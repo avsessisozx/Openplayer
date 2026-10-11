@@ -6,6 +6,11 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Sürüm etiketi (örn. v0.1.0). Boş bırakırsan sadece derler.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -36,9 +41,18 @@ jobs:
           name: OpenPlayer-debug-apk
           path: OpenPlayer-debug.apk
 
-      - name: Publish release (tags only)
+      - name: Publish release (tag push)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          files: OpenPlayer-debug.apk
+          generate_release_notes: true
+
+      - name: Publish release (manual run)
+        if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          target_commitish: ${{ github.sha }}
           files: OpenPlayer-debug.apk
           generate_release_notes: true
