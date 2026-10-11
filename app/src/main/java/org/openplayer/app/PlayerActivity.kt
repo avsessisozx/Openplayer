@@ -13,7 +13,9 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory
 import androidx.media3.ui.PlayerView
 
 class PlayerActivity : AppCompatActivity() {
@@ -70,7 +72,8 @@ class PlayerActivity : AppCompatActivity() {
         val index = (if (startIndex >= 0) startIndex else intent.getIntExtra(EXTRA_INDEX, 0))
             .coerceIn(0, uris.size - 1)
 
-        val exo = ExoPlayer.Builder(this).build().also { player = it }
+        val exo = ExoPlayer.Builder(this, NextRenderersFactory(this).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON))
+            .build().also { player = it }
         playerView.player = exo
         exo.setMediaItems(uris.map { MediaItem.fromUri(it) }, index, ResumeStore.position(this, uris[index]))
         exo.prepare()
