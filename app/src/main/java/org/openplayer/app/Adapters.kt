@@ -1,7 +1,9 @@
 package org.openplayer.app
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.graphics.Outline
+import android.graphics.drawable.GradientDrawable
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.Gravity
@@ -16,8 +18,10 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.request.videoFrameMillis
 
-class FolderAdapter(private val onClick: (FolderItem) -> Unit) :
-    RecyclerView.Adapter<FolderAdapter.VH>() {
+class FolderAdapter(
+    private val onClick: (FolderItem) -> Unit,
+    private val onLongClick: (FolderItem) -> Unit,
+) : RecyclerView.Adapter<FolderAdapter.VH>() {
 
     var items: List<FolderItem> = emptyList()
         @SuppressLint("NotifyDataSetChanged")
@@ -26,7 +30,7 @@ class FolderAdapter(private val onClick: (FolderItem) -> Unit) :
             notifyDataSetChanged()
         }
 
-    class VH(val root: LinearLayout, val name: TextView, val count: TextView) :
+    class VH(val root: LinearLayout, val name: TextView, val count: TextView, val badge: TextView, val icon: ImageView) :
         RecyclerView.ViewHolder(root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -34,7 +38,21 @@ class FolderAdapter(private val onClick: (FolderItem) -> Unit) :
         val icon = ImageView(c).apply {
             setImageResource(R.drawable.ic_folder)
             setColorFilter(UiColors.folderIcon)
-            layoutParams = LinearLayout.LayoutParams(c.dp(56), c.dp(48))
+        }
+        val badge = TextView(c).apply {
+            setTextColor(Color.WHITE)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+            gravity = Gravity.CENTER
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(0xFFF0435F.toInt())
+            }
+            visibility = View.GONE
+        }
+        val iconBox = FrameLayout(c).apply {
+            layoutParams = LinearLayout.LayoutParams(c.dp(64), c.dp(52))
+            addView(icon, FrameLayout.LayoutParams(c.dp(56), c.dp(48), Gravity.START or Gravity.BOTTOM))
+            addView(badge, FrameLayout.LayoutParams(c.dp(22), c.dp(22), Gravity.TOP or Gravity.END))
         }
         val name = TextView(c).apply {
             setTextColor(UiColors.textPrimary)
@@ -51,7 +69,7 @@ class FolderAdapter(private val onClick: (FolderItem) -> Unit) :
             addView(name)
             addView(count)
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                .apply { marginStart = c.dp(16) }
+                .apply { marginStart = c.dp(12) }
         }
         val root = LinearLayout(c).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -62,10 +80,10 @@ class FolderAdapter(private val onClick: (FolderItem) -> Unit) :
             )
             isClickable = true
             isFocusable = true
-            addView(icon)
+            addView(iconBox)
             addView(texts)
         }
-        return VH(root, name, count)
+        return VH(root, name, count, badge, icon)
     }
 
     override fun getItemCount() = items.size
@@ -73,13 +91,23 @@ class FolderAdapter(private val onClick: (FolderItem) -> Unit) :
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item = items[position]
         holder.name.text = item.name
-        holder.count.text = "${item.videoCount} video"
+        holder.count.text = "${item.videoCount} video" + if (item.hidden) " · gizli" else ""
+        holder.badge.visibility = if (item.newCount > 0) View.VISIBLE else View.GONE
+        holder.badge.text = if (item.newCount > 99) "99+" else item.newCount.toString()
+        holder.icon.alpha = if (item.hidden) 0.5f else 1f
         holder.root.setOnClickListener { onClick(item) }
+        holder.root.setOnLongClickListener {
+            onLongClick(item)
+            true
+        }
     }
 }
 
-class VideoAdapter(private val onClick: (VideoItem) -> Unit) :
-    RecyclerView.Adapter<VideoAdapter.VH>() {
+class VideoAdapter(
+    private val grid: Boolean,
+    private val onClick: (VideoItem) -> Unit,
+    private val onMore: (VideoItem, View) -> Unit,
+) : RecyclerView.Adapter<VideoAdapter.VH>() {
 
     var items: List<VideoItem> = emptyList()
         @SuppressLint("NotifyDataSetChanged")
@@ -90,18 +118,24 @@ class VideoAdapter(private val onClick: (VideoItem) -> Unit) :
 
     /** Son oynatılan videonun başlığı vurgulanır. */
     var highlightUri: String? = null
-        @SuppressLint("NotifyDataSetChanged")
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+
+    var newDays: Int = 7
 
     class VH(
-        val root: LinearLayout,
+        val root: ViewGroup,
         val thumb: ImageView,
         val duration: TextView,
         val title: TextView,
+        val tag: TextView,
+        val more: ImageView,
+        val progress: View,
     ) : RecyclerView.ViewHolder(root)
+
+    private fun round(c: android.content.Context, radiusDp: Int) = object : ViewOutlineProvider() {
+        override fun getOutline(view: View, outline: Outline) {
+            outline.setRoundRect(0, 0, view.width, view.height, c.dp(radiusDp).toFloat())
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val c = parent.context
@@ -110,61 +144,127 @@ class VideoAdapter(private val onClick: (VideoItem) -> Unit) :
             setBackgroundColor(0xFF1B1F24.toInt())
         }
         val duration = TextView(c).apply {
-            setTextColor(0xFFFFFFFF.toInt())
+            setTextColor(Color.WHITE)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             setBackgroundColor(0x99000000.toInt())
             setPadding(c.dp(6), c.dp(2), c.dp(6), c.dp(2))
         }
+        val progress = View(c).apply {
+            setBackgroundColor(UiColors.accent)
+            visibility = View.GONE
+        }
         val box = FrameLayout(c).apply {
-            layoutParams = LinearLayout.LayoutParams(c.dp(112), c.dp(64))
             clipToOutline = true
-            outlineProvider = object : ViewOutlineProvider() {
-                override fun getOutline(view: View, outline: Outline) {
-                    outline.setRoundRect(0, 0, view.width, view.height, c.dp(6).toFloat())
-                }
-            }
+            outlineProvider = round(c, 6)
             addView(thumb, FrameLayout.LayoutParams(-1, -1))
             addView(
                 duration,
                 FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM or Gravity.END)
-                    .apply { setMargins(0, 0, c.dp(4), c.dp(4)) }
+                    .apply { setMargins(0, 0, c.dp(4), c.dp(5)) }
             )
+            addView(progress, FrameLayout.LayoutParams(0, c.dp(3), Gravity.BOTTOM or Gravity.START))
         }
         val title = TextView(c).apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-            maxLines = 3
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (grid) 14f else 16f)
+            maxLines = if (grid) 2 else 3
             ellipsize = TextUtils.TruncateAt.END
+        }
+        val tag = TextView(c).apply {
+            text = "YENİ"
+            setTextColor(Color.WHITE)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setPadding(c.dp(5), c.dp(1), c.dp(5), c.dp(1))
+            background = GradientDrawable().apply {
+                cornerRadius = c.dp(4).toFloat()
+                setColor(0xFFF0435F.toInt())
+            }
+            visibility = View.GONE
+        }
+        val more = c.iconView(R.drawable.ic_more_vert, 40, 8).apply {
+            setColorFilter(UiColors.textSecondary)
+        }
+
+        if (grid) {
+            box.layoutParams = LinearLayout.LayoutParams(-1, c.dp(96))
+            val textRow = LinearLayout(c).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                addView(title, LinearLayout.LayoutParams(0, -2, 1f))
+                addView(tag, LinearLayout.LayoutParams(-2, -2).apply { marginStart = c.dp(4) })
+            }
+            val root = LinearLayout(c).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(c.dp(6), c.dp(6), c.dp(6), c.dp(6))
+                layoutParams = RecyclerView.LayoutParams(-1, -2)
+                isClickable = true
+                isFocusable = true
+                addView(box)
+                addView(textRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = c.dp(4) })
+            }
+            return VH(root, thumb, duration, title, tag, more, progress)
+        }
+
+        box.layoutParams = LinearLayout.LayoutParams(c.dp(112), c.dp(64))
+        val texts = LinearLayout(c).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(title)
+            addView(tag, LinearLayout.LayoutParams(-2, -2).apply { topMargin = c.dp(3) })
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                 .apply { marginStart = c.dp(14) }
         }
         val root = LinearLayout(c).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(c.dp(16), c.dp(8), c.dp(16), c.dp(8))
-            layoutParams = RecyclerView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+            setPadding(c.dp(16), c.dp(8), c.dp(4), c.dp(8))
+            layoutParams = RecyclerView.LayoutParams(-1, -2)
             isClickable = true
             isFocusable = true
             addView(box)
-            addView(title)
+            addView(texts)
+            addView(more)
         }
-        return VH(root, thumb, duration, title)
+        return VH(root, thumb, duration, title, tag, more, progress)
     }
 
     override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item = items[position]
+        val ctx = holder.root.context
+        val uriText = item.uri.toString()
         holder.title.text = item.title
         holder.title.setTextColor(
-            if (item.uri.toString() == highlightUri) UiColors.accent else UiColors.textPrimary
+            when {
+                uriText == highlightUri -> UiColors.accent
+                ResumeStore.isPlayed(ctx, uriText) -> UiColors.textSecondary
+                else -> UiColors.textPrimary
+            }
         )
         holder.duration.text = formatDuration(item.durationMs)
-        holder.thumb.load(item.uri, Thumbs.get(holder.root.context)) {
+        holder.tag.visibility = if (VideoRepository.isNew(ctx, item, newDays)) View.VISIBLE else View.GONE
+
+        // Kaldığı yeri gösteren ince çizgi
+        val pos = ResumeStore.position(ctx, item.uri)
+        if (pos > 0 && item.durationMs > 0) {
+            holder.progress.visibility = View.VISIBLE
+            holder.progress.post {
+                val w = (holder.thumb.width * (pos.toFloat() / item.durationMs)).toInt().coerceIn(0, holder.thumb.width)
+                holder.progress.layoutParams = (holder.progress.layoutParams as FrameLayout.LayoutParams).apply { width = w }
+            }
+        } else {
+            holder.progress.visibility = View.GONE
+        }
+
+        holder.thumb.load(item.uri, Thumbs.get(ctx)) {
             videoFrameMillis(1000)
             crossfade(true)
         }
         holder.root.setOnClickListener { onClick(item) }
+        holder.root.setOnLongClickListener {
+            onMore(item, holder.root)
+            true
+        }
+        holder.more.setOnClickListener { onMore(item, holder.more) }
     }
 }
