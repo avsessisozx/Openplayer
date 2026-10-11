@@ -1,0 +1,147 @@
+package org.openplayer.app
+
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Handler
+import android.os.Looper
+import android.util.TypedValue
+import androidx.media3.common.C
+import androidx.media3.common.Tracks
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.text.Cue
+import androidx.media3.ui.CaptionStyleCompat
+import androidx.media3.ui.SubtitleView
+
+/**
+ * Altyazıyı tek bir SubtitleView üzerinden gösterir.
+ * - Harici dosyalar kendi ayrıştırıcımızla okunur; gecikme ve satır atlama bunlarda tam çalışır.
+ * - Gömülü parçalar ExoPlayer'dan gelir; gecikme sadece pozitif yönde (geç göster) desteklenir.
+ */
+class SubtitleController(private val host: PlayerActivity, private val view: SubtitleView) {
+
+    enum class Mode { OFF, EMBEDDED, EXTERNAL }
+
+    var mode = Mode.OFF
+        private set
+    var externalName: String? = null
+        private set
+    var delayMs = 0L
+
+    private var external: List<SubCue> = emptyList()
+    private var maxDurationMs = 0L
+    private var lastKey: List<Int> = emptyList()
+    private val handler = Handler(Looper.getMainLooper())
+    private val pendingEmbedded = ArrayList<Runnable>()
+
+    val hasExternal: Boolean get() = mode == Mode.EXTERNAL && external.isNotEmpty()
+
+    fun applyStyle() {
+        val s = host.settings
+        view.setStyle(
+            CaptionStyleCompat(
+                s.subtitleColor,
+                s.subtitleBackground,
+                Color.TRANSPARENT,
+                if (s.subtitleOutline) CaptionStyleCompat.EDGE_TYPE_OUTLINE else CaptionStyleCompat.EDGE_TYPE_NONE,
+                Color.BLACK,
+                if (s.subtitleBold) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
+            )
+        )
+        view.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, s.subtitleSizeSp)
+        view.setBottomPaddingFraction(s.subtitleBottomFraction)
+    }
+
+    fun setOff() {
+        mode = Mode.OFF
+        external = emptyList()
+        externalName = null
+        clearCues()
+        val p = host.player
+        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+            .build()
+    }
+
+    fun useEmbedded(group: Tracks.Group) {
+        mode = Mode.EMBEDDED
+        external = emptyList()
+        externalName = null
+        clearCues()
+        val p = host.player
+        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+            .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, 0))
+            .build()
+    }
+
+    fun useExternal(cues: List<SubCue>, name: String) {
+        val p = host.player
+        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+            .build()
+        mode = Mode.EXTERNAL
+        external = cues
+        externalName = name
+        maxDurationMs = cues.maxOfOrNull { it.endMs - it.startMs } ?: 0L
+        lastKey = listOf(-1)
+        clearCues()
+        tick(p.currentPosition)
+    }
+
+    private fun clearCues() {
+        pendingEmbedded.forEach { handler.removeCallbacks(it) }
+        pendingEmbedded.clear()
+        lastKey = emptyList()
+        view.setCues(emptyList())
+    }
+
+    fun onEmbeddedCues(cues: List<Cue>) {
+        if (mode != Mode.EMBEDDED) return
+        if (delayMs > 0) {
+            val r = Runnable { view.setCues(cues) }
+            pendingEmbedded += r
+            handler.postDelayed(r, delayMs)
+        } else {
+            view.setCues(cues)
+        }
+    }
+
+    /** Oynatma konumuna göre harici altyazıyı günceller. Yaklaşık 100 ms'de bir çağrılır. */
+    fun tick(positionMs: Long) {
+        if (mode != Mode.EXTERNAL) return
+        val t = positionMs - delayMs
+        val active = activeIndexes(t)
+        if (active != lastKey) {
+            lastKey = active
+            view.setCues(active.map { Cue.Builder().setText(external[it].text).build() })
+        }
+    }
+
+    private fun activeIndexes(t: Long): List<Int> {
+        var lo = 0
+        var hi = external.size
+        while (lo < hi) {
+            val mid = (lo + hi) ushr 1
+            if (external[mid].startMs <= t) lo = mid + 1 else hi = mid
+        }
+        val result = ArrayList<Int>()
+        var i = lo - 1
+        var steps = 0
+        while (i >= 0 && steps < 12) {
+            if (external[i].endMs > t) result.add(0, i)
+            if (t - external[i].startMs > maxDurationMs) break
+            i--
+            steps++
+        }
+        return result
+    }
+
+    /** Konumdan sonraki altyazı satırının video zamanı (yoksa null). */
+    fun nextCueMs(positionMs: Long): Long? =
+        external.firstOrNull { it.startMs + delayMs > positionMs + 400 }?.let { it.startMs + delayMs }
+
+    fun previousCueMs(positionMs: Long): Long? =
+        external.lastOrNull { it.startMs + delayMs < positionMs - 1200 }?.let { it.startMs + delayMs }
+}
