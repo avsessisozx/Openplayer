@@ -9,7 +9,9 @@ Android için açık kaynak, gelişmiş bir video oynatıcı. Amaç: popüler ka
 
 `v0.1.0`: iskelet. Çalışan kısımlar:
 
-- Video seçip oynatma (Media3/ExoPlayer)
+- Klasör listesi, klasör içi video listesi (küçük resim + süre), arama, kaldığı yerden devam, sağ alttaki düğmeyle son oynatılanı açma
+- Klasördeki videolar sıralı oynatma listesi olarak açılır (önceki/sonraki)
+- Media3/ExoPlayer ile oynatma
 - Ekran 4 bölgeye ayrılır (sol/sağ × üst/alt). Dikey kaydırma bölgeye atanan işlevi yapar (parlaklık, ses, hız), yatay kaydırma sarar
 - Tek dokunma: kontrolleri aç/kapa, çift dokunma: oynat/duraklat
 

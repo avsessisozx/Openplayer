@@ -1,6 +1,7 @@
 package org.openplayer.app
 
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -17,7 +18,13 @@ import androidx.media3.ui.PlayerView
 
 class PlayerActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_URIS = "org.openplayer.app.URIS"
+        const val EXTRA_INDEX = "org.openplayer.app.INDEX"
+    }
+
     private var player: ExoPlayer? = null
+    private var startIndex = -1
     private lateinit var playerView: PlayerView
     private lateinit var hud: TextView
 
@@ -56,10 +63,16 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val uri = intent?.data ?: return finish()
+        @Suppress("DEPRECATION")
+        val uris: List<Uri> = intent?.getParcelableArrayListExtra<Uri>(EXTRA_URIS)
+            ?: listOfNotNull(intent?.data)
+        if (uris.isEmpty()) return finish()
+        val index = (if (startIndex >= 0) startIndex else intent.getIntExtra(EXTRA_INDEX, 0))
+            .coerceIn(0, uris.size - 1)
+
         val exo = ExoPlayer.Builder(this).build().also { player = it }
         playerView.player = exo
-        exo.setMediaItem(MediaItem.fromUri(uri))
+        exo.setMediaItems(uris.map { MediaItem.fromUri(it) }, index, ResumeStore.position(this, uris[index]))
         exo.prepare()
         exo.playWhenReady = true
 
@@ -82,6 +95,15 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        player?.let { p ->
+            val uri = p.currentMediaItem?.localConfiguration?.uri
+            if (uri != null) {
+                val duration = p.duration
+                val nearEnd = duration > 0 && p.currentPosition > duration - 5_000
+                ResumeStore.save(this, uri, if (nearEnd) 0L else p.currentPosition)
+            }
+            startIndex = p.currentMediaItemIndex
+        }
         playerView.player = null
         player?.release()
         player = null
