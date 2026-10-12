@@ -267,6 +267,16 @@ class PlayerActivity : AppCompatActivity() {
         super.attachBaseContext(UiScale.wrap(newBase))
     }
 
+    override fun applyOverrideConfiguration(overrideConfiguration: android.content.res.Configuration?) {
+        // AppCompat kendi yapılandırmasıyla yoğunluk ölçeğini ezmesin.
+        if (overrideConfiguration != null) {
+            val uiMode = overrideConfiguration.uiMode
+            overrideConfiguration.setTo(baseContext.resources.configuration)
+            overrideConfiguration.uiMode = uiMode
+        }
+        super.applyOverrideConfiguration(overrideConfiguration)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -462,6 +472,11 @@ class PlayerActivity : AppCompatActivity() {
                 .build()
         }
         val saved = if (settings.resumePlayback) ResumeStore.position(this, uris[index]) else 0L
+        if (MusicController.isMusic(player.currentMediaItem)) {
+            // Müzikten kalan tekrar/karıştırma ayarları videoya taşınmasın.
+            player.repeatMode = Player.REPEAT_MODE_OFF
+            player.shuffleModeEnabled = false
+        }
         player.setMediaItems(items, index, if (saved > 5_000) saved else 0L)
         player.prepare()
         player.playWhenReady = true

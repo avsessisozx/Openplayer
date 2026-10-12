@@ -1,3 +1,14 @@
+# 1.0.0-beta7
+
+Tek, bütünlüklü sürüm: beta6'daki tema/menü/arayüz modu işleri + aşağıdakiler.
+
+- **Müzik çalar** (Ayarlar → Müzik çalar, isteğe bağlı): ana ekranda "Müzik" sekmesi; şarkılar, albümler, sanatçılar, klasörler; arama ve sıralama; albüm kapakları; "Çalıyor" ekranı (ilerleme, karıştır, tekrar, uyku zamanlayıcısı, ekolayzır/ses artırma, kuyruk); mini oynatıcı; bildirim, kilit ekranı ve Bluetooth düğmeleri. Müzik izni ilk açılışta istenir.
+- **Videoya özel hafıza:** hız, görünüm, yakınlaştırma, altyazı gecikmesi/hızı ve ses parçası her video için ayrı hatırlanır (Ayarlar → Oynatıcı'dan kapatılabilir).
+- **Ayarları dışa/içe aktar** (Ayarlar ana sayfası → Yedekleme). Parola ve API anahtarı dosyaya yazılmaz.
+- Müzikten sonra açılan videoda tekrar/karıştırma kalıntısı temizlenir.
+
+---
+
 # 1.0.0-beta6
 
 - **Tema ve görünüm** (Ayarlar): 9 hazır tema, vurgu rengi, düğme biçimi, menü opaklığı, kısayol boyutu/opaklığı; temayı JSON olarak dışa/içe aktarma.
