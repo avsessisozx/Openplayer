@@ -1,12 +1,21 @@
 package org.openplayer.app
 
+import android.graphics.Color
+import android.graphics.Typeface
 import android.text.Html
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.StrikethroughSpan
+import android.text.style.StyleSpan
+import android.text.style.UnderlineSpan
 import java.nio.ByteBuffer
 import java.nio.charset.CharacterCodingException
 import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
 
-data class SubCue(val startMs: Long, val endMs: Long, val text: CharSequence)
+/** [alignment]: ASS sayı tuşu düzeni (1-3 alt, 4-6 orta, 7-9 üst). Varsayılan 2 = alt orta. */
+data class SubCue(val startMs: Long, val endMs: Long, val text: CharSequence, val alignment: Int = 2)
 
 /** Harici altyazı dosyalarını okur: SRT, WebVTT, SSA/ASS, SAMI, MicroDVD, MPL2, TMPlayer. */
 object SubtitleParser {
@@ -115,7 +124,129 @@ object SubtitleParser {
         return (h.toLong() * 3600 + mi.toLong() * 60 + s.toLong()) * 1000 + f.padEnd(2, '0').take(2).toLong() * 10
     }
 
+    private data class AssStyle(
+        val color: Int? = null,
+        val bold: Boolean = false,
+        val italic: Boolean = false,
+        val underline: Boolean = false,
+        val strike: Boolean = false,
+        val alignment: Int = 2,
+    )
+
+    /** "&H00BBGGRR" (stil satırı), "&HBBGGRR&" (satır içi etiket) ya da ondalık sayıyı renge çevirir. */
+    private fun assColor(raw: String): Int? {
+        val t = raw.trim()
+        val value: Long = if (t.startsWith("&H", ignoreCase = true)) {
+            t.substring(2).trimEnd('&').toLongOrNull(16) ?: return null
+        } else {
+            t.toLongOrNull() ?: return null
+        }
+        val color = Color.rgb((value and 0xFF).toInt(), ((value shr 8) and 0xFF).toInt(), ((value shr 16) and 0xFF).toInt())
+        // Beyaz zaten varsayılan; kullanıcının altyazı rengi ayarı geçerli kalsın.
+        return color.takeIf { it != Color.WHITE }
+    }
+
+    private fun assFlag(raw: String?): Boolean = raw?.trim()?.let { it != "0" && it.isNotEmpty() } ?: false
+
+    /** Eski (v4) hizalama kodunu sayı tuşu düzenine çevirir. */
+    private fun legacyAlignment(a: Int): Int = when (a) {
+        1, 2, 3 -> a
+        5, 6, 7 -> a + 2
+        9, 10, 11 -> a - 5
+        else -> 2
+    }
+
+    private fun parseAssStyles(text: String): Map<String, AssStyle> {
+        val styles = HashMap<String, AssStyle>()
+        var inStyles = false
+        var fields = emptyList<String>()
+        for (line in text.split('\n')) {
+            val l = line.trim()
+            if (l.startsWith("[")) {
+                inStyles = l.contains("Styles", ignoreCase = true)
+                continue
+            }
+            if (!inStyles) continue
+            if (l.startsWith("Format:", ignoreCase = true)) {
+                fields = l.substringAfter(':').split(',').map { it.trim().lowercase() }
+            } else if (l.startsWith("Style:", ignoreCase = true) && fields.isNotEmpty()) {
+                val parts = l.substringAfter(':').trimStart().split(',')
+                fun field(name: String) = fields.indexOf(name).takeIf { it >= 0 }?.let { parts.getOrNull(it) }
+                val name = field("name")?.trim() ?: continue
+                val alignment = field("alignment")?.trim()?.toIntOrNull()
+                styles[name] = AssStyle(
+                    color = field("primarycolour")?.let { assColor(it) },
+                    bold = assFlag(field("bold")),
+                    italic = assFlag(field("italic")),
+                    underline = assFlag(field("underline")),
+                    strike = assFlag(field("strikeout")),
+                    // v4+ biçiminde sayı tuşu düzeni, v4 biçiminde eski kod kullanılır.
+                    alignment = when {
+                        alignment == null -> 2
+                        "tertiarycolour" in fields -> legacyAlignment(alignment)
+                        else -> alignment.coerceIn(1, 9)
+                    },
+                )
+            }
+        }
+        return styles
+    }
+
+    private fun appendStyled(sb: SpannableStringBuilder, text: String, st: AssStyle) {
+        if (text.isEmpty()) return
+        val start = sb.length
+        sb.append(text)
+        val end = sb.length
+        st.color?.let { sb.setSpan(ForegroundColorSpan(it), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE) }
+        when {
+            st.bold && st.italic -> sb.setSpan(StyleSpan(Typeface.BOLD_ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            st.bold -> sb.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            st.italic -> sb.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        if (st.underline) sb.setSpan(UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        if (st.strike) sb.setSpan(StrikethroughSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+
+    /** ASS metnini biçimli metne çevirir. Sonuç: (metin, hizalama). */
+    private fun assStyledText(raw: String, base: AssStyle): Pair<CharSequence, Int> {
+        val sb = SpannableStringBuilder()
+        var cur = base
+        var alignment = base.alignment
+        var i = 0
+        fun plain(t: String) = t.replace("\\N", "\n").replace("\\n", "\n").replace("\\h", " ")
+        while (i < raw.length) {
+            val open = raw.indexOf('{', i)
+            if (open < 0) {
+                appendStyled(sb, plain(raw.substring(i)), cur)
+                break
+            }
+            appendStyled(sb, plain(raw.substring(i, open)), cur)
+            val close = raw.indexOf('}', open)
+            if (close < 0) break
+            val block = raw.substring(open + 1, close)
+            for (tag in block.split('\\').drop(1)) {
+                val t = tag.trim()
+                when {
+                    t.startsWith("an") -> t.substring(2).toIntOrNull()?.takeIf { it in 1..9 }?.let { alignment = it }
+                    t.length > 1 && t[0] == 'a' && t[1].isDigit() -> t.substring(1).toIntOrNull()?.let { alignment = legacyAlignment(it) }
+                    t == "r" || (t.startsWith("r") && t.length > 1 && !t[1].isDigit()) -> cur = base
+                    t.startsWith("i") && t.length >= 2 && t[1].isDigit() -> cur = cur.copy(italic = assFlag(t.substring(1)))
+                    t.startsWith("b") && t.length >= 2 && t[1].isDigit() ->
+                        cur = cur.copy(bold = t.substring(1).toIntOrNull()?.let { it != 0 } ?: false)
+                    t.startsWith("u") && t.length >= 2 && t[1].isDigit() -> cur = cur.copy(underline = assFlag(t.substring(1)))
+                    t.startsWith("s") && t.length >= 2 && t[1].isDigit() -> cur = cur.copy(strike = assFlag(t.substring(1)))
+                    t.startsWith("1c") -> cur = cur.copy(color = assColor(t.substring(2)))
+                    t.startsWith("c&") || t.startsWith("c") && t.length > 1 && t[1] == '&' -> cur = cur.copy(color = assColor(t.substring(1)))
+                }
+            }
+            i = close + 1
+        }
+        return sb.trimEnd() to alignment
+    }
+
     private fun parseAss(text: String): List<SubCue> {
+        val styles = parseAssStyles(text)
+        val defaultStyle = styles["Default"] ?: styles.values.firstOrNull() ?: AssStyle()
         val out = ArrayList<SubCue>()
         var inEvents = false
         var fields = listOf("Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text")
@@ -134,12 +265,13 @@ object SubtitleParser {
                 val si = fields.indexOfFirst { it.equals("Start", true) }
                 val ei = fields.indexOfFirst { it.equals("End", true) }
                 val ti = fields.indexOfFirst { it.equals("Text", true) }
+                val yi = fields.indexOfFirst { it.equals("Style", true) }
                 if (si < 0 || ei < 0 || ti < 0) continue
-                var body = parts[ti]
+                val body = parts[ti]
                 if (Regex("""\\p[1-9]""").containsMatchIn(body)) continue // çizim komutları
-                body = body.replace(Regex("""\{[^}]*}"""), "")
-                    .replace("\\N", "\n").replace("\\n", "\n").replace("\\h", " ")
-                out += SubCue(assTime(parts[si]), assTime(parts[ei]), body.trim())
+                val style = styles[parts.getOrNull(yi)?.trim() ?: ""] ?: defaultStyle
+                val (styled, alignment) = assStyledText(body, style)
+                out += SubCue(assTime(parts[si]), assTime(parts[ei]), styled, alignment)
             }
         }
         return out

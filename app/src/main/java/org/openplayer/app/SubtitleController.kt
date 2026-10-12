@@ -115,8 +115,18 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         val active = activeIndexes(t)
         if (active != lastKey) {
             lastKey = active
-            view.setCues(active.map { Cue.Builder().setText(external[it].text).build() })
+            view.setCues(active.map { toCue(external[it]) })
         }
+    }
+
+    /** ASS hizalamasına göre üst/orta konumlu satır oluşturur; alt satırlar varsayılan konumda kalır. */
+    private fun toCue(sub: SubCue): Cue {
+        val b = Cue.Builder().setText(sub.text)
+        when (sub.alignment) {
+            7, 8, 9 -> b.setLine(0.06f, Cue.LINE_TYPE_FRACTION).setLineAnchor(Cue.ANCHOR_TYPE_START)
+            4, 5, 6 -> b.setLine(0.5f, Cue.LINE_TYPE_FRACTION).setLineAnchor(Cue.ANCHOR_TYPE_MIDDLE)
+        }
+        return b.build()
     }
 
     private fun activeIndexes(t: Long): List<Int> {

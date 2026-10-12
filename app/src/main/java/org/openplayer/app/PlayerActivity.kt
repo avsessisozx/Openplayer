@@ -18,7 +18,11 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.util.Rational
 import android.util.TypedValue
+import android.media.AudioManager
 import android.view.Gravity
+import android.view.InputDevice
+import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.PixelCopy
 import android.view.SurfaceView
 import android.view.TextureView
@@ -337,6 +341,65 @@ class PlayerActivity : AppCompatActivity() {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) hideControls() else playerView.player = player
+    }
+
+
+    // ---------------------------------------------------------------- klavye, fare ve medya tuşları
+
+    private val systemAudio by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
+
+    private fun nudgeVolume(direction: Int) {
+        systemAudio.adjustStreamVolume(
+            AudioManager.STREAM_MUSIC,
+            if (direction > 0) AudioManager.ADJUST_RAISE else AudioManager.ADJUST_LOWER,
+            AudioManager.FLAG_SHOW_UI
+        )
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (locked || kidsLocked) return super.onKeyDown(keyCode, event)
+        val step = settings.doubleTapSeekSec.coerceAtLeast(1) * 1000L
+        val handled = when (keyCode) {
+            KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_BUTTON_A -> { togglePlay(); true }
+            KeyEvent.KEYCODE_MEDIA_PLAY -> { player.play(); true }
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> { player.pause(); true }
+            KeyEvent.KEYCODE_MEDIA_STOP -> { player.pause(); player.seekTo(0); true }
+            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_MEDIA_REWIND -> {
+                seekRelative(-(if (event.isShiftPressed) step * 6 else step)); showControls(); true
+            }
+            KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> {
+                seekRelative(if (event.isShiftPressed) step * 6 else step); showControls(); true
+            }
+            KeyEvent.KEYCODE_DPAD_UP -> { nudgeVolume(+1); true }
+            KeyEvent.KEYCODE_DPAD_DOWN -> { nudgeVolume(-1); true }
+            KeyEvent.KEYCODE_MEDIA_NEXT, KeyEvent.KEYCODE_N, KeyEvent.KEYCODE_PAGE_DOWN -> { next(); true }
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS, KeyEvent.KEYCODE_P, KeyEvent.KEYCODE_PAGE_UP -> { previous(); true }
+            KeyEvent.KEYCODE_M -> { onShortcut(Shortcut.MUTE); true }
+            KeyEvent.KEYCODE_F -> { cycleAspect(); true }
+            KeyEvent.KEYCODE_R -> { cycleOrientation(); true }
+            KeyEvent.KEYCODE_LEFT_BRACKET -> { setSpeed((player.playbackParameters.speed - 0.1f).coerceIn(0.25f, 4f)); true }
+            KeyEvent.KEYCODE_RIGHT_BRACKET -> { setSpeed((player.playbackParameters.speed + 0.1f).coerceIn(0.25f, 4f)); true }
+            KeyEvent.KEYCODE_COMMA -> { jumpSubtitle(false); true }
+            KeyEvent.KEYCODE_PERIOD -> { jumpSubtitle(true); true }
+            else -> false
+        }
+        return handled || super.onKeyDown(keyCode, event)
+    }
+
+    /** Fare tekerleği ile ses ayarı. */
+    override fun onGenericMotionEvent(event: MotionEvent): Boolean {
+        if (!locked && !kidsLocked &&
+            event.isFromSource(InputDevice.SOURCE_CLASS_POINTER) &&
+            event.actionMasked == MotionEvent.ACTION_SCROLL
+        ) {
+            val v = event.getAxisValue(MotionEvent.AXIS_VSCROLL)
+            if (v != 0f) {
+                nudgeVolume(if (v > 0) +1 else -1)
+                return true
+            }
+        }
+        return super.onGenericMotionEvent(event)
     }
 
     // ---------------------------------------------------------------- oynatıcı bağlama
