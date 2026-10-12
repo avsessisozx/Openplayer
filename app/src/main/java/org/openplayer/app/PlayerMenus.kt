@@ -57,10 +57,12 @@ class PlayerMenus(private val a: PlayerActivity) {
         }
         val labels = groups.mapIndexed { i, g ->
             trackLabel(g.getTrackFormat(0), i) + if (!g.isSupported) " (desteklenmiyor)" else ""
-        } + "Ses artırma ve ekolayzır…"
+        } + "Ses artırma ve ekolayzır…" + "Ses gecikmesi (eşitleme)…"
         val selected = groups.indexOfFirst { it.isSelected }.coerceAtLeast(0)
         a.showChoice("Ses parçası", labels, selected) { which ->
-            if (which >= groups.size) {
+            if (which == groups.size + 1) {
+                showAudioDelay()
+            } else if (which >= groups.size) {
                 showEqualizer()
             } else {
                 val p = a.player
@@ -69,6 +71,48 @@ class PlayerMenus(private val a: PlayerActivity) {
                     .build()
             }
         }
+    }
+
+    /** Ses gecikmesi: + sesi geciktirir, − öne alır. Bluetooth için ek gecikme ayrı tutulur. */
+    fun showAudioDelay() {
+        val s = a.settings
+        fun fmt(ms: Long) = "${if (ms >= 0) "+" else ""}$ms ms"
+        val delayLabel = a.label("", 16f)
+        val btLabel = a.label("", 16f)
+        fun refresh() {
+            delayLabel.text = "Ses gecikmesi: ${fmt(s.audioDelayMs)}\n(+ ses geç gelir, − ses erken gelir)"
+            btLabel.text = "Bluetooth ek gecikme: ${fmt(s.bluetoothDelayMs)}\n(yalnızca Bluetooth kulaklık/hoparlör bağlıyken)"
+        }
+        refresh()
+        fun row(onStep: (Long) -> Unit): LinearLayout = LinearLayout(a).apply {
+            orientation = LinearLayout.HORIZONTAL
+            for ((t, ms) in listOf("-100" to -100L, "-10" to -10L, "+10" to 10L, "+100" to 100L)) {
+                addView(Button(a).apply {
+                    text = t
+                    setOnClickListener {
+                        onStep(ms)
+                        refresh()
+                    }
+                }, LinearLayout.LayoutParams(0, -2, 1f))
+            }
+        }
+        val root = a.vertical {
+            addView(delayLabel)
+            addView(row { s.audioDelayMs += it }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+            addView(btLabel, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
+            addView(row { s.bluetoothDelayMs += it }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+        }
+        AlertDialog.Builder(a)
+            .setTitle("Ses gecikmesi")
+            .setView(root)
+            .setPositiveButton("Tamam") { _, _ -> AudioDelay.apply(a) }
+            .setNeutralButton("Sıfırla") { _, _ ->
+                s.audioDelayMs = 0L
+                s.bluetoothDelayMs = 0L
+                AudioDelay.apply(a)
+            }
+            .setOnCancelListener { AudioDelay.apply(a) }
+            .show()
     }
 
     fun showEqualizer() {
@@ -164,15 +208,59 @@ class PlayerMenus(private val a: PlayerActivity) {
                 }, LinearLayout.LayoutParams(0, -2, 1f))
             }
         }
+        val speedLabel = a.label("", 16f)
+        fun refreshSpeed() {
+            speedLabel.text = "Altyazı hızı: ×${"%.4f".format(a.subtitles.speed)}\n(kare hızı farkı için; 1.0000 = değişmez)"
+        }
+        refreshSpeed()
+        val presets = listOf("23.976→25" to 23.976 / 25.0, "25→23.976" to 25.0 / 23.976, "24→25" to 24.0 / 25.0, "25→24" to 25.0 / 24.0)
+        val speedRow1 = LinearLayout(a).apply {
+            orientation = LinearLayout.HORIZONTAL
+            for ((t, f) in presets) {
+                addView(Button(a).apply {
+                    text = t
+                    textSize = 11f
+                    setOnClickListener {
+                        a.subtitles.speed = f
+                        refreshSpeed()
+                    }
+                }, LinearLayout.LayoutParams(0, -2, 1f))
+            }
+        }
+        val speedRow2 = LinearLayout(a).apply {
+            orientation = LinearLayout.HORIZONTAL
+            for ((t, d) in listOf("-0.1%" to -0.001, "+0.1%" to 0.001)) {
+                addView(Button(a).apply {
+                    text = t
+                    setOnClickListener {
+                        a.subtitles.speed = (a.subtitles.speed + d).coerceIn(0.5, 2.0)
+                        refreshSpeed()
+                    }
+                }, LinearLayout.LayoutParams(0, -2, 1f))
+            }
+            addView(Button(a).apply {
+                text = "1.0"
+                setOnClickListener {
+                    a.subtitles.speed = 1.0
+                    refreshSpeed()
+                }
+            }, LinearLayout.LayoutParams(0, -2, 1f))
+        }
         val root = a.vertical {
             addView(label)
             addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) })
+            addView(speedLabel, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(20) })
+            addView(speedRow1, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+            addView(speedRow2, LinearLayout.LayoutParams(-1, -2))
         }
         AlertDialog.Builder(a)
             .setTitle("Altyazı senkronu")
             .setView(root)
             .setPositiveButton("Tamam", null)
-            .setNeutralButton("Sıfırla") { _, _ -> a.subtitles.delayMs = 0L }
+            .setNeutralButton("Sıfırla") { _, _ ->
+                a.subtitles.delayMs = 0L
+                a.subtitles.speed = 1.0
+            }
             .show()
     }
 
@@ -463,25 +551,30 @@ class PlayerMenus(private val a: PlayerActivity) {
     // ------------------------------------------------------------ üç nokta paneli
 
     fun showOverflow() {
-        lateinit var dialog: AlertDialog
+        val dialog = android.app.Dialog(a)
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        a.keepControls()
         fun item(icon: Int, label: String, action: () -> Unit): View =
-            a.actionButton(icon, null, label, false) {
+            a.actionButton(icon, null, label, false, scale = 0.95f, bgOpacity = 0f, ring = true) {
                 dialog.dismiss()
                 action()
             }
 
+        // MX gibi: videonun üstünde, sağa yaslı, arka plansız, ince çerçeveli düğmeler.
         val grid = GridLayout(a).apply {
             columnCount = 4
             val items = listOf(
                 item(R.drawable.ic_list, "Listeler") { showPlaylist() },
                 item(R.drawable.ic_aspect, "En boy oranı") { showAspectMenu() },
-                item(R.drawable.ic_subtitles, "Altyazı stili") { showSubtitleStyle() },
+                item(R.drawable.ic_subtitles, "Özel stil") { showSubtitleStyle() },
                 item(R.drawable.ic_bookmark, "Yer imi") { showBookmarks() },
                 item(R.drawable.ic_info, "Bilgi") { showInfo() },
                 item(R.drawable.ic_share, "Paylaş") { a.shareCurrent() },
                 item(R.drawable.ic_public, "Ağ akışı") { showStreamDialog() },
                 item(R.drawable.ic_lock, "Çocuk kilidi") { a.startKidsLock() },
                 item(R.drawable.ic_tune, "Ses ayarları") { showEqualizer() },
+                item(R.drawable.ic_headphones, "Ses gecikmesi") { showAudioDelay() },
+                item(R.drawable.ic_timer, "Altyazı senkronu") { showSubtitleSync() },
                 item(R.drawable.ic_settings, "Ayarlar") { a.openSettings() },
             )
             items.forEach { addView(it) }
@@ -489,6 +582,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         val shortcutsSwitch = SwitchCompat(a).apply {
             text = "Kısayollar"
             setTextColor(Color.WHITE)
+            setShadowLayer(a.dp(4).toFloat(), 0f, 0f, Color.BLACK)
             isChecked = a.settings.showShortcuts
             setOnCheckedChangeListener { _, on ->
                 a.settings.showShortcuts = on
@@ -498,18 +592,23 @@ class PlayerMenus(private val a: PlayerActivity) {
         val remainingSwitch = SwitchCompat(a).apply {
             text = "Kalan süreyi göster"
             setTextColor(Color.WHITE)
+            setShadowLayer(a.dp(4).toFloat(), 0f, 0f, Color.BLACK)
             isChecked = a.settings.showRemainingTime
             setOnCheckedChangeListener { _, on -> a.settings.showRemainingTime = on }
         }
         val root = a.vertical(12) {
             addView(grid)
-            addView(shortcutsSwitch, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) })
-            addView(remainingSwitch, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(4) })
+            addView(shortcutsSwitch, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
+            addView(remainingSwitch, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
         }
-        dialog = AlertDialog.Builder(a)
-            .setView(ScrollView(a).apply { addView(root) })
-            .setNegativeButton("Kapat", null)
-            .create()
+        dialog.setContentView(ScrollView(a).apply { addView(root) })
+        dialog.window?.apply {
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+            setGravity(Gravity.END or Gravity.CENTER_VERTICAL)
+            setLayout(android.view.WindowManager.LayoutParams.WRAP_CONTENT, android.view.WindowManager.LayoutParams.WRAP_CONTENT)
+            setDimAmount(0.35f)
+        }
+        dialog.setCanceledOnTouchOutside(true)
         dialog.show()
     }
 

@@ -242,15 +242,21 @@ class MainActivity : AppCompatActivity() {
             searching -> {
                 backButton.visibility = View.GONE
                 shown = if (query.isEmpty()) emptyList()
-                else VideoRepository.sort(visibleVideos().filter { it.title.contains(query, ignoreCase = true) }, settings.sortOrder)
+                else VideoRepository.sort(this, visibleVideos().filter { it.title.contains(query, ignoreCase = true) }, settings)
                 showVideos(shown, if (query.isEmpty()) "Aramak için yazın" else "Sonuç bulunamadı")
             }
             currentFolder != null -> {
                 val folder = currentFolder!!
                 titleView.text = folder.name
                 backButton.visibility = View.VISIBLE
-                shown = VideoRepository.sort(all.filter { it.bucketId == folder.bucketId }, settings.sortOrder)
+                shown = VideoRepository.sort(this, all.filter { it.bucketId == folder.bucketId }, settings)
                 showVideos(shown, "Bu klasörde video yok")
+            }
+            settings.listMode == ListMode.FILES -> {
+                titleView.text = "Videolar"
+                backButton.visibility = View.GONE
+                shown = VideoRepository.sort(this, visibleVideos(), settings)
+                showVideos(shown, "Video bulunamadı")
             }
             else -> {
                 titleView.text = "Klasörler"
@@ -272,6 +278,10 @@ class MainActivity : AppCompatActivity() {
         sortButton.visibility = View.VISIBLE
         viewButton.visibility = View.VISIBLE
         viewButton.setImageResource(if (settings.gridView) R.drawable.ic_view_list else R.drawable.ic_grid)
+        for (ad in listOf(listAdapter, gridAdapter)) {
+            ad.fields = settings.listFields
+            ad.durationOnThumb = settings.durationOnThumb
+        }
         // Aynı yerleşim ve bağdaştırıcı yeniden atanmaz; böylece kaydırma konumu korunur.
         if (settings.gridView) {
             if (list.layoutManager !is GridLayoutManager) {
@@ -327,11 +337,7 @@ class MainActivity : AppCompatActivity() {
     // ------------------------------------------------------------ menüler
 
     private fun showSortMenu() {
-        val orders = SortOrder.entries
-        showChoice("Sırala", orders.map { it.label }, orders.indexOf(settings.sortOrder)) {
-            settings.sortOrder = orders[it]
-            render()
-        }
+        showListPanel(settings) { render() }
     }
 
     private fun showRootMenu(anchor: View) {
@@ -498,7 +504,8 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Henüz oynatılmış video yok", Toast.LENGTH_SHORT).show()
             return
         }
-        val siblings = VideoRepository.sort(all.filter { it.bucketId == video.bucketId }, settings.sortOrder)
+        val siblings = if (settings.listMode == ListMode.FILES && currentFolder == null) shown
+            else VideoRepository.sort(this, all.filter { it.bucketId == video.bucketId }, settings)
         startPlayer(siblings, siblings.indexOfFirst { it.id == video.id }.coerceAtLeast(0))
     }
 

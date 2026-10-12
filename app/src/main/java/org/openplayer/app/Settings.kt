@@ -20,6 +20,23 @@ enum class SortOrder(val label: String) {
     DURATION_ASC("Süre (kısadan uzuna)"),
 }
 
+enum class ListMode(val label: String) {
+    FOLDERS("Klasörler"),
+    FILES("Dosyalar"),
+}
+
+enum class SortKey(val label: String) {
+    TITLE("Başlık"),
+    DATE("Tarih"),
+    LAST_PLAYED("Oynama zamanı"),
+    STATUS("Durum"),
+    DURATION("Uzunluk"),
+    SIZE("Boyut"),
+    RESOLUTION("Çözünürlük"),
+    PATH("Adres"),
+    EXTENSION("Dosya türü"),
+}
+
 enum class DoubleTapAction(val label: String) {
     PLAY_PAUSE("Oynat / duraklat"),
     SEEK("Kenarlarda sarma, ortada oynat/duraklat"),
@@ -154,6 +171,11 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("live_scrub", true)
         set(v) = prefs.edit().putBoolean("live_scrub", v).apply()
 
+    /** Çimdik bırakılınca yakınlaştırmayı %100/125/150/200/300/500 adımlarına oturtur. */
+    var quickZoom: Boolean
+        get() = prefs.getBoolean("quick_zoom", true)
+        set(v) = prefs.edit().putBoolean("quick_zoom", v).apply()
+
     var pinchZoomEnabled: Boolean
         get() = prefs.getBoolean("pinch_zoom", true)
         set(v) = prefs.edit().putBoolean("pinch_zoom", v).apply()
@@ -229,6 +251,16 @@ class AppSettings private constructor(context: Context) {
         set(v) = prefs.edit().putString("os_pass", SecretBox.encrypt(v)).apply()
 
     // --- Ses ---
+    /** Ses gecikmesi (ms). + sesi geciktirir, − öne alır. */
+    var audioDelayMs: Long
+        get() = prefs.getLong("audio_delay_ms", 0L)
+        set(v) = prefs.edit().putLong("audio_delay_ms", v.coerceIn(-5000L, 5000L)).apply()
+
+    /** Bluetooth çıkışta ek ses gecikmesi (ms). */
+    var bluetoothDelayMs: Long
+        get() = prefs.getLong("bt_delay_ms", 0L)
+        set(v) = prefs.edit().putLong("bt_delay_ms", v.coerceIn(-5000L, 5000L)).apply()
+
     var eqEnabled: Boolean
         get() = prefs.getBoolean("eq_enabled", false)
         set(v) = prefs.edit().putBoolean("eq_enabled", v).apply()
@@ -251,6 +283,27 @@ class AppSettings private constructor(context: Context) {
     var sortOrder: SortOrder
         get() = enumOf("sort", SortOrder.NAME_ASC)
         set(v) = putEnum("sort", v)
+
+    var listMode: ListMode
+        get() = enumOf("list_mode", ListMode.FOLDERS)
+        set(v) = putEnum("list_mode", v)
+
+    var sortKey: SortKey
+        get() = enumOf("sort_key", SortKey.TITLE)
+        set(v) = putEnum("sort_key", v)
+
+    var sortAscending: Boolean
+        get() = prefs.getBoolean("sort_asc", true)
+        set(v) = prefs.edit().putBoolean("sort_asc", v).apply()
+
+    /** Liste satırında gösterilecek alanlar: thumb, duration, ext, played, resolution, path, size, date. */
+    var listFields: Set<String>
+        get() = prefs.getStringSet("list_fields", null) ?: setOf("thumb", "duration")
+        set(v) = prefs.edit().putStringSet("list_fields", v).apply()
+
+    var durationOnThumb: Boolean
+        get() = prefs.getBoolean("duration_on_thumb", true)
+        set(v) = prefs.edit().putBoolean("duration_on_thumb", v).apply()
 
     var gridView: Boolean
         get() = prefs.getBoolean("grid_view", false)

@@ -483,6 +483,7 @@ class PlayerActivity : AppCompatActivity() {
         abB = -1L
         subtitleAutoDone = false
         subtitles.delayMs = 0L
+        subtitles.speed = 1.0
         subtitles.setOff()
         sidecars = if (uri != null) SubtitleFiles.findSidecars(this, uri) else emptyList()
         val remembered = uri?.let { SubtitleFiles.remembered(this, it) }
@@ -988,6 +989,19 @@ class PlayerActivity : AppCompatActivity() {
         showHud("Yakınlaştırma %${(zoom * 100).roundToInt()}")
     }
 
+    fun snapZoom() {
+        if (!settings.quickZoom || zoom <= 1f) return
+        val steps = floatArrayOf(1f, 1.25f, 1.5f, 2f, 3f, 5f)
+        val target = steps.minByOrNull { kotlin.math.abs(it - zoom) } ?: return
+        zoom = target
+        if (zoom <= 1f) {
+            panX = 0f
+            panY = 0f
+        }
+        panBy(0f, 0f)
+        showHud("%${(zoom * 100).toInt()}")
+    }
+
     fun panBy(dx: Float, dy: Float) {
         val limitX = playerView.width * (zoom - 1f) / 2f
         val limitY = playerView.height * (zoom - 1f) / 2f
@@ -1086,15 +1100,31 @@ class PlayerActivity : AppCompatActivity() {
         if (!::shortcutRow.isInitialized) return
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         shortcutRow.removeAllViews()
-        shortcutRow.addView(actionButton(
-            R.drawable.ic_edit, null, "Öğeleri özelleştir", false,
-            scale = settings.shortcutSizePercent / 100f,
-            bgOpacity = settings.shortcutOpacityPercent / 100f,
-        ) { menus.showCustomizeShortcuts() })
-        for (s in settings.shortcuts) {
-            shortcutRow.addView(buildShortcut(s))
+        val all = settings.shortcuts
+        // MX gibi: kapalıyken yalnızca ilk 5 simge görünür; "›" tüm listeyi açar.
+        val shown = if (shortcutsExpanded) all else all.take(5)
+        if (shortcutsExpanded) {
+            shortcutRow.addView(actionButton(
+                R.drawable.ic_edit, null, "Öğeleri özelleştir", false,
+                scale = settings.shortcutSizePercent / 100f,
+                bgOpacity = settings.shortcutOpacityPercent / 100f,
+                showLabel = false,
+            ) { menus.showCustomizeShortcuts() })
+        }
+        for (s in shown) shortcutRow.addView(buildShortcut(s))
+        if (all.size > 5) {
+            shortcutRow.addView(iconView(R.drawable.ic_back, 48, 12).apply {
+                rotation = if (shortcutsExpanded) 0f else 180f
+                setOnClickListener {
+                    shortcutsExpanded = !shortcutsExpanded
+                    refreshShortcuts()
+                    scheduleAutoHide()
+                }
+            })
         }
     }
+
+    private var shortcutsExpanded = false
 
     private fun buildShortcut(s: Shortcut): View {
         var icon = s.icon
@@ -1140,6 +1170,7 @@ class PlayerActivity : AppCompatActivity() {
             icon, glyph, label, active, rotation,
             scale = settings.shortcutSizePercent / 100f,
             bgOpacity = settings.shortcutOpacityPercent / 100f,
+            showLabel = false,
         ) { onShortcut(s) }
     }
 

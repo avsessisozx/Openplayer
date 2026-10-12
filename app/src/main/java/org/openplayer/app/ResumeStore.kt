@@ -15,8 +15,11 @@ object ResumeStore {
         prefs(c).edit()
             .putString("last_uri", uri.toString())
             .putLong("pos_$uri", positionMs)
+            .putLong("at_$uri", System.currentTimeMillis())
             .apply()
     }
+
+    fun lastPlayed(c: Context, uri: Uri): Long = prefs(c).getLong("at_$uri", 0L)
 
     fun markPlayed(c: Context, uri: Uri) {
         prefs(c).edit().putBoolean("played_$uri", true).apply()

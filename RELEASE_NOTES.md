@@ -1,3 +1,14 @@
+# 1.0.0-beta5
+
+- **Ses gecikmesi** (± ms) ve **Bluetooth ek gecikmesi**: Ses ayarları → "Ses gecikmesi", ⋮ menüsü. + sesi geciktirir, − öne alır.
+- **Altyazı hızı** (kare hızı dönüşümü: 23.976↔25, 24↔25) ve ince ayar: Altyazı → Senkronizasyon.
+- **⋮ menüsü** MX düzeninde: şeffaf, sağa yaslı, ince çerçeveli düğmeler.
+- **Kısayol satırı** tek sıra, yalnızca simge; ilk 5 düğme ve "›" ile tüm liste.
+- **Liste paneli:** Görünüm modu (Klasörler / Dosyalar), düzen, 9 sıralama ölçütü + yön, satırda gösterilecek alanlar, gelişmiş seçenekler.
+- **Hızlı yakınlaştırma:** çimdik bırakılınca %100/125/150/200/300/500 adımlarına oturur (Ayarlar → Hareketler).
+
+---
+
 # 1.0.0-beta4
 
 - Ses/parlaklık/sarma göstergelerinin kaybolma süresi milisaniye ayarlı (Ayarlar → Oynatıcı → Görünüm, varsayılan 500 ms).

@@ -90,6 +90,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
 
         override fun onScaleEnd(d: ScaleGestureDetector) {
             scaling = false
+            if (!scaleOnSubtitle) a.snapZoom()
             a.hideHudSoon()
         }
     })

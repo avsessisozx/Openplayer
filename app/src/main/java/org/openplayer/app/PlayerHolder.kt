@@ -3,6 +3,9 @@ package org.openplayer.app
 import android.content.Context
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.audio.AudioProcessor
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
@@ -68,16 +71,32 @@ object PlayerHolder {
 
     private fun create(app: Context): ExoPlayer {
         val settings = AppSettings.get(app)
+        val delay = AudioDelayProcessor().also {
+            it.delayMs = AudioDelay.effectiveDelayMs(app)
+            AudioDelay.current = it
+        }
+        fun sink(context: Context, floatOut: Boolean, playbackParams: Boolean) =
+            DefaultAudioSink.Builder(context)
+                .setEnableFloatOutput(floatOut)
+                .setEnableAudioOutputPlaybackParameters(playbackParams)
+                .setAudioProcessors(arrayOf<AudioProcessor>(delay))
+                .build()
         val renderers: DefaultRenderersFactory = when (settings.decoder) {
             DecoderMode.HW ->
-                DefaultRenderersFactory(app)
-                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
+                object : DefaultRenderersFactory(app) {
+                    override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =
+                        sink(context, enableFloatOutput, enableAudioOutputPlaybackParameters)
+                }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
             DecoderMode.HW_PLUS ->
-                NextRenderersFactory(app)
-                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+                object : NextRenderersFactory(app) {
+                    override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =
+                        sink(context, enableFloatOutput, enableAudioOutputPlaybackParameters)
+                }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
             DecoderMode.SW ->
-                NextRenderersFactory(app)
-                    .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+                object : NextRenderersFactory(app) {
+                    override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =
+                        sink(context, enableFloatOutput, enableAudioOutputPlaybackParameters)
+                }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
         }
         renderers.setEnableDecoderFallback(true)
 

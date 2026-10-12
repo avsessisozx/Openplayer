@@ -33,6 +33,8 @@ fun Context.actionButton(
     iconRotation: Float = 0f,
     scale: Float = 1f,
     bgOpacity: Float = 0.6f,
+    showLabel: Boolean = true,
+    ring: Boolean = false,
     onClick: () -> Unit,
 ): View {
     fun argb(rgb: Int) = ((bgOpacity.coerceIn(0f, 1f) * 255).toInt() shl 24) or (rgb and 0xFFFFFF)
@@ -40,7 +42,8 @@ fun Context.actionButton(
         layoutParams = LinearLayout.LayoutParams(dp((56 * scale).toInt()), dp((56 * scale).toInt())).apply { gravity = Gravity.CENTER_HORIZONTAL }
         background = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
-            setColor(if (active) ((maxOf(bgOpacity, 0.6f) * 255).toInt() shl 24) or 0x3563C9 else argb(0x202830))
+            if (ring) setStroke(dp(2), 0x99FFFFFF.toInt())
+            setColor(if (ring && !active) 0x00000000 else if (active) ((maxOf(bgOpacity, 0.6f) * 255).toInt() shl 24) or 0x3563C9 else argb(0x202830))
         }
         if (icon != 0) {
             addView(ImageView(context).apply {
@@ -73,10 +76,13 @@ fun Context.actionButton(
     return LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER_HORIZONTAL
-        layoutParams = LinearLayout.LayoutParams(dp((76 * scale).toInt().coerceAtLeast(56)), ViewGroup.LayoutParams.WRAP_CONTENT)
+        layoutParams = LinearLayout.LayoutParams(
+            if (showLabel) dp((76 * scale).toInt().coerceAtLeast(56)) else dp((56 * scale).toInt() + 14),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
         setPadding(dp(2), dp(4), dp(2), dp(4))
         addView(circle)
-        addView(text, LinearLayout.LayoutParams(-1, -2))
+        if (showLabel) addView(text, LinearLayout.LayoutParams(-1, -2))
         setOnClickListener { onClick() }
     }
 }

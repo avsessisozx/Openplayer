@@ -27,6 +27,9 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         private set
     var delayMs = 0L
 
+    /** Altyazı hız çarpanı (kare hızı dönüşümü için; 1.0 = değişmez). */
+    var speed = 1.0
+
     private var external: List<SubCue> = emptyList()
     private var maxDurationMs = 0L
     private var lastKey: List<Int> = emptyList()
@@ -111,7 +114,7 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     /** Oynatma konumuna göre harici altyazıyı günceller. Yaklaşık 100 ms'de bir çağrılır. */
     fun tick(positionMs: Long) {
         if (mode != Mode.EXTERNAL) return
-        val t = positionMs - delayMs
+        val t = ((positionMs - delayMs) * speed).toLong()
         val active = activeIndexes(t)
         if (active != lastKey) {
             lastKey = active
@@ -150,8 +153,10 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
 
     /** Konumdan sonraki altyazı satırının video zamanı (yoksa null). */
     fun nextCueMs(positionMs: Long): Long? =
-        external.firstOrNull { it.startMs + delayMs > positionMs + 400 }?.let { it.startMs + delayMs }
+        external.firstOrNull { videoMs(it) > positionMs + 400 }?.let { videoMs(it) }
 
     fun previousCueMs(positionMs: Long): Long? =
-        external.lastOrNull { it.startMs + delayMs < positionMs - 1200 }?.let { it.startMs + delayMs }
+        external.lastOrNull { videoMs(it) < positionMs - 1200 }?.let { videoMs(it) }
+
+    private fun videoMs(c: SubCue): Long = (c.startMs / speed).toLong() + delayMs
 }

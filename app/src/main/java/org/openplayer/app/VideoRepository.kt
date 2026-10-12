@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.openplayer.app
 
 import android.content.ContentUris
@@ -15,6 +17,9 @@ data class VideoItem(
     val bucketName: String,
     val sizeBytes: Long,
     val dateAddedSec: Long,
+    val widthPx: Int = 0,
+    val heightPx: Int = 0,
+    val path: String = "",
 )
 
 data class FolderItem(
@@ -42,6 +47,9 @@ object VideoRepository {
             MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Video.Media.SIZE,
             MediaStore.Video.Media.DATE_ADDED,
+            MediaStore.Video.Media.WIDTH,
+            MediaStore.Video.Media.HEIGHT,
+            MediaStore.Video.Media.DATA,
         )
         val result = ArrayList<VideoItem>()
         try {
@@ -53,6 +61,10 @@ object VideoRepository {
                 val bucketNameCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
                 val sizeCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
                 val dateCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
+                val wCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH)
+                val hCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT)
+                @Suppress("DEPRECATION")
+                val dataCol = c.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
                 while (c.moveToNext()) {
                     val id = c.getLong(idCol)
                     result += VideoItem(
@@ -64,6 +76,9 @@ object VideoRepository {
                         bucketName = c.getString(bucketNameCol) ?: "Diğer",
                         sizeBytes = c.getLong(sizeCol),
                         dateAddedSec = c.getLong(dateCol),
+                        widthPx = c.getInt(wCol),
+                        heightPx = c.getInt(hCol),
+                        path = c.getString(dataCol) ?: "",
                     )
                 }
             }
@@ -96,14 +111,28 @@ object VideoRepository {
             .sortedBy { it.name.lowercase() }
     }
 
-    fun sort(videos: List<VideoItem>, order: SortOrder): List<VideoItem> = when (order) {
-        SortOrder.NAME_ASC -> videos.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title })
-        SortOrder.NAME_DESC -> videos.sortedWith(compareByDescending(String.CASE_INSENSITIVE_ORDER) { it.title })
-        SortOrder.DATE_DESC -> videos.sortedByDescending { it.dateAddedSec }
-        SortOrder.DATE_ASC -> videos.sortedBy { it.dateAddedSec }
-        SortOrder.SIZE_DESC -> videos.sortedByDescending { it.sizeBytes }
-        SortOrder.SIZE_ASC -> videos.sortedBy { it.sizeBytes }
-        SortOrder.DURATION_DESC -> videos.sortedByDescending { it.durationMs }
-        SortOrder.DURATION_ASC -> videos.sortedBy { it.durationMs }
+    private fun status(context: Context, v: VideoItem): Int = when {
+        ResumeStore.isPlayed(context, v.uri.toString()) -> 2
+        ResumeStore.position(context, v.uri) > 0L -> 1
+        else -> 0
+    }
+
+    /** Seçili ölçüte ve yöne göre sıralar. */
+    fun sort(context: Context, videos: List<VideoItem>, settings: AppSettings): List<VideoItem> {
+        val ci = String.CASE_INSENSITIVE_ORDER
+        val cmp: Comparator<VideoItem> = when (settings.sortKey) {
+            SortKey.TITLE -> compareBy<VideoItem, String>(ci) { it.title }
+            SortKey.DATE -> compareBy<VideoItem> { it.dateAddedSec }
+            SortKey.LAST_PLAYED -> compareBy<VideoItem> { ResumeStore.lastPlayed(context, it.uri) }
+            SortKey.STATUS -> compareBy<VideoItem> { status(context, it) }
+            SortKey.DURATION -> compareBy<VideoItem> { it.durationMs }
+            SortKey.SIZE -> compareBy<VideoItem> { it.sizeBytes }
+            SortKey.RESOLUTION -> compareBy<VideoItem> { it.widthPx.toLong() * it.heightPx }
+            SortKey.PATH -> compareBy<VideoItem, String>(ci) { it.path }
+            SortKey.EXTENSION -> compareBy<VideoItem, String>(ci) { it.title.substringAfterLast('.', "") }
+        }
+        // Eşit olanlar başlığa göre sıralanır; sonuç kararlı kalır.
+        val full = cmp.thenBy(ci) { it.title }
+        return videos.sortedWith(if (settings.sortAscending) full else full.reversed())
     }
 }

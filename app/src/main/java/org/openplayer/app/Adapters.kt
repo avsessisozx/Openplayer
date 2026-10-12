@@ -119,6 +119,25 @@ class VideoAdapter(
 
     var newDays: Int = 7
 
+    /** Satırda gösterilecek alanlar (thumb, duration, ext, played, resolution, path, size, date). */
+    var fields: Set<String> = setOf("thumb", "duration")
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            if (field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
+
+    var durationOnThumb: Boolean = true
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            if (field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
+
     class VH(
         val root: ViewGroup,
         val thumb: ImageView,
@@ -127,6 +146,8 @@ class VideoAdapter(
         val tag: TextView,
         val more: ImageView,
         val progress: View,
+        val meta: TextView,
+        val box: View,
     ) : RecyclerView.ViewHolder(root)
 
     private fun round(c: android.content.Context, radiusDp: Int) = object : ViewOutlineProvider() {
@@ -179,6 +200,13 @@ class VideoAdapter(
             }
             visibility = View.GONE
         }
+        val meta = TextView(c).apply {
+            setTextColor(UiColors.textSecondary)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            maxLines = 2
+            ellipsize = TextUtils.TruncateAt.END
+            visibility = View.GONE
+        }
         val more = c.iconView(R.drawable.ic_more_vert, 40, 8).apply {
             setColorFilter(UiColors.textSecondary)
         }
@@ -199,14 +227,16 @@ class VideoAdapter(
                 isFocusable = true
                 addView(box)
                 addView(textRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = c.dp(4) })
+                addView(meta, LinearLayout.LayoutParams(-1, -2))
             }
-            return VH(root, thumb, duration, title, tag, more, progress)
+            return VH(root, thumb, duration, title, tag, more, progress, meta, box)
         }
 
         box.layoutParams = LinearLayout.LayoutParams(c.dp(112), c.dp(64))
         val texts = LinearLayout(c).apply {
             orientation = LinearLayout.VERTICAL
             addView(title)
+            addView(meta, LinearLayout.LayoutParams(-2, -2).apply { topMargin = c.dp(2) })
             addView(tag, LinearLayout.LayoutParams(-2, -2).apply { topMargin = c.dp(3) })
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                 .apply { marginStart = c.dp(14) }
@@ -222,7 +252,24 @@ class VideoAdapter(
             addView(texts)
             addView(more)
         }
-        return VH(root, thumb, duration, title, tag, more, progress)
+        return VH(root, thumb, duration, title, tag, more, progress, meta, box)
+    }
+
+    private fun metaText(ctx: android.content.Context, item: VideoItem): String {
+        val parts = ArrayList<String>()
+        if ("duration" in fields && !durationOnThumb) parts += formatDuration(item.durationMs)
+        if ("ext" in fields) item.title.substringAfterLast('.', "").takeIf { it.isNotEmpty() }?.let { parts += it.uppercase() }
+        if ("resolution" in fields && item.widthPx > 0) parts += "${item.widthPx}×${item.heightPx}"
+        if ("size" in fields) parts += android.text.format.Formatter.formatShortFileSize(ctx, item.sizeBytes)
+        if ("date" in fields && item.dateAddedSec > 0) {
+            parts += java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT).format(java.util.Date(item.dateAddedSec * 1000))
+        }
+        if ("played" in fields) {
+            val t = ResumeStore.lastPlayed(ctx, item.uri)
+            if (t > 0) parts += java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT).format(java.util.Date(t))
+        }
+        if ("path" in fields && item.path.isNotEmpty()) parts += item.path.substringBeforeLast('/', "")
+        return parts.joinToString(" · ")
     }
 
     override fun getItemCount() = items.size
@@ -240,6 +287,11 @@ class VideoAdapter(
             }
         )
         holder.duration.text = formatDuration(item.durationMs)
+        holder.duration.visibility = if ("duration" in fields && durationOnThumb) View.VISIBLE else View.GONE
+        holder.box.visibility = if ("thumb" in fields) View.VISIBLE else View.GONE
+        val metaLine = metaText(ctx, item)
+        holder.meta.text = metaLine
+        holder.meta.visibility = if (metaLine.isEmpty()) View.GONE else View.VISIBLE
         holder.tag.visibility = if (VideoRepository.isNew(ctx, item, newDays)) View.VISIBLE else View.GONE
 
         // Kaldığı yeri gösteren ince çizgi

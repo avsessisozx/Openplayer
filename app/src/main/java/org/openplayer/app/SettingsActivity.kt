@@ -142,6 +142,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         section("Yakınlaştırma ve altyazı")
         toggle("Çimdikle yakınlaştırma ve kaydırma", null, s.pinchZoomEnabled) { s.pinchZoomEnabled = it }
+        toggle("Hızlı yakınlaştırma", "Çimdiği bırakınca %100, 125, 150, 200, 300 veya 500 adımlarından en yakınına oturur", s.quickZoom) { s.quickZoom = it }
         toggle("Altyazı hareketleri", "Alt şeritte: yatay = önceki/sonraki satır, dikey = konum, çimdik = boyut", s.subtitleGestures) { s.subtitleGestures = it }
     }
 
