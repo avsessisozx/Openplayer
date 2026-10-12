@@ -212,6 +212,11 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getString("eq_levels", "")?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
         set(v) = prefs.edit().putString("eq_levels", v.joinToString(",")).apply()
 
+    /** Virgülle ayrılmış dil kodları (örn. "tr,en"). Boş = sistem dili. */
+    var audioLanguages: String
+        get() = prefs.getString("audio_langs", "") ?: ""
+        set(v) = prefs.edit().putString("audio_langs", v.trim()).apply()
+
     /** 100 = normal, 200 = en yüksek yazılımsal artırma. */
     var volumeBoostPercent: Int
         get() = prefs.getInt("boost", 100)

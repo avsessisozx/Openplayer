@@ -15,8 +15,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
-import coil.request.videoFrameMillis
 
 class FolderAdapter(
     private val onClick: (FolderItem) -> Unit,
@@ -256,10 +254,7 @@ class VideoAdapter(
             holder.progress.visibility = View.GONE
         }
 
-        holder.thumb.load(item.uri, Thumbs.get(ctx)) {
-            videoFrameMillis(1000)
-            crossfade(true)
-        }
+        ThumbLoader.load(ctx, item, holder.thumb)
         holder.root.setOnClickListener { onClick(item) }
         holder.root.setOnLongClickListener {
             onMore(item, holder.root)

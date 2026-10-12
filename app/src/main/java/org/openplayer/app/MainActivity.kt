@@ -209,16 +209,26 @@ class MainActivity : AppCompatActivity() {
 
     // ------------------------------------------------------------ veri ve görünüm
 
+    private val loader = java.util.concurrent.Executors.newSingleThreadExecutor()
+
+    /** MediaStore taraması arka planda yapılır; arayüz takılmaz. */
     private fun refresh() {
-        val visible = all.isEmpty()
-        all = VideoRepository.loadAll(this)
-        val highlight = ResumeStore.lastUri(this)
-        listAdapter.highlightUri = highlight
-        gridAdapter.highlightUri = highlight
-        listAdapter.newDays = settings.newVideoDays
-        gridAdapter.newDays = settings.newVideoDays
-        render()
-        if (visible) list.scrollToPosition(0)
+        val app = applicationContext
+        loader.execute {
+            val loaded = VideoRepository.loadAll(app)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                val first = all.isEmpty()
+                all = loaded
+                val highlight = ResumeStore.lastUri(this)
+                listAdapter.highlightUri = highlight
+                gridAdapter.highlightUri = highlight
+                listAdapter.newDays = settings.newVideoDays
+                gridAdapter.newDays = settings.newVideoDays
+                render()
+                if (first) list.scrollToPosition(0)
+            }
+        }
     }
 
     private fun visibleVideos(): List<VideoItem> {
@@ -249,8 +259,10 @@ class MainActivity : AppCompatActivity() {
                 viewButton.visibility = View.GONE
                 val folders = VideoRepository.folders(this, all, settings)
                 folderAdapter.items = folders
-                list.layoutManager = LinearLayoutManager(this)
-                list.adapter = folderAdapter
+                if (list.layoutManager?.javaClass != LinearLayoutManager::class.java) {
+                    list.layoutManager = LinearLayoutManager(this)
+                }
+                if (list.adapter !== folderAdapter) list.adapter = folderAdapter
                 if (folders.isEmpty()) showMessage("Video bulunamadı") else hideMessage()
             }
         }
@@ -260,15 +272,19 @@ class MainActivity : AppCompatActivity() {
         sortButton.visibility = View.VISIBLE
         viewButton.visibility = View.VISIBLE
         viewButton.setImageResource(if (settings.gridView) R.drawable.ic_view_list else R.drawable.ic_grid)
+        // Aynı yerleşim ve bağdaştırıcı yeniden atanmaz; böylece kaydırma konumu korunur.
         if (settings.gridView) {
-            val span = (resources.displayMetrics.widthPixels / dp(170)).coerceAtLeast(2)
-            list.layoutManager = GridLayoutManager(this, span)
+            if (list.layoutManager !is GridLayoutManager) {
+                list.layoutManager = GridLayoutManager(this, (resources.displayMetrics.widthPixels / dp(170)).coerceAtLeast(2))
+            }
             gridAdapter.items = videos
-            list.adapter = gridAdapter
+            if (list.adapter !== gridAdapter) list.adapter = gridAdapter
         } else {
-            list.layoutManager = LinearLayoutManager(this)
+            if (list.layoutManager?.javaClass != LinearLayoutManager::class.java) {
+                list.layoutManager = LinearLayoutManager(this)
+            }
             listAdapter.items = videos
-            list.adapter = listAdapter
+            if (list.adapter !== listAdapter) list.adapter = listAdapter
         }
         if (videos.isEmpty()) showMessage(emptyText) else hideMessage()
     }

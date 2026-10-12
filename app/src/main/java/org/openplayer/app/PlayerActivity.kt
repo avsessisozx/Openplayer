@@ -541,7 +541,7 @@ class PlayerActivity : AppCompatActivity() {
     // ---------------------------------------------------------------- arayüz oluşturma
 
     private fun buildUi(): View {
-        playerView = PlayerView(this).apply {
+        playerView = (layoutInflater.inflate(R.layout.player_view, null) as PlayerView).apply {
             useController = false
             setShutterBackgroundColor(Color.BLACK)
             setKeepContentOnPlayerReset(true)
@@ -671,11 +671,13 @@ class PlayerActivity : AppCompatActivity() {
             addView(bottomPanel, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM))
         }
 
+        // Gösterge arka plansız: yalnızca gölgeli yazı, böylece görüntüyü kapatmaz.
         hud = TextView(this).apply {
             setTextColor(Color.WHITE)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
-            setBackgroundColor(0x99000000.toInt())
-            setPadding(dp(20), dp(10), dp(20), dp(10))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setShadowLayer(dp(8).toFloat(), 0f, 0f, Color.BLACK)
+            gravity = Gravity.CENTER
             visibility = View.GONE
         }
         unlockButton = iconView(R.drawable.ic_lock_open, 56, 16).apply {

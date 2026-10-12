@@ -99,6 +99,12 @@ object PlayerHolder {
         exo.trackSelectionParameters = exo.trackSelectionParameters.buildUpon()
             .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
             .build()
+        val audioLangs = settings.audioLanguages.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        if (audioLangs.isNotEmpty()) {
+            exo.trackSelectionParameters = exo.trackSelectionParameters.buildUpon()
+                .setPreferredAudioLanguages(*audioLangs.toTypedArray())
+                .build()
+        }
         exo.setPlaybackSpeed(settings.playbackSpeed)
         return exo
     }

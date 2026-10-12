@@ -77,6 +77,4 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.documentfile:documentfile:1.0.1")
-    implementation("io.coil-kt:coil:2.7.0")
-    implementation("io.coil-kt:coil-video:2.7.0")
 }
