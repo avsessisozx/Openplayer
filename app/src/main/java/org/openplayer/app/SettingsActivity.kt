@@ -215,11 +215,21 @@ class SettingsActivity : AppCompatActivity() {
     private fun gesturesPage() {
         section("Dikey kaydırma bölgeleri")
         val prefs = GesturePrefs(this)
+        note("Çizgileri sürükleyerek şeritlerin sınırını ayarlayın. Çizgileri üst üste getirirseniz orta şerit olmaz. Ekranın alt kenarındaki altyazı bölgesi bundan bağımsızdır.")
+        content.addView(ZoneEditor(this, prefs), LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, dp(4), 0, dp(8)) })
         for (zone in GesturePrefs.zones) {
-            choice("${GesturePrefs.zoneLabel(zone)} bölge", prefs.get(zone).label,
+            choice("${GesturePrefs.zoneLabel(zone)} şerit", prefs.get(zone).label,
                 GestureAction.entries.map { it.label }, prefs.get(zone).ordinal) {
                 prefs.set(zone, GestureAction.entries[it])
             }
+        }
+        action("Bölgeleri sıfırla", "Sol parlaklık, sağ ses, orta kapalı; sınırlar ortada") {
+            prefs.set("left", GestureAction.BRIGHTNESS)
+            prefs.set("mid", GestureAction.NONE)
+            prefs.set("right", GestureAction.VOLUME)
+            prefs.split1 = 0.5f
+            prefs.split2 = 0.5f
+            render()
         }
         section("Sarma")
         toggle("Sararken canlı önizleme", "Çubuğu veya ekranı kaydırırken görüntü akar; bırakınca tam konuma gider", s.liveScrub) { s.liveScrub = it }

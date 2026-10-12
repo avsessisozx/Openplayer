@@ -15,36 +15,64 @@ enum class GestureAction(val label: String) {
     BRIGHTNESS("Parlaklık"),
     VOLUME("Ses"),
     SPEED("Oynatma hızı"),
+    SEEK("Sarma (ileri/geri)"),
+    SUB_POSITION("Altyazı konumu"),
+    SUB_SIZE("Altyazı boyutu"),
+    ZOOM("Yakınlaştırma"),
 }
 
-/** Ekranı 2x2 böler: sol/sağ x üst/alt. Her bölgenin işlevi ayarlanabilir. */
+/**
+ * Ekran üç dikey şeride bölünür: sol, orta, sağ. Her şeridin işlevi ve şeritlerin sınırları ayarlanır.
+ * Varsayılan: sol parlaklık, sağ ses, orta kapalı (sınırlar ekranın ortasında birleşir).
+ */
 class GesturePrefs(context: Context) {
     private val prefs = context.getSharedPreferences("gestures", Context.MODE_PRIVATE)
 
     companion object {
-        val zones = listOf("left_top", "left_bottom", "right_top", "right_bottom")
+        val zones = listOf("left", "mid", "right")
         fun zoneLabel(zone: String) = when (zone) {
-            "left_top" -> "Sol üst"
-            "left_bottom" -> "Sol alt"
-            "right_top" -> "Sağ üst"
-            else -> "Sağ alt"
+            "left" -> "Sol"
+            "mid" -> "Orta"
+            else -> "Sağ"
         }
     }
 
-    private val defaults = mapOf(
-        "left_top" to GestureAction.BRIGHTNESS,
-        "left_bottom" to GestureAction.BRIGHTNESS,
-        "right_top" to GestureAction.VOLUME,
-        "right_bottom" to GestureAction.VOLUME,
-    )
+    private fun default(zone: String) = when (zone) {
+        "left" -> GestureAction.BRIGHTNESS
+        "right" -> GestureAction.VOLUME
+        else -> GestureAction.NONE
+    }
+
+    private fun parse(name: String?) = name?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() }
 
     fun get(zone: String): GestureAction =
-        prefs.getString(zone, null)
-            ?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() }
-            ?: defaults.getValue(zone)
+        parse(prefs.getString(zone, null))
+            // Eski dört bölgeli ayardan göç: üst bölgelerin işlevi alınır.
+            ?: parse(prefs.getString(zone + (if (zone == "left" || zone == "right") "_top" else ""), null)).takeIf { zone != "mid" }
+            ?: default(zone)
 
     fun set(zone: String, action: GestureAction) {
         prefs.edit().putString(zone, action.name).apply()
+    }
+
+    /** Sol şeridin bitiş noktası (ekran genişliğinin oranı). */
+    var split1: Float
+        get() = prefs.getFloat("split1", 0.5f)
+        set(v) = prefs.edit().putFloat("split1", v.coerceIn(0.1f, 0.9f)).apply()
+
+    /** Sağ şeridin başlangıç noktası. Orta şerit split1..split2 arasıdır; eşitse orta yoktur. */
+    var split2: Float
+        get() = prefs.getFloat("split2", 0.5f)
+        set(v) = prefs.edit().putFloat("split2", v.coerceIn(0.1f, 0.9f)).apply()
+
+    fun zoneAt(xFraction: Float): String {
+        val a = split1
+        val b = split2.coerceAtLeast(a)
+        return when {
+            xFraction < a -> "left"
+            xFraction < b -> "mid"
+            else -> "right"
+        }
     }
 }
 
@@ -61,7 +89,10 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
     private val prefs = GesturePrefs(a)
 
     private var mode = Mode.NONE
-    private var zone = "left_top"
+    private var zone = "left"
+    private var startSubSize = 20f
+    private var lastFraction = 0f
+    private var verticalSeeking = false
     private var startPos = 0L
     private var startVolume = 0
     private var startBrightness = 0.5f
@@ -107,7 +138,9 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         override fun onDown(e: MotionEvent): Boolean {
             mode = Mode.NONE
             subSwipe = 0f
-            zone = (if (e.x < width / 2f) "left" else "right") + "_" + (if (e.y < height / 2f) "top" else "bottom")
+            zone = prefs.zoneAt(e.x / width)
+            startSubSize = a.settings.subtitleSizeSp
+            lastFraction = 0f
             inSubtitleArea = a.settings.subtitleGestures && a.subtitles.mode != SubtitleController.Mode.OFF &&
                     e.y > height * 0.72f
             startPos = a.player.currentPosition
@@ -212,6 +245,28 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                 a.setSpeed(value)
                 a.showHud("Hız ${"%.2f".format(value)}x")
             }
+            GestureAction.SEEK -> {
+                val delta = (fraction * a.settings.swipeSeekSec * 1000f).toLong()
+                val duration = a.player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
+                seekTarget = (startPos + delta).coerceIn(0L, duration)
+                verticalSeeking = true
+                a.scrubStart()
+                a.scrubMove(seekTarget)
+                a.showHud("${formatDuration(seekTarget)}\n[${if (delta >= 0) "+" else "-"}${formatDuration(abs(delta))}]")
+            }
+            GestureAction.SUB_POSITION -> {
+                a.setSubtitleBottom(startSubBottom + fraction)
+                a.showHud("Altyazı konumu")
+            }
+            GestureAction.SUB_SIZE -> {
+                a.settings.subtitleSizeSp = (startSubSize * (1f + fraction * 2f)).coerceIn(10f, 48f)
+                a.subtitles.applyStyle()
+                a.showHud("Altyazı boyutu ${a.settings.subtitleSizeSp.roundToInt()}")
+            }
+            GestureAction.ZOOM -> {
+                a.zoomBy(1f + (fraction - lastFraction) * 2f)
+                lastFraction = fraction
+            }
             GestureAction.NONE -> Unit
         }
     }
@@ -243,6 +298,10 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
             when (mode) {
                 Mode.HORIZONTAL -> if (a.settings.horizontalSeekEnabled) a.scrubEnd(seekTarget)
+                Mode.VERTICAL -> if (verticalSeeking) {
+                    verticalSeeking = false
+                    a.scrubEnd(seekTarget)
+                }
                 Mode.SUB_H -> if (abs(subSwipe) > a.dp(60)) a.jumpSubtitle(subSwipe > 0)
                 else -> Unit
             }
