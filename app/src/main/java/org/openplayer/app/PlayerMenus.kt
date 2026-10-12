@@ -102,7 +102,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             addView(btLabel, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
             addView(row { s.bluetoothDelayMs += it }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
         }
-        AlertDialog.Builder(a)
+        PanelBuilder(a)
             .setTitle("Ses gecikmesi")
             .setView(root)
             .setPositiveButton("Tamam") { _, _ -> AudioDelay.apply(a) }
@@ -143,7 +143,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             root.addView(a.label("Bu cihazda ekolayzır kullanılamıyor.", 13f, 0xFF9AA3AD.toInt()),
                 LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) })
         }
-        AlertDialog.Builder(a)
+        PanelBuilder(a)
             .setTitle("Ses ayarları")
             .setView(ScrollView(a).apply { addView(root) })
             .setPositiveButton("Tamam", null)
@@ -179,7 +179,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         entries += "Stil ve boyut…" to { showSubtitleStyle() }
         entries += "Karakter kodlaması…" to { showCharsetMenu() }
 
-        AlertDialog.Builder(a)
+        PanelBuilder(a)
             .setTitle("Altyazı")
             .setItems(entries.map { it.first }.toTypedArray()) { _, which -> entries[which].second() }
             .setNegativeButton("Kapat", null)
@@ -253,7 +253,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             addView(speedRow1, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
             addView(speedRow2, LinearLayout.LayoutParams(-1, -2))
         }
-        AlertDialog.Builder(a)
+        PanelBuilder(a)
             .setTitle("Altyazı senkronu")
             .setView(root)
             .setPositiveButton("Tamam", null)
@@ -322,7 +322,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             addView(outline)
             addView(bold)
         }
-        AlertDialog.Builder(a)
+        PanelBuilder(a)
             .setTitle("Altyazı stili")
             .setView(ScrollView(a).apply { addView(root) })
             .setPositiveButton("Tamam", null)
@@ -360,7 +360,7 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     fun showOnlineSearch() {
         if (a.settings.osApiKey.isEmpty()) {
-            AlertDialog.Builder(a)
+            PanelBuilder(a)
                 .setTitle("API anahtarı gerekli")
                 .setMessage("Çevrimiçi altyazı araması için opensubtitles.com hesabınızdan aldığınız API anahtarını Ayarlar > Altyazı bölümüne girin.")
                 .setPositiveButton("Ayarlar") { _, _ -> a.openSettings() }
@@ -374,7 +374,7 @@ class PlayerMenus(private val a: PlayerActivity) {
     }
 
     private fun busyDialog(message: String): AlertDialog =
-        AlertDialog.Builder(a).setMessage(message).setCancelable(false).show()
+        PanelBuilder(a).setMessage(message).setCancelable(false).show()
 
     private fun runSearch(query: String) {
         val uri = a.currentUri ?: return
@@ -498,7 +498,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         val uri = a.currentUri ?: return
         val marks = ResumeStore.bookmarks(a, uri)
         val labels = listOf("＋ Bu konuma yer imi ekle (${timeLabel(a.player.currentPosition)})") + marks.map { timeLabel(it) }
-        val dialog = AlertDialog.Builder(a)
+        val dialog = PanelBuilder(a)
             .setTitle("Yer imleri")
             .setItems(labels.toTypedArray()) { _, which ->
                 if (which == 0) {

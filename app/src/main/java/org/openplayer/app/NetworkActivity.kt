@@ -118,6 +118,7 @@ class NetworkActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onBackPressedDispatcher.addCallback(this, backCallback)
+        ThemeManager.applyWindow(this)
         setContentView(buildUi())
         showServers()
     }
@@ -161,7 +162,7 @@ class NetworkActivity : AppCompatActivity() {
         }
         return FrameLayout(this).apply {
             fitsSystemWindows = true
-            setBackgroundColor(Color.BLACK)
+            setBackgroundColor(UiColors.background)
             addView(content, FrameLayout.LayoutParams(-1, -1))
         }
     }
@@ -276,7 +277,7 @@ class NetworkActivity : AppCompatActivity() {
         showChoice(s.name.ifBlank { s.host }, listOf("Düzenle", "Sil"), -1) { which ->
             when (which) {
                 0 -> showServerDialog(s)
-                1 -> AlertDialog.Builder(this)
+                1 -> PanelBuilder(this)
                     .setMessage("“${s.name.ifBlank { s.host }}” silinsin mi?")
                     .setPositiveButton("Sil") { _, _ ->
                         NetworkStore.delete(this, s.id)
@@ -332,7 +333,7 @@ class NetworkActivity : AppCompatActivity() {
             listOf(name, host, port, path, user, pass).forEach { addView(it, LinearLayout.LayoutParams(-1, -2)) }
             addView(secure)
         }
-        val dialog = AlertDialog.Builder(this)
+        val dialog = PanelBuilder(this)
             .setTitle(if (existing == null) "Sunucu ekle" else "Sunucuyu düzenle")
             .setView(ScrollView(this).apply { addView(form) })
             .setPositiveButton("Kaydet", null)

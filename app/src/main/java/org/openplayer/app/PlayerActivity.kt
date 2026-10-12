@@ -546,7 +546,7 @@ class PlayerActivity : AppCompatActivity() {
         if (next == null) {
             showMessage("Oynatma hatası", msg)
         } else {
-            androidx.appcompat.app.AlertDialog.Builder(this)
+            PanelBuilder(this)
                 .setTitle("Oynatma hatası")
                 .setMessage("$msg\nÇözücü ${next.label} olarak değiştirilip tekrar denensin mi?")
                 .setPositiveButton("Dene") { _, _ ->

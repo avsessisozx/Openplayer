@@ -40,10 +40,19 @@ fun Context.actionButton(
     fun argb(rgb: Int) = ((bgOpacity.coerceIn(0f, 1f) * 255).toInt() shl 24) or (rgb and 0xFFFFFF)
     val circle = FrameLayout(this).apply {
         layoutParams = LinearLayout.LayoutParams(dp((56 * scale).toInt()), dp((56 * scale).toInt())).apply { gravity = Gravity.CENTER_HORIZONTAL }
+        val btnShape = AppSettings.get(context).buttonShape
         background = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
+            when (btnShape) {
+                ButtonShape.CIRCLE -> shape = GradientDrawable.OVAL
+                ButtonShape.ROUNDED -> { shape = GradientDrawable.RECTANGLE; cornerRadius = dp(16).toFloat() }
+                ButtonShape.SQUARE -> { shape = GradientDrawable.RECTANGLE; cornerRadius = dp(4).toFloat() }
+            }
             if (ring) setStroke(dp(2), 0x99FFFFFF.toInt())
-            setColor(if (ring && !active) 0x00000000 else if (active) ((maxOf(bgOpacity, 0.6f) * 255).toInt() shl 24) or 0x3563C9 else argb(0x202830))
+            setColor(
+                if (ring && !active) 0x00000000
+                else if (active) ((maxOf(bgOpacity, 0.6f) * 255).toInt() shl 24) or (ThemeManager.accent and 0xFFFFFF)
+                else argb(0x202830)
+            )
         }
         if (icon != 0) {
             addView(ImageView(context).apply {
@@ -114,7 +123,7 @@ fun Context.vertical(padDp: Int = 20, build: LinearLayout.() -> Unit): LinearLay
 }
 
 fun Context.showChoice(title: String, items: List<String>, selected: Int, onPick: (Int) -> Unit) {
-    val builder = AlertDialog.Builder(this).setTitle(title).setNegativeButton("İptal", null)
+    val builder = PanelBuilder(this).setTitle(title).setNegativeButton("İptal", null)
     if (selected >= 0) {
         builder.setSingleChoiceItems(items.toTypedArray(), selected) { d, which ->
             d.dismiss()
@@ -133,7 +142,7 @@ fun Context.showMultiChoice(
     onOk: (BooleanArray) -> Unit,
 ) {
     val state = checked.copyOf()
-    AlertDialog.Builder(this)
+    PanelBuilder(this)
         .setTitle(title)
         .setMultiChoiceItems(items.toTypedArray(), state) { _, which, isChecked -> state[which] = isChecked }
         .setPositiveButton("Tamam") { _, _ -> onOk(state) }
@@ -158,7 +167,7 @@ fun Context.showInput(
         setPadding(dp(20), dp(8), dp(20), 0)
         addView(input, FrameLayout.LayoutParams(-1, -2))
     }
-    AlertDialog.Builder(this)
+    PanelBuilder(this)
         .setTitle(title)
         .setView(box)
         .setPositiveButton("Tamam") { _, _ -> onOk(input.text.toString()) }
@@ -167,5 +176,28 @@ fun Context.showInput(
 }
 
 fun Context.showMessage(title: String, message: String) {
-    AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton("Tamam", null).show()
+    PanelBuilder(this).setTitle(title).setMessage(message).setPositiveButton("Tamam", null).show()
+}
+
+
+/** Tüm menüler için ortak yarı saydam, yuvarlak köşeli panel. Opaklık ve renkler tema ayarlarından gelir. */
+class PanelBuilder(private val ctx: Context) : AlertDialog.Builder(ctx, ThemeManager.dialogStyle()) {
+    override fun create(): AlertDialog {
+        val d = super.create()
+        d.setOnShowListener {
+            val w = d.window ?: return@setOnShowListener
+            val alpha = AppSettings.get(ctx).panelOpacityPercent.coerceIn(30, 100) * 255 / 100
+            val bg = GradientDrawable().apply {
+                cornerRadius = ctx.dp(20).toFloat()
+                setColor((alpha shl 24) or (ThemeManager.surface and 0xFFFFFF))
+                setStroke(ctx.dp(1), 0x22FFFFFF)
+            }
+            w.setBackgroundDrawable(android.graphics.drawable.InsetDrawable(bg, ctx.dp(8)))
+            w.setDimAmount(0.2f)
+            for (b in intArrayOf(AlertDialog.BUTTON_POSITIVE, AlertDialog.BUTTON_NEGATIVE, AlertDialog.BUTTON_NEUTRAL)) {
+                d.getButton(b)?.setTextColor(ThemeManager.accent)
+            }
+        }
+        return d
+    }
 }

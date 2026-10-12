@@ -146,7 +146,7 @@ fun Context.showListPanel(s: AppSettings, onDone: () -> Unit) {
         addView(toggle("Küçük resimde süreyi göster", durBadge) { durBadge = it })
         addView(toggle("Gizli klasörleri göster", showHidden) { showHidden = it })
     }
-    AlertDialog.Builder(this)
+    PanelBuilder(this)
         .setView(ScrollView(this).apply { addView(root) })
         .setNegativeButton("İptal", null)
         .setPositiveButton("Bitti") { _, _ ->

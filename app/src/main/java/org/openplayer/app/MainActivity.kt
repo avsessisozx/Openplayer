@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onBackPressedDispatcher.addCallback(this, backCallback)
+        ThemeManager.applyWindow(this)
         setContentView(buildUi())
     }
 
@@ -197,7 +198,7 @@ class MainActivity : AppCompatActivity() {
 
         return FrameLayout(this).apply {
             fitsSystemWindows = true
-            setBackgroundColor(Color.BLACK)
+            setBackgroundColor(UiColors.background)
             addView(content, FrameLayout.LayoutParams(-1, -1))
             addView(
                 fab,
@@ -463,7 +464,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun confirmDelete(video: VideoItem) {
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        PanelBuilder(this)
             .setTitle("Silinsin mi?")
             .setMessage(video.title)
             .setPositiveButton("Sil") { _, _ -> delete(video) }

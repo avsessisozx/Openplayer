@@ -122,6 +122,29 @@ class AppSettings private constructor(context: Context) {
         set(v) = prefs.edit().putBoolean("show_shortcuts", v).apply()
 
     /** Ses/parlaklık/sarma göstergesinin bırakıldıktan sonra kaybolma süresi (milisaniye). */
+    // --- Tema ---
+    var themeId: String
+        get() = prefs.getString("theme_id", "dark") ?: "dark"
+        set(v) = prefs.edit().putString("theme_id", v).apply()
+
+    /** 0 = temanın kendi vurgu rengi. */
+    var accentOverride: Int
+        get() = prefs.getInt("accent_override", 0)
+        set(v) = prefs.edit().putInt("accent_override", v).apply()
+
+    var customTheme: String
+        get() = prefs.getString("custom_theme", "") ?: ""
+        set(v) = prefs.edit().putString("custom_theme", v.take(4096)).apply()
+
+    /** Menü panellerinin opaklığı (yüzde). */
+    var panelOpacityPercent: Int
+        get() = prefs.getInt("panel_opacity", 80)
+        set(v) = prefs.edit().putInt("panel_opacity", v.coerceIn(30, 100)).apply()
+
+    var buttonShape: ButtonShape
+        get() = enumOf("button_shape", ButtonShape.CIRCLE)
+        set(v) = putEnum("button_shape", v)
+
     var hudHideMs: Int
         get() = prefs.getInt("hud_hide_ms", 500)
         set(v) = prefs.edit().putInt("hud_hide_ms", v.coerceIn(0, 10_000)).apply()

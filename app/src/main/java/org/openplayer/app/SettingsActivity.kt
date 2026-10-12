@@ -28,7 +28,43 @@ class SettingsActivity : AppCompatActivity() {
         AUDIO("Ses", "Ses artırma, ekolayzır, ses dili", R.drawable.ic_volume_up),
         SUBTITLE("Altyazı", "Görünüm, karakter kodlaması, diller", R.drawable.ic_subtitles),
         ONLINE("Çevrimiçi altyazı", "OpenSubtitles hesabı ve API anahtarı", R.drawable.ic_cloud_download),
+        THEME("Tema ve görünüm", "Renk temaları, vurgu rengi, düğme biçimi, panel opaklığı", R.drawable.ic_tune),
         LIST("Liste ve dosyalar", "Yeni etiketi, gizli klasörler, dosya erişimi", R.drawable.ic_view_list),
+    }
+
+    private val exportTheme = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) runCatching {
+            contentResolver.openOutputStream(uri)?.use { it.write(ThemeManager.exportJson().toByteArray()) }
+            android.widget.Toast.makeText(this, "Tema dışa aktarıldı", android.widget.Toast.LENGTH_SHORT).show()
+        }.onFailure { android.widget.Toast.makeText(this, "Yazılamadı", android.widget.Toast.LENGTH_SHORT).show() }
+    }
+
+    private val importTheme = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            val text = runCatching {
+                contentResolver.openInputStream(uri)?.use { it.readBytes(4097).toString(Charsets.UTF_8) }
+            }.getOrNull()
+            if (text != null && ThemeManager.importJson(this, text)) {
+                ThemeManager.reload(); recreate()
+            } else {
+                android.widget.Toast.makeText(this, "Geçersiz tema dosyası", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun java.io.InputStream.readBytes(max: Int): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        val buf = ByteArray(1024)
+        while (out.size() < max) {
+            val n = read(buf, 0, minOf(buf.size, max - out.size()))
+            if (n < 0) break
+            out.write(buf, 0, n)
+        }
+        return out.toByteArray()
     }
 
     private lateinit var s: AppSettings
@@ -38,6 +74,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         s = AppSettings.get(this)
+        ThemeManager.applyWindow(this)
         page = intent.getStringExtra(EXTRA_PAGE)?.let { name -> Page.entries.firstOrNull { it.name == name } }
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -46,7 +83,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(
             ScrollView(this).apply {
                 fitsSystemWindows = true
-                setBackgroundColor(Color.BLACK)
+                setBackgroundColor(UiColors.background)
                 addView(content)
             }
         )
@@ -65,6 +102,7 @@ class SettingsActivity : AppCompatActivity() {
             Page.SUBTITLE -> subtitlePage()
             Page.ONLINE -> onlinePage()
             Page.LIST -> listPage()
+            Page.THEME -> themePage()
         }
     }
 
@@ -202,6 +240,95 @@ class SettingsActivity : AppCompatActivity() {
         text("Kullanıcı adı", s.osUser.ifEmpty { "İsteğe bağlı" }, "İndirme için gerekebilir") { s.osUser = it }
         text("Parola", if (s.osPass.isEmpty()) "İsteğe bağlı" else "••••••••", "Parola", password = true) { s.osPass = it }
         note("Bilgiler cihazda şifrelenerek saklanır. Anahtarı opensubtitles.com/consumers adresinden ücretsiz alabilirsiniz.")
+    }
+
+    private fun themeApplied() {
+        ThemeManager.reload()
+        recreate()
+    }
+
+    private fun themePage() {
+        section("Renk teması")
+        val all = ThemeManager.presets
+        all.chunked(3).forEach { rowThemes ->
+            val line = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(dp(14), dp(4), dp(14), dp(4))
+            }
+            for (i in 0 until 3) {
+                val th = rowThemes.getOrNull(i)
+                if (th == null) {
+                    line.addView(View(this), LinearLayout.LayoutParams(0, dp(72), 1f))
+                    continue
+                }
+                val sel = s.themeId == th.id
+                val card = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = android.view.Gravity.CENTER
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        cornerRadius = dp(14).toFloat()
+                        setColor(th.surface)
+                        setStroke(dp(if (sel) 3 else 1), if (sel) th.accent else 0x33FFFFFF)
+                    }
+                    addView(View(context).apply {
+                        background = android.graphics.drawable.GradientDrawable().apply {
+                            shape = android.graphics.drawable.GradientDrawable.OVAL
+                            setColor(th.accent)
+                        }
+                    }, LinearLayout.LayoutParams(dp(22), dp(22)))
+                    addView(TextView(context).apply {
+                        text = th.name
+                        setTextColor(Color.WHITE)
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                        gravity = android.view.Gravity.CENTER
+                        setPadding(0, dp(6), 0, 0)
+                    })
+                    setOnClickListener { s.themeId = th.id; themeApplied() }
+                }
+                line.addView(card, LinearLayout.LayoutParams(0, dp(72), 1f).apply { setMargins(dp(4), 0, dp(4), 0) })
+            }
+            content.addView(line)
+        }
+        if (s.themeId == "custom") note("Şu an içe aktarılmış özel tema kullanılıyor.")
+        section("Vurgu rengi")
+        val accents = ThemeManager.accentChoices
+        val accIdx = accents.indexOfFirst { it.second == s.accentOverride }.coerceAtLeast(0)
+        choice("Vurgu rengi", accents[accIdx].first, accents.map { it.first }, accIdx) {
+            s.accentOverride = accents[it].second
+            themeApplied()
+        }
+        section("Düğmeler ve paneller")
+        choice("Düğme biçimi", s.buttonShape.label, ButtonShape.entries.map { it.label }, s.buttonShape.ordinal) {
+            s.buttonShape = ButtonShape.entries[it]
+        }
+        val pan = listOf(40, 50, 60, 70, 80, 90, 100)
+        choice("Menü opaklığı", "%${s.panelOpacityPercent} (düşük = şeffaf)", pan.map { "%$it" }, pan.indexOf(s.panelOpacityPercent)) {
+            s.panelOpacityPercent = pan[it]
+        }
+        section("Oynatıcı kısayolları")
+        val sizes = listOf(50, 60, 70, 80, 90, 100, 120, 150)
+        choice("Kısayol düğme boyutu", "%${s.shortcutSizePercent}", sizes.map { "%$it" }, sizes.indexOf(s.shortcutSizePercent)) {
+            s.shortcutSizePercent = sizes[it]
+        }
+        val ops = listOf(0, 10, 20, 35, 50, 70, 100)
+        choice("Kısayol düğme opaklığı", "%${s.shortcutOpacityPercent}", ops.map { "%$it" }, ops.indexOf(s.shortcutOpacityPercent)) {
+            s.shortcutOpacityPercent = ops[it]
+        }
+        val scrims = listOf(0, 10, 20, 30, 45, 60, 80)
+        choice("Üst/alt şerit karartması", "%${s.scrimPercent}", scrims.map { "%$it" }, scrims.indexOf(s.scrimPercent)) {
+            s.scrimPercent = scrims[it]
+        }
+        section("Tema dosyası")
+        action("Temayı dışa aktar", "Geçerli renkleri JSON dosyası olarak kaydeder, paylaşabilirsiniz") {
+            exportTheme.launch("openplayer-tema.json")
+        }
+        action("Tema içe aktar", "Başkasının paylaştığı tema dosyasını yükler") {
+            importTheme.launch(arrayOf("application/json", "text/plain", "*/*"))
+        }
+        action("Varsayılana dön", "Tema, vurgu rengi ve düğme biçimini sıfırlar") {
+            s.themeId = "dark"; s.accentOverride = 0; s.buttonShape = ButtonShape.CIRCLE; s.panelOpacityPercent = 80
+            themeApplied()
+        }
     }
 
     private fun listPage() {

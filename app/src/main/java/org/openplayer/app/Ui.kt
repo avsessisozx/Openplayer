@@ -2,11 +2,14 @@ package org.openplayer.app
 
 import android.content.Context
 
+/** Arayüz renkleri; seçili temadan okunur ([ThemeManager]). */
 object UiColors {
-    val accent = 0xFF2F8CFF.toInt()
-    val textPrimary = 0xFFEDEDED.toInt()
-    val textSecondary = 0xFF9AA3AD.toInt()
-    val folderIcon = 0xFF4A5560.toInt()
+    val accent: Int get() = ThemeManager.accent
+    val background: Int get() = ThemeManager.background
+    val surface: Int get() = ThemeManager.surface
+    val textPrimary: Int get() = 0xFFEDEDED.toInt()
+    val textSecondary: Int get() = ThemeManager.current.textSecondary
+    val folderIcon: Int get() = 0xFF4A5560.toInt()
 }
 
 fun Context.dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()

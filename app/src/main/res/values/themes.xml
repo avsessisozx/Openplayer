@@ -6,4 +6,45 @@
         <item name="android:navigationBarColor">@android:color/black</item>
         <item name="colorAccent">#2F8CFF</item>
     </style>
+
+    <!-- Ortak yarı saydam menü paneli; arka plan ve opaklık PanelBuilder ile koddan ayarlanır. -->
+    <style name="PanelDialog" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="colorAccent">#2F8CFF</item>
+        <item name="colorControlActivated">#2F8CFF</item>
+        <item name="android:textColorPrimary">#FFFFFFFF</item>
+        <item name="android:textColorSecondary">#B3FFFFFF</item>
+    </style>
+    <style name="PanelDialog.Amoled">
+        <item name="colorAccent">#00E5FF</item>
+        <item name="colorControlActivated">#00E5FF</item>
+    </style>
+    <style name="PanelDialog.Ocean">
+        <item name="colorAccent">#29B6F6</item>
+        <item name="colorControlActivated">#29B6F6</item>
+    </style>
+    <style name="PanelDialog.Sunset">
+        <item name="colorAccent">#FF7043</item>
+        <item name="colorControlActivated">#FF7043</item>
+    </style>
+    <style name="PanelDialog.Forest">
+        <item name="colorAccent">#66BB6A</item>
+        <item name="colorControlActivated">#66BB6A</item>
+    </style>
+    <style name="PanelDialog.Purple">
+        <item name="colorAccent">#AB47BC</item>
+        <item name="colorControlActivated">#AB47BC</item>
+    </style>
+    <style name="PanelDialog.Rose">
+        <item name="colorAccent">#EC407A</item>
+        <item name="colorControlActivated">#EC407A</item>
+    </style>
+    <style name="PanelDialog.Gold">
+        <item name="colorAccent">#FFC107</item>
+        <item name="colorControlActivated">#FFC107</item>
+    </style>
+    <style name="PanelDialog.Mono">
+        <item name="colorAccent">#B0BEC5</item>
+        <item name="colorControlActivated">#B0BEC5</item>
+    </style>
 </resources>
