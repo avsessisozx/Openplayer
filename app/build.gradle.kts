@@ -74,7 +74,7 @@ dependencies {
     implementation("androidx.media3:media3-ui:$media3")
     implementation("androidx.media3:media3-session:$media3")
     implementation("androidx.media3:media3-datasource-okhttp:$media3")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.0")
     implementation("com.hierynomus:smbj:0.13.0")
     implementation("commons-net:commons-net:3.11.1")
     implementation("io.github.anilbeesetti:nextlib-media3ext:1.10.1-0.13.0")
