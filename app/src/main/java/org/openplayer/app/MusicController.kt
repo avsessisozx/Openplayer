@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -64,9 +63,9 @@ object MusicController {
         p.repeatMode = s.musicRepeat
         p.prepare()
         p.playWhenReady = true
-        runCatching {
-            ContextCompat.startForegroundService(app, Intent(app, PlaybackService::class.java))
-        }
+        // Düz startService: Media3 oynatma başlayınca servisi kendisi ön plana alır.
+        // startForegroundService süre içinde startForeground çağrılmazsa uygulamayı çökertir.
+        runCatching { app.startService(Intent(app, PlaybackService::class.java)) }
         syncFx(app, p)
     }
 

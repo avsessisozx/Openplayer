@@ -183,6 +183,23 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getInt("music_repeat", 0).coerceIn(0, 2)
         set(v) = prefs.edit().putInt("music_repeat", v.coerceIn(0, 2)).apply()
 
+    var useTrash: Boolean
+        get() = prefs.getBoolean("use_trash", true)
+        set(v) = prefs.edit().putBoolean("use_trash", v).apply()
+
+    var show360: Boolean
+        get() = prefs.getBoolean("show_360", true)
+        set(v) = prefs.edit().putBoolean("show_360", v).apply()
+
+    /** Liste küçük resim ölçeği (yüzde; 100 = varsayılan). */
+    var listScale: Int
+        get() = prefs.getInt("list_scale", 100)
+        set(v) = prefs.edit().putInt("list_scale", v.coerceIn(25, 500)).apply()
+
+    var listTextScale: Int
+        get() = prefs.getInt("list_text_scale", 100)
+        set(v) = prefs.edit().putInt("list_text_scale", v.coerceIn(70, 160)).apply()
+
     var skipSilence: Boolean
         get() = prefs.getBoolean("skip_silence", false)
         set(v) = prefs.edit().putBoolean("skip_silence", v).apply()

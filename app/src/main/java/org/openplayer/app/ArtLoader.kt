@@ -94,3 +94,8 @@ object ArtLoader {
         }
     }.getOrNull()
 }
+
+/** Ortak küçük yardımcılar. */
+object AppArt {
+    fun round(view: View, radiusDp: Int) = ArtLoader.roundCorners(view, radiusDp)
+}

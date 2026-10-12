@@ -16,6 +16,19 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
+/** Seçili öğelerin üstünde görünen tik işareti. */
+fun checkMark(c: android.content.Context): ImageView = ImageView(c).apply {
+    setImageResource(R.drawable.ic_check)
+    setColorFilter(Color.WHITE)
+    val pad = c.dp(4)
+    setPadding(pad, pad, pad, pad)
+    background = GradientDrawable().apply {
+        shape = GradientDrawable.OVAL
+        setColor(UiColors.accent)
+    }
+    visibility = View.GONE
+}
+
 class FolderAdapter(
     private val onClick: (FolderItem) -> Unit,
     private val onLongClick: (FolderItem) -> Unit,
@@ -28,8 +41,17 @@ class FolderAdapter(
             notifyDataSetChanged()
         }
 
-    class VH(val root: LinearLayout, val name: TextView, val count: TextView, val badge: TextView, val icon: ImageView) :
-        RecyclerView.ViewHolder(root)
+    var selected: Set<Long> = emptySet()
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    class VH(
+        val root: LinearLayout, val name: TextView, val count: TextView, val badge: TextView, val icon: ImageView,
+        val check: ImageView,
+    ) : RecyclerView.ViewHolder(root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val c = parent.context
@@ -47,10 +69,12 @@ class FolderAdapter(
             }
             visibility = View.GONE
         }
+        val check = checkMark(c)
         val iconBox = FrameLayout(c).apply {
             layoutParams = LinearLayout.LayoutParams(c.dp(64), c.dp(52))
             addView(icon, FrameLayout.LayoutParams(c.dp(56), c.dp(48), Gravity.START or Gravity.BOTTOM))
             addView(badge, FrameLayout.LayoutParams(c.dp(22), c.dp(22), Gravity.TOP or Gravity.END))
+            addView(check, FrameLayout.LayoutParams(c.dp(24), c.dp(24), Gravity.CENTER))
         }
         val name = TextView(c).apply {
             setTextColor(UiColors.textPrimary)
@@ -81,13 +105,16 @@ class FolderAdapter(
             addView(iconBox)
             addView(texts)
         }
-        return VH(root, name, count, badge, icon)
+        return VH(root, name, count, badge, icon, check)
     }
 
     override fun getItemCount() = items.size
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item = items[position]
+        val sel = item.bucketId in selected
+        holder.check.visibility = if (sel) View.VISIBLE else View.GONE
+        holder.root.setBackgroundColor(if (sel) 0x33FFFFFF else 0)
         holder.name.text = item.name
         holder.count.text = "${item.videoCount} video" + if (item.hidden) " · gizli" else ""
         holder.badge.visibility = if (item.newCount > 0) View.VISIBLE else View.GONE
@@ -105,7 +132,19 @@ class VideoAdapter(
     private val grid: Boolean,
     private val onClick: (VideoItem) -> Unit,
     private val onMore: (VideoItem, View) -> Unit,
+    private val onLong: (VideoItem) -> Unit,
 ) : RecyclerView.Adapter<VideoAdapter.VH>() {
+
+    /** Seçili video kimlikleri (seçim modu). */
+    var selected: Set<Long> = emptySet()
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    /** Seçim modunda ⋮ düğmesi gizlenir. */
+    var selecting: Boolean = false
 
     var items: List<VideoItem> = emptyList()
         @SuppressLint("NotifyDataSetChanged")
@@ -148,6 +187,7 @@ class VideoAdapter(
         val progress: View,
         val meta: TextView,
         val box: View,
+        val check: ImageView,
     ) : RecyclerView.ViewHolder(root)
 
     private fun round(c: android.content.Context, radiusDp: Int) = object : ViewOutlineProvider() {
@@ -172,6 +212,7 @@ class VideoAdapter(
             setBackgroundColor(UiColors.accent)
             visibility = View.GONE
         }
+        val check = checkMark(c)
         val box = FrameLayout(c).apply {
             clipToOutline = true
             outlineProvider = round(c, 6)
@@ -182,6 +223,7 @@ class VideoAdapter(
                     .apply { setMargins(0, 0, c.dp(4), c.dp(5)) }
             )
             addView(progress, FrameLayout.LayoutParams(0, c.dp(3), Gravity.BOTTOM or Gravity.START))
+            addView(check, FrameLayout.LayoutParams(c.dp(26), c.dp(26), Gravity.TOP or Gravity.END).apply { setMargins(0, c.dp(4), c.dp(4), 0) })
         }
         val title = TextView(c).apply {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, if (grid) 14f else 16f)
@@ -229,7 +271,7 @@ class VideoAdapter(
                 addView(textRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = c.dp(4) })
                 addView(meta, LinearLayout.LayoutParams(-1, -2))
             }
-            return VH(root, thumb, duration, title, tag, more, progress, meta, box)
+            return VH(root, thumb, duration, title, tag, more, progress, meta, box, check)
         }
 
         box.layoutParams = LinearLayout.LayoutParams(c.dp(112), c.dp(64))
@@ -252,7 +294,7 @@ class VideoAdapter(
             addView(texts)
             addView(more)
         }
-        return VH(root, thumb, duration, title, tag, more, progress, meta, box)
+        return VH(root, thumb, duration, title, tag, more, progress, meta, box, check)
     }
 
     private fun metaText(ctx: android.content.Context, item: VideoItem): String {
@@ -278,6 +320,10 @@ class VideoAdapter(
         val item = items[position]
         val ctx = holder.root.context
         val uriText = item.uri.toString()
+        val sel = item.id in selected
+        holder.check.visibility = if (sel) View.VISIBLE else View.GONE
+        holder.root.setBackgroundColor(if (sel) 0x33FFFFFF else 0)
+        holder.more.visibility = if (selecting) View.INVISIBLE else View.VISIBLE
         holder.title.text = item.title
         holder.title.setTextColor(
             when {
@@ -309,7 +355,7 @@ class VideoAdapter(
         ThumbLoader.load(ctx, item, holder.thumb)
         holder.root.setOnClickListener { onClick(item) }
         holder.root.setOnLongClickListener {
-            onMore(item, holder.root)
+            onLong(item)
             true
         }
         holder.more.setOnClickListener { onMore(item, holder.more) }

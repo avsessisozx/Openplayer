@@ -123,7 +123,15 @@ class MusicActivity : AppCompatActivity() {
         PlayerHolder.get(this).addListener(playerListener)
         updateMini()
         if (hasPermission()) load() else requestPermission.launch(permission)
+        if (Build.VERSION.SDK_INT >= 33 && !askedNotifications &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            askedNotifications = true
+            requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
+
+    private var askedNotifications = false
 
     override fun onStop() {
         PlayerHolder.player?.removeListener(playerListener)
@@ -175,6 +183,13 @@ class MusicActivity : AppCompatActivity() {
             addView(titleBox, LinearLayout.LayoutParams(0, dp(56), 1f).apply { marginStart = dp(8) })
             addView(searchButton)
             addView(sortButton)
+            addView(iconView(R.drawable.ic_playlist_add).apply {
+                contentDescription = "Listeler"
+                setOnClickListener {
+                    startActivity(Intent(this@MusicActivity, PlaylistActivity::class.java)
+                        .putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.MUSIC))
+                }
+            })
         }
 
         tabRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -400,9 +415,6 @@ class MusicActivity : AppCompatActivity() {
     }
 
     private fun afterPlay() {
-        if (Build.VERSION.SDK_INT >= 33 &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        ) requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
         updateMini()
     }
 

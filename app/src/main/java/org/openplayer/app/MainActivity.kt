@@ -48,22 +48,25 @@ class MainActivity : AppCompatActivity() {
     private lateinit var list: RecyclerView
     private lateinit var emptyView: TextView
 
-    private val folderAdapter = FolderAdapter({ openFolder(it) }, { folderMenu(it) })
-    private val listAdapter = VideoAdapter(false, { play(it) }, { v, anchor -> videoMenu(v, anchor) })
-    private val gridAdapter = VideoAdapter(true, { play(it) }, { v, anchor -> videoMenu(v, anchor) })
+    private val folderAdapter = FolderAdapter({ onFolderClick(it) }, { startFolderSelection(it) })
+    private val listAdapter = VideoAdapter(false, { onVideoClick(it) }, { v, _ -> videoSheet(v) }, { startVideoSelection(it) })
+    private val gridAdapter = VideoAdapter(true, { onVideoClick(it) }, { v, _ -> videoSheet(v) }, { startVideoSelection(it) })
+
+    private val fileOps = FileOps(this)
+    private val selVideos = LinkedHashSet<Long>()
+    private val selFolders = LinkedHashSet<Long>()
+    private var selectionOn = false
+    private lateinit var topBarView: View
+    private lateinit var selBar: LinearLayout
+    private lateinit var selTitle: TextView
+    private lateinit var actionBar: LinearLayout
+    private lateinit var fabView: View
 
     private var all: List<VideoItem> = emptyList()
     private var currentFolder: FolderItem? = null
     private var searching = false
     private var shown: List<VideoItem> = emptyList()
 
-    private var pendingAction: (() -> Unit)? = null
-    private val writeAccess =
-        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            val action = pendingAction
-            pendingAction = null
-            if (result.resultCode == RESULT_OK) action?.invoke()
-        }
 
     private val permission: String
         get() = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_VIDEO
@@ -77,6 +80,7 @@ class MainActivity : AppCompatActivity() {
     private val backCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             when {
+                selectionOn -> exitSelection()
                 searching -> closeSearch()
                 currentFolder != null -> {
                     currentFolder = null
@@ -191,6 +195,41 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener { if (!hasPermission()) requestPermission.launch(permission) }
         }
 
+        topBarView = topBar
+        selTitle = TextView(this).apply {
+            setTextColor(Color.WHITE)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+        }
+        selBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(8), 0, dp(4), 0)
+            visibility = View.GONE
+            addView(iconView(R.drawable.ic_close).apply { setOnClickListener { exitSelection() } })
+            addView(selTitle, LinearLayout.LayoutParams(0, dp(56), 1f).apply { marginStart = dp(16) })
+            addView(iconView(R.drawable.ic_play).apply { setOnClickListener { playSelection() } })
+            addView(iconView(R.drawable.ic_info).apply { setOnClickListener { infoSelection() } })
+            addView(iconView(R.drawable.ic_more_vert).apply { setOnClickListener { selectionMenu() } })
+        }
+        actionBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setBackgroundColor(UiColors.surface)
+            visibility = View.GONE
+            fun act(icon: Int, desc: String, onClick: () -> Unit) {
+                addView(iconView(icon, 48, 12).apply {
+                    contentDescription = desc
+                    setOnClickListener { onClick() }
+                }, LinearLayout.LayoutParams(0, dp(52), 1f))
+            }
+            act(R.drawable.ic_check, "Hepsini seç") { selectAll() }
+            act(R.drawable.ic_move, "Taşı") { transferSelection(move = true) }
+            act(R.drawable.ic_copy, "Kopyala") { transferSelection(move = false) }
+            act(R.drawable.ic_playlist_add, "Listeye ekle") { addSelectionToPlaylist() }
+            act(R.drawable.ic_edit, "Yeniden adlandır") { renameSelection() }
+            act(R.drawable.ic_delete, "Sil") { deleteSelection() }
+        }
+
         modeTabs = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             visibility = View.GONE
@@ -212,11 +251,13 @@ class MainActivity : AppCompatActivity() {
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             addView(topBar, LinearLayout.LayoutParams(-1, -2))
+            addView(selBar, LinearLayout.LayoutParams(-1, -2))
             addView(modeTabs, LinearLayout.LayoutParams(-1, -2))
             addView(FrameLayout(this@MainActivity).apply {
                 addView(list, FrameLayout.LayoutParams(-1, -1))
                 addView(emptyView, FrameLayout.LayoutParams(-1, -1))
             }, LinearLayout.LayoutParams(-1, 0, 1f))
+            addView(actionBar, LinearLayout.LayoutParams(-1, -2))
         }
 
         val fab = ImageView(this).apply {
@@ -232,6 +273,7 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener { resumeLast() }
         }
 
+        fabView = fab
         return FrameLayout(this).apply {
             fitsSystemWindows = true
             setBackgroundColor(UiColors.background)
@@ -257,6 +299,8 @@ class MainActivity : AppCompatActivity() {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 val first = all.isEmpty()
                 all = loaded
+                selVideos.retainAll(loaded.map { it.id }.toSet())
+                selFolders.retainAll(loaded.map { it.bucketId }.toSet())
                 val highlight = ResumeStore.lastUri(this)
                 listAdapter.highlightUri = highlight
                 gridAdapter.highlightUri = highlight
@@ -274,6 +318,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render() {
+        renderInner()
+        if (::selBar.isInitialized) updateSelectionUi()
+    }
+
+    private fun renderInner() {
         val query = searchField.text.toString().trim()
         when {
             searching -> {
@@ -379,10 +428,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun showRootMenu(anchor: View) {
         val menu = PopupMenu(this, anchor)
-        menu.menu.add(0, 1, 0, "Ağ akışı aç")
-        menu.menu.add(0, 2, 1, if (settings.showHiddenFolders) "Gizli klasörleri sakla" else "Gizli klasörleri göster")
-        menu.menu.add(0, 4, 2, "Ağ kaynakları (SMB / FTP / WebDAV)")
-        menu.menu.add(0, 3, 3, "Ayarlar")
+        menu.menu.add(0, 5, 0, "Oynatma listeleri")
+        menu.menu.add(0, 6, 1, "Favoriler")
+        menu.menu.add(0, 1, 2, "Ağ akışı aç")
+        menu.menu.add(0, 2, 3, if (settings.showHiddenFolders) "Gizli klasörleri sakla" else "Gizli klasörleri göster")
+        menu.menu.add(0, 4, 4, "Ağ kaynakları (SMB / FTP / WebDAV)")
+        menu.menu.add(0, 3, 5, "Ayarlar")
         menu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> showInput("Ağ akışı", "http://, https:// veya rtsp:// adresi") { url ->
@@ -398,6 +449,12 @@ class MainActivity : AppCompatActivity() {
                     render()
                 }
                 3 -> startActivity(Intent(this, SettingsActivity::class.java))
+                5 -> startActivity(Intent(this, PlaylistActivity::class.java).putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.VIDEO))
+                6 -> startActivity(
+                    Intent(this, PlaylistActivity::class.java)
+                        .putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.VIDEO)
+                        .putExtra(PlaylistActivity.EXTRA_OPEN, PlaylistActivity.FAV)
+                )
                 4 -> startActivity(Intent(this, NetworkActivity::class.java))
             }
             true
@@ -405,127 +462,361 @@ class MainActivity : AppCompatActivity() {
         menu.show()
     }
 
-    private fun folderMenu(folder: FolderItem) {
-        val label = if (folder.hidden) "Klasörü göster" else "Klasörü gizle"
-        showChoice(folder.name, listOf(label), -1) {
-            val set = settings.hiddenFolders.toMutableSet()
-            if (folder.hidden) set.remove(folder.bucketId) else set.add(folder.bucketId)
-            settings.hiddenFolders = set
-            render()
+    // ------------------------------------------------------------ seçim modu
+
+    private fun folderMode(): Boolean =
+        selFolders.isNotEmpty() || (currentFolder == null && !searching && settings.listMode == ListMode.FOLDERS)
+
+    private fun onVideoClick(v: VideoItem) {
+        if (selectionOn) toggleVideo(v) else play(v)
+    }
+
+    private fun onFolderClick(f: FolderItem) {
+        if (selectionOn) toggleFolder(f) else openFolder(f)
+    }
+
+    private fun startVideoSelection(v: VideoItem) {
+        selectionOn = true
+        if (!selVideos.add(v.id)) selVideos.remove(v.id)
+        updateSelectionUi()
+    }
+
+    private fun startFolderSelection(f: FolderItem) {
+        selectionOn = true
+        if (!selFolders.add(f.bucketId)) selFolders.remove(f.bucketId)
+        updateSelectionUi()
+    }
+
+    private fun toggleVideo(v: VideoItem) {
+        if (!selVideos.add(v.id)) selVideos.remove(v.id)
+        updateSelectionUi()
+    }
+
+    private fun toggleFolder(f: FolderItem) {
+        if (!selFolders.add(f.bucketId)) selFolders.remove(f.bucketId)
+        updateSelectionUi()
+    }
+
+    private fun exitSelection() {
+        selVideos.clear()
+        selFolders.clear()
+        selectionOn = false
+        updateSelectionUi()
+    }
+
+    private fun updateSelectionUi() {
+        val folders = folderMode()
+        val count = if (folders) selFolders.size else selVideos.size
+        if (selectionOn && count == 0) selectionOn = false
+        topBarView.visibility = if (selectionOn) View.GONE else View.VISIBLE
+        selBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
+        actionBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
+        fabView.visibility = if (selectionOn) View.GONE else View.VISIBLE
+        if (::modeTabs.isInitialized) modeTabs.visibility = if (settings.musicMode && !selectionOn) View.VISIBLE else View.GONE
+        val total = if (folders) folderAdapter.items.size else shown.size
+        selTitle.text = "$count / $total Seçildi"
+        folderAdapter.selected = selFolders.toSet()
+        for (ad in listOf(listAdapter, gridAdapter)) {
+            ad.selecting = selectionOn
+            ad.selected = selVideos.toSet()
         }
     }
 
-    private fun videoMenu(video: VideoItem, anchor: View) {
-        val menu = PopupMenu(this, anchor)
-        menu.menu.add(0, 1, 0, "Oynat")
-        menu.menu.add(0, 2, 1, "Paylaş")
-        menu.menu.add(0, 3, 2, "Yeniden adlandır")
-        menu.menu.add(0, 4, 3, "Sil")
-        menu.menu.add(0, 5, 4, "Bilgi")
-        menu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                1 -> play(video)
-                2 -> share(video)
-                3 -> rename(video)
-                4 -> confirmDelete(video)
-                5 -> showInfo(video)
-            }
-            true
-        }
-        menu.show()
+    /** Seçimdeki videolar (klasör seçiliyse klasörlerdeki tüm videolar). */
+    private fun targetVideos(): List<VideoItem> =
+        if (folderMode()) VideoRepository.sort(this, all.filter { it.bucketId in selFolders }, settings)
+        else shown.filter { it.id in selVideos }
+
+    private fun folderDir(bucketId: Long): java.io.File? =
+        all.firstOrNull { it.bucketId == bucketId }?.path?.takeIf { it.isNotEmpty() }
+            ?.substringBeforeLast('/')?.let { java.io.File(it) }
+
+    private fun selectAll() {
+        if (folderMode()) folderAdapter.items.forEach { selFolders.add(it.bucketId) }
+        else shown.forEach { selVideos.add(it.id) }
+        selectionOn = true
+        updateSelectionUi()
     }
 
-    private fun share(video: VideoItem) {
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = "video/*"
-            putExtra(Intent.EXTRA_STREAM, video.uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    private fun invertSelection() {
+        if (folderMode()) {
+            val now = folderAdapter.items.map { it.bucketId }.filter { it !in selFolders }
+            selFolders.clear(); selFolders.addAll(now)
+        } else {
+            val now = shown.map { it.id }.filter { it !in selVideos }
+            selVideos.clear(); selVideos.addAll(now)
         }
-        startActivity(Intent.createChooser(send, "Paylaş"))
+        updateSelectionUi()
     }
 
-    private fun showInfo(video: VideoItem) {
-        val path = SubtitleFiles.pathOf(this, video.uri)
-        showMessage(
-            "Bilgi",
-            buildString {
-                appendLine("Ad: ${video.title}")
-                appendLine("Klasör: ${video.bucketName}")
-                if (path != null) appendLine("Konum: $path")
-                appendLine("Boyut: ${"%.1f".format(video.sizeBytes / 1048576.0)} MB")
-                appendLine("Süre: ${formatDuration(video.durationMs)}")
-            }.trim()
+    /** İlk ve son seçili öğe arasındakilerin hepsini seçer. */
+    private fun selectRange() {
+        if (folderMode()) {
+            val idx = folderAdapter.items.withIndex().filter { it.value.bucketId in selFolders }.map { it.index }
+            if (idx.size >= 2) for (i in idx.min()..idx.max()) selFolders.add(folderAdapter.items[i].bucketId)
+        } else {
+            val idx = shown.withIndex().filter { it.value.id in selVideos }.map { it.index }
+            if (idx.size >= 2) for (i in idx.min()..idx.max()) selVideos.add(shown[i].id)
+        }
+        updateSelectionUi()
+    }
+
+    private fun playSelection() {
+        val v = targetVideos()
+        if (v.isEmpty()) return
+        exitSelection()
+        startPlayer(v, 0)
+    }
+
+    private fun summaryLines(videos: List<VideoItem>): List<Pair<String, String>> {
+        val size = videos.sumOf { it.sizeBytes }
+        val dur = videos.sumOf { it.durationMs }
+        return listOf(
+            "Video sayısı" to videos.size.toString(),
+            "Toplam boyut" to android.text.format.Formatter.formatFileSize(this, size),
+            "Toplam süre" to formatDuration(dur),
         )
     }
 
-    // ------------------------------------------------------------ yeniden adlandırma ve silme
-
-    /** Android sürümüne göre yazma iznini isteyip işlemi çalıştırır. */
-    private fun withWriteAccess(video: VideoItem, action: () -> Unit) {
-        if (Build.VERSION.SDK_INT >= 30) {
-            pendingAction = action
-            val request = MediaStore.createWriteRequest(contentResolver, listOf(video.uri))
-            writeAccess.launch(IntentSenderRequest.Builder(request.intentSender).build())
+    private fun infoSelection() {
+        val videos = targetVideos()
+        if (videos.isEmpty()) return
+        if (!folderMode() && videos.size == 1) {
+            val v = videos[0]
+            showMediaInfo(v.title, v.uri, v.sizeBytes, v.dateAddedSec * 1000L)
             return
         }
-        try {
-            action()
-        } catch (e: SecurityException) {
-            if (Build.VERSION.SDK_INT == 29 && e is RecoverableSecurityException) {
-                pendingAction = action
-                writeAccess.launch(IntentSenderRequest.Builder(e.userAction.actionIntent.intentSender).build())
-            } else {
-                Toast.makeText(this, "Bu dosya için izin alınamadı", Toast.LENGTH_SHORT).show()
+        val lines = ArrayList<Pair<String, String>>()
+        if (folderMode()) {
+            val names = folderAdapter.items.filter { it.bucketId in selFolders }.map { it.name }
+            lines += (if (names.size == 1) "Klasör" else "Klasörler") to names.joinToString(", ")
+            if (selFolders.size == 1) folderDir(selFolders.first())?.let { lines += "Konum" to it.absolutePath }
+        }
+        lines += summaryLines(videos)
+        showSummaryInfo(if (folderMode()) "Klasör bilgisi" else "Seçili videolar", lines)
+    }
+
+    private fun selectionMenu() {
+        val videos = targetVideos()
+        val entries = ArrayList<SheetEntry>()
+        if (videos.isNotEmpty()) {
+            val uris = videos.map { it.uri.toString() }
+            val allFav = uris.all { PlaylistStore.isFavorite(this, PlaylistStore.VIDEO, it) }
+            entries += SheetEntry(if (allFav) R.drawable.ic_favorite_border else R.drawable.ic_favorite,
+                if (allFav) "Favorilerden çıkar" else "Favorilere ekle") {
+                PlaylistStore.setFavorites(this, PlaylistStore.VIDEO, uris, !allFav)
+                Toast.makeText(this, if (allFav) "Favorilerden çıkarıldı" else "Favorilere eklendi", Toast.LENGTH_SHORT).show()
+                exitSelection()
+            }
+            entries += SheetEntry(R.drawable.ic_share, "Paylaş") { shareMany(videos) }
+        }
+        entries += SheetEntry(R.drawable.ic_swap, "Seçimi ters çevir") { invertSelection() }
+        entries += SheetEntry(R.drawable.ic_list, "Aralığı seç") { selectRange() }
+        if (folderMode()) {
+            val hide = folderAdapter.items.filter { it.bucketId in selFolders }.any { !it.hidden }
+            entries += SheetEntry(R.drawable.ic_folder, if (hide) "Klasörleri gizle" else "Klasörleri göster") {
+                val set = settings.hiddenFolders.toMutableSet()
+                if (hide) set.addAll(selFolders) else set.removeAll(selFolders)
+                settings.hiddenFolders = set
+                exitSelection()
+                render()
+            }
+        }
+        showSheet("Seçim", entries)
+    }
+
+    private fun transferSelection(move: Boolean) {
+        val videos = targetVideos()
+        if (videos.isEmpty()) return
+        if (!fileOps.requireAllFiles()) return
+        val start = videos.firstOrNull()?.path?.takeIf { it.isNotEmpty() }?.let { java.io.File(it).parentFile }
+        fileOps.pickFolder(if (move) "Taşınacak klasör" else "Kopyalanacak klasör", start) { dest ->
+            val items = videos.map { TransferItem(it.uri, it.path.takeIf { p -> p.isNotEmpty() }, it.title) }
+            fileOps.transfer(items, dest, move) {
+                exitSelection()
+                refresh()
             }
         }
     }
 
-    private fun rename(video: VideoItem) {
-        val ext = video.title.substringAfterLast('.', "")
-        showInput("Yeniden adlandır", "Yeni ad", video.title.removeSuffix(if (ext.isEmpty()) "" else ".$ext")) { base ->
-            val clean = base.trim().replace(Regex("""[\\/:*?"<>|]"""), "_")
-            if (clean.isEmpty()) return@showInput
-            val newName = if (ext.isEmpty()) clean else "$clean.$ext"
-            withWriteAccess(video) {
-                try {
-                    contentResolver.update(video.uri, ContentValues().apply {
-                        put(MediaStore.Video.Media.DISPLAY_NAME, newName)
-                    }, null, null)
+    private fun addSelectionToPlaylist() {
+        val uris = targetVideos().map { it.uri.toString() }
+        if (uris.isEmpty()) return
+        showAddToPlaylist(PlaylistStore.VIDEO, uris) { exitSelection() }
+    }
+
+    private fun renameSelection() {
+        if (folderMode()) {
+            if (selFolders.size != 1) {
+                Toast.makeText(this, "Bir seferde tek klasör yeniden adlandırılabilir", Toast.LENGTH_SHORT).show()
+                return
+            }
+            val id = selFolders.first()
+            val dir = folderDir(id)
+            if (dir == null) {
+                Toast.makeText(this, "Klasör konumu bulunamadı", Toast.LENGTH_SHORT).show()
+                return
+            }
+            showInput("Klasörü yeniden adlandır", "Yeni ad", dir.name) { n ->
+                val paths = all.filter { it.bucketId == id }.map { it.path }.filter { it.isNotEmpty() }
+                fileOps.renameFolder(dir, n, paths) {
+                    exitSelection()
                     refresh()
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Yeniden adlandırılamadı", Toast.LENGTH_SHORT).show()
                 }
             }
+            return
+        }
+        val videos = targetVideos()
+        when {
+            videos.isEmpty() -> Unit
+            videos.size == 1 -> renameOne(videos[0])
+            else -> batchRename(videos)
         }
     }
 
-    private fun confirmDelete(video: VideoItem) {
+    private fun renameOne(video: VideoItem) {
+        val ext = video.title.substringAfterLast('.', "")
+        showInput("Yeniden adlandır", "Yeni ad", video.title.removeSuffix(if (ext.isEmpty()) "" else ".$ext")) { base ->
+            val clean = base.trim()
+            if (clean.isEmpty()) return@showInput
+            val newName = if (ext.isEmpty()) clean else "$clean.$ext"
+            fileOps.rename(listOf(video.uri), listOf(newName)) {
+                exitSelection()
+                refresh()
+            }
+        }
+    }
+
+    private fun batchRename(videos: List<VideoItem>) {
+        fun field(hint: String, initial: String = "") = EditText(this).apply {
+            setText(initial)
+            this.hint = hint
+            setSingleLine()
+        }
+        val pattern = field("Düzen", "{name}")
+        val find = field("Bul (isteğe bağlı)")
+        val repl = field("Şununla değiştir")
+        val preview = label("", 12f, UiColors.textSecondary)
+        fun compute(i: Int, v: VideoItem): String {
+            val ext = v.title.substringAfterLast('.', "")
+            val base = v.title.removeSuffix(if (ext.isEmpty()) "" else ".$ext")
+            var s = pattern.text.toString()
+                .replace("{name}", base)
+                .replace("{nnn}", "%03d".format(i + 1))
+                .replace("{nn}", "%02d".format(i + 1))
+                .replace("{n}", (i + 1).toString())
+            val f = find.text.toString()
+            if (f.isNotEmpty()) s = s.replace(f, repl.text.toString())
+            return if (ext.isEmpty()) s else "$s.$ext"
+        }
+        fun updatePreview() {
+            preview.text = "Örnek: " + compute(0, videos[0])
+        }
+        val watcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) = Unit
+            override fun afterTextChanged(s: Editable?) = updatePreview()
+        }
+        pattern.addTextChangedListener(watcher)
+        find.addTextChangedListener(watcher)
+        repl.addTextChangedListener(watcher)
+        updatePreview()
+        val box = vertical {
+            addView(label("{name} = eski ad, {n} = sıra (1,2,3), {nn} = 01,02, {nnn} = 001", 12f, UiColors.textSecondary))
+            addView(pattern)
+            addView(find)
+            addView(repl)
+            addView(preview, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
+        }
         PanelBuilder(this)
-            .setTitle("Silinsin mi?")
-            .setMessage(video.title)
-            .setPositiveButton("Sil") { _, _ -> delete(video) }
+            .setTitle("Toplu yeniden adlandır (${videos.size})")
+            .setView(android.widget.ScrollView(this).apply { addView(box) })
+            .setPositiveButton("Uygula") { _, _ ->
+                val names = videos.mapIndexed { i, v -> compute(i, v) }
+                if (names.toSet().size != names.size) {
+                    Toast.makeText(this, "Bazı adlar aynı çıkıyor; {n} ekleyin", Toast.LENGTH_LONG).show()
+                } else {
+                    fileOps.rename(videos.map { it.uri }, names) {
+                        exitSelection()
+                        refresh()
+                    }
+                }
+            }
             .setNegativeButton("İptal", null)
             .show()
     }
 
-    private fun delete(video: VideoItem) {
-        if (Build.VERSION.SDK_INT >= 30) {
-            pendingAction = { refresh() }
-            val request = MediaStore.createDeleteRequest(contentResolver, listOf(video.uri))
-            writeAccess.launch(IntentSenderRequest.Builder(request.intentSender).build())
-            return
-        }
-        try {
-            contentResolver.delete(video.uri, null, null)
-            refresh()
-        } catch (e: SecurityException) {
-            if (Build.VERSION.SDK_INT == 29 && e is RecoverableSecurityException) {
-                pendingAction = { delete(video) }
-                writeAccess.launch(IntentSenderRequest.Builder(e.userAction.actionIntent.intentSender).build())
-            } else {
-                Toast.makeText(this, "Silinemedi", Toast.LENGTH_SHORT).show()
+    private fun deleteSelection() {
+        val videos = targetVideos()
+        if (videos.isEmpty()) return
+        val trash = Build.VERSION.SDK_INT >= 30 && settings.useTrash
+        val what = if (folderMode()) "${selFolders.size} klasördeki ${videos.size} video" else "${videos.size} video"
+        PanelBuilder(this)
+            .setTitle("Silinsin mi?")
+            .setMessage("$what ${if (trash) "çöp kutusuna taşınacak (30 gün içinde geri alınabilir)." else "kalıcı olarak silinecek."}")
+            .setPositiveButton("Sil") { _, _ ->
+                fileOps.delete(videos.map { it.uri }) {
+                    exitSelection()
+                    refresh()
+                }
             }
+            .setNegativeButton("İptal", null)
+            .show()
+    }
+
+    // ------------------------------------------------------------ satır menüsü (⋮)
+
+    private fun videoSheet(video: VideoItem) {
+        val u = video.uri.toString()
+        val fav = PlaylistStore.isFavorite(this, PlaylistStore.VIDEO, u)
+        val entries = ArrayList<SheetEntry>()
+        entries += SheetEntry(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border,
+            if (fav) "Favorilerden çıkar" else "Favorilere ekle") {
+            PlaylistStore.toggleFavorite(this, PlaylistStore.VIDEO, u)
         }
+        entries += SheetEntry(R.drawable.ic_playlist_add, "Oynatma listesine ekle") {
+            showAddToPlaylist(PlaylistStore.VIDEO, listOf(u))
+        }
+        entries += SheetEntry(R.drawable.ic_share, "Paylaş") { shareMany(listOf(video)) }
+        entries += SheetEntry(R.drawable.ic_edit, "Yeniden adlandır") { renameOne(video) }
+        entries += SheetEntry(R.drawable.ic_subtitles, "Altyazı ara") {
+            startActivity(
+                Intent(this, PlayerActivity::class.java)
+                    .putParcelableArrayListExtra(PlayerActivity.EXTRA_URIS, arrayListOf(video.uri))
+                    .putStringArrayListExtra(PlayerActivity.EXTRA_TITLES, arrayListOf(video.title))
+                    .putExtra(PlayerActivity.EXTRA_INDEX, 0)
+                    .putExtra("org.openplayer.app.OPEN_SUBTITLE_SEARCH", true)
+            )
+        }
+        entries += SheetEntry(R.drawable.ic_info, "Özellikler") {
+            showMediaInfo(video.title, video.uri, video.sizeBytes, video.dateAddedSec * 1000L)
+        }
+        entries += SheetEntry(R.drawable.ic_delete, "Sil", danger = true) { deleteSingle(video) }
+        showSheet(video.title, entries)
+    }
+
+    private fun deleteSingle(video: VideoItem) {
+        val trash = Build.VERSION.SDK_INT >= 30 && settings.useTrash
+        PanelBuilder(this)
+            .setTitle("Silinsin mi?")
+            .setMessage(video.title + "\n\n" + if (trash) "Çöp kutusuna taşınır, geri alınabilir." else "Kalıcı olarak silinir.")
+            .setPositiveButton("Sil") { _, _ ->
+                fileOps.delete(listOf(video.uri)) { refresh() }
+            }
+            .setNegativeButton("İptal", null)
+            .show()
+    }
+
+    private fun shareMany(videos: List<VideoItem>) {
+        val send = if (videos.size == 1) Intent(Intent.ACTION_SEND).apply {
+            type = "video/*"
+            putExtra(Intent.EXTRA_STREAM, videos[0].uri)
+        } else Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "video/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(videos.map { it.uri }))
+        }
+        send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(Intent.createChooser(send, "Paylaş"))
     }
 
     // ------------------------------------------------------------ oynatma
