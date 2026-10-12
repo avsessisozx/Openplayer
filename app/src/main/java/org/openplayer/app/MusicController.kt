@@ -191,6 +191,67 @@ object MusicController {
         }
     }
 
+    /** Ses ayarları panelinden: ReplayGain veya geçiş süresi değişince çağrılır. */
+    fun refreshAudioSettings() {
+        updateReplayGain()
+        main.removeCallbacks(fadeTicker)
+        main.post(fadeTicker)
+    }
+
+    private val listener = object : Player.Listener {
+        override fun onTracksChanged(tracks: Tracks) {
+            lastTracks = tracks
+            updateReplayGain()
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            main.removeCallbacks(fadeTicker)
+            if (isPlaying) main.post(fadeTicker)
+            val item = PlayerHolder.player?.currentMediaItem
+            if (isPlaying && isMusic(item) && item?.mediaId != lastCountedId) {
+                lastCountedId = item?.mediaId
+                appCtx?.let { c -> item?.mediaId?.let { MusicStats.record(c, it) } }
+            }
+        }
+
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            if (!playWhenReady && reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM && sleepAtEnd) {
+                sleepAtEnd = false
+                PlayerHolder.player?.pauseAtEndOfMediaItems = false
+            }
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            main.post(fadeTicker)
+            PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
+        }
+
+        override fun onAudioSessionIdChanged(audioSessionId: Int) {
+            PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
+        }
+    }
+
+    private var appCtx: Context? = null
+
+    private fun ensureInstalled(app: Context, p: ExoPlayer) {
+        appCtx = app
+        if (installedOn === p) return
+        installedOn?.removeListener(listener)
+        p.addListener(listener)
+        installedOn = p
+    }
+
+    /** Ekolayzır yalnızca müzik çalarken bu denetleyiciye bağlıdır; video ekranı kendisininkini kullanır. */
+    private fun syncFx(app: Context, p: ExoPlayer) {
+        if (isMusic(p.currentMediaItem)) {
+            val f = fx ?: AudioFx(app).also { fx = it }
+            f.attach(p.audioSessionId)
+        } else {
+            fx?.release()
+            fx = null
+        }
+    }
+
     /** Ses ayarları paneli (ses artırma, ekolayzır, bas/tiz, denge, ReplayGain, geçiş). */
     fun showFxPanel(a: android.app.Activity) {
         val f = fx
