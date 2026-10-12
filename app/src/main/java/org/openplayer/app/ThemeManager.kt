@@ -140,3 +140,25 @@ object ThemeManager {
         return theme.id == "custom"
     }
 }
+
+/** Arayüz modu: seçime (veya ekran boyutuna) göre arayüz yoğunluğunu ölçekler. */
+object UiScale {
+    fun wrap(base: android.content.Context): android.content.Context {
+        val cfg0 = base.resources.configuration
+        val mode = runCatching {
+            base.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE).getString("ui_mode", null)
+        }.getOrNull()?.let { n -> UiMode.entries.firstOrNull { it.name == n } } ?: UiMode.AUTO
+        val factor = if (mode == UiMode.AUTO) {
+            val sw = cfg0.smallestScreenWidthDp
+            when {
+                sw >= 840 -> UiMode.WIDE.scale
+                sw >= 600 -> UiMode.TABLET.scale
+                else -> 1f
+            }
+        } else mode.scale
+        if (factor == 1f) return base
+        val cfg = android.content.res.Configuration(cfg0)
+        cfg.densityDpi = (cfg0.densityDpi * factor).toInt()
+        return base.createConfigurationContext(cfg)
+    }
+}

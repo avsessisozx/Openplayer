@@ -50,6 +50,14 @@ enum class OrientationMode(val label: String) {
     PORTRAIT("Dikey"),
 }
 
+enum class UiMode(val label: String, val scale: Float) {
+    AUTO("Otomatik (ekrana göre)", 1f),
+    PHONE("Telefon", 1f),
+    BIG_PHONE("Büyük telefon", 1.12f),
+    TABLET("Tablet", 1.25f),
+    WIDE("Geniş ekran (PC, TV, emülatör)", 1.4f),
+}
+
 enum class Shortcut(val id: String, val label: String, val icon: Int, val glyph: String? = null) {
     ROTATE("rotate", "Ekran döndürme", R.drawable.ic_screen_rotation),
     BACKGROUND("background", "Arka planda oynat", R.drawable.ic_headphones),
@@ -63,7 +71,8 @@ enum class Shortcut(val id: String, val label: String, val icon: Int, val glyph:
     NIGHT("night", "Gece modu", R.drawable.ic_night),
     SCREENSHOT("screenshot", "Ekran görüntüsü", R.drawable.ic_camera),
     MIRROR("mirror", "Ayna modu", R.drawable.ic_flip),
-    VFLIP("vflip", "Dikey çevirme", R.drawable.ic_flip);
+    VFLIP("vflip", "Dikey çevirme", R.drawable.ic_flip),
+    SKIP_INTRO("skipintro", "İntro atla", 0, "»");
 
     companion object {
         fun byId(id: String) = entries.firstOrNull { it.id == id }
@@ -144,6 +153,30 @@ class AppSettings private constructor(context: Context) {
     var buttonShape: ButtonShape
         get() = enumOf("button_shape", ButtonShape.CIRCLE)
         set(v) = putEnum("button_shape", v)
+
+    var uiMode: UiMode
+        get() = enumOf("ui_mode", UiMode.AUTO)
+        set(v) = putEnum("ui_mode", v)
+
+    var naturalSort: Boolean
+        get() = prefs.getBoolean("natural_sort", true)
+        set(v) = prefs.edit().putBoolean("natural_sort", v).apply()
+
+    var skipSilence: Boolean
+        get() = prefs.getBoolean("skip_silence", false)
+        set(v) = prefs.edit().putBoolean("skip_silence", v).apply()
+
+    var incognito: Boolean
+        get() = prefs.getBoolean("incognito", false)
+        set(v) = prefs.edit().putBoolean("incognito", v).apply()
+
+    var skipIntroSec: Int
+        get() = prefs.getInt("skip_intro_sec", 85)
+        set(v) = prefs.edit().putInt("skip_intro_sec", v.coerceIn(5, 600)).apply()
+
+    var edgeGuardDp: Int
+        get() = prefs.getInt("edge_guard_dp", 0)
+        set(v) = prefs.edit().putInt("edge_guard_dp", v.coerceIn(0, 80)).apply()
 
     var hudHideMs: Int
         get() = prefs.getInt("hud_hide_ms", 500)

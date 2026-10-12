@@ -95,6 +95,8 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         }
     })
 
+    private var ignoring = false
+
     private val detector = GestureDetector(a, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
             mode = Mode.NONE
@@ -217,6 +219,14 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             return true
         }
 
+        val guard = a.dp(a.settings.edgeGuardDp)
+        if (guard > 0 && event.actionMasked == MotionEvent.ACTION_DOWN) {
+            ignoring = event.x < guard || event.x > width - guard
+        }
+        if (ignoring) {
+            if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) ignoring = false
+            return true
+        }
         scaleDetector.onTouchEvent(event)
         val handled = detector.onTouchEvent(event)
 

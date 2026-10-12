@@ -115,6 +115,10 @@ class NetworkActivity : AppCompatActivity() {
         override fun handleOnBackPressed() = goBack()
     }
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(UiScale.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onBackPressedDispatcher.addCallback(this, backCallback)

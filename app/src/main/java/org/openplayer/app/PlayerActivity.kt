@@ -262,6 +262,10 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(UiScale.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -413,6 +417,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun bindPlayer(p: ExoPlayer) {
         if (::player.isInitialized) player.removeListener(playerListener)
         player = p
+        p.skipSilenceEnabled = settings.skipSilence
         p.addListener(playerListener)
         playerView.player = p
         audioFx.attach(p.audioSessionId)
@@ -896,7 +901,7 @@ class PlayerActivity : AppCompatActivity() {
 
     fun saveResume() {
         val uri = currentUri ?: return
-        if (!::player.isInitialized) return
+        if (!::player.isInitialized || settings.incognito) return
         val duration = player.duration
         val pos = player.currentPosition
         val finished = duration > 0 && pos > duration - 5_000
@@ -1164,7 +1169,7 @@ class PlayerActivity : AppCompatActivity() {
             }
             Shortcut.SLEEP -> active = sleepDeadline > 0 || sleepAtEnd
             Shortcut.BACKGROUND -> active = settings.backgroundPlay
-            Shortcut.ROTATE, Shortcut.EQUALIZER, Shortcut.SCREENSHOT -> Unit
+            Shortcut.ROTATE, Shortcut.EQUALIZER, Shortcut.SCREENSHOT, Shortcut.SKIP_INTRO -> Unit
         }
         return actionButton(
             icon, glyph, label, active, rotation,
@@ -1178,6 +1183,11 @@ class PlayerActivity : AppCompatActivity() {
         scheduleAutoHide()
         when (s) {
             Shortcut.ROTATE -> cycleOrientation()
+            Shortcut.SKIP_INTRO -> {
+                val target = player.currentPosition + settings.skipIntroSec * 1000L
+                player.seekTo(if (player.duration > 0) minOf(target, player.duration - 1000L) else target)
+                toast("+${settings.skipIntroSec} sn")
+            }
             Shortcut.BACKGROUND -> {
                 settings.backgroundPlay = !settings.backgroundPlay
                 toast(if (settings.backgroundPlay) "Arka planda oynatma açık" else "Arka planda oynatma kapalı")

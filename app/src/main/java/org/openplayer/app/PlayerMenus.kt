@@ -57,20 +57,21 @@ class PlayerMenus(private val a: PlayerActivity) {
         }
         val labels = groups.mapIndexed { i, g ->
             trackLabel(g.getTrackFormat(0), i) + if (!g.isSupported) " (desteklenmiyor)" else ""
-        } + "Ses artırma ve ekolayzır…" + "Ses gecikmesi (eşitleme)…"
+        }
         val selected = groups.indexOfFirst { it.isSelected }.coerceAtLeast(0)
-        a.showChoice("Ses parçası", labels, selected) { which ->
-            if (which == groups.size + 1) {
-                showAudioDelay()
-            } else if (which >= groups.size) {
-                showEqualizer()
-            } else {
+        PanelBuilder(a)
+            .setTitle("Ses parçası")
+            .setSingleChoiceItems(labels.toTypedArray(), selected) { d, which ->
                 val p = a.player
                 p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
                     .setOverrideForType(TrackSelectionOverride(groups[which].mediaTrackGroup, 0))
                     .build()
+                d.dismiss()
             }
-        }
+            .setPositiveButton("Ses gecikmesi") { _, _ -> showAudioDelay() }
+            .setNeutralButton("Ekolayzır") { _, _ -> showEqualizer() }
+            .setNegativeButton("Kapat", null)
+            .show()
     }
 
     /** Ses gecikmesi: + sesi geciktirir, − öne alır. Bluetooth için ek gecikme ayrı tutulur. */
@@ -173,11 +174,11 @@ class PlayerMenus(private val a: PlayerActivity) {
         if (sub.mode == SubtitleController.Mode.EXTERNAL && a.sidecars.none { it.name == sub.externalName } && sub.externalName != null) {
             entries += "● Eklenen: ${sub.externalName}" to {}
         }
-        entries += "Dosyadan ekle…" to { a.pickSubtitleFile() }
-        entries += "Çevrimiçi altyazı ara…" to { showOnlineSearch() }
-        entries += "Senkronizasyon (gecikme)…" to { showSubtitleSync() }
-        entries += "Stil ve boyut…" to { showSubtitleStyle() }
-        entries += "Karakter kodlaması…" to { showCharsetMenu() }
+        entries += "＋  Dosyadan ekle…" to { a.pickSubtitleFile() }
+        entries += "＋  Çevrimiçi altyazı ara…" to { showOnlineSearch() }
+        entries += "⏱  Senkronizasyon (gecikme, hız)…" to { showSubtitleSync() }
+        entries += "Aa  Stil ve boyut…" to { showSubtitleStyle() }
+        entries += "⚙  Karakter kodlaması…" to { showCharsetMenu() }
 
         PanelBuilder(a)
             .setTitle("Altyazı")

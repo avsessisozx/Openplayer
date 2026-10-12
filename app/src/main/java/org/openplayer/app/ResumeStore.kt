@@ -7,6 +7,10 @@ import android.net.Uri
 object ResumeStore {
     private fun prefs(c: Context) = c.getSharedPreferences("resume", Context.MODE_PRIVATE)
 
+    fun clearAll(c: Context) {
+        prefs(c).edit().clear().apply()
+    }
+
     fun lastUri(c: Context): String? = prefs(c).getString("last_uri", null)
 
     fun position(c: Context, uri: Uri): Long = prefs(c).getLong("pos_$uri", 0L)

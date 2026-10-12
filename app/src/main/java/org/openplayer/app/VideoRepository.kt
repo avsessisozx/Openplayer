@@ -119,7 +119,7 @@ object VideoRepository {
 
     /** Seçili ölçüte ve yöne göre sıralar. */
     fun sort(context: Context, videos: List<VideoItem>, settings: AppSettings): List<VideoItem> {
-        val ci = String.CASE_INSENSITIVE_ORDER
+        val ci: Comparator<String> = if (settings.naturalSort) NaturalOrder else String.CASE_INSENSITIVE_ORDER
         val cmp: Comparator<VideoItem> = when (settings.sortKey) {
             SortKey.TITLE -> compareBy<VideoItem, String>(ci) { it.title }
             SortKey.DATE -> compareBy<VideoItem> { it.dateAddedSec }
@@ -134,5 +134,36 @@ object VideoRepository {
         // Eşit olanlar başlığa göre sıralanır; sonuç kararlı kalır.
         val full = cmp.thenBy(ci) { it.title }
         return videos.sortedWith(if (settings.sortAscending) full else full.reversed())
+    }
+}
+
+/** "Bölüm 2", "Bölüm 10"dan önce gelsin diye sayıları değerine göre karşılaştırır. */
+object NaturalOrder : Comparator<String> {
+    override fun compare(a: String, b: String): Int {
+        var i = 0
+        var j = 0
+        while (i < a.length && j < b.length) {
+            val x = a[i]
+            val y = b[j]
+            if (x.isDigit() && y.isDigit()) {
+                var ie = i
+                while (ie < a.length && a[ie].isDigit()) ie++
+                var je = j
+                while (je < b.length && b[je].isDigit()) je++
+                val na = a.substring(i, ie).trimStart('0')
+                val nb = b.substring(j, je).trimStart('0')
+                if (na.length != nb.length) return na.length - nb.length
+                val c = na.compareTo(nb)
+                if (c != 0) return c
+                i = ie
+                j = je
+            } else {
+                val c = x.lowercaseChar().compareTo(y.lowercaseChar())
+                if (c != 0) return c
+                i++
+                j++
+            }
+        }
+        return (a.length - i) - (b.length - j)
     }
 }

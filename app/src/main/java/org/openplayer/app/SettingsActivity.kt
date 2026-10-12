@@ -71,6 +71,10 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var content: LinearLayout
     private var page: Page? = null
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(UiScale.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         s = AppSettings.get(this)
@@ -123,6 +127,15 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun playerPage() {
         section("Oynatma")
+        toggle("Sessizlikleri atla", "Videodaki sessiz bölümleri hızla geçer", s.skipSilence) { s.skipSilence = it }
+        val intro = listOf(30, 60, 85, 90, 120, 180)
+        choice("İntro atla süresi", "${s.skipIntroSec} sn (kısayol olarak eklenebilir)", intro.map { "$it sn" }, intro.indexOf(s.skipIntroSec)) {
+            s.skipIntroSec = intro[it]
+        }
+        val edges = listOf(0, 12, 24, 36, 48)
+        choice("Kenar koruması", if (s.edgeGuardDp == 0) "Kapalı" else "${s.edgeGuardDp} dp", edges.map { if (it == 0) "Kapalı" else "$it dp" }, edges.indexOf(s.edgeGuardDp)) {
+            s.edgeGuardDp = edges[it]
+        }
         toggle("Arka planda oynat", "Ana ekrana çıkınca ses çalmaya devam eder", s.backgroundPlay) { s.backgroundPlay = it }
         toggle("Otomatik pencere içinde pencere (PiP)", "Ana ekrana çıkınca küçük pencerede devam eder", s.autoPip) { s.autoPip = it }
         toggle("Kaldığı yerden devam et", null, s.resumePlayback) { s.resumePlayback = it }
@@ -297,6 +310,11 @@ class SettingsActivity : AppCompatActivity() {
             s.accentOverride = accents[it].second
             themeApplied()
         }
+        choice("Arayüz modu", s.uiMode.label, UiMode.entries.map { it.label }, s.uiMode.ordinal) {
+            s.uiMode = UiMode.entries[it]
+            recreate()
+        }
+        note("Otomatik: ekran boyutuna göre ayarlanır. Telefonda tablet düzeni görmek veya tersi için elle seçin.")
         section("Düğmeler ve paneller")
         choice("Düğme biçimi", s.buttonShape.label, ButtonShape.entries.map { it.label }, s.buttonShape.ordinal) {
             s.buttonShape = ButtonShape.entries[it]
@@ -333,11 +351,18 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun listPage() {
         section("Liste")
+        toggle("Doğal sıralama", "\"Bölüm 2\", \"Bölüm 10\"dan önce gelir", s.naturalSort) { s.naturalSort = it }
         val days = listOf(1, 3, 7, 14, 30)
         choice("\"Yeni\" etiketi süresi", "${s.newVideoDays} gün", days.map { "$it gün" }, days.indexOf(s.newVideoDays)) {
             s.newVideoDays = days[it]
         }
         toggle("Gizli klasörleri göster", "Klasöre uzun basarak gizleyebilirsiniz", s.showHiddenFolders) { s.showHiddenFolders = it }
+        section("Gizlilik")
+        toggle("Gizli mod", "Açıkken kaldığı yer ve geçmiş kaydedilmez", s.incognito) { s.incognito = it }
+        action("Geçmişi temizle", "Kaldığı yerleri, izlenme durumunu ve yer imlerini siler") {
+            ResumeStore.clearAll(this)
+            android.widget.Toast.makeText(this, "Geçmiş temizlendi", android.widget.Toast.LENGTH_SHORT).show()
+        }
         section("Dosya erişimi")
         action("Tüm dosyalara erişim izni", "Videonun yanındaki altyazıları otomatik bulmak için gerekir") { openAllFilesAccess() }
     }
