@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import org.videolan.libvlc.LibVLC
 import org.videolan.libvlc.Media
+import org.videolan.libvlc.interfaces.IMedia
 import org.videolan.libvlc.MediaPlayer
 import org.videolan.libvlc.util.VLCVideoLayout
 
@@ -92,7 +93,7 @@ class VlcPlayerActivity : AppCompatActivity() {
         val f = java.io.File(cacheDir, "vlc_sub_${subtitleSeq++}.$ext")
         val ok = runCatching {
             contentResolver.openInputStream(uri)?.use { input -> f.outputStream().use { input.copyTo(it) } }
-            vlc?.addSlave(Media.Slave.Type.Subtitle, Uri.fromFile(f), true)
+            vlc?.addSlave(IMedia.Slave.Type.Subtitle, Uri.fromFile(f), true)
         }.getOrNull() != null
         toast(if (ok) "Altyazı eklendi" else "Altyazı yüklenemedi")
     }
