@@ -1,3 +1,13 @@
+# 1.0.0-beta6
+
+- **Tema ve görünüm** (Ayarlar): 9 hazır tema, vurgu rengi, düğme biçimi, menü opaklığı, kısayol boyutu/opaklığı; temayı JSON olarak dışa/içe aktarma.
+- Tüm menüler ortak yarı saydam, yuvarlak köşeli panelde; opaklık ayarlanabilir.
+- "Ses parçası" menüsü düzeltildi (parçalar seçim, gecikme/ekolayzır düğme). Altyazı menüsü simgeli.
+- **Arayüz modu:** Otomatik / Telefon / Büyük telefon / Tablet / Geniş ekran (arayüz ölçeği).
+- Doğal sıralama, sessizlikleri atla, gizli mod, geçmişi temizle, "İntro atla" kısayolu, kenar koruması.
+
+---
+
 # 1.0.0-beta5
 
 - **Ses gecikmesi** (± ms) ve **Bluetooth ek gecikmesi**: Ses ayarları → "Ses gecikmesi", ⋮ menüsü. + sesi geciktirir, − öne alır.
