@@ -396,6 +396,33 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getString("audio_langs", "") ?: ""
         set(v) = prefs.edit().putString("audio_langs", v.trim()).apply()
 
+    var bassStrength: Int
+        get() = prefs.getInt("bass_strength", 0)
+        set(v) = prefs.edit().putInt("bass_strength", v.coerceIn(0, 1000)).apply()
+
+    var virtualizerStrength: Int
+        get() = prefs.getInt("virtualizer_strength", 0)
+        set(v) = prefs.edit().putInt("virtualizer_strength", v.coerceIn(0, 1000)).apply()
+
+    /** -100 (sol) .. 100 (sağ). */
+    var audioBalance: Int
+        get() = prefs.getInt("audio_balance", 0)
+        set(v) = prefs.edit().putInt("audio_balance", v.coerceIn(-100, 100)).apply()
+
+    var monoMix: Boolean
+        get() = prefs.getBoolean("mono_mix", false)
+        set(v) = prefs.edit().putBoolean("mono_mix", v).apply()
+
+    /** 0 kapalı, 1 parça, 2 albüm. Yalnızca ses kısma uygulanır. */
+    var replayGainMode: Int
+        get() = prefs.getInt("replay_gain", 0)
+        set(v) = prefs.edit().putInt("replay_gain", v.coerceIn(0, 2)).apply()
+
+    /** Şarkı başı/sonu ses geçişi (sn); 0 kapalı. */
+    var crossfadeSec: Int
+        get() = prefs.getInt("crossfade_sec", 0)
+        set(v) = prefs.edit().putInt("crossfade_sec", v.coerceIn(0, 12)).apply()
+
     /** 100 = normal, 200 = en yüksek yazılımsal artırma. */
     var volumeBoostPercent: Int
         get() = prefs.getInt("boost", 100)

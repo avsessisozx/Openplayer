@@ -1,7 +1,9 @@
 package org.openplayer.app
 
 import android.content.Context
+import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
+import android.media.audiofx.Virtualizer
 import android.media.audiofx.LoudnessEnhancer
 
 /** Ekolayzır ve yazılımsal ses artırma (%200'e kadar). */
@@ -10,6 +12,8 @@ class AudioFx(context: Context) {
     private val settings = AppSettings.get(context)
     private var eq: Equalizer? = null
     private var loud: LoudnessEnhancer? = null
+    private var bass: BassBoost? = null
+    private var virt: Virtualizer? = null
 
     val available: Boolean get() = eq != null
 
@@ -38,6 +42,50 @@ class AudioFx(context: Context) {
         runCatching {
             loud = LoudnessEnhancer(sessionId).also { applyBoost(it) }
         }
+        runCatching {
+            bass = BassBoost(0, sessionId).also { b ->
+                b.setStrength(settings.bassStrength.toShort())
+                b.enabled = settings.bassStrength > 0
+            }
+        }
+        runCatching {
+            virt = Virtualizer(0, sessionId).also { v ->
+                v.setStrength(settings.virtualizerStrength.toShort())
+                v.enabled = settings.virtualizerStrength > 0
+            }
+        }
+    }
+
+    val bassAvailable: Boolean get() = bass != null
+    val virtualizerAvailable: Boolean get() = virt != null
+
+    fun setBass(strength: Int) {
+        settings.bassStrength = strength
+        runCatching {
+            bass?.setStrength(settings.bassStrength.toShort())
+            bass?.enabled = settings.bassStrength > 0
+        }
+    }
+
+    fun setVirtualizer(strength: Int) {
+        settings.virtualizerStrength = strength
+        runCatching {
+            virt?.setStrength(settings.virtualizerStrength.toShort())
+            virt?.enabled = settings.virtualizerStrength > 0
+        }
+    }
+
+    val presetNames: List<String>
+        get() = eq?.let { e -> List(e.numberOfPresets.toInt()) { e.getPresetName(it.toShort()) } } ?: emptyList()
+
+    fun usePreset(index: Int) {
+        val e = eq ?: return
+        runCatching {
+            e.usePreset(index.toShort())
+            settings.eqLevels = List(bandCount) { level(it) }
+            settings.eqEnabled = true
+            e.enabled = true
+        }
     }
 
     fun setEnabled(enabled: Boolean) {
@@ -53,6 +101,8 @@ class AudioFx(context: Context) {
     fun reset() {
         for (i in 0 until bandCount) eq?.setBandLevel(i.toShort(), 0)
         settings.eqLevels = List(bandCount) { 0 }
+        setBass(0)
+        setVirtualizer(0)
     }
 
     fun setBoostPercent(percent: Int) {
@@ -69,7 +119,11 @@ class AudioFx(context: Context) {
     fun release() {
         runCatching { eq?.release() }
         runCatching { loud?.release() }
+        runCatching { bass?.release() }
+        runCatching { virt?.release() }
         eq = null
         loud = null
+        bass = null
+        virt = null
     }
 }

@@ -7,7 +7,11 @@ import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.C
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
+import androidx.media3.extractor.metadata.id3.TextInformationFrame
+import androidx.media3.extractor.metadata.vorbis.VorbisComment
 import androidx.media3.exoplayer.ExoPlayer
 
 /** Müzik çalarını yöneten ortak nokta: kuyruk kurma, ses efektleri, uyku zamanlayıcısı. */
@@ -117,83 +121,171 @@ object MusicController {
     // ------------------------------------------------------------ ses efektleri
 
     private var lastCountedId: String? = null
+    private var lastTracks: Tracks? = null
+    private var replayFactor = 1f
+    private var fadeFactor = 1f
 
-    private val listener = object : Player.Listener {
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            val item = PlayerHolder.player?.currentMediaItem
-            if (isPlaying && isMusic(item) && item?.mediaId != lastCountedId) {
-                lastCountedId = item?.mediaId
-                appCtx?.let { c -> item?.mediaId?.let { MusicStats.record(c, it) } }
+    private fun parseGain(value: String?): Float? =
+        value?.let { Regex("-?\\d+(\\.\\d+)?").find(it)?.value?.toFloatOrNull() }
+
+    private fun replayGainDb(tracks: Tracks, mode: Int): Float? {
+        var track: Float? = null
+        var album: Float? = null
+        for (g in tracks.groups) {
+            if (g.type != C.TRACK_TYPE_AUDIO) continue
+            for (i in 0 until g.length) {
+                val md = g.getTrackFormat(i).metadata ?: continue
+                for (j in 0 until md.length()) {
+                    val e = md.get(j)
+                    val key: String
+                    val value: String?
+                    when (e) {
+                        is VorbisComment -> { key = e.key; value = e.value }
+                        is TextInformationFrame -> { key = e.description ?: ""; value = e.values.firstOrNull() }
+                        else -> continue
+                    }
+                    when (key.uppercase()) {
+                        "REPLAYGAIN_TRACK_GAIN" -> track = parseGain(value)
+                        "REPLAYGAIN_ALBUM_GAIN" -> album = parseGain(value)
+                    }
+                }
             }
         }
+        return if (mode == 2) album ?: track else track ?: album
+    }
 
-        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-            if (!playWhenReady && reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM && sleepAtEnd) {
-                sleepAtEnd = false
-                PlayerHolder.player?.pauseAtEndOfMediaItems = false
+    /** ReplayGain (yalnızca ses kısma) ve geçiş yumuşatmasını birleştirip oynatıcı sesine uygular. */
+    private fun applyVolume() {
+        val p = PlayerHolder.player ?: return
+        p.volume = if (isMusic(p.currentMediaItem)) (replayFactor * fadeFactor).coerceIn(0f, 1f) else 1f
+    }
+
+    private fun updateReplayGain() {
+        val c = appCtx ?: return
+        val mode = AppSettings.get(c).replayGainMode
+        val db = if (mode == 0) null else lastTracks?.let { replayGainDb(it, mode) }
+        replayFactor = if (db == null) 1f else Math.pow(10.0, db / 20.0).toFloat().coerceAtMost(1f)
+        applyVolume()
+    }
+
+    private val fadeTicker = object : Runnable {
+        override fun run() {
+            val p = PlayerHolder.player
+            val c = appCtx
+            if (p == null || c == null || !isMusic(p.currentMediaItem)) {
+                fadeFactor = 1f
+                applyVolume()
+                return
             }
-        }
-
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
-        }
-
-        override fun onAudioSessionIdChanged(audioSessionId: Int) {
-            PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
-        }
-    }
-
-    private var appCtx: Context? = null
-
-    private fun ensureInstalled(app: Context, p: ExoPlayer) {
-        appCtx = app
-        if (installedOn === p) return
-        installedOn?.removeListener(listener)
-        p.addListener(listener)
-        installedOn = p
-    }
-
-    /** Ekolayzır yalnızca müzik çalarken bu denetleyiciye bağlıdır; video ekranı kendisininkini kullanır. */
-    private fun syncFx(app: Context, p: ExoPlayer) {
-        if (isMusic(p.currentMediaItem)) {
-            val f = fx ?: AudioFx(app).also { fx = it }
-            f.attach(p.audioSessionId)
-        } else {
-            fx?.release()
-            fx = null
+            val ms = AppSettings.get(c).crossfadeSec * 1000L
+            var f = 1f
+            if (ms > 0) {
+                val pos = p.currentPosition
+                val dur = p.duration
+                if (pos < ms) f = minOf(f, Math.sqrt(pos.coerceAtLeast(0L).toDouble() / ms).toFloat())
+                if (dur > 0 && dur - pos < ms) f = minOf(f, Math.sqrt((dur - pos).coerceAtLeast(0L).toDouble() / ms).toFloat())
+            }
+            fadeFactor = f.coerceIn(0f, 1f)
+            applyVolume()
+            if (p.isPlaying) main.postDelayed(this, 120)
         }
     }
 
-    /** Ses ayarları paneli (ses artırma + ekolayzır). */
+    /** Ses ayarları paneli (ses artırma, ekolayzır, bas/tiz, denge, ReplayGain, geçiş). */
     fun showFxPanel(a: android.app.Activity) {
         val f = fx
+        val st = AppSettings.get(a)
         val root = a.vertical {}
-        val boostLabel = a.label("Ses artırma: %${AppSettings.get(a).volumeBoostPercent}")
+        val boostLabel = a.label("Ses artırma: %${st.volumeBoostPercent}")
         root.addView(boostLabel)
-        root.addView(a.seekBar(100, 200, AppSettings.get(a).volumeBoostPercent) { v ->
-            if (f != null) f.setBoostPercent(v) else AppSettings.get(a).volumeBoostPercent = v
+        root.addView(a.seekBar(100, 200, st.volumeBoostPercent) { v ->
+            if (f != null) f.setBoostPercent(v) else st.volumeBoostPercent = v
             boostLabel.text = "Ses artırma: %$v"
         })
         if (f != null && f.available && f.bandCount > 0) {
             val sw = androidx.appcompat.widget.SwitchCompat(a).apply {
                 text = "Ekolayzır"
                 setTextColor(android.graphics.Color.WHITE)
-                isChecked = AppSettings.get(a).eqEnabled
+                isChecked = st.eqEnabled
                 setOnCheckedChangeListener { _, on -> f.setEnabled(on) }
             }
             root.addView(sw, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
+            val presets = f.presetNames
+            if (presets.isNotEmpty()) {
+                root.addView(a.label("Hazır ayarlar", 14f, UiColors.accent).apply {
+                    setPadding(0, a.dp(8), 0, a.dp(8))
+                    setOnClickListener {
+                        a.showChoice("Ekolayzır ayarı", presets, -1) { i ->
+                            f.usePreset(i)
+                            sw.isChecked = true
+                            android.widget.Toast.makeText(a, "Ayar uygulandı; çubuklar bir sonraki açılışta güncellenir", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
+            }
             val (min, max) = f.levelRange
             for (band in 0 until f.bandCount) {
                 val freq = f.centerFreqHz(band)
                 root.addView(a.label(if (freq >= 1000) "${freq / 1000} kHz" else "$freq Hz", 12f))
                 root.addView(a.seekBar(min, max, f.level(band)) { v -> f.setLevel(band, v) })
             }
+            val bassLabel = a.label("Bas güçlendirme: ${st.bassStrength / 10}%", 14f)
+            root.addView(bassLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
+            root.addView(a.seekBar(0, 1000, st.bassStrength) { v ->
+                f.setBass(v)
+                bassLabel.text = "Bas güçlendirme: ${v / 10}%"
+            })
+            val virtLabel = a.label("Stereo genişletme: ${st.virtualizerStrength / 10}%", 14f)
+            root.addView(virtLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+            root.addView(a.seekBar(0, 1000, st.virtualizerStrength) { v ->
+                f.setVirtualizer(v)
+                virtLabel.text = "Stereo genişletme: ${v / 10}%"
+            })
+            root.addView(a.label("Bas ve genişletme, cihazın ses efekti desteğine bağlıdır; bazı telefonlarda etkisi az olabilir.", 11f, UiColors.textSecondary))
         } else {
             root.addView(
                 a.label("Ekolayzır için önce bir şarkı çalın.", 13f, UiColors.textSecondary),
                 android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) }
             )
         }
+
+        val balLabel = a.label("Denge: ${balanceText(st.audioBalance)}", 14f)
+        root.addView(balLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
+        root.addView(a.seekBar(-100, 100, st.audioBalance) { v ->
+            st.audioBalance = v
+            AudioBalance.update(st)
+            balLabel.text = "Denge: ${balanceText(v)}"
+        })
+        root.addView(androidx.appcompat.widget.SwitchCompat(a).apply {
+            text = "Mono karıştırma"
+            setTextColor(android.graphics.Color.WHITE)
+            isChecked = st.monoMix
+            setOnCheckedChangeListener { _, on ->
+                st.monoMix = on
+                AudioBalance.update(st)
+            }
+        }, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+
+        val rgNames = listOf("Kapalı", "Parça", "Albüm")
+        root.addView(a.label("ReplayGain: ${rgNames[st.replayGainMode]} (yalnızca ses kısar)", 14f, UiColors.accent).apply {
+            setPadding(0, a.dp(14), 0, a.dp(6))
+            setOnClickListener {
+                a.showChoice("ReplayGain", rgNames, st.replayGainMode) { i ->
+                    st.replayGainMode = i
+                    refreshAudioSettings()
+                    text = "ReplayGain: ${rgNames[i]} (yalnızca ses kısar)"
+                }
+            }
+        })
+        val cfLabel = a.label(if (st.crossfadeSec == 0) "Geçişte yumuşatma: kapalı" else "Geçişte yumuşatma: ${st.crossfadeSec} sn", 14f)
+        root.addView(cfLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+        root.addView(a.seekBar(0, 12, st.crossfadeSec) { v ->
+            st.crossfadeSec = v
+            refreshAudioSettings()
+            cfLabel.text = if (v == 0) "Geçişte yumuşatma: kapalı" else "Geçişte yumuşatma: $v sn"
+        })
+        root.addView(a.label("Yumuşatma, şarkı sonunda sesi kısıp sonrakinin başında açar; şarkıları üst üste bindirmez.", 11f, UiColors.textSecondary))
+
         PanelBuilder(a)
             .setTitle("Ses ayarları")
             .setView(android.widget.ScrollView(a).apply { addView(root) })
@@ -201,7 +293,16 @@ object MusicController {
             .setNeutralButton("Sıfırla") { _, _ ->
                 f?.reset()
                 f?.setBoostPercent(100)
+                st.audioBalance = 0
+                st.monoMix = false
+                AudioBalance.update(st)
             }
             .show()
+    }
+
+    private fun balanceText(v: Int) = when {
+        v == 0 -> "orta"
+        v < 0 -> "sol %${-v}"
+        else -> "sağ %$v"
     }
 }
