@@ -31,20 +31,24 @@ fun Context.actionButton(
     label: String,
     active: Boolean,
     iconRotation: Float = 0f,
+    scale: Float = 1f,
+    bgOpacity: Float = 0.6f,
     onClick: () -> Unit,
 ): View {
+    fun argb(rgb: Int) = ((bgOpacity.coerceIn(0f, 1f) * 255).toInt() shl 24) or (rgb and 0xFFFFFF)
     val circle = FrameLayout(this).apply {
-        layoutParams = LinearLayout.LayoutParams(dp(56), dp(56)).apply { gravity = Gravity.CENTER_HORIZONTAL }
+        layoutParams = LinearLayout.LayoutParams(dp((56 * scale).toInt()), dp((56 * scale).toInt())).apply { gravity = Gravity.CENTER_HORIZONTAL }
         background = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
-            setColor(if (active) 0xFF3563C9.toInt() else 0x99202830.toInt())
+            setColor(if (active) ((maxOf(bgOpacity, 0.6f) * 255).toInt() shl 24) or 0x3563C9 else argb(0x202830))
         }
         if (icon != 0) {
             addView(ImageView(context).apply {
                 setImageResource(icon)
                 setColorFilter(Color.WHITE)
                 rotation = iconRotation
-                setPadding(dp(14), dp(14), dp(14), dp(14))
+                val pad = dp((14 * scale).toInt())
+                setPadding(pad, pad, pad, pad)
             }, FrameLayout.LayoutParams(-1, -1))
         } else {
             addView(TextView(context).apply {
@@ -59,7 +63,8 @@ fun Context.actionButton(
     val text = TextView(this).apply {
         this.text = label
         setTextColor(Color.WHITE)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f * scale.coerceIn(0.8f, 1.2f))
+        setShadowLayer(dp(4).toFloat(), 0f, 0f, Color.BLACK)
         gravity = Gravity.CENTER_HORIZONTAL
         maxLines = 2
         ellipsize = TextUtils.TruncateAt.END
@@ -68,7 +73,7 @@ fun Context.actionButton(
     return LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER_HORIZONTAL
-        layoutParams = LinearLayout.LayoutParams(dp(76), ViewGroup.LayoutParams.WRAP_CONTENT)
+        layoutParams = LinearLayout.LayoutParams(dp((76 * scale).toInt().coerceAtLeast(56)), ViewGroup.LayoutParams.WRAP_CONTENT)
         setPadding(dp(2), dp(4), dp(2), dp(4))
         addView(circle)
         addView(text, LinearLayout.LayoutParams(-1, -2))

@@ -101,8 +101,28 @@ class AppSettings private constructor(context: Context) {
         set(v) = prefs.edit().putBoolean("show_remaining", v).apply()
 
     var showShortcuts: Boolean
-        get() = prefs.getBoolean("show_shortcuts", true)
+        get() = prefs.getBoolean("show_shortcuts", false)
         set(v) = prefs.edit().putBoolean("show_shortcuts", v).apply()
+
+    /** Ses/parlaklık/sarma göstergesinin bırakıldıktan sonra kaybolma süresi (milisaniye). */
+    var hudHideMs: Int
+        get() = prefs.getInt("hud_hide_ms", 500)
+        set(v) = prefs.edit().putInt("hud_hide_ms", v.coerceIn(0, 10_000)).apply()
+
+    /** Kısayol düğmelerinin boyutu (yüzde). */
+    var shortcutSizePercent: Int
+        get() = prefs.getInt("shortcut_size", 80)
+        set(v) = prefs.edit().putInt("shortcut_size", v.coerceIn(50, 150)).apply()
+
+    /** Kısayol düğmelerinin arka plan opaklığı (yüzde; düşük = daha şeffaf). */
+    var shortcutOpacityPercent: Int
+        get() = prefs.getInt("shortcut_opacity", 35)
+        set(v) = prefs.edit().putInt("shortcut_opacity", v.coerceIn(0, 100)).apply()
+
+    /** Üst ve alt kontrol şeritlerinin karartma yoğunluğu (yüzde). */
+    var scrimPercent: Int
+        get() = prefs.getInt("scrim_percent", 30)
+        set(v) = prefs.edit().putInt("scrim_percent", v.coerceIn(0, 100)).apply()
 
     var controlsTimeoutSec: Int
         get() = prefs.getInt("controls_timeout", 4)

@@ -90,7 +90,23 @@ class SettingsActivity : AppCompatActivity() {
         toggle("Kaldığı yerden devam et", null, s.resumePlayback) { s.resumePlayback = it }
         section("Görünüm")
         toggle("Kalan süreyi göster", "Kapalıyken toplam süre gösterilir", s.showRemainingTime) { s.showRemainingTime = it }
-        toggle("Kısayol satırını göster", "Üst taraftaki yuvarlak düğmeler. Hangilerinin görüneceğini oynatıcıdaki \"Öğeleri özelleştir\" ile seçin.", s.showShortcuts) { s.showShortcuts = it }
+        toggle("Kısayol satırı açık başlasın", "Kapalıyken oynatıcıda alt soldaki düğmeyle açılır. Hangilerinin görüneceğini \"Öğeleri özelleştir\" ile seçin.", s.showShortcuts) { s.showShortcuts = it }
+        val sizes = listOf(50, 60, 70, 80, 90, 100, 120, 150)
+        choice("Kısayol düğme boyutu", "%${s.shortcutSizePercent}", sizes.map { "%$it" }, sizes.indexOf(s.shortcutSizePercent)) {
+            s.shortcutSizePercent = sizes[it]
+        }
+        val ops = listOf(0, 10, 20, 35, 50, 70, 100)
+        choice("Kısayol düğme opaklığı", "%${s.shortcutOpacityPercent} (düşük = şeffaf)", ops.map { "%$it" }, ops.indexOf(s.shortcutOpacityPercent)) {
+            s.shortcutOpacityPercent = ops[it]
+        }
+        val scrims = listOf(0, 10, 20, 30, 45, 60, 80)
+        choice("Üst/alt şerit karartması", "%${s.scrimPercent}", scrims.map { "%$it" }, scrims.indexOf(s.scrimPercent)) {
+            s.scrimPercent = scrims[it]
+        }
+        val hudMs = listOf(0, 100, 200, 300, 500, 700, 1000, 1500, 2000, 3000)
+        choice("Göstergelerin kaybolma süresi", "${s.hudHideMs} ms", hudMs.map { "$it ms" }, hudMs.indexOf(s.hudHideMs)) {
+            s.hudHideMs = hudMs[it]
+        }
         choice("Ekran yönü", s.orientation.label, OrientationMode.entries.map { it.label }, s.orientation.ordinal) {
             s.orientation = OrientationMode.entries[it]
         }

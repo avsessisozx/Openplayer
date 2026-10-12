@@ -565,6 +565,8 @@ class PlayerActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- arayüz oluşturma
 
+    private fun scrimColor(): Int = ((settings.scrimPercent.coerceIn(0, 100) * 255 / 100) shl 24)
+
     private fun buildUi(): View {
         playerView = (layoutInflater.inflate(R.layout.player_view, null) as PlayerView).apply {
             useController = false
@@ -668,6 +670,13 @@ class PlayerActivity : AppCompatActivity() {
             addView(LinearLayout(context).apply {
                 gravity = Gravity.START
                 addView(lockButton)
+                addView(iconView(R.drawable.ic_tune).apply {
+                    setOnClickListener {
+                        settings.showShortcuts = !settings.showShortcuts
+                        refreshShortcuts()
+                        scheduleAutoHide()
+                    }
+                })
             }, LinearLayout.LayoutParams(0, -2, 1f))
             addView(prevButton)
             addView(playButton)
@@ -685,10 +694,10 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         val topScrim = View(this).apply {
-            background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0xCC000000.toInt(), 0))
+            background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(scrimColor(), 0))
         }
         val bottomScrim = View(this).apply {
-            background = GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(0xCC000000.toInt(), 0))
+            background = GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(scrimColor(), 0))
         }
 
         controls = FrameLayout(this).apply {
@@ -791,13 +800,14 @@ class PlayerActivity : AppCompatActivity() {
         if (settings.liveScrub) {
             player.pause()
             player.setSeekParameters(SeekParameters.CLOSEST_SYNC)
+            runCatching { player.isScrubbingModeEnabled = true }
         }
     }
 
     fun scrubMove(posMs: Long) {
         if (!scrubActive || !settings.liveScrub) return
         val now = SystemClock.uptimeMillis()
-        if (now - lastScrubAt < 60) return
+        if (now - lastScrubAt < 24) return
         lastScrubAt = now
         player.seekTo(posMs)
     }
@@ -805,6 +815,7 @@ class PlayerActivity : AppCompatActivity() {
     fun scrubEnd(posMs: Long) {
         if (!scrubActive) return
         scrubActive = false
+        runCatching { player.isScrubbingModeEnabled = false }
         player.setSeekParameters(SeekParameters.EXACT)
         player.seekTo(posMs)
         if (settings.liveScrub && scrubWasPlaying) player.play()
@@ -818,7 +829,7 @@ class PlayerActivity : AppCompatActivity() {
 
     fun hideHudSoon() {
         handler.removeCallbacks(hideHudRunnable)
-        handler.postDelayed(hideHudRunnable, 700)
+        handler.postDelayed(hideHudRunnable, settings.hudHideMs.toLong())
     }
 
     fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -1075,7 +1086,11 @@ class PlayerActivity : AppCompatActivity() {
         if (!::shortcutRow.isInitialized) return
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         shortcutRow.removeAllViews()
-        shortcutRow.addView(actionButton(R.drawable.ic_edit, null, "Öğeleri özelleştir", false) { menus.showCustomizeShortcuts() })
+        shortcutRow.addView(actionButton(
+            R.drawable.ic_edit, null, "Öğeleri özelleştir", false,
+            scale = settings.shortcutSizePercent / 100f,
+            bgOpacity = settings.shortcutOpacityPercent / 100f,
+        ) { menus.showCustomizeShortcuts() })
         for (s in settings.shortcuts) {
             shortcutRow.addView(buildShortcut(s))
         }
@@ -1121,7 +1136,11 @@ class PlayerActivity : AppCompatActivity() {
             Shortcut.BACKGROUND -> active = settings.backgroundPlay
             Shortcut.ROTATE, Shortcut.EQUALIZER, Shortcut.SCREENSHOT -> Unit
         }
-        return actionButton(icon, glyph, label, active, rotation) { onShortcut(s) }
+        return actionButton(
+            icon, glyph, label, active, rotation,
+            scale = settings.shortcutSizePercent / 100f,
+            bgOpacity = settings.shortcutOpacityPercent / 100f,
+        ) { onShortcut(s) }
     }
 
     private fun onShortcut(s: Shortcut) {
