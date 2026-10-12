@@ -24,14 +24,16 @@ class NowPlayingActivity : AppCompatActivity() {
     private lateinit var art: ImageView
     private lateinit var titleView: TextView
     private lateinit var artistView: TextView
-    private lateinit var seek: SeekBar
+    private lateinit var wave: WaveSeekView
+    private lateinit var favButton: ImageView
+    private lateinit var infoView: TextView
+    private lateinit var rootView: LinearLayout
     private lateinit var posView: TextView
     private lateinit var durView: TextView
     private lateinit var playButton: ImageView
-    private lateinit var shuffleButton: ImageView
-    private lateinit var repeatButton: ImageView
+    private lateinit var shuffleButton: LinearLayout
+    private lateinit var repeatButton: LinearLayout
     private lateinit var sleepLabel: TextView
-    private lateinit var speedLabel: TextView
     private lateinit var lyricsScroll: ScrollView
     private lateinit var lyricsBox: LinearLayout
     private lateinit var artFrame: android.widget.FrameLayout
@@ -115,12 +117,43 @@ class NowPlayingActivity : AppCompatActivity() {
         gravity = Gravity.CENTER
     }
 
+    private fun chipBg(color: Int, radiusDp: Int = 22) = GradientDrawable().apply {
+        cornerRadius = dp(radiusDp).toFloat()
+        setColor(color)
+    }
+
+    private fun chip(size: Float, bold: Boolean): TextView = text(size, Color.WHITE, bold).apply {
+        gravity = Gravity.CENTER_VERTICAL or Gravity.START
+        setPadding(dp(16), dp(7), dp(16), dp(7))
+        background = chipBg(0x4D000000)
+    }
+
+    /** Yarı saydam, yuvarlak köşeli düğme. */
+    private fun pill(icon: Int, widthDp: Int = 72, onClick: () -> Unit): LinearLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER
+        background = chipBg(0x4D000000, 24)
+        addView(iconView(icon, 48, 12))
+        minimumWidth = dp(widthDp)
+        setOnClickListener { onClick() }
+    }
+
+    private fun circle(icon: Int, sizeDp: Int, padDp: Int, bg: Int, tint: Int = Color.WHITE, onClick: () -> Unit) =
+        iconView(icon, sizeDp, padDp).apply {
+            setColorFilter(tint)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(bg)
+            }
+            setOnClickListener { onClick() }
+        }
+
     private fun buildUi(): View {
         val metrics = resources.displayMetrics
-        val artSize = minOf((metrics.widthPixels * 0.8f).toInt(), (metrics.heightPixels * 0.42f).toInt())
+        val artSize = minOf(metrics.widthPixels - dp(32), (metrics.heightPixels * 0.5f).toInt())
 
         art = ImageView(this)
-        ArtLoader.roundCorners(art, 20)
+        ArtLoader.roundCorners(art, 24)
         lyricsBox = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(8), dp(16), dp(8), dp(16))
@@ -128,124 +161,106 @@ class NowPlayingActivity : AppCompatActivity() {
         lyricsScroll = ScrollView(this).apply {
             visibility = View.GONE
             isVerticalScrollBarEnabled = false
+            background = chipBg(0x99000000, 24)
             addView(lyricsBox)
         }
+        favButton = circle(R.drawable.ic_favorite_border, 48, 12, 0x66000000) { toggleFavorite() }
+        val queueButton = circle(R.drawable.ic_view_list, 48, 12, 0x66000000) { showQueue() }
+        val moreButton = circle(R.drawable.ic_more_vert, 48, 12, 0x66000000) { showMoreSheet() }
         artFrame = android.widget.FrameLayout(this).apply {
             addView(art, android.widget.FrameLayout.LayoutParams(-1, -1))
             addView(lyricsScroll, android.widget.FrameLayout.LayoutParams(-1, -1))
+            addView(favButton, android.widget.FrameLayout.LayoutParams(dp(48), dp(48), Gravity.BOTTOM or Gravity.START).apply { setMargins(dp(8), 0, 0, dp(8)) })
+            addView(LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                addView(queueButton)
+                addView(moreButton)
+            }, android.widget.FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM or Gravity.END).apply { setMargins(0, 0, dp(8), dp(8)) })
             setOnClickListener { toggleLyrics() }
         }
-        titleView = text(22f, bold = true).apply { maxLines = 2 }
-        artistView = text(15f, UiColors.textSecondary)
+        titleView = chip(22f, true)
+        artistView = chip(15f, true)
 
-        seek = SeekBar(this).apply {
-            max = 1000
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(s: SeekBar, p: Int, fromUser: Boolean) {
-                    if (fromUser) posView.text = formatDuration(p.toLong() * (player?.duration?.coerceAtLeast(0) ?: 0L) / 1000)
-                }
-
-                override fun onStartTrackingTouch(s: SeekBar) {
-                    dragging = true
-                }
-
-                override fun onStopTrackingTouch(s: SeekBar) {
-                    val p = player
-                    if (p != null && p.duration > 0) p.seekTo(s.progress.toLong() * p.duration / 1000)
-                    dragging = false
-                }
-            })
+        wave = WaveSeekView(this).apply {
+            onScrub = { f ->
+                val d = player?.duration?.coerceAtLeast(0) ?: 0L
+                posView.text = formatDuration((f * d).toLong())
+            }
+            onSeek = { f ->
+                val p = player
+                if (p != null && p.duration > 0) p.seekTo((f * p.duration).toLong())
+            }
+            onDragChanged = { dragging = it }
         }
-        posView = text(12f, UiColors.textSecondary).apply { gravity = Gravity.START }
-        durView = text(12f, UiColors.textSecondary).apply { gravity = Gravity.END }
+        posView = text(13f, Color.WHITE, true).apply {
+            setPadding(dp(12), dp(4), dp(12), dp(4))
+            background = chipBg(0xCC000000.toInt(), 16)
+        }
+        durView = text(13f, Color.WHITE, true).apply {
+            setPadding(dp(12), dp(4), dp(12), dp(4))
+            background = chipBg(0xCC000000.toInt(), 16)
+        }
         val times = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            addView(posView, LinearLayout.LayoutParams(0, -2, 1f))
-            addView(durView, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(posView, LinearLayout.LayoutParams(-2, -2))
+            addView(View(context), LinearLayout.LayoutParams(0, 1, 1f))
+            addView(durView, LinearLayout.LayoutParams(-2, -2))
         }
 
-        shuffleButton = iconView(R.drawable.ic_shuffle, 52, 14).apply {
-            setOnClickListener { MusicController.setShuffle(context, !(player?.shuffleModeEnabled ?: false)) }
+        shuffleButton = pill(R.drawable.ic_shuffle) {
+            MusicController.setShuffle(this, !(player?.shuffleModeEnabled ?: false))
         }
-        val prev = iconView(R.drawable.ic_prev, 60, 16).apply { setOnClickListener { player?.seekToPrevious() } }
-        playButton = iconView(R.drawable.ic_play, 76, 18).apply {
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(UiColors.accent)
+        repeatButton = pill(R.drawable.ic_repeat) {
+            val cur = AppSettings.get(this).musicRepeat
+            // kapalı -> tüm liste -> tek şarkı -> kapalı
+            val nextMode = when (cur) {
+                Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
+                Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
+                else -> Player.REPEAT_MODE_OFF
             }
-            setOnClickListener {
-                val p = player ?: return@setOnClickListener
-                if (p.isPlaying) p.pause() else p.play()
-            }
+            MusicController.setRepeat(this, nextMode)
         }
-        val next = iconView(R.drawable.ic_next, 60, 16).apply { setOnClickListener { player?.seekToNextMediaItem() } }
-        repeatButton = iconView(R.drawable.ic_repeat, 52, 14).apply {
-            setOnClickListener {
-                val cur = AppSettings.get(context).musicRepeat
-                // kapalı -> tüm liste -> tek şarkı -> kapalı
-                val nextMode = when (cur) {
-                    Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
-                    Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
-                    else -> Player.REPEAT_MODE_OFF
-                }
-                MusicController.setRepeat(context, nextMode)
+        sleepLabel = text(12f, Color.WHITE).apply { setPadding(0, 0, dp(12), 0); visibility = View.GONE }
+        val fxPill = pill(R.drawable.ic_tune) { MusicController.showFxPanel(this) }
+        val sleepPill = pill(R.drawable.ic_timer) { showSleep() }.apply { addView(sleepLabel) }
+        val pills = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(fxPill)
+            addView(sleepPill, LinearLayout.LayoutParams(-2, -2).apply { marginStart = dp(10) })
+            addView(View(context), LinearLayout.LayoutParams(0, 1, 1f))
+            addView(repeatButton)
+            addView(shuffleButton, LinearLayout.LayoutParams(-2, -2).apply { marginStart = dp(10) })
+        }
+
+        val back10 = circle(R.drawable.ic_replay10, 52, 14, 0x4D000000) {
+            player?.let { it.seekTo((it.currentPosition - 10_000).coerceAtLeast(0)) }
+        }
+        val prev = circle(R.drawable.ic_prev, 64, 18, Color.BLACK) { player?.seekToPrevious() }
+        playButton = circle(R.drawable.ic_play, 88, 24, Color.BLACK) {
+            val p = player ?: return@circle
+            if (p.isPlaying) p.pause() else p.play()
+        }
+        val next = circle(R.drawable.ic_next, 64, 18, Color.BLACK) { player?.seekToNextMediaItem() }
+        val fwd10 = circle(R.drawable.ic_forward10, 52, 14, 0x4D000000) {
+            player?.let { p ->
+                val d = p.duration
+                val t = p.currentPosition + 10_000
+                p.seekTo(if (d > 0) t.coerceAtMost(d) else t)
             }
         }
         val controls = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            addView(shuffleButton)
-            addView(prev)
-            addView(playButton, LinearLayout.LayoutParams(dp(76), dp(76)).apply { setMargins(dp(8), 0, dp(8), 0) })
-            addView(next)
-            addView(repeatButton)
+            addView(back10)
+            addView(prev, LinearLayout.LayoutParams(dp(64), dp(64)).apply { setMargins(dp(8), 0, dp(4), 0) })
+            addView(playButton, LinearLayout.LayoutParams(dp(88), dp(88)).apply { setMargins(dp(4), 0, dp(4), 0) })
+            addView(next, LinearLayout.LayoutParams(dp(64), dp(64)).apply { setMargins(dp(4), 0, dp(8), 0) })
+            addView(fwd10)
         }
-
-        sleepLabel = text(12f, UiColors.textSecondary)
-        val sleepButton = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            addView(iconView(R.drawable.ic_timer, 44, 10))
-            addView(sleepLabel)
-            setOnClickListener { showSleep() }
-        }
-        val fxButton = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            addView(iconView(R.drawable.ic_tune, 44, 10))
-            addView(text(12f, UiColors.textSecondary).apply { text = "Ses ayarları" })
-            setOnClickListener { MusicController.showFxPanel(this@NowPlayingActivity) }
-        }
-        val queueButton = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            addView(iconView(R.drawable.ic_view_list, 44, 10))
-            addView(text(12f, UiColors.textSecondary).apply { text = "Kuyruk" })
-            setOnClickListener { showQueue() }
-        }
-        speedLabel = text(12f, UiColors.textSecondary)
-        val speedButton = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            addView(iconView(R.drawable.ic_repeat, 44, 10))
-            addView(speedLabel)
-            setOnClickListener { showSpeed() }
-        }
-        val lyricsButton = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            addView(iconView(R.drawable.ic_lyrics, 44, 10))
-            addView(text(12f, UiColors.textSecondary).apply { text = "Sözler" })
-            setOnClickListener { toggleLyrics() }
-        }
-        val bottomRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            addView(sleepButton, LinearLayout.LayoutParams(0, -2, 1f))
-            addView(speedButton, LinearLayout.LayoutParams(0, -2, 1f))
-            addView(lyricsButton, LinearLayout.LayoutParams(0, -2, 1f))
-            addView(fxButton, LinearLayout.LayoutParams(0, -2, 1f))
-            addView(queueButton, LinearLayout.LayoutParams(0, -2, 1f))
+        infoView = text(12f, Color.WHITE, true).apply {
+            setPadding(dp(14), dp(5), dp(14), dp(5))
+            background = chipBg(0x4D000000, 14)
         }
 
         val back = iconView(R.drawable.ic_back).apply { setOnClickListener { finish() } }
@@ -253,29 +268,103 @@ class NowPlayingActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             addView(back)
-            addView(text(16f, UiColors.textSecondary).apply { text = "Çalıyor" }, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(text(16f, Color.WHITE).apply { text = "Çalıyor" }, LinearLayout.LayoutParams(0, -2, 1f))
             addView(View(context), LinearLayout.LayoutParams(dp(48), dp(48)))
         }
 
         val column = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(dp(24), 0, dp(24), dp(16))
-            addView(artFrame, LinearLayout.LayoutParams(artSize, artSize).apply { topMargin = dp(8) })
-            addView(titleView, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(24) })
-            addView(artistView, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(4) })
-            addView(seek, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(20) })
-            addView(times, LinearLayout.LayoutParams(-1, -2))
-            addView(controls, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
-            addView(bottomRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(20) })
+            setPadding(dp(16), 0, dp(16), dp(16))
+            addView(artFrame, LinearLayout.LayoutParams(artSize, artSize).apply { topMargin = dp(4) })
+            addView(titleView, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(16); gravity = Gravity.START })
+            addView(artistView, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(6); gravity = Gravity.START })
+            addView(pills, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(18) })
+            addView(controls, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(18) })
+            addView(wave, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(16) })
+            addView(times, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(4) })
+            addView(infoView, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(14) })
         }
-        return LinearLayout(this).apply {
+        rootView = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             fitsSystemWindows = true
-            setBackgroundColor(UiColors.background)
+            background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(UiColors.background, UiColors.background))
             addView(top, LinearLayout.LayoutParams(-1, -2))
             addView(ScrollView(this@NowPlayingActivity).apply { addView(column) }, LinearLayout.LayoutParams(-1, 0, 1f))
         }
+        return rootView
+    }
+
+    // ------------------------------------------------------------ arka plan rengi, favori, bilgi
+
+    private fun applyBackground(bmp: android.graphics.Bitmap) {
+        val small = android.graphics.Bitmap.createScaledBitmap(bmp, 12, 12, true)
+        var r = 0L; var g = 0L; var b = 0L; var n = 0L
+        for (x in 0 until 12) for (y in 0 until 12) {
+            val c = small.getPixel(x, y)
+            val hsv = FloatArray(3)
+            Color.colorToHSV(c, hsv)
+            // Gri/çok koyu/çok açık pikseller rengi sulandırır; doygun olanlar daha ağır sayılır.
+            val w = (1 + (hsv[1] * 6).toInt()).toLong()
+            r += Color.red(c) * w; g += Color.green(c) * w; b += Color.blue(c) * w; n += w
+        }
+        if (n == 0L) return
+        val avg = Color.rgb((r / n).toInt(), (g / n).toInt(), (b / n).toInt())
+        val hsv = FloatArray(3)
+        Color.colorToHSV(avg, hsv)
+        val topHsv = floatArrayOf(hsv[0], (hsv[1] * 0.9f).coerceIn(0f, 0.8f), 0.5f)
+        val botHsv = floatArrayOf(hsv[0], (hsv[1] * 0.9f).coerceIn(0f, 0.8f), 0.1f)
+        rootView.background = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(Color.HSVToColor(topHsv), Color.HSVToColor(botHsv))
+        )
+    }
+
+    private fun currentUri(): String? = player?.currentMediaItem?.localConfiguration?.uri?.toString()
+
+    private fun toggleFavorite() {
+        val u = currentUri() ?: return
+        PlaylistStore.toggleFavorite(this, PlaylistStore.MUSIC, u)
+        updateFavorite()
+    }
+
+    private fun updateFavorite() {
+        val u = currentUri()
+        val fav = u != null && PlaylistStore.isFavorite(this, PlaylistStore.MUSIC, u)
+        favButton.setImageResource(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border)
+        favButton.setColorFilter(if (fav) 0xFFFF5C7A.toInt() else Color.WHITE)
+    }
+
+    private fun kbpsText(): String {
+        val p = PlayerHolder.player ?: return ""
+        val fmt = p.audioFormat
+        val parts = ArrayList<String>()
+        val rate = fmt?.sampleRate ?: 0
+        if (rate > 0) {
+            val khz = rate / 1000.0
+            parts += (if (khz == khz.toInt().toDouble()) khz.toInt().toString() else "%.1f".format(khz)) + " kHz"
+        }
+        val track = library[p.currentMediaItem?.mediaId ?: ""]
+        var bitrate = fmt?.bitrate ?: -1
+        if (bitrate <= 0 && track != null && track.durationMs > 0) bitrate = (track.sizeBytes * 8 * 1000 / track.durationMs).toInt()
+        if (bitrate > 0) parts += "${bitrate / 1000} kbps"
+        val ext = track?.path?.substringAfterLast('.', "")?.takeIf { it.isNotEmpty() && it.length <= 5 }
+            ?: fmt?.sampleMimeType?.substringAfterLast('/')
+        if (!ext.isNullOrEmpty()) parts += ext
+        return parts.joinToString("  ").uppercase()
+    }
+
+    private fun showMoreSheet() {
+        val u = currentUri() ?: return
+        val fav = PlaylistStore.isFavorite(this, PlaylistStore.MUSIC, u)
+        val e = ArrayList<SheetEntry>()
+        e += SheetEntry(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border, if (fav) "Favorilerden çıkar" else "Favorilere ekle") { toggleFavorite() }
+        e += SheetEntry(R.drawable.ic_playlist_add, "Oynatma listesine ekle") { showAddToPlaylist(PlaylistStore.MUSIC, listOf(u)) }
+        e += SheetEntry(R.drawable.ic_lyrics, "Sözler") { toggleLyrics() }
+        e += SheetEntry(R.drawable.ic_repeat, "Çalma hızı") { showSpeed() }
+        e += SheetEntry(R.drawable.ic_timer, "Uyku zamanlayıcısı") { showSleep() }
+        e += SheetEntry(R.drawable.ic_tune, "Ses ayarları") { MusicController.showFxPanel(this) }
+        e += SheetEntry(R.drawable.ic_view_list, "Kuyruk") { showQueue() }
+        showSheet(titleView.text?.toString() ?: "", e)
     }
 
     private fun refresh() {
@@ -299,13 +388,19 @@ class NowPlayingActivity : AppCompatActivity() {
                 albumId = albumId, durationMs = 0, trackNo = 0, dateAddedSec = 0, folderPath = ""
             ) else null
             val full = library[item?.mediaId ?: ""] ?: track
-            ArtLoader.load(art, full, 800)
+            ArtLoader.load(art, full, 800) { applyBackground(it) }
+            wave.setSeed(item?.mediaId?.toLongOrNull() ?: 0L)
             loadLyrics(library[item?.mediaId ?: ""])
         }
         playButton.setImageResource(if (p.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
-        shuffleButton.setColorFilter(if (p.shuffleModeEnabled) UiColors.accent else Color.WHITE)
-        repeatButton.setImageResource(if (p.repeatMode == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat)
-        repeatButton.setColorFilter(if (p.repeatMode == Player.REPEAT_MODE_OFF) Color.WHITE else UiColors.accent)
+        (shuffleButton.getChildAt(0) as ImageView).setColorFilter(if (p.shuffleModeEnabled) UiColors.accent else Color.WHITE)
+        (repeatButton.getChildAt(0) as ImageView).apply {
+            setImageResource(if (p.repeatMode == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat)
+            setColorFilter(if (p.repeatMode == Player.REPEAT_MODE_OFF) Color.WHITE else UiColors.accent)
+        }
+        updateFavorite()
+        infoView.text = kbpsText()
+        infoView.visibility = if (infoView.text.isNullOrEmpty()) View.GONE else View.VISIBLE
         tick()
     }
 
@@ -315,15 +410,16 @@ class NowPlayingActivity : AppCompatActivity() {
         durView.text = if (dur > 0) formatDuration(dur) else "--:--"
         if (!dragging) {
             posView.text = formatDuration(p.currentPosition)
-            seek.progress = if (dur > 0) (p.currentPosition * 1000 / dur).toInt().coerceIn(0, 1000) else 0
+            wave.progress = if (dur > 0) (p.currentPosition.toFloat() / dur) else 0f
         }
         val end = MusicController.sleepEndsAtMs
-        sleepLabel.text = when {
+        val sleepText = when {
             MusicController.sleepAtEnd -> "Şarkı sonunda"
-            end > System.currentTimeMillis() -> "Uyku: ${((end - System.currentTimeMillis()) / 60_000L).toInt() + 1} dk"
-            else -> "Uyku"
+            end > System.currentTimeMillis() -> "${((end - System.currentTimeMillis()) / 60_000L).toInt() + 1} dk"
+            else -> ""
         }
-        speedLabel.text = "Hız ${"%.2f".format(p.playbackParameters.speed).trimEnd('0').trimEnd('.')}x"
+        sleepLabel.text = sleepText
+        sleepLabel.visibility = if (sleepText.isEmpty()) View.GONE else View.VISIBLE
         updateLyricHighlight(p.currentPosition)
     }
 

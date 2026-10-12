@@ -46,7 +46,7 @@ object ArtLoader {
         iv.setBackgroundColor(UiColors.surface)
     }
 
-    fun load(iv: ImageView, track: MusicTrack?, sizePx: Int) {
+    fun load(iv: ImageView, track: MusicTrack?, sizePx: Int, onLoaded: ((Bitmap) -> Unit)? = null) {
         if (track == null) {
             iv.tag = null
             placeholder(iv)
@@ -57,6 +57,7 @@ object ArtLoader {
         val hit = cache.get(k)
         if (hit != null) {
             show(iv, hit)
+            onLoaded?.invoke(hit)
             return
         }
         placeholder(iv)
@@ -69,7 +70,12 @@ object ArtLoader {
                 return@execute
             }
             cache.put(k, bmp)
-            main.post { if (iv.tag == k) show(iv, bmp) }
+            main.post {
+                if (iv.tag == k) {
+                    show(iv, bmp)
+                    onLoaded?.invoke(bmp)
+                }
+            }
         }
     }
 
