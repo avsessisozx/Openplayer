@@ -82,8 +82,10 @@ object PlayerHolder {
         val http = DefaultHttpDataSource.Factory()
             .setAllowCrossProtocolRedirects(true)
             .setUserAgent("OpenPlayer/0.3")
+        val authedHttp = NetworkDataSourceFactory.withWebDavAuth(app, http)
+        val dataSources = NetworkDataSourceFactory(app, DefaultDataSource.Factory(app, authedHttp))
         val mediaSources = DefaultMediaSourceFactory(app)
-            .setDataSourceFactory(DefaultDataSource.Factory(app, http))
+            .setDataSourceFactory(dataSources)
 
         val exo = ExoPlayer.Builder(app, renderers)
             .setMediaSourceFactory(mediaSources)

@@ -322,7 +322,8 @@ class MainActivity : AppCompatActivity() {
         val menu = PopupMenu(this, anchor)
         menu.menu.add(0, 1, 0, "Ağ akışı aç")
         menu.menu.add(0, 2, 1, if (settings.showHiddenFolders) "Gizli klasörleri sakla" else "Gizli klasörleri göster")
-        menu.menu.add(0, 3, 2, "Ayarlar")
+        menu.menu.add(0, 4, 2, "Ağ kaynakları (SMB / FTP / WebDAV)")
+        menu.menu.add(0, 3, 3, "Ayarlar")
         menu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> showInput("Ağ akışı", "http://, https:// veya rtsp:// adresi") { url ->
@@ -338,6 +339,7 @@ class MainActivity : AppCompatActivity() {
                     render()
                 }
                 3 -> startActivity(Intent(this, SettingsActivity::class.java))
+                4 -> startActivity(Intent(this, NetworkActivity::class.java))
             }
             true
         }
