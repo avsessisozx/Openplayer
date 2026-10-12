@@ -554,6 +554,12 @@ class PlayerActivity : AppCompatActivity() {
         val uri = item.localConfiguration?.uri
         if (uri != currentUri) saveMemory()
         if (uri != currentUri) {
+            triedDecoders.clear()
+            orientationOverride = null
+            if (PlayerHolder.decoderOverride != null) {
+                PlayerHolder.decoderOverride = null
+                handler.post { if (!isDestroyed) PlayerHolder.rebuild(this) }
+            }
             vrManual = null
             if (vr != VrMode.NONE) setVr(VrMode.NONE, remember = false)
         }
@@ -615,28 +621,24 @@ class PlayerActivity : AppCompatActivity() {
         }.start()
     }
 
+    private val triedDecoders = HashSet<DecoderMode>()
+
     private fun onPlaybackError(error: PlaybackException) {
+        val cur = PlayerHolder.effectiveDecoder(this)
+        triedDecoders += cur
+        val order = listOf(DecoderMode.HW, DecoderMode.HW_PLUS, DecoderMode.SW)
+        val next = order.firstOrNull { it !in triedDecoders }
+        if (next != null && settings.autoDecoderFallback) {
+            // MX gibi: sormadan sıradaki çözücüyle aynı konumdan yeniden dener.
+            PlayerHolder.decoderOverride = next
+            PlayerHolder.rebuild(this)
+            decoderLabel.text = next.short
+            toast("${next.label} çözücüyle yeniden deneniyor")
+            return
+        }
         if (errorDialogShown) return
         errorDialogShown = true
-        val next = when (settings.decoder) {
-            DecoderMode.HW -> DecoderMode.HW_PLUS
-            DecoderMode.HW_PLUS -> DecoderMode.SW
-            DecoderMode.SW -> null
-        }
-        val msg = "Bu video oynatılamadı (${error.errorCodeName})."
-        if (next == null) {
-            showMessage("Oynatma hatası", msg)
-        } else {
-            PanelBuilder(this)
-                .setTitle("Oynatma hatası")
-                .setMessage("$msg\nÇözücü ${next.label} olarak değiştirilip tekrar denensin mi?")
-                .setPositiveButton("Dene") { _, _ ->
-                    errorDialogShown = false
-                    changeDecoder(next)
-                }
-                .setNegativeButton("Hayır", null)
-                .show()
-        }
+        showMessage("Oynatma hatası", "Bu video oynatılamadı (${error.errorCodeName}). Tüm çözücüler denendi.")
     }
 
     fun changeDecoder(mode: DecoderMode) {
@@ -694,6 +696,25 @@ class PlayerActivity : AppCompatActivity() {
         shortcutScroll = HorizontalScrollView(this).apply {
             isHorizontalScrollBarEnabled = false
             addView(shortcutRow, FrameLayout.LayoutParams(-2, -2))
+            val flingDetector = android.view.GestureDetector(this@PlayerActivity, object : android.view.GestureDetector.SimpleOnGestureListener() {
+                override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent, vx: Float, vy: Float): Boolean {
+                    if (e1 == null) return false
+                    val dx = e2.x - e1.x
+                    if (kotlin.math.abs(dx) < dp(48) || kotlin.math.abs(dx) < kotlin.math.abs(e2.y - e1.y)) return false
+                    if (dx < 0 && !shortcutsExpanded) {
+                        shortcutsExpanded = true
+                    } else if (dx > 0 && shortcutsExpanded && scrollX == 0) {
+                        shortcutsExpanded = false
+                    } else return false
+                    refreshShortcuts()
+                    scheduleAutoHide()
+                    return true
+                }
+            })
+            setOnTouchListener { _, ev ->
+                flingDetector.onTouchEvent(ev)
+                false
+            }
         }
 
         elapsedView = label("0:00", 14f)
@@ -889,7 +910,7 @@ class PlayerActivity : AppCompatActivity() {
     fun scrubMove(posMs: Long) {
         if (!scrubActive || !settings.liveScrub) return
         val now = SystemClock.uptimeMillis()
-        if (now - lastScrubAt < 24) return
+        if (now - lastScrubAt < 40) return
         lastScrubAt = now
         player.seekTo(posMs)
     }
@@ -898,7 +919,7 @@ class PlayerActivity : AppCompatActivity() {
         if (!scrubActive) return
         scrubActive = false
         runCatching { player.isScrubbingModeEnabled = false }
-        player.setSeekParameters(SeekParameters.EXACT)
+        player.setSeekParameters(if (settings.exactSeekOnRelease) SeekParameters.EXACT else SeekParameters.CLOSEST_SYNC)
         player.seekTo(posMs)
         if (settings.liveScrub && scrubWasPlaying) player.play()
     }
@@ -964,7 +985,7 @@ class PlayerActivity : AppCompatActivity() {
         }
         remainingView.text = if (settings.showRemainingTime) "-" + formatDuration((duration - pos).coerceAtLeast(0)) else formatDuration(duration)
         seekBar.secondaryProgress = (player.bufferedPosition / 1000).toInt()
-        decoderLabel.text = settings.decoder.short
+        decoderLabel.text = PlayerHolder.effectiveDecoder(this).short
     }
 
     private fun tick() {
@@ -1231,15 +1252,23 @@ class PlayerActivity : AppCompatActivity() {
         surface.translationY = panY
     }
 
+    /** Döndür düğmesi: o an dikeyse yataya, yataysa dikeye geçer (ayardaki varsayılan mod değişmez). */
+    private var orientationOverride: Int? = null
+
     fun cycleOrientation() {
-        val all = OrientationMode.entries
-        settings.orientation = all[(settings.orientation.ordinal + 1) % all.size]
-        applyOrientation()
-        showHud("Ekran yönü: ${settings.orientation.label}")
+        val landscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        val target = if (landscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        orientationOverride = target
+        requestedOrientation = target
+        showHud(if (landscape) "Dikey" else "Yatay")
         hideHudSoon()
     }
 
     private fun applyOrientation() {
+        orientationOverride?.let {
+            requestedOrientation = it
+            return
+        }
         val size = player.videoSize
         requestedOrientation = when (settings.orientation) {
             OrientationMode.AUTO -> when {
@@ -1278,7 +1307,7 @@ class PlayerActivity : AppCompatActivity() {
         refreshShortcuts()
         updatePlayButton()
         updateNavButtons()
-        decoderLabel.text = settings.decoder.short
+        decoderLabel.text = PlayerHolder.effectiveDecoder(this).short
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         subtitles.applyStyle()
     }

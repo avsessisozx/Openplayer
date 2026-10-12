@@ -27,6 +27,12 @@ object PlayerHolder {
 
     val player: ExoPlayer? get() = current
 
+    /** O an açık video için geçici çözücü modu (ayarı değiştirmez). */
+    @Volatile var decoderOverride: DecoderMode? = null
+
+    fun effectiveDecoder(context: Context): DecoderMode =
+        decoderOverride ?: AppSettings.get(context.applicationContext).decoder
+
     fun get(context: Context): ExoPlayer =
         current ?: create(context.applicationContext).also { current = it }
 
@@ -81,7 +87,7 @@ object PlayerHolder {
                 .setEnableAudioOutputPlaybackParameters(playbackParams)
                 .setAudioProcessors(arrayOf<AudioProcessor>(delay))
                 .build()
-        val renderers: DefaultRenderersFactory = when (settings.decoder) {
+        val renderers: DefaultRenderersFactory = when (decoderOverride ?: settings.decoder) {
             DecoderMode.HW ->
                 object : DefaultRenderersFactory(app) {
                     override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =

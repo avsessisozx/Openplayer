@@ -268,6 +268,16 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("horizontal_seek", true)
         set(v) = prefs.edit().putBoolean("horizontal_seek", v).apply()
 
+    /** Açılamayan videoda çözücüler sırayla otomatik denenir (HW → HW+ → SW). */
+    var autoDecoderFallback: Boolean
+        get() = prefs.getBoolean("auto_decoder_fallback", true)
+        set(v) = prefs.edit().putBoolean("auto_decoder_fallback", v).apply()
+
+    /** Sarmayı bırakınca tam kareye git (kapalıysa en yakın anahtar kare: daha akıcı, birkaç sn sapabilir). */
+    var exactSeekOnRelease: Boolean
+        get() = prefs.getBoolean("exact_seek_release", true)
+        set(v) = prefs.edit().putBoolean("exact_seek_release", v).apply()
+
     /** Sararken görüntü canlı akar (ileri-geri sararken önizleme). */
     var liveScrub: Boolean
         get() = prefs.getBoolean("live_scrub", true)

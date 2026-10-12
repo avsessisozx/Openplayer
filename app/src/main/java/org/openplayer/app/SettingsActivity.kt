@@ -223,6 +223,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         section("Sarma")
         toggle("Sararken canlı önizleme", "Çubuğu veya ekranı kaydırırken görüntü akar; bırakınca tam konuma gider", s.liveScrub) { s.liveScrub = it }
+        toggle("Bırakınca tam konuma git", "Kapalıyken en yakın anahtar kareye gider: daha akıcı, birkaç sn sapabilir", s.exactSeekOnRelease) { s.exactSeekOnRelease = it }
         toggle("Yatay kaydırma ile sarma", null, s.horizontalSeekEnabled) { s.horizontalSeekEnabled = it }
         val swipeOptions = listOf(30, 60, 90, 120, 180, 300)
         choice("Ekranı baştan sona kaydırınca sarma", "${s.swipeSeekSec} sn", swipeOptions.map { "$it sn" }, swipeOptions.indexOf(s.swipeSeekSec)) {
@@ -247,6 +248,7 @@ class SettingsActivity : AppCompatActivity() {
         choice("Varsayılan çözücü", s.decoder.label, DecoderMode.entries.map { it.label }, DecoderMode.entries.indexOf(s.decoder)) {
             s.decoder = DecoderMode.entries[it]
         }
+        toggle("Açılamazsa otomatik dene", "Video açılmazsa çözücüler sırayla (HW → HW+ → SW) sormadan denenir; ayarınız değişmez", s.autoDecoderFallback) { s.autoDecoderFallback = it }
         note("HW: sistemin donanım çözücüsü, en az pil harcar. HW+: donanımın desteklemediği biçimlerde FFmpeg kullanır. SW: önce FFmpeg ile işlemci çözmesi. Oynatma sırasında üstteki etiketten de değiştirilebilir.")
     }
 
