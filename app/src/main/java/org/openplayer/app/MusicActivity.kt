@@ -19,6 +19,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -40,6 +41,8 @@ class MusicActivity : AppCompatActivity() {
         val icon: Int = 0,
         val trailing: String? = null,
         val highlight: Boolean = false,
+        val trackId: Long = -1L,
+        val onMore: (() -> Unit)? = null,
         val onLong: (() -> Unit)? = null,
         val onClick: () -> Unit,
     )
@@ -57,6 +60,35 @@ class MusicActivity : AppCompatActivity() {
     private lateinit var miniTitle: TextView
     private lateinit var miniSub: TextView
     private lateinit var miniPlay: ImageView
+
+    private val fileOps = FileOps(this)
+    private val selected = LinkedHashSet<Long>()
+    private var selectionOn = false
+    private var shownTracks: List<MusicTrack> = emptyList()
+    private lateinit var topBarView: View
+    private lateinit var selBar: LinearLayout
+    private lateinit var selTitle: TextView
+    private lateinit var actionBar: LinearLayout
+    private var pendingTrack: MusicTrack? = null
+
+    private val pickCover = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        val tr = pendingTrack
+        pendingTrack = null
+        if (uri != null && tr != null) {
+            val ok = MusicTagStore.setCover(this, tr.id, uri)
+            Toast.makeText(this, if (ok) "Kapak değiştirildi" else "Görsel okunamadı", Toast.LENGTH_SHORT).show()
+            load()
+        }
+    }
+
+    private val pickLyrics = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        val tr = pendingTrack
+        pendingTrack = null
+        if (uri != null && tr != null) {
+            val ok = Lyrics.importFile(this, tr.id, uri)
+            Toast.makeText(this, if (ok) "Söz dosyası eklendi" else "Dosya okunamadı veya çok büyük", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private var all: List<MusicTrack> = emptyList()
     private var tab = Tab.SONGS
@@ -79,6 +111,7 @@ class MusicActivity : AppCompatActivity() {
     private val backCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             when {
+                selectionOn -> exitSelection()
                 searching -> closeSearch()
                 detail != null -> {
                     detail = null
@@ -192,6 +225,36 @@ class MusicActivity : AppCompatActivity() {
             })
         }
 
+        topBarView = topBar
+        selTitle = text(20f)
+        selBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(8), 0, dp(4), 0)
+            visibility = View.GONE
+            addView(iconView(R.drawable.ic_close).apply { setOnClickListener { exitSelection() } })
+            addView(selTitle, LinearLayout.LayoutParams(0, dp(56), 1f).apply { marginStart = dp(16) })
+            addView(iconView(R.drawable.ic_play).apply { setOnClickListener { playSelection() } })
+            addView(iconView(R.drawable.ic_info).apply { setOnClickListener { infoSelection() } })
+        }
+        actionBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setBackgroundColor(UiColors.surface)
+            visibility = View.GONE
+            fun act(icon: Int, desc: String, onClick: () -> Unit) {
+                addView(iconView(icon, 48, 12).apply {
+                    contentDescription = desc
+                    setOnClickListener { onClick() }
+                }, LinearLayout.LayoutParams(0, dp(52), 1f))
+            }
+            act(R.drawable.ic_check, "Hepsini seç") { selectAll() }
+            act(R.drawable.ic_playlist_add, "Listeye ekle") { addSelectionToPlaylist() }
+            act(R.drawable.ic_edit, "Etiketleri düzenle") { editTags(selectedTracks()) }
+            act(R.drawable.ic_share, "Paylaş") { shareTracks(selectedTracks()) }
+            act(R.drawable.ic_delete, "Sil") { deleteTracks(selectedTracks()) }
+        }
+
         tabRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         buildTabs()
 
@@ -243,12 +306,14 @@ class MusicActivity : AppCompatActivity() {
             fitsSystemWindows = true
             setBackgroundColor(UiColors.background)
             addView(topBar, LinearLayout.LayoutParams(-1, -2))
+            addView(selBar, LinearLayout.LayoutParams(-1, -2))
             addView(tabRow, LinearLayout.LayoutParams(-1, dp(44)))
             addView(FrameLayout(this@MusicActivity).apply {
                 addView(list, FrameLayout.LayoutParams(-1, -1))
                 addView(emptyView, FrameLayout.LayoutParams(-1, -1))
             }, LinearLayout.LayoutParams(-1, 0, 1f))
             addView(mini, LinearLayout.LayoutParams(-1, -2))
+            addView(actionBar, LinearLayout.LayoutParams(-1, -2))
         }
     }
 
@@ -342,14 +407,20 @@ class MusicActivity : AppCompatActivity() {
         val d = detail
 
         fun songRows(tracks: List<MusicTrack>) {
+            shownTracks = tracks
             tracks.forEachIndexed { i, t ->
                 rows += Row(
                     t.title, "${t.artist} • ${t.album}", t, trailing = formatDuration(t.durationMs),
                     highlight = t.id.toString() == playingId,
-                    onLong = { showTrackMenu(t) },
-                ) { MusicController.play(this, tracks, i); afterPlay() }
+                    trackId = t.id,
+                    onMore = { showTrackMenu(t) },
+                    onLong = { toggleSelect(t) },
+                ) {
+                    if (selectionOn) toggleSelect(t) else { MusicController.play(this, tracks, i); afterPlay() }
+                }
             }
         }
+        shownTracks = emptyList()
 
         when {
             searching -> {
@@ -408,6 +479,7 @@ class MusicActivity : AppCompatActivity() {
             return
         }
         emptyView.visibility = View.GONE
+        updateSelectionUi()
         val lm = list.layoutManager as LinearLayoutManager
         val pos = lm.findFirstVisibleItemPosition()
         adapter.rows = rows
@@ -418,28 +490,227 @@ class MusicActivity : AppCompatActivity() {
         updateMini()
     }
 
-    private fun showTrackMenu(t: MusicTrack) {
-        val items = arrayOf("Sıradakine ekle", "Kuyruğun sonuna ekle", "Bilgi")
+    // ------------------------------------------------------------ seçim modu
+
+    private fun toggleSelect(t: MusicTrack) {
+        selectionOn = true
+        if (!selected.add(t.id)) selected.remove(t.id)
+        updateSelectionUi()
+    }
+
+    private fun exitSelection() {
+        selected.clear()
+        selectionOn = false
+        updateSelectionUi()
+    }
+
+    private fun selectedTracks(): List<MusicTrack> = shownTracks.filter { it.id in selected }
+
+    private fun selectAll() {
+        shownTracks.forEach { selected.add(it.id) }
+        selectionOn = true
+        updateSelectionUi()
+    }
+
+    private fun updateSelectionUi() {
+        if (selectionOn && selected.isEmpty()) selectionOn = false
+        topBarView.visibility = if (selectionOn) View.GONE else View.VISIBLE
+        selBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
+        actionBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
+        selTitle.text = "${selected.size} / ${shownTracks.size} Seçildi"
+        adapter.refreshSelection()
+    }
+
+    private fun playSelection() {
+        val ts = selectedTracks()
+        if (ts.isEmpty()) return
+        exitSelection()
+        MusicController.play(this, ts, 0)
+        updateMini()
+    }
+
+    private fun infoSelection() {
+        val ts = selectedTracks()
+        if (ts.isEmpty()) return
+        if (ts.size == 1) {
+            showTrackInfo(ts[0])
+            return
+        }
+        showSummaryInfo("Seçili şarkılar", listOf(
+            "Şarkı sayısı" to ts.size.toString(),
+            "Toplam boyut" to android.text.format.Formatter.formatFileSize(this, ts.sumOf { it.sizeBytes }),
+            "Toplam süre" to formatDuration(ts.sumOf { it.durationMs }),
+        ))
+    }
+
+    private fun showTrackInfo(t: MusicTrack) {
+        showMediaInfo(t.title, t.uri, t.sizeBytes, t.dateAddedSec * 1000L)
+    }
+
+    private fun addSelectionToPlaylist() {
+        val uris = selectedTracks().map { it.uri.toString() }
+        if (uris.isEmpty()) return
+        showAddToPlaylist(PlaylistStore.MUSIC, uris) { exitSelection() }
+    }
+
+    private fun shareTracks(ts: List<MusicTrack>) {
+        if (ts.isEmpty()) return
+        val send = if (ts.size == 1) Intent(Intent.ACTION_SEND).apply {
+            type = "audio/*"
+            putExtra(Intent.EXTRA_STREAM, ts[0].uri)
+        } else Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "audio/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(ts.map { it.uri }))
+        }
+        send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(Intent.createChooser(send, "Paylaş"))
+    }
+
+    private fun deleteTracks(ts: List<MusicTrack>) {
+        if (ts.isEmpty()) return
+        val trash = Build.VERSION.SDK_INT >= 30 && settings.useTrash
         PanelBuilder(this)
-            .setTitle(t.title)
-            .setItems(items) { _, which ->
-                when (which) {
-                    0 -> {
-                        MusicController.enqueue(this, t, next = true)
-                        android.widget.Toast.makeText(this, "Sıradakine eklendi", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                    1 -> {
-                        MusicController.enqueue(this, t, next = false)
-                        android.widget.Toast.makeText(this, "Kuyruğa eklendi", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                    else -> showMessage(
-                        t.title,
-                        "Sanatçı: ${t.artist}\nAlbüm: ${t.album}\nSüre: ${formatDuration(t.durationMs)}\nKlasör: ${t.folderPath}"
-                    )
+            .setTitle("Silinsin mi?")
+            .setMessage("${ts.size} şarkı ${if (trash) "çöp kutusuna taşınacak (geri alınabilir)." else "kalıcı olarak silinecek."}")
+            .setPositiveButton("Sil") { _, _ ->
+                fileOps.delete(ts.map { it.uri }) {
+                    exitSelection()
+                    load()
                 }
             }
-            .setNegativeButton("Kapat", null)
+            .setNegativeButton("İptal", null)
             .show()
+    }
+
+    private fun renameTrack(t: MusicTrack) {
+        val full = t.path.substringAfterLast('/').ifEmpty { t.title }
+        val ext = full.substringAfterLast('.', "")
+        showInput("Dosyayı yeniden adlandır", "Yeni ad", full.removeSuffix(if (ext.isEmpty()) "" else ".$ext")) { base ->
+            val clean = base.trim()
+            if (clean.isEmpty()) return@showInput
+            fileOps.rename(listOf(t.uri), listOf(if (ext.isEmpty()) clean else "$clean.$ext")) { load() }
+        }
+    }
+
+    // ------------------------------------------------------------ etiket düzenleme
+
+    private fun editTags(tracks: List<MusicTrack>) {
+        if (tracks.isEmpty()) return
+        val single = tracks.size == 1
+        val t0 = tracks[0]
+        fun field(hint: String, initial: String, number: Boolean = false) = EditText(this).apply {
+            setText(initial)
+            this.hint = hint
+            setSingleLine()
+            if (number) inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        }
+        val fTitle = field("Şarkı adı", if (single) t0.title else "")
+        val fArtist = field(if (single) "Sanatçı" else "Sanatçı (boş = değiştirme)", if (single) t0.artist else "")
+        val fAlbum = field(if (single) "Albüm" else "Albüm (boş = değiştirme)", if (single) t0.album else "")
+        val fAlbumArtist = field(if (single) "Albüm sanatçısı" else "Albüm sanatçısı (boş = değiştirme)", if (single) t0.albumArtist else "")
+        val fGenre = field(if (single) "Tür" else "Tür (boş = değiştirme)", if (single) t0.genre else "")
+        val fYear = field(if (single) "Yıl" else "Yıl (boş = değiştirme)", if (single && t0.year > 0) t0.year.toString() else "", true)
+        val fTrack = field("Parça no", if (single && t0.trackNo > 0) t0.trackNo.toString() else "", true)
+        val box = vertical {
+            addView(label(
+                if (single) "Değişiklikler uygulamada saklanır; dosyanın kendisi değişmez."
+                else "${tracks.size} şarkı için ortak alanlar. Boş bıraktığın alan değişmez.",
+                12f, UiColors.textSecondary
+            ))
+            if (single) addView(fTitle)
+            addView(fArtist)
+            addView(fAlbum)
+            addView(fAlbumArtist)
+            addView(fGenre)
+            addView(fYear)
+            if (single) addView(fTrack)
+            if (single) {
+                addView(android.widget.Button(this@MusicActivity).apply {
+                    text = "Kapağı değiştir…"
+                    setOnClickListener {
+                        pendingTrack = t0
+                        pickCover.launch(arrayOf("image/*"))
+                    }
+                }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
+                addView(android.widget.Button(this@MusicActivity).apply {
+                    text = "Söz dosyası ekle (.lrc / .txt)…"
+                    setOnClickListener {
+                        pendingTrack = t0
+                        pickLyrics.launch(arrayOf("*/*"))
+                    }
+                }, LinearLayout.LayoutParams(-1, -2))
+            }
+        }
+        PanelBuilder(this)
+            .setTitle(if (single) "Etiketleri düzenle" else "${tracks.size} şarkıyı düzenle")
+            .setView(android.widget.ScrollView(this).apply { addView(box) })
+            .setPositiveButton("Kaydet") { _, _ ->
+                for (t in tracks) {
+                    val cur = MusicTagStore.get(this, t.id)
+                    fun pick(v: EditText, old: String?): String? = v.text.toString().trim().ifEmpty { null } ?: old
+                    MusicTagStore.save(
+                        this, t.id,
+                        MusicTagStore.Tags(
+                            title = if (single) pick(fTitle, null) else cur?.title,
+                            artist = pick(fArtist, cur?.artist),
+                            album = pick(fAlbum, cur?.album),
+                            albumArtist = pick(fAlbumArtist, cur?.albumArtist),
+                            genre = pick(fGenre, cur?.genre),
+                            year = fYear.text.toString().trim().toIntOrNull() ?: cur?.year,
+                            trackNo = if (single) fTrack.text.toString().trim().toIntOrNull() else cur?.trackNo,
+                            cover = cur?.cover ?: false,
+                        )
+                    )
+                }
+                exitSelection()
+                load()
+            }
+            .setNeutralButton("Orijinale döndür") { _, _ ->
+                tracks.forEach {
+                    MusicTagStore.reset(this, it.id)
+                    Lyrics.removeUserFile(this, it.id)
+                }
+                exitSelection()
+                load()
+            }
+            .setNegativeButton("İptal", null)
+            .show()
+    }
+
+    // ------------------------------------------------------------ satır menüsü
+
+    private fun showTrackMenu(t: MusicTrack) {
+        val u = t.uri.toString()
+        val fav = PlaylistStore.isFavorite(this, PlaylistStore.MUSIC, u)
+        val e = ArrayList<SheetEntry>()
+        e += SheetEntry(R.drawable.ic_play, "Çal") {
+            val i = shownTracks.indexOfFirst { it.id == t.id }
+            if (i >= 0) MusicController.play(this, shownTracks, i) else MusicController.play(this, listOf(t), 0)
+            updateMini()
+        }
+        e += SheetEntry(R.drawable.ic_next, "Sıradakine ekle") {
+            MusicController.enqueue(this, t, next = true)
+            Toast.makeText(this, "Sıradakine eklendi", Toast.LENGTH_SHORT).show()
+            updateMini()
+        }
+        e += SheetEntry(R.drawable.ic_view_list, "Kuyruğun sonuna ekle") {
+            MusicController.enqueue(this, t, next = false)
+            Toast.makeText(this, "Kuyruğa eklendi", Toast.LENGTH_SHORT).show()
+            updateMini()
+        }
+        e += SheetEntry(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border,
+            if (fav) "Favorilerden çıkar" else "Favorilere ekle") {
+            PlaylistStore.toggleFavorite(this, PlaylistStore.MUSIC, u)
+        }
+        e += SheetEntry(R.drawable.ic_playlist_add, "Oynatma listesine ekle") {
+            showAddToPlaylist(PlaylistStore.MUSIC, listOf(u))
+        }
+        e += SheetEntry(R.drawable.ic_edit, "Etiketleri düzenle") { editTags(listOf(t)) }
+        e += SheetEntry(R.drawable.ic_share, "Paylaş") { shareTracks(listOf(t)) }
+        e += SheetEntry(R.drawable.ic_edit, "Dosyayı yeniden adlandır") { renameTrack(t) }
+        e += SheetEntry(R.drawable.ic_info, "Özellikler") { showTrackInfo(t) }
+        e += SheetEntry(R.drawable.ic_delete, "Sil", danger = true) { deleteTracks(listOf(t)) }
+        showSheet(t.title, e)
     }
 
     private fun updateMini() {
@@ -467,44 +738,62 @@ class MusicActivity : AppCompatActivity() {
                 notifyDataSetChanged()
             }
 
+        @android.annotation.SuppressLint("NotifyDataSetChanged")
+        fun refreshSelection() = notifyDataSetChanged()
+
         inner class VH(
             root: View,
             val art: ImageView,
             val title: TextView,
             val sub: TextView,
             val trailing: TextView,
+            val more: ImageView,
+            val check: ImageView,
         ) : RecyclerView.ViewHolder(root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val art = ImageView(parent.context)
             ArtLoader.roundCorners(art, 8)
+            val check = checkMark(parent.context)
+            val artBox = FrameLayout(parent.context).apply {
+                addView(art, FrameLayout.LayoutParams(-1, -1))
+                addView(check, FrameLayout.LayoutParams(dp(24), dp(24), Gravity.CENTER))
+            }
             val title = text(16f)
             val sub = text(13f, UiColors.textSecondary)
             val trailing = text(12f, UiColors.textSecondary)
+            val more = iconView(R.drawable.ic_more_vert, 40, 8).apply { setColorFilter(UiColors.textSecondary) }
             val root = LinearLayout(parent.context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(16), dp(6), dp(16), dp(6))
+                setPadding(dp(16), dp(6), dp(4), dp(6))
                 layoutParams = RecyclerView.LayoutParams(-1, -2)
-                addView(art, LinearLayout.LayoutParams(dp(52), dp(52)))
+                addView(artBox, LinearLayout.LayoutParams(dp(52), dp(52)))
                 addView(LinearLayout(context).apply {
                     orientation = LinearLayout.VERTICAL
                     addView(title)
                     addView(sub)
                 }, LinearLayout.LayoutParams(0, -2, 1f).apply { marginStart = dp(14); marginEnd = dp(8) })
                 addView(trailing)
+                addView(more)
             }
-            return VH(root, art, title, sub, trailing)
+            return VH(root, art, title, sub, trailing, more, check)
         }
 
         override fun getItemCount() = rows.size
 
         override fun onBindViewHolder(h: VH, position: Int) {
             val r = rows[position]
+            val sel = r.trackId >= 0 && r.trackId in selected
+            h.check.visibility = if (sel) View.VISIBLE else View.GONE
+            h.itemView.setBackgroundColor(if (sel) 0x33FFFFFF else 0)
             h.title.text = r.title
             h.title.setTextColor(if (r.highlight) UiColors.accent else Color.WHITE)
             h.sub.text = r.subtitle
             h.trailing.text = r.trailing ?: ""
+            val more = r.onMore
+            h.more.visibility = if (more != null && !selectionOn) View.VISIBLE else View.GONE
+            h.more.setOnClickListener { more?.invoke() }
             if (r.icon != 0) {
                 h.art.tag = null
                 h.art.setImageResource(r.icon)

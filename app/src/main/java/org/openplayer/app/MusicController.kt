@@ -92,7 +92,19 @@ object MusicController {
 
     // ------------------------------------------------------------ uyku zamanlayıcısı
 
+    var sleepAtEnd = false
+        private set
+
+    /** Çalan şarkı bitince duraklatır. */
+    fun sleepAtEndOfTrack(on: Boolean) {
+        main.removeCallbacks(sleepRunnable)
+        sleepEndsAtMs = 0L
+        sleepAtEnd = on
+        PlayerHolder.player?.pauseAtEndOfMediaItems = on
+    }
+
     fun startSleep(minutes: Int) {
+        if (sleepAtEnd) sleepAtEndOfTrack(false)
         main.removeCallbacks(sleepRunnable)
         if (minutes <= 0) {
             sleepEndsAtMs = 0L
@@ -104,7 +116,24 @@ object MusicController {
 
     // ------------------------------------------------------------ ses efektleri
 
+    private var lastCountedId: String? = null
+
     private val listener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            val item = PlayerHolder.player?.currentMediaItem
+            if (isPlaying && isMusic(item) && item?.mediaId != lastCountedId) {
+                lastCountedId = item?.mediaId
+                appCtx?.let { c -> item?.mediaId?.let { MusicStats.record(c, it) } }
+            }
+        }
+
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            if (!playWhenReady && reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM && sleepAtEnd) {
+                sleepAtEnd = false
+                PlayerHolder.player?.pauseAtEndOfMediaItems = false
+            }
+        }
+
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
         }

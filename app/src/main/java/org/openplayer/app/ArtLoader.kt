@@ -23,7 +23,9 @@ object ArtLoader {
     }
     private val missing = java.util.Collections.synchronizedSet(HashSet<String>())
 
-    private fun key(t: MusicTrack, size: Int) = (if (t.albumId > 0) "a${t.albumId}" else "t${t.id}") + "_$size"
+    private fun key(t: MusicTrack, size: Int) =
+        (if (t.coverFile != null) "c${t.id}_${java.io.File(t.coverFile).lastModified()}"
+        else if (t.albumId > 0) "a${t.albumId}" else "t${t.id}") + "_$size"
 
     fun roundCorners(view: View, radiusDp: Int) {
         val r = view.context.dp(radiusDp).toFloat()
@@ -80,6 +82,13 @@ object ArtLoader {
     }
 
     private fun fetch(app: Context, t: MusicTrack, sizePx: Int): Bitmap? = runCatching {
+        if (t.coverFile != null) {
+            val o = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(t.coverFile, o)
+            var sample = 1
+            while (o.outWidth / (sample * 2) >= sizePx) sample *= 2
+            return@runCatching BitmapFactory.decodeFile(t.coverFile, BitmapFactory.Options().apply { inSampleSize = sample })
+        }
         if (Build.VERSION.SDK_INT >= 29) {
             app.contentResolver.loadThumbnail(t.uri, Size(sizePx, sizePx), null)
         } else {

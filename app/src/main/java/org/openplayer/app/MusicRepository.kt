@@ -18,9 +18,16 @@ data class MusicTrack(
     val trackNo: Int,
     val dateAddedSec: Long,
     val folderPath: String,
+    val path: String = "",
+    val year: Int = 0,
+    val genre: String = "",
+    val albumArtist: String = "",
+    val coverFile: String? = null,
+    val sizeBytes: Long = 0L,
 ) {
     val artworkUri: Uri
-        get() = ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), albumId)
+        get() = if (coverFile != null) Uri.fromFile(java.io.File(coverFile))
+        else ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), albumId)
 }
 
 data class MusicGroup(val key: String, val title: String, val subtitle: String, val tracks: List<MusicTrack>)
@@ -50,6 +57,8 @@ object MusicRepository {
             MediaStore.Audio.Media.TRACK,
             MediaStore.Audio.Media.DATE_ADDED,
             MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.YEAR,
+            MediaStore.Audio.Media.SIZE,
         )
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND ${MediaStore.Audio.Media.DURATION} >= 10000"
         try {
@@ -65,12 +74,14 @@ object MusicRepository {
                 val iTrack = c.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
                 val iDate = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_ADDED)
                 val iData = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                val iYear = c.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
+                val iSize = c.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
                 while (c.moveToNext()) {
                     val id = c.getLong(iId)
                     val artist = c.getString(iArtist)?.takeIf { it.isNotBlank() && it != "<unknown>" } ?: UNKNOWN_ARTIST
                     val album = c.getString(iAlbum)?.takeIf { it.isNotBlank() && it != "<unknown>" } ?: UNKNOWN_ALBUM
                     val path = c.getString(iData) ?: ""
-                    out += MusicTrack(
+                    val base = MusicTrack(
                         id = id,
                         uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id),
                         title = c.getString(iTitle)?.takeIf { it.isNotBlank() } ?: path.substringAfterLast('/'),
@@ -81,7 +92,11 @@ object MusicRepository {
                         trackNo = c.getInt(iTrack) % 1000,
                         dateAddedSec = c.getLong(iDate),
                         folderPath = path.substringBeforeLast('/', ""),
+                        path = path,
+                        year = c.getInt(iYear),
+                        sizeBytes = c.getLong(iSize),
                     )
+                    out += MusicTagStore.apply(context, base)
                 }
             }
         } catch (_: SecurityException) {

@@ -31,6 +31,15 @@ class NowPlayingActivity : AppCompatActivity() {
     private lateinit var shuffleButton: ImageView
     private lateinit var repeatButton: ImageView
     private lateinit var sleepLabel: TextView
+    private lateinit var speedLabel: TextView
+    private lateinit var lyricsScroll: ScrollView
+    private lateinit var lyricsBox: LinearLayout
+    private lateinit var artFrame: android.widget.FrameLayout
+    private var library: Map<String, MusicTrack> = emptyMap()
+    private var lyricLines: List<LyricLine>? = null
+    private var lyricViews: List<TextView> = emptyList()
+    private var lyricIndex = -1
+    private var showLyrics = false
     private val handler = Handler(Looper.getMainLooper())
     private var dragging = false
     private var lastMediaId: String? = null
@@ -78,6 +87,17 @@ class NowPlayingActivity : AppCompatActivity() {
         p.addListener(listener)
         refresh()
         handler.post(ticker)
+        val app = applicationContext
+        Thread {
+            val map = MusicRepository.loadAll(app).associateBy { it.id.toString() }
+            runOnUiThread {
+                if (!isFinishing && !isDestroyed) {
+                    library = map
+                    lastMediaId = null
+                    refresh()
+                }
+            }
+        }.start()
     }
 
     override fun onStop() {
@@ -101,6 +121,20 @@ class NowPlayingActivity : AppCompatActivity() {
 
         art = ImageView(this)
         ArtLoader.roundCorners(art, 20)
+        lyricsBox = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(8), dp(16), dp(8), dp(16))
+        }
+        lyricsScroll = ScrollView(this).apply {
+            visibility = View.GONE
+            isVerticalScrollBarEnabled = false
+            addView(lyricsBox)
+        }
+        artFrame = android.widget.FrameLayout(this).apply {
+            addView(art, android.widget.FrameLayout.LayoutParams(-1, -1))
+            addView(lyricsScroll, android.widget.FrameLayout.LayoutParams(-1, -1))
+            setOnClickListener { toggleLyrics() }
+        }
         titleView = text(22f, bold = true).apply { maxLines = 2 }
         artistView = text(15f, UiColors.textSecondary)
 
@@ -189,10 +223,27 @@ class NowPlayingActivity : AppCompatActivity() {
             addView(text(12f, UiColors.textSecondary).apply { text = "Kuyruk" })
             setOnClickListener { showQueue() }
         }
+        speedLabel = text(12f, UiColors.textSecondary)
+        val speedButton = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            addView(iconView(R.drawable.ic_repeat, 44, 10))
+            addView(speedLabel)
+            setOnClickListener { showSpeed() }
+        }
+        val lyricsButton = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            addView(iconView(R.drawable.ic_lyrics, 44, 10))
+            addView(text(12f, UiColors.textSecondary).apply { text = "Sözler" })
+            setOnClickListener { toggleLyrics() }
+        }
         val bottomRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             addView(sleepButton, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(speedButton, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(lyricsButton, LinearLayout.LayoutParams(0, -2, 1f))
             addView(fxButton, LinearLayout.LayoutParams(0, -2, 1f))
             addView(queueButton, LinearLayout.LayoutParams(0, -2, 1f))
         }
@@ -210,7 +261,7 @@ class NowPlayingActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(dp(24), 0, dp(24), dp(16))
-            addView(art, LinearLayout.LayoutParams(artSize, artSize).apply { topMargin = dp(8) })
+            addView(artFrame, LinearLayout.LayoutParams(artSize, artSize).apply { topMargin = dp(8) })
             addView(titleView, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(24) })
             addView(artistView, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(4) })
             addView(seek, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(20) })
@@ -247,7 +298,9 @@ class NowPlayingActivity : AppCompatActivity() {
                 id = id, uri = uri, title = "", artist = "", album = "",
                 albumId = albumId, durationMs = 0, trackNo = 0, dateAddedSec = 0, folderPath = ""
             ) else null
-            ArtLoader.load(art, track, 800)
+            val full = library[item?.mediaId ?: ""] ?: track
+            ArtLoader.load(art, full, 800)
+            loadLyrics(library[item?.mediaId ?: ""])
         }
         playButton.setImageResource(if (p.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
         shuffleButton.setColorFilter(if (p.shuffleModeEnabled) UiColors.accent else Color.WHITE)
@@ -265,17 +318,108 @@ class NowPlayingActivity : AppCompatActivity() {
             seek.progress = if (dur > 0) (p.currentPosition * 1000 / dur).toInt().coerceIn(0, 1000) else 0
         }
         val end = MusicController.sleepEndsAtMs
-        sleepLabel.text = if (end > System.currentTimeMillis()) {
-            val min = ((end - System.currentTimeMillis()) / 60_000L).toInt() + 1
-            "Uyku: $min dk"
-        } else "Uyku zamanlayıcısı"
+        sleepLabel.text = when {
+            MusicController.sleepAtEnd -> "Şarkı sonunda"
+            end > System.currentTimeMillis() -> "Uyku: ${((end - System.currentTimeMillis()) / 60_000L).toInt() + 1} dk"
+            else -> "Uyku"
+        }
+        speedLabel.text = "Hız ${"%.2f".format(p.playbackParameters.speed).trimEnd('0').trimEnd('.')}x"
+        updateLyricHighlight(p.currentPosition)
+    }
+
+    // ------------------------------------------------------------ sözler
+
+    private fun toggleLyrics() {
+        showLyrics = !showLyrics
+        applyLyricsVisibility()
+    }
+
+    private fun applyLyricsVisibility() {
+        val has = !lyricLines.isNullOrEmpty()
+        if (showLyrics && !has) {
+            showLyrics = false
+            android.widget.Toast.makeText(
+                this, "Bu şarkı için söz dosyası yok. Kütüphanede şarkının ⋮ menüsü → Etiketleri düzenle → söz dosyası ekle.",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
+        lyricsScroll.visibility = if (showLyrics) View.VISIBLE else View.GONE
+        art.visibility = if (showLyrics) View.INVISIBLE else View.VISIBLE
+    }
+
+    private fun loadLyrics(track: MusicTrack?) {
+        lyricsBox.removeAllViews()
+        lyricIndex = -1
+        lyricViews = emptyList()
+        lyricLines = null
+        if (track != null) {
+            val app = applicationContext
+            Thread {
+                val lines = Lyrics.load(app, track)
+                runOnUiThread {
+                    if (isFinishing || isDestroyed || lastMediaId != track.id.toString()) return@runOnUiThread
+                    lyricLines = lines
+                    val views = ArrayList<TextView>()
+                    lines?.forEach { l ->
+                        val tv = TextView(this).apply {
+                            text = l.text
+                            gravity = Gravity.CENTER
+                            setTextColor(UiColors.textSecondary)
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+                            setPadding(0, dp(6), 0, dp(6))
+                            if (l.timeMs >= 0) setOnClickListener { player?.seekTo(l.timeMs.coerceAtLeast(0)) }
+                        }
+                        lyricsBox.addView(tv, LinearLayout.LayoutParams(-1, -2))
+                        views += tv
+                    }
+                    lyricViews = views
+                    if (lines == null) {
+                        showLyrics = false
+                    }
+                    applyLyricsVisibility()
+                }
+            }.start()
+        } else {
+            showLyrics = false
+            applyLyricsVisibility()
+        }
+    }
+
+    private fun updateLyricHighlight(posMs: Long) {
+        val lines = lyricLines ?: return
+        if (lines.isEmpty() || lines[0].timeMs < 0 || lyricViews.size != lines.size) return
+        var idx = -1
+        for (i in lines.indices) if (lines[i].timeMs <= posMs) idx = i else break
+        if (idx == lyricIndex) return
+        lyricIndex = idx
+        lyricViews.forEachIndexed { i, tv ->
+            tv.setTextColor(if (i == idx) Color.WHITE else UiColors.textSecondary)
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == idx) 20f else 17f)
+        }
+        if (showLyrics && idx >= 0) {
+            val tv = lyricViews[idx]
+            lyricsScroll.post {
+                lyricsScroll.smoothScrollTo(0, (tv.top - lyricsScroll.height / 2 + tv.height / 2).coerceAtLeast(0))
+            }
+        }
+    }
+
+    private fun showSpeed() {
+        val speeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
+        val cur = player?.playbackParameters?.speed ?: 1f
+        val sel = speeds.indices.minByOrNull { kotlin.math.abs(speeds[it] - cur) } ?: 2
+        showChoice("Çalma hızı", speeds.map { "${it}x" }, sel) { player?.setPlaybackSpeed(speeds[it]) }
     }
 
     private fun showSleep() {
-        val options = listOf("Kapalı", "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika")
-        val minutes = listOf(0, 15, 30, 45, 60, 90)
+        val options = listOf("Kapalı", "Bu şarkı bitince", "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika")
+        val minutes = listOf(0, -1, 15, 30, 45, 60, 90)
         showChoice("Uyku zamanlayıcısı", options, -1) {
-            MusicController.startSleep(minutes[it])
+            when (minutes[it]) {
+                0 -> { MusicController.startSleep(0); MusicController.sleepAtEndOfTrack(false) }
+                -1 -> MusicController.sleepAtEndOfTrack(true)
+                else -> MusicController.startSleep(minutes[it])
+            }
             tick()
         }
     }

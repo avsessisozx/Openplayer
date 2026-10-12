@@ -10,6 +10,7 @@ object ResumeStore {
     fun clearAll(c: Context) {
         prefs(c).edit().clear().apply()
         VideoMemory.clearAll(c)
+        MusicStats.clear(c)
     }
 
     fun lastUri(c: Context): String? = prefs(c).getString("last_uri", null)
