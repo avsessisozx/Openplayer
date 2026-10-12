@@ -26,6 +26,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.PixelCopy
 import android.view.SurfaceView
+import android.view.ViewGroup
 import android.view.TextureView
 import android.view.View
 import android.view.WindowManager
@@ -46,6 +47,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
@@ -215,6 +217,7 @@ class PlayerActivity : AppCompatActivity() {
         override fun onTracksChanged(tracks: Tracks) {
             autoSelectSubtitle(tracks)
             applyPendingAudio(tracks)
+            detectVr(tracks)
         }
 
         override fun onCues(cueGroup: CueGroup) {
@@ -320,7 +323,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        playerView.player = player
+        bindVideo(player)
         handler.post(ticker)
         applyOrientation()
     }
@@ -341,7 +344,7 @@ class PlayerActivity : AppCompatActivity() {
         } else if (!inPip) {
             player.pause()
         }
-        if (!inPip) playerView.player = null
+        if (!inPip) bindVideo(null)
     }
 
     override fun onDestroy() {
@@ -364,7 +367,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        if (isInPictureInPictureMode) hideControls() else playerView.player = player
+        if (isInPictureInPictureMode) hideControls() else bindVideo(player)
     }
 
 
@@ -433,7 +436,7 @@ class PlayerActivity : AppCompatActivity() {
         player = p
         p.skipSilenceEnabled = settings.skipSilence
         p.addListener(playerListener)
-        playerView.player = p
+        bindVideo(p)
         audioFx.attach(p.audioSessionId)
     }
 
@@ -550,6 +553,10 @@ class PlayerActivity : AppCompatActivity() {
         val item = player.currentMediaItem ?: return
         val uri = item.localConfiguration?.uri
         if (uri != currentUri) saveMemory()
+        if (uri != currentUri) {
+            vrManual = null
+            if (vr != VrMode.NONE) setVr(VrMode.NONE, remember = false)
+        }
         currentUri = uri
         titleView.text = item.mediaMetadata.title ?: uri?.let { SubtitleFiles.displayName(this, it) } ?: ""
         abA = -1L
@@ -1053,6 +1060,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     fun zoomBy(factor: Float) {
+        if (vr != VrMode.NONE) return
         if (!settings.pinchZoomEnabled) return
         zoom = (zoom * factor).coerceIn(1f, 5f)
         if (zoom <= 1.01f) {
@@ -1085,13 +1093,117 @@ class PlayerActivity : AppCompatActivity() {
         applyTransform()
     }
 
+    // ---------------------------------------------------------------- 360°
+
+    var vr: VrMode = VrMode.NONE
+        private set
+    private var vrManual: VrMode? = null
+    private var vrView: Vr360View? = null
+    private var vrRoot: FrameLayout? = null
+
+    /** Görüntü yüzeyini bağlar: 360° açıksa GL küreye, değilse normal görünüme. */
+    private fun bindVideo(p: ExoPlayer?) {
+        val v = vrView
+        if (vr != VrMode.NONE && v != null) {
+            playerView.player = null
+            if (p != null) v.onResume() else v.onPause()
+        } else {
+            playerView.player = p
+        }
+    }
+
+    private fun detectVr(tracks: Tracks) {
+        val manual = vrManual
+        if (manual != null) return
+        var format: Format? = null
+        for (g in tracks.groups) {
+            if (g.type == C.TRACK_TYPE_VIDEO && g.length > 0) {
+                val idx = (0 until g.length).firstOrNull { g.isTrackSelected(it) } ?: 0
+                format = g.getTrackFormat(idx)
+                break
+            }
+        }
+        val name = titleView.text?.toString().orEmpty()
+        var detected = Vr360.detect(format, name)
+        if (detected == VrMode.NONE) detected = currentUri?.let { Vr360.saved(this, it.toString()) } ?: VrMode.NONE
+        if (detected != vr) setVr(detected, remember = true)
+    }
+
+    /** Elle veya otomatik 360° biçimini ayarlar. NONE normal oynatmaya döner. */
+    fun setVr(mode: VrMode, remember: Boolean = true, manual: Boolean = false) {
+        if (manual) vrManual = mode
+        val old = vr
+        vr = mode
+        if (remember) currentUri?.let { Vr360.remember(this, it.toString(), mode) }
+        if (mode == VrMode.NONE) {
+            vrView?.let { v ->
+                v.onPause()
+                (v.parent as? ViewGroup)?.removeView(v)
+            }
+            vrView = null
+            if (old != VrMode.NONE && ::player.isInitialized) {
+                player.clearVideoSurface()
+                playerView.visibility = View.VISIBLE
+                playerView.player = player
+            }
+            zoom = 1f
+            panX = 0f
+            panY = 0f
+        } else {
+            var v = vrView
+            if (v == null) {
+                v = Vr360View(this) { sf ->
+                    handler.post {
+                        if (sf != null && vr != VrMode.NONE && ::player.isInitialized) player.setVideoSurface(sf)
+                        else if (sf == null && ::player.isInitialized) player.clearVideoSurface()
+                    }
+                }
+                v.setOnTouchListener(GestureController(this))
+                vrView = v
+                playerView.player = null
+                playerView.visibility = View.GONE
+                val parent = playerView.parent as ViewGroup
+                parent.addView(v, parent.indexOfChild(playerView) + 1, FrameLayout.LayoutParams(-1, -1))
+                v.onResume()
+            }
+            v.mode = mode
+            if (old == VrMode.NONE) {
+                v.resetLook()
+                showHud("360° video — kaydırarak etrafa bakın")
+                hideHudSoon()
+            }
+        }
+        refreshShortcuts()
+    }
+
+    fun vrLook(dx: Float, dy: Float) {
+        vrView?.look(dx, dy)
+    }
+
+    fun vrZoom(factor: Float) {
+        vrView?.zoomFov(factor)
+    }
+
+    fun vrSensorEnabled(): Boolean = vrView?.sensorEnabled == true
+
+    fun vrSetSensor(on: Boolean) {
+        vrView?.setSensor(on)
+        if (on && vrView?.sensorEnabled != true) toast("Bu cihazda hareket sensörü yok")
+    }
+
+    fun vrReset() {
+        vrView?.resetLook()
+    }
+
     fun toggleMirror() {
+        if (vr != VrMode.NONE) return
         mirror = !mirror
         applyTransform()
         refreshShortcuts()
     }
 
     fun toggleVerticalFlip() {
+        if (vr != VrMode.NONE) return
         vflip = !vflip
         applyTransform()
         refreshShortcuts()

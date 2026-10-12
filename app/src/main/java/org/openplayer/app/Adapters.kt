@@ -371,7 +371,9 @@ class VideoAdapter(
         val metaLine = metaText(ctx, item)
         holder.meta.text = metaLine
         holder.meta.visibility = if (metaLine.isEmpty()) View.GONE else View.VISIBLE
-        holder.tag.visibility = if (VideoRepository.isNew(ctx, item, newDays)) View.VISIBLE else View.GONE
+        val is360 = Vr360.isSpherical(ctx, uriText, item.title)
+        holder.tag.text = if (is360) "360°" else "YENİ"
+        holder.tag.visibility = if (is360 || VideoRepository.isNew(ctx, item, newDays)) View.VISIBLE else View.GONE
 
         // Kaldığı yeri gösteren ince çizgi
         val pos = ResumeStore.position(ctx, item.uri)

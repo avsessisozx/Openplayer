@@ -311,7 +311,7 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 val first = all.isEmpty()
-                all = loaded
+                all = if (settings.show360) loaded else loaded.filter { !Vr360.isSpherical(this, it.uri.toString(), it.title) }
                 selVideos.retainAll(loaded.map { it.id }.toSet())
                 selFolders.retainAll(loaded.map { it.bucketId }.toSet())
                 val highlight = ResumeStore.lastUri(this)

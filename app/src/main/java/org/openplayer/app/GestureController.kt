@@ -77,6 +77,11 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
 
     private val scaleDetector = ScaleGestureDetector(a, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScaleBegin(d: ScaleGestureDetector): Boolean {
+            if (a.vr != VrMode.NONE) {
+                scaleOnSubtitle = false
+                scaling = true
+                return true
+            }
             scaleOnSubtitle = a.settings.subtitleGestures && a.subtitles.mode != SubtitleController.Mode.OFF &&
                     d.focusY > height * 0.72f
             scaling = a.settings.pinchZoomEnabled || scaleOnSubtitle
@@ -84,13 +89,14 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         }
 
         override fun onScale(d: ScaleGestureDetector): Boolean {
-            if (scaleOnSubtitle) a.adjustSubtitleSize(d.scaleFactor) else a.zoomBy(d.scaleFactor)
+            if (a.vr != VrMode.NONE) a.vrZoom(d.scaleFactor)
+            else if (scaleOnSubtitle) a.adjustSubtitleSize(d.scaleFactor) else a.zoomBy(d.scaleFactor)
             return true
         }
 
         override fun onScaleEnd(d: ScaleGestureDetector) {
             scaling = false
-            if (!scaleOnSubtitle) a.snapZoom()
+            if (!scaleOnSubtitle && a.vr == VrMode.NONE) a.snapZoom()
             a.hideHudSoon()
         }
     })
@@ -115,6 +121,10 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean {
             if (e1 == null || scaling || e2.pointerCount > 1) return true
+            if (a.vr != VrMode.NONE) {
+                a.vrLook(dx, dy)
+                return true
+            }
             if (a.zoom > 1.02f) {
                 a.panBy(-dx, -dy)
                 return true

@@ -1,6 +1,7 @@
 package org.openplayer.app
 
 import android.graphics.Color
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -564,6 +565,29 @@ class PlayerMenus(private val a: PlayerActivity) {
         a.showTrimDialog(uri, title, a.player.duration.coerceAtLeast(0L), { a.player.currentPosition })
     }
 
+    /** 360° biçim seçimi ve bakış ayarları. */
+    fun showVrMenu() {
+        val modes = VrMode.choices
+        val labels = ArrayList<String>()
+        modes.forEach { labels += (if (a.vr == it) "✓ " else "") + it.label }
+        if (a.vr != VrMode.NONE) {
+            labels += if (a.vrSensorEnabled()) "Hareket sensörünü kapat" else "Hareket sensörüyle bak (deneysel)"
+            labels += "Bakış yönünü sıfırla"
+            labels += "360° modundan çık"
+        }
+        AlertDialog.Builder(a)
+            .setTitle("360° oynatma")
+            .setItems(labels.toTypedArray()) { _, i ->
+                when {
+                    i < modes.size -> a.setVr(modes[i], manual = true)
+                    labels[i].startsWith("Hareket") -> a.vrSetSensor(!a.vrSensorEnabled())
+                    labels[i].startsWith("Bakış") -> a.vrReset()
+                    else -> a.setVr(VrMode.NONE, manual = true)
+                }
+            }
+            .show()
+    }
+
     fun showOverflow() {
         val dialog = android.app.Dialog(a)
         dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
@@ -611,10 +635,22 @@ class PlayerMenus(private val a: PlayerActivity) {
             isChecked = a.settings.showRemainingTime
             setOnCheckedChangeListener { _, on -> a.settings.showRemainingTime = on }
         }
+        val vrRow = TextView(a).apply {
+            text = if (a.vr == VrMode.NONE) "360 olarak oynat" else "360° ayarları"
+            setTextColor(0xCCFFFFFF.toInt())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setShadowLayer(a.dp(4).toFloat(), 0f, 0f, Color.BLACK)
+            setPadding(0, a.dp(10), 0, a.dp(6))
+            setOnClickListener {
+                dialog.dismiss()
+                showVrMenu()
+            }
+        }
         val root = a.vertical(12) {
             addView(grid)
             addView(shortcutsSwitch, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
             addView(remainingSwitch, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+            addView(vrRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
         }
         dialog.setContentView(ScrollView(a).apply { addView(root) })
         dialog.window?.apply {
