@@ -48,6 +48,10 @@ class FolderAdapter(
             notifyDataSetChanged()
         }
 
+    /** Klasör simgesi ve yazı ölçeği (yüzde). */
+    var scalePercent: Int = 100
+    var textScalePercent: Int = 100
+
     class VH(
         val root: LinearLayout, val name: TextView, val count: TextView, val badge: TextView, val icon: ImageView,
         val check: ImageView,
@@ -115,6 +119,18 @@ class FolderAdapter(
         val sel = item.bucketId in selected
         holder.check.visibility = if (sel) View.VISIBLE else View.GONE
         holder.root.setBackgroundColor(if (sel) 0x33FFFFFF else 0)
+        val sc = scalePercent / 100f
+        val tm = (Math.pow(sc.toDouble(), 0.4).toFloat().coerceIn(0.8f, 1.6f)) * textScalePercent / 100f
+        holder.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f * tm)
+        holder.count.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f * tm)
+        (holder.icon.layoutParams as FrameLayout.LayoutParams).apply {
+            width = (holder.root.context.dp(56) * sc).toInt().coerceAtLeast(holder.root.context.dp(20))
+            height = (holder.root.context.dp(48) * sc).toInt().coerceAtLeast(holder.root.context.dp(18))
+        }
+        (holder.icon.parent as View).layoutParams = (holder.icon.parent as View).layoutParams.apply {
+            width = (holder.root.context.dp(64) * sc).toInt().coerceAtLeast(holder.root.context.dp(24))
+            height = (holder.root.context.dp(52) * sc).toInt().coerceAtLeast(holder.root.context.dp(22))
+        }
         holder.name.text = item.name
         holder.count.text = "${item.videoCount} video" + if (item.hidden) " · gizli" else ""
         holder.badge.visibility = if (item.newCount > 0) View.VISIBLE else View.GONE
@@ -145,6 +161,22 @@ class VideoAdapter(
 
     /** Seçim modunda ⋮ düğmesi gizlenir. */
     var selecting: Boolean = false
+
+    /** Küçük resim ölçeği (yüzde); çimdik hareketiyle sürekli değişir. */
+    var scalePercent: Int = 100
+
+    /** Yazı boyutu çarpanı (yüzde). */
+    var textScalePercent: Int = 100
+
+    /** Izgarada sütun sayısı (küçük resim yüksekliğini hesaplamak için). */
+    var spanCount: Int = 2
+
+    private fun textMul(): Float {
+        val auto = Math.pow(scalePercent / 100.0, 0.35).toFloat().coerceIn(0.85f, 1.4f)
+        return auto * textScalePercent / 100f
+    }
+
+    override fun getItemViewType(position: Int): Int = if (!grid && scalePercent >= 280) 2 else 0
 
     var items: List<VideoItem> = emptyList()
         @SuppressLint("NotifyDataSetChanged")
@@ -225,9 +257,10 @@ class VideoAdapter(
             addView(progress, FrameLayout.LayoutParams(0, c.dp(3), Gravity.BOTTOM or Gravity.START))
             addView(check, FrameLayout.LayoutParams(c.dp(26), c.dp(26), Gravity.TOP or Gravity.END).apply { setMargins(0, c.dp(4), c.dp(4), 0) })
         }
+        val vertical = grid || viewType == 2
         val title = TextView(c).apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (grid) 14f else 16f)
-            maxLines = if (grid) 2 else 3
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (vertical) 14f else 16f)
+            maxLines = if (vertical) 2 else 3
             ellipsize = TextUtils.TruncateAt.END
         }
         val tag = TextView(c).apply {
@@ -253,7 +286,7 @@ class VideoAdapter(
             setColorFilter(UiColors.textSecondary)
         }
 
-        if (grid) {
+        if (vertical) {
             box.layoutParams = LinearLayout.LayoutParams(-1, c.dp(96))
             val textRow = LinearLayout(c).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -352,7 +385,39 @@ class VideoAdapter(
             holder.progress.visibility = View.GONE
         }
 
-        ThumbLoader.load(ctx, item, holder.thumb)
+        // Ölçek: küçük resim ve yazı boyutu
+        val s = scalePercent
+        val mul = textMul()
+        val vertical = holder.itemViewType == 2 || grid
+        holder.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, (if (vertical) 14f else 16f) * mul)
+        holder.meta.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f * mul)
+        holder.duration.setTextSize(TypedValue.COMPLEX_UNIT_SP, (12f * mul).coerceIn(9f, 18f))
+        val screenW = ctx.resources.displayMetrics.widthPixels
+        val lp = holder.box.layoutParams as LinearLayout.LayoutParams
+        when {
+            holder.itemViewType == 2 -> {
+                val extra = if (s > 400) 1f + (s - 400) / 100f * 0.6f else 1f
+                lp.width = -1
+                lp.height = ((screenW - ctx.dp(12)) * 9f / 16f * extra).toInt()
+            }
+            grid -> {
+                lp.width = -1
+                val colW = screenW / spanCount.coerceAtLeast(1) - ctx.dp(12)
+                lp.height = (colW * 9f / 16f).toInt().coerceAtLeast(ctx.dp(24))
+            }
+            else -> {
+                lp.width = ctx.dp(112) * s / 100
+                lp.height = ctx.dp(64) * s / 100
+            }
+        }
+        holder.box.layoutParams = lp
+        if ("thumb" in fields && s >= 45) holder.box.visibility = View.VISIBLE else holder.box.visibility = View.GONE
+        val tier = when {
+            holder.itemViewType == 2 || (grid && screenW / spanCount.coerceAtLeast(1) > ctx.dp(300)) -> 2
+            s >= 170 || (grid && screenW / spanCount.coerceAtLeast(1) > ctx.dp(190)) -> 1
+            else -> 0
+        }
+        ThumbLoader.load(ctx, item, holder.thumb, tier)
         holder.root.setOnClickListener { onClick(item) }
         holder.root.setOnLongClickListener {
             onLong(item)

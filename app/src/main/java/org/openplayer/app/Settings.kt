@@ -196,6 +196,14 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getInt("list_scale", 100)
         set(v) = prefs.edit().putInt("list_scale", v.coerceIn(25, 500)).apply()
 
+    var gridScale: Int
+        get() = prefs.getInt("grid_scale", 100)
+        set(v) = prefs.edit().putInt("grid_scale", v.coerceIn(25, 500)).apply()
+
+    var folderScale: Int
+        get() = prefs.getInt("folder_scale", 100)
+        set(v) = prefs.edit().putInt("folder_scale", v.coerceIn(25, 500)).apply()
+
     var listTextScale: Int
         get() = prefs.getInt("list_text_scale", 100)
         set(v) = prefs.edit().putInt("list_text_scale", v.coerceIn(70, 160)).apply()

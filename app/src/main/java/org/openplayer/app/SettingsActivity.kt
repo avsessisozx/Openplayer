@@ -412,6 +412,16 @@ class SettingsActivity : AppCompatActivity() {
         choice("\"Yeni\" etiketi süresi", "${s.newVideoDays} gün", days.map { "$it gün" }, days.indexOf(s.newVideoDays)) {
             s.newVideoDays = days[it]
         }
+        toggle("360° videoları listede göster", "Kapalıyken 360° videolar listelerden gizlenir; açıkken \"360°\" etiketi görünür", s.show360) { s.show360 = it }
+        val tsizes = listOf(70, 85, 100, 125, 160)
+        val tnames = listOf("Çok küçük", "Küçük", "Normal", "Büyük", "Çok büyük")
+        choice("Liste yazı boyutu", tnames.getOrElse(tsizes.indexOf(s.listTextScale)) { "%${s.listTextScale}" }, tnames, tsizes.indexOf(s.listTextScale).coerceAtLeast(0)) {
+            s.listTextScale = tsizes[it]
+        }
+        action("Simge boyutlarını sıfırla", "Listede iki parmakla yaptığınız boyutlandırmayı varsayılana döndürür") {
+            s.listScale = 100; s.gridScale = 100; s.folderScale = 100; s.listTextScale = 100
+            android.widget.Toast.makeText(this, "Boyutlar sıfırlandı", android.widget.Toast.LENGTH_SHORT).show()
+        }
         toggle("Gizli klasörleri göster", "Klasöre uzun basarak gizleyebilirsiniz", s.showHiddenFolders) { s.showHiddenFolders = it }
         section("Gizlilik")
         toggle("Gizli mod", "Açıkken kaldığı yer ve geçmiş kaydedilmez", s.incognito) { s.incognito = it }

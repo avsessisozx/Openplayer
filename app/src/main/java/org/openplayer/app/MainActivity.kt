@@ -22,6 +22,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.annotation.SuppressLint
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -187,6 +188,7 @@ class MainActivity : AppCompatActivity() {
             clipToPadding = false
             setPadding(0, 0, 0, dp(96))
         }
+        installPinch()
         emptyView = TextView(this).apply {
             setTextColor(UiColors.textSecondary)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
@@ -256,6 +258,17 @@ class MainActivity : AppCompatActivity() {
             addView(FrameLayout(this@MainActivity).apply {
                 addView(list, FrameLayout.LayoutParams(-1, -1))
                 addView(emptyView, FrameLayout.LayoutParams(-1, -1))
+                pinchHud = TextView(this@MainActivity).apply {
+                    setTextColor(Color.WHITE)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                    setPadding(dp(14), dp(6), dp(14), dp(6))
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        cornerRadius = dp(18).toFloat()
+                        setColor(0xCC000000.toInt())
+                    }
+                    visibility = View.GONE
+                }
+                addView(pinchHud, FrameLayout.LayoutParams(-2, -2, Gravity.CENTER))
             }, LinearLayout.LayoutParams(-1, 0, 1f))
             addView(actionBar, LinearLayout.LayoutParams(-1, -2))
         }
@@ -350,6 +363,8 @@ class MainActivity : AppCompatActivity() {
                 sortButton.visibility = View.GONE
                 viewButton.visibility = View.GONE
                 val folders = VideoRepository.folders(this, all, settings)
+                folderAdapter.scalePercent = settings.folderScale
+                folderAdapter.textScalePercent = settings.listTextScale
                 folderAdapter.items = folders
                 if (list.layoutManager?.javaClass != LinearLayoutManager::class.java) {
                     list.layoutManager = LinearLayoutManager(this)
@@ -357,6 +372,65 @@ class MainActivity : AppCompatActivity() {
                 if (list.adapter !== folderAdapter) list.adapter = folderAdapter
                 if (folders.isEmpty()) showMessage("Video bulunamadı") else hideMessage()
             }
+        }
+    }
+
+    private fun gridSpan(): Int =
+        Math.round(resources.displayMetrics.widthPixels / (dp(170) * settings.gridScale / 100f)).coerceIn(1, 8)
+
+    private var pinchHud: TextView? = null
+    private var lastPinchApply = 0L
+
+    private fun pinchKind(): Int = if (list.adapter === folderAdapter) 0 else if (list.adapter === gridAdapter) 1 else 2
+
+    /** İki parmakla çimdik: klasör/video simgelerini sürekli (serbest) boyutlandırır. */
+    private fun installPinch() {
+        val detector = android.view.ScaleGestureDetector(this, object : android.view.ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(d: android.view.ScaleGestureDetector): Boolean {
+                val kind = pinchKind()
+                val cur = when (kind) { 0 -> settings.folderScale; 1 -> settings.gridScale; else -> settings.listScale }
+                val next = Math.round(cur * d.scaleFactor).coerceIn(25, 500)
+                if (next == cur) return false
+                when (kind) { 0 -> settings.folderScale = next; 1 -> settings.gridScale = next; else -> settings.listScale = next }
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - lastPinchApply > 60) {
+                    lastPinchApply = now
+                    applyPinch(kind)
+                }
+                pinchHud?.let { it.text = "%$next"; it.visibility = View.VISIBLE }
+                return true
+            }
+
+            override fun onScaleEnd(d: android.view.ScaleGestureDetector) {
+                applyPinch(pinchKind())
+                list.postDelayed({ pinchHud?.visibility = View.GONE }, 700)
+            }
+        })
+        list.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: android.view.MotionEvent): Boolean {
+                detector.onTouchEvent(e)
+                return e.pointerCount >= 2
+            }
+
+            override fun onTouchEvent(rv: RecyclerView, e: android.view.MotionEvent) {
+                detector.onTouchEvent(e)
+            }
+
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun applyPinch(kind: Int) {
+        when (kind) {
+            0 -> { folderAdapter.scalePercent = settings.folderScale; folderAdapter.notifyDataSetChanged() }
+            1 -> {
+                gridAdapter.scalePercent = settings.gridScale
+                gridAdapter.spanCount = gridSpan()
+                (list.layoutManager as? GridLayoutManager)?.spanCount = gridSpan()
+                gridAdapter.notifyDataSetChanged()
+            }
+            else -> { listAdapter.scalePercent = settings.listScale; listAdapter.notifyDataSetChanged() }
         }
     }
 
@@ -368,10 +442,17 @@ class MainActivity : AppCompatActivity() {
             ad.fields = settings.listFields
             ad.durationOnThumb = settings.durationOnThumb
         }
+        listAdapter.scalePercent = settings.listScale
+        listAdapter.textScalePercent = settings.listTextScale
+        gridAdapter.scalePercent = settings.gridScale
+        gridAdapter.textScalePercent = settings.listTextScale
+        gridAdapter.spanCount = gridSpan()
         // Aynı yerleşim ve bağdaştırıcı yeniden atanmaz; böylece kaydırma konumu korunur.
         if (settings.gridView) {
             if (list.layoutManager !is GridLayoutManager) {
-                list.layoutManager = GridLayoutManager(this, (resources.displayMetrics.widthPixels / dp(170)).coerceAtLeast(2))
+                list.layoutManager = GridLayoutManager(this, gridSpan())
+            } else {
+                (list.layoutManager as GridLayoutManager).spanCount = gridSpan()
             }
             gridAdapter.items = videos
             if (list.adapter !== gridAdapter) list.adapter = gridAdapter
