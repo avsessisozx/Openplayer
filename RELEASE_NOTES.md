@@ -1,3 +1,19 @@
+# 1.0.0-beta8
+
+Büyük sürüm. **Cihazda henüz denenmedi** — hata bulursanız lütfen bildirin.
+
+- **Çoklu seçim (MX gibi):** klasöre/videoya uzun bas → seç; hepsini seç, taşı, kopyala, listeye ekle, yeniden adlandır (toplu dahil), sil. Silme çöp kutusuna gider (Ayarlar'dan kapatılabilir).
+- **⋮ menüsü:** favori, oynatma listesi, paylaş, yeniden adlandır, altyazı ara, Kes, sesi çıkar (m4a/mp3/ogg, kayıpsız ayıklama), özel klasöre kilitle, ayrıntılı Özellikler paneli, sil.
+- **Kes:** kayıpsız kırpma (yeniden kodlama yok, Android 10+).
+- **Özel klasör (kasa):** cihaz kilidiyle açılır, ekran görüntüsü engellenir.
+- **Favoriler ve oynatma listeleri** (video + müzik); müzikte akıllı listeler (en çok çalınan, son eklenen…).
+- **Müzik:** etiket düzenleme (uygulama içi), şarkı sözleri (.lrc/gömülü), kapak değiştirme, hız, "bu şarkı bitince uyu". Müzik başlatma çökmesi düzeltildi.
+- **Serbest boyut:** iki parmakla çimdikle klasör, liste ve ızgara simgelerini sürekli büyüt/küçült (yalnız yazıdan yarım ekran karta kadar); ızgarada sütun sayısı değişir. Ayarlar → Liste: yazı boyutu, boyutları sıfırla.
+- **360° video:** küresel üstveri otomatik algılanır; sürükle = etrafa bak, çimdik = görüş açısı, çift dokunuş = oynat/duraklat. Algılanmayan dosyalar için ⋮ → "360 olarak oynat" (360°, 180°, üst-alt/yan yana 3B — 3B'de tek göz gösterilir). Deneysel hareket sensörü. Ayarlar → Liste: "360° videoları listede göster" (kapalıysa gizlenir; açıkken "360°" etiketi).
+- Videoya özel hafıza, ayarları dışa/içe aktarma, gizli mod.
+
+---
+
 # 1.0.0-beta7
 
 Tek, bütünlüklü sürüm: beta6'daki tema/menü/arayüz modu işleri + aşağıdakiler.
