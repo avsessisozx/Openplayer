@@ -307,6 +307,9 @@ class PlayerActivity : AppCompatActivity() {
         }
         refreshAll()
         requestNotificationPermissionIfNeeded()
+        if (intent.getBooleanExtra("org.openplayer.app.OPEN_SUBTITLE_SEARCH", false)) {
+            handler.postDelayed({ if (!isFinishing) menus.showOnlineSearch() }, 700)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

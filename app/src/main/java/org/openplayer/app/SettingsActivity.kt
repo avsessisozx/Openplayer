@@ -406,6 +406,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun listPage() {
         section("Liste")
+        toggle("Silince çöp kutusuna taşı", "Android 11 ve üstünde silinen videolar geri alınabilir (30 gün). Kapalıyken kalıcı silinir.", s.useTrash) { s.useTrash = it }
         toggle("Doğal sıralama", "\"Bölüm 2\", \"Bölüm 10\"dan önce gelir", s.naturalSort) { s.naturalSort = it }
         val days = listOf(1, 3, 7, 14, 30)
         choice("\"Yeni\" etiketi süresi", "${s.newVideoDays} gün", days.map { "$it gün" }, days.indexOf(s.newVideoDays)) {

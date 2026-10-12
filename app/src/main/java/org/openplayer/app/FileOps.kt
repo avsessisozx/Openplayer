@@ -76,10 +76,10 @@ class FileOps(private val a: AppCompatActivity) {
     // ------------------------------------------------------------ silme
 
     /** Çöp kutusuna taşır (Android 11+, ayardan kapatılabilir) veya kalıcı siler. */
-    fun delete(uris: List<Uri>, onDone: () -> Unit) {
+    fun delete(uris: List<Uri>, permanent: Boolean = false, onDone: () -> Unit) {
         if (uris.isEmpty()) return
         if (Build.VERSION.SDK_INT >= 30) {
-            val s = if (AppSettings.get(a).useTrash) MediaStore.createTrashRequest(a.contentResolver, uris, true)
+            val s = if (!permanent && AppSettings.get(a).useTrash) MediaStore.createTrashRequest(a.contentResolver, uris, true)
             else MediaStore.createDeleteRequest(a.contentResolver, uris)
             launch(s.intentSender) { onDone() }
             return

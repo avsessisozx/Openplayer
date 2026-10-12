@@ -553,6 +553,17 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     // ------------------------------------------------------------ üç nokta paneli
 
+    fun showTrim() {
+        val uri = a.currentUri
+        if (uri == null || uri.scheme == "http" || uri.scheme == "https" || uri.scheme == "rtsp") {
+            a.toast("Kesme yalnızca cihazdaki videolarda çalışır")
+            return
+        }
+        val title = a.player.currentMediaItem?.mediaMetadata?.title?.toString()
+            ?: SubtitleFiles.displayName(a, uri)
+        a.showTrimDialog(uri, title, a.player.duration.coerceAtLeast(0L), { a.player.currentPosition })
+    }
+
     fun showOverflow() {
         val dialog = android.app.Dialog(a)
         dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
@@ -572,6 +583,7 @@ class PlayerMenus(private val a: PlayerActivity) {
                 item(R.drawable.ic_subtitles, "Özel stil") { showSubtitleStyle() },
                 item(R.drawable.ic_bookmark, "Yer imi") { showBookmarks() },
                 item(R.drawable.ic_info, "Bilgi") { showInfo() },
+                item(R.drawable.ic_cut, "Kes") { showTrim() },
                 item(R.drawable.ic_share, "Paylaş") { a.shareCurrent() },
                 item(R.drawable.ic_public, "Ağ akışı") { showStreamDialog() },
                 item(R.drawable.ic_lock, "Çocuk kilidi") { a.startKidsLock() },

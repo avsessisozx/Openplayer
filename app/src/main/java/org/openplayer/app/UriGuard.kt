@@ -20,7 +20,7 @@ object UriGuard {
         if (scheme !in allowedSchemes) return false
         if (uri.toString().length > MAX_URL) return false
         return when (scheme) {
-            "file" -> uri.path?.let { !isPrivateToApp(context, File(it)) } ?: false
+            "file" -> uri.path?.let { !isPrivateToApp(context, File(it)) || Vault.isVaultFile(context, File(it)) } ?: false
             "content" -> uri.authority?.let { it != "${context.packageName}.provider" } ?: false
             else -> !uri.host.isNullOrBlank()
         }

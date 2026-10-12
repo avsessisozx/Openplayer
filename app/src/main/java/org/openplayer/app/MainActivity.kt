@@ -430,6 +430,7 @@ class MainActivity : AppCompatActivity() {
         val menu = PopupMenu(this, anchor)
         menu.menu.add(0, 5, 0, "Oynatma listeleri")
         menu.menu.add(0, 6, 1, "Favoriler")
+        menu.menu.add(0, 7, 2, "Özel klasör")
         menu.menu.add(0, 1, 2, "Ağ akışı aç")
         menu.menu.add(0, 2, 3, if (settings.showHiddenFolders) "Gizli klasörleri sakla" else "Gizli klasörleri göster")
         menu.menu.add(0, 4, 4, "Ağ kaynakları (SMB / FTP / WebDAV)")
@@ -449,6 +450,7 @@ class MainActivity : AppCompatActivity() {
                     render()
                 }
                 3 -> startActivity(Intent(this, SettingsActivity::class.java))
+                7 -> startActivity(Intent(this, VaultActivity::class.java))
                 5 -> startActivity(Intent(this, PlaylistActivity::class.java).putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.VIDEO))
                 6 -> startActivity(
                     Intent(this, PlaylistActivity::class.java)
@@ -609,6 +611,14 @@ class MainActivity : AppCompatActivity() {
                 exitSelection()
             }
             entries += SheetEntry(R.drawable.ic_share, "Paylaş") { shareMany(videos) }
+            entries += SheetEntry(R.drawable.ic_lock, "Özel klasöre kilitle") {
+                lockToVault(fileOps, videos) { exitSelection(); refresh() }
+            }
+            if (videos.size == 1) {
+                val v = videos[0]
+                entries += SheetEntry(R.drawable.ic_cut, "Kes") { showTrimDialog(v.uri, v.title, v.durationMs) { refresh() } }
+                entries += SheetEntry(R.drawable.ic_headphones, "Sesi çıkar (m4a/mp3)") { showExtractAudio(v.uri, v.title) }
+            }
         }
         entries += SheetEntry(R.drawable.ic_swap, "Seçimi ters çevir") { invertSelection() }
         entries += SheetEntry(R.drawable.ic_list, "Aralığı seç") { selectRange() }
@@ -787,6 +797,15 @@ class MainActivity : AppCompatActivity() {
                     .putExtra(PlayerActivity.EXTRA_INDEX, 0)
                     .putExtra("org.openplayer.app.OPEN_SUBTITLE_SEARCH", true)
             )
+        }
+        entries += SheetEntry(R.drawable.ic_cut, "Kes") {
+            showTrimDialog(video.uri, video.title, video.durationMs) { refresh() }
+        }
+        entries += SheetEntry(R.drawable.ic_headphones, "Sesi çıkar (m4a/mp3)") {
+            showExtractAudio(video.uri, video.title)
+        }
+        entries += SheetEntry(R.drawable.ic_lock, "Özel klasöre kilitle") {
+            lockToVault(fileOps, listOf(video)) { refresh() }
         }
         entries += SheetEntry(R.drawable.ic_info, "Özellikler") {
             showMediaInfo(video.title, video.uri, video.sizeBytes, video.dateAddedSec * 1000L)
