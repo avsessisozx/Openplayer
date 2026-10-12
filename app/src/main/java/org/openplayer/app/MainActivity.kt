@@ -101,8 +101,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(buildUi())
     }
 
+    private lateinit var modeTabs: LinearLayout
+
     override fun onResume() {
         super.onResume()
+        modeTabs.visibility = if (settings.musicMode) View.VISIBLE else View.GONE
         if (hasPermission()) refresh() else requestPermission.launch(permission)
     }
 
@@ -178,9 +181,28 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener { if (!hasPermission()) requestPermission.launch(permission) }
         }
 
+        modeTabs = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            visibility = View.GONE
+            for ((title, selected) in listOf("Videolar" to true, "Müzik" to false)) {
+                addView(TextView(context).apply {
+                    text = title
+                    gravity = Gravity.CENTER
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+                    setTextColor(if (selected) UiColors.accent else UiColors.textSecondary)
+                    if (selected) {
+                        setTypeface(typeface, android.graphics.Typeface.BOLD)
+                        paint.isUnderlineText = true
+                    }
+                    if (!selected) setOnClickListener { startActivity(Intent(this@MainActivity, MusicActivity::class.java)) }
+                }, LinearLayout.LayoutParams(0, dp(40), 1f))
+            }
+        }
+
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             addView(topBar, LinearLayout.LayoutParams(-1, -2))
+            addView(modeTabs, LinearLayout.LayoutParams(-1, -2))
             addView(FrameLayout(this@MainActivity).apply {
                 addView(list, FrameLayout.LayoutParams(-1, -1))
                 addView(emptyView, FrameLayout.LayoutParams(-1, -1))

@@ -28,6 +28,7 @@ class SettingsActivity : AppCompatActivity() {
         AUDIO("Ses", "Ses artırma, ekolayzır, ses dili", R.drawable.ic_volume_up),
         SUBTITLE("Altyazı", "Görünüm, karakter kodlaması, diller", R.drawable.ic_subtitles),
         ONLINE("Çevrimiçi altyazı", "OpenSubtitles hesabı ve API anahtarı", R.drawable.ic_cloud_download),
+        MUSIC("Müzik çalar", "Videolardan ayrı müzik kütüphanesi ve çalar (isteğe bağlı)", R.drawable.ic_music_note),
         THEME("Tema ve görünüm", "Renk temaları, vurgu rengi, düğme biçimi, panel opaklığı", R.drawable.ic_tune),
         LIST("Liste ve dosyalar", "Yeni etiketi, gizli klasörler, dosya erişimi", R.drawable.ic_view_list),
     }
@@ -132,6 +133,7 @@ class SettingsActivity : AppCompatActivity() {
             Page.ONLINE -> onlinePage()
             Page.LIST -> listPage()
             Page.THEME -> themePage()
+            Page.MUSIC -> musicPage()
         }
     }
 
@@ -286,6 +288,16 @@ class SettingsActivity : AppCompatActivity() {
         text("Kullanıcı adı", s.osUser.ifEmpty { "İsteğe bağlı" }, "İndirme için gerekebilir") { s.osUser = it }
         text("Parola", if (s.osPass.isEmpty()) "İsteğe bağlı" else "••••••••", "Parola", password = true) { s.osPass = it }
         note("Bilgiler cihazda şifrelenerek saklanır. Anahtarı opensubtitles.com/consumers adresinden ücretsiz alabilirsiniz.")
+    }
+
+    private fun musicPage() {
+        section("Müzik modu")
+        toggle("Müzik çaları etkinleştir", "Açınca ana ekranda \"Müzik\" sekmesi görünür. Müzik izni ilk açtığınızda istenir.", s.musicMode) { s.musicMode = it }
+        val sorts = MusicSort.entries
+        choice("Varsayılan sıralama", s.musicSort.label, sorts.map { it.label }, sorts.indexOf(s.musicSort)) {
+            s.musicSort = sorts[it]
+        }
+        note("Müzik; albüm, sanatçı ve klasör görünümleri, \"Çalıyor\" ekranı, kuyruk, uyku zamanlayıcısı, ekolayzır ve bildirimden denetim sunar. Bluetooth ve kilit ekranı düğmeleri çalışır.")
     }
 
     private fun themeApplied() {

@@ -166,6 +166,23 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("per_video_memory", true)
         set(v) = prefs.edit().putBoolean("per_video_memory", v).apply()
 
+    var musicMode: Boolean
+        get() = prefs.getBoolean("music_mode", false)
+        set(v) = prefs.edit().putBoolean("music_mode", v).apply()
+
+    var musicSort: MusicSort
+        get() = enumOf("music_sort", MusicSort.TITLE)
+        set(v) = putEnum("music_sort", v)
+
+    var musicShuffle: Boolean
+        get() = prefs.getBoolean("music_shuffle", false)
+        set(v) = prefs.edit().putBoolean("music_shuffle", v).apply()
+
+    /** 0 = kapalı, 1 = tek şarkı, 2 = tüm liste (Player.REPEAT_MODE_*). */
+    var musicRepeat: Int
+        get() = prefs.getInt("music_repeat", 0).coerceIn(0, 2)
+        set(v) = prefs.edit().putInt("music_repeat", v.coerceIn(0, 2)).apply()
+
     var skipSilence: Boolean
         get() = prefs.getBoolean("skip_silence", false)
         set(v) = prefs.edit().putBoolean("skip_silence", v).apply()
