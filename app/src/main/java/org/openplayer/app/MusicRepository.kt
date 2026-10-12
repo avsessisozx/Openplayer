@@ -24,6 +24,7 @@ data class MusicTrack(
     val albumArtist: String = "",
     val coverFile: String? = null,
     val sizeBytes: Long = 0L,
+    val composer: String = "",
 ) {
     val artworkUri: Uri
         get() = if (coverFile != null) Uri.fromFile(java.io.File(coverFile))
@@ -46,8 +47,13 @@ object MusicRepository {
     private const val UNKNOWN_ALBUM = "Bilinmeyen albüm"
 
     fun loadAll(context: Context): List<MusicTrack> {
+        val extended = runCatching { query(context, true) }.getOrNull()
+        return extended ?: query(context, false)
+    }
+
+    private fun query(context: Context, extra: Boolean): List<MusicTrack> {
         val out = ArrayList<MusicTrack>()
-        val projection = arrayOf(
+        val base = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
@@ -60,6 +66,9 @@ object MusicRepository {
             MediaStore.Audio.Media.YEAR,
             MediaStore.Audio.Media.SIZE,
         )
+        val projection = if (extra) {
+            base + arrayOf("composer", "genre", "album_artist")
+        } else base
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND ${MediaStore.Audio.Media.DURATION} >= 10000"
         try {
             context.contentResolver.query(
@@ -76,6 +85,9 @@ object MusicRepository {
                 val iData = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                 val iYear = c.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
                 val iSize = c.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
+                val iComposer = if (extra) c.getColumnIndexOrThrow("composer") else -1
+                val iGenre = if (extra) c.getColumnIndexOrThrow("genre") else -1
+                val iAlbumArtist = if (extra) c.getColumnIndexOrThrow("album_artist") else -1
                 while (c.moveToNext()) {
                     val id = c.getLong(iId)
                     val artist = c.getString(iArtist)?.takeIf { it.isNotBlank() && it != "<unknown>" } ?: UNKNOWN_ARTIST
@@ -95,12 +107,17 @@ object MusicRepository {
                         path = path,
                         year = c.getInt(iYear),
                         sizeBytes = c.getLong(iSize),
+                        composer = if (iComposer >= 0) c.getString(iComposer)?.takeIf { it.isNotBlank() && it != "<unknown>" } ?: "" else "",
+                        genre = if (iGenre >= 0) c.getString(iGenre)?.takeIf { it.isNotBlank() && it != "<unknown>" } ?: "" else "",
+                        albumArtist = if (iAlbumArtist >= 0) c.getString(iAlbumArtist)?.takeIf { it.isNotBlank() && it != "<unknown>" } ?: "" else "",
                     )
                     out += MusicTagStore.apply(context, base)
                 }
             }
         } catch (_: SecurityException) {
-        } catch (_: RuntimeException) {
+        } catch (e: RuntimeException) {
+            // Genişletilmiş sütunlar bu cihazda yoksa üst katman temel sorguyu dener.
+            if (extra) throw e
         }
         return out
     }
@@ -144,4 +161,23 @@ object MusicRepository {
                 list.sortedWith(compareBy(NaturalOrder) { it.title }),
             )
         }.sortedWith(compareBy(NaturalOrder) { it.title })
+
+    private fun group(prefix: String, tracks: List<MusicTrack>, key: (MusicTrack) -> String, unknown: String, sub: (List<MusicTrack>) -> String = { countText(it.size) }) =
+        tracks.groupBy { key(it).ifBlank { unknown } }.map { (k, list) ->
+            MusicGroup("${prefix}_$k", k, sub(list), list.sortedWith(compareBy<MusicTrack, String>(NaturalOrder) { it.artist }.thenBy(NaturalOrder) { it.album }.thenBy { it.trackNo }))
+        }
+
+    fun albumArtists(tracks: List<MusicTrack>): List<MusicGroup> =
+        group("aa", tracks, { it.albumArtist.ifBlank { it.artist } }, UNKNOWN_ARTIST) { l -> "${l.map { it.album }.distinct().size} albüm • " + countText(l.size) }
+            .sortedWith(compareBy(NaturalOrder) { it.title })
+
+    fun genres(tracks: List<MusicTrack>): List<MusicGroup> =
+        group("genre", tracks, { it.genre }, "Bilinmeyen tür").sortedWith(compareBy(NaturalOrder) { it.title })
+
+    fun composers(tracks: List<MusicTrack>): List<MusicGroup> =
+        group("composer", tracks, { it.composer }, "Bilinmeyen besteci").sortedWith(compareBy(NaturalOrder) { it.title })
+
+    fun years(tracks: List<MusicTrack>): List<MusicGroup> =
+        group("year", tracks, { if (it.year > 0) it.year.toString() else "" }, "Bilinmeyen yıl")
+            .sortedByDescending { it.title.toIntOrNull() ?: -1 }
 }

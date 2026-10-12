@@ -315,6 +315,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun musicPage() {
         section("Müzik modu")
         toggle("Müzik çaları etkinleştir", "Açınca ana ekranda \"Müzik\" sekmesi görünür. Müzik izni ilk açtığınızda istenir.", s.musicMode) { s.musicMode = it }
+        toggle("Açılışta Kitaplık ekranı", "Kapalıyken müzik doğrudan Şarkılar sekmesiyle açılır", s.musicStartHome) { s.musicStartHome = it }
         val sorts = MusicSort.entries
         choice("Varsayılan sıralama", s.musicSort.label, sorts.map { it.label }, sorts.indexOf(s.musicSort)) {
             s.musicSort = sorts[it]
@@ -431,7 +432,7 @@ class SettingsActivity : AppCompatActivity() {
             s.listTextScale = tsizes[it]
         }
         action("Simge boyutlarını sıfırla", "Listede iki parmakla yaptığınız boyutlandırmayı varsayılana döndürür") {
-            s.listScale = 100; s.gridScale = 100; s.folderScale = 100; s.listTextScale = 100
+            s.listScale = 100; s.gridScale = 100; s.folderScale = 100; s.listTextScale = 100; s.musicScale = 100
             android.widget.Toast.makeText(this, "Boyutlar sıfırlandı", android.widget.Toast.LENGTH_SHORT).show()
         }
         toggle("Gizli klasörleri göster", "Klasöre uzun basarak gizleyebilirsiniz", s.showHiddenFolders) { s.showHiddenFolders = it }

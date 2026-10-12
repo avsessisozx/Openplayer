@@ -170,6 +170,16 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("music_mode", false)
         set(v) = prefs.edit().putBoolean("music_mode", v).apply()
 
+    /** Müzik açılışında Kitaplık ekranı gösterilir (kapalıysa Şarkılar). */
+    var musicStartHome: Boolean
+        get() = prefs.getBoolean("music_start_home", true)
+        set(v) = prefs.edit().putBoolean("music_start_home", v).apply()
+
+    /** Müzik listelerinde simge/yazı ölçeği (yüzde). */
+    var musicScale: Int
+        get() = prefs.getInt("music_scale", 100)
+        set(v) = prefs.edit().putInt("music_scale", v.coerceIn(30, 400)).apply()
+
     var musicSort: MusicSort
         get() = enumOf("music_sort", MusicSort.TITLE)
         set(v) = putEnum("music_sort", v)

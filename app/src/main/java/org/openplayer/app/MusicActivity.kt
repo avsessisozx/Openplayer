@@ -32,13 +32,18 @@ import androidx.recyclerview.widget.RecyclerView
 /** Müzik kütüphanesi: şarkılar, albümler, sanatçılar, klasörler; altta mini oynatıcı. */
 class MusicActivity : AppCompatActivity() {
 
-    private enum class Tab(val title: String) { SONGS("Şarkılar"), ALBUMS("Albümler"), ARTISTS("Sanatçılar"), FOLDERS("Klasörler") }
+    private enum class Tab(val title: String) {
+        HOME("Kitaplık"), SONGS("Şarkılar"), ALBUMS("Albümler"), ARTISTS("Sanatçılar"),
+        ALBUM_ARTISTS("Albüm sanatçıları"), GENRES("Tarzlar"), YEARS("Yıllar"), COMPOSERS("Besteciler"),
+        FOLDERS("Klasörler"), TREE("Klasör hiyerarşisi")
+    }
 
     private class Row(
         val title: String,
         val subtitle: String,
         val art: MusicTrack?,
         val icon: Int = 0,
+        val iconBg: Int = 0,
         val trailing: String? = null,
         val highlight: Boolean = false,
         val trackId: Long = -1L,
@@ -92,6 +97,8 @@ class MusicActivity : AppCompatActivity() {
 
     private var all: List<MusicTrack> = emptyList()
     private var tab = Tab.SONGS
+    private var treePath: String? = null
+    private lateinit var tabScroll: android.widget.HorizontalScrollView
     private var detail: MusicGroup? = null
     private var searching = false
     private val adapter = RowAdapter()
@@ -115,6 +122,14 @@ class MusicActivity : AppCompatActivity() {
                 searching -> closeSearch()
                 detail != null -> {
                     detail = null
+                    render()
+                }
+                tab == Tab.TREE && treePath != null && treePath != treeRoot() -> {
+                    treePath = treePath!!.substringBeforeLast('/')
+                    render()
+                }
+                tab != Tab.HOME && settings.musicStartHome -> {
+                    tab = Tab.HOME
                     render()
                 }
                 else -> finish()
@@ -146,6 +161,7 @@ class MusicActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         settings = AppSettings.get(this)
+        tab = if (settings.musicStartHome) Tab.HOME else Tab.SONGS
         ThemeManager.applyWindow(this)
         onBackPressedDispatcher.addCallback(this, backCallback)
         setContentView(buildUi())
@@ -256,6 +272,10 @@ class MusicActivity : AppCompatActivity() {
         }
 
         tabRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        tabScroll = android.widget.HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            addView(tabRow, FrameLayout.LayoutParams(-2, -1))
+        }
         buildTabs()
 
         list = RecyclerView(this).apply {
@@ -264,6 +284,7 @@ class MusicActivity : AppCompatActivity() {
             clipToPadding = false
             setPadding(0, 0, 0, dp(8))
         }
+        installListGestures()
         emptyView = text(16f, UiColors.textSecondary).apply {
             maxLines = 6
             gravity = Gravity.CENTER
@@ -307,7 +328,7 @@ class MusicActivity : AppCompatActivity() {
             setBackgroundColor(UiColors.background)
             addView(topBar, LinearLayout.LayoutParams(-1, -2))
             addView(selBar, LinearLayout.LayoutParams(-1, -2))
-            addView(tabRow, LinearLayout.LayoutParams(-1, dp(44)))
+            addView(tabScroll, LinearLayout.LayoutParams(-1, dp(44)))
             addView(FrameLayout(this@MusicActivity).apply {
                 addView(list, FrameLayout.LayoutParams(-1, -1))
                 addView(emptyView, FrameLayout.LayoutParams(-1, -1))
@@ -320,15 +341,98 @@ class MusicActivity : AppCompatActivity() {
     private fun buildTabs() {
         tabRow.removeAllViews()
         // "Videolar" sekmesi ilk sırada: müzik modundan videoya dönüş.
-        tabRow.addView(tabView("Videolar", false) { finish() }, LinearLayout.LayoutParams(0, -1, 1f))
+        tabRow.addView(tabView("Videolar", false) { finish() }, LinearLayout.LayoutParams(-2, -1))
+        var selectedView: View? = null
         for (t in Tab.entries) {
-            tabRow.addView(tabView(t.title, t == tab && detail == null) {
+            val v = tabView(t.title, t == tab && detail == null) {
                 tab = t
                 detail = null
+                treePath = null
                 closeSearch()
                 render()
-            }, LinearLayout.LayoutParams(0, -1, 1f))
+            }
+            if (t == tab) selectedView = v
+            tabRow.addView(v, LinearLayout.LayoutParams(-2, -1))
         }
+        tabRow.addView(tabView("Listeler", false) {
+            startActivity(Intent(this, PlaylistActivity::class.java).putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.MUSIC))
+        }, LinearLayout.LayoutParams(-2, -1))
+        selectedView?.let { v -> tabScroll.post { tabScroll.smoothScrollTo((v.left - dp(40)).coerceAtLeast(0), 0) } }
+    }
+
+    private fun switchTab(delta: Int) {
+        val all = Tab.entries
+        val next = all.indexOf(tab) + delta
+        if (next !in all.indices) return
+        tab = all[next]
+        detail = null
+        treePath = null
+        closeSearch()
+        render()
+        list.translationX = delta * dp(60).toFloat()
+        list.alpha = 0.3f
+        list.animate().translationX(0f).alpha(1f).setDuration(180).start()
+    }
+
+    private var pinchLast = 0L
+
+    /** Listede sağa/sola kaydırınca sekme değişir; iki parmakla çimdik simge boyutunu ayarlar. */
+    private fun installListGestures() {
+        val scale = android.view.ScaleGestureDetector(this, object : android.view.ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(d: android.view.ScaleGestureDetector): Boolean {
+                val cur = settings.musicScale
+                val next = Math.round(cur * d.scaleFactor).coerceIn(30, 400)
+                if (next == cur) return false
+                settings.musicScale = next
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - pinchLast > 60) {
+                    pinchLast = now
+                    adapter.refreshSelection()
+                }
+                return true
+            }
+
+            override fun onScaleEnd(d: android.view.ScaleGestureDetector) {
+                adapter.refreshSelection()
+            }
+        })
+        var downX = 0f
+        var downY = 0f
+        var swiping = false
+        list.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: android.view.MotionEvent): Boolean {
+                scale.onTouchEvent(e)
+                when (e.actionMasked) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        downX = e.x
+                        downY = e.y
+                        swiping = false
+                    }
+                    android.view.MotionEvent.ACTION_MOVE -> if (e.pointerCount == 1 && !swiping) {
+                        val dx = e.x - downX
+                        val dy = e.y - downY
+                        if (kotlin.math.abs(dx) > dp(24) && kotlin.math.abs(dx) > kotlin.math.abs(dy) * 1.8f) swiping = true
+                    }
+                }
+                return e.pointerCount >= 2 || swiping
+            }
+
+            override fun onTouchEvent(rv: RecyclerView, e: android.view.MotionEvent) {
+                scale.onTouchEvent(e)
+                when (e.actionMasked) {
+                    android.view.MotionEvent.ACTION_UP -> {
+                        if (swiping) {
+                            val dx = e.x - downX
+                            if (kotlin.math.abs(dx) > dp(70)) switchTab(if (dx < 0) 1 else -1)
+                        }
+                        swiping = false
+                    }
+                    android.view.MotionEvent.ACTION_CANCEL -> swiping = false
+                }
+            }
+
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
     }
 
     private fun tabView(title: String, selected: Boolean, onClick: () -> Unit): View =
@@ -336,7 +440,8 @@ class MusicActivity : AppCompatActivity() {
             text = title
             gravity = Gravity.CENTER
             maxLines = 1
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setPadding(dp(14), 0, dp(14), 0)
             setTextColor(if (selected) UiColors.accent else UiColors.textSecondary)
             if (selected) setTypeface(typeface, android.graphics.Typeface.BOLD)
             setOnClickListener { onClick() }
@@ -445,6 +550,28 @@ class MusicActivity : AppCompatActivity() {
                 }
                 songRows(d.tracks)
             }
+            tab == Tab.HOME -> {
+                titleView.text = "Kitaplık"
+                fun entry(t: Tab, icon: Int, color: Int, count: String) {
+                    rows += Row(t.title, count, null, icon = icon, iconBg = color) {
+                        tab = t
+                        treePath = null
+                        render()
+                    }
+                }
+                entry(Tab.SONGS, R.drawable.ic_music_note, 0xFF6F86D6.toInt(), "${all.size} şarkı")
+                entry(Tab.FOLDERS, R.drawable.ic_folder, 0xFF3B82F6.toInt(), "${MusicRepository.folders(all).size} klasör")
+                entry(Tab.TREE, R.drawable.ic_move, 0xFF5B6EE1.toInt(), "Klasör ağacında gez")
+                entry(Tab.ALBUMS, R.drawable.ic_album, 0xFF6050C0.toInt(), "${MusicRepository.albums(all).size} albüm")
+                entry(Tab.ARTISTS, R.drawable.ic_mic, 0xFF5A5599.toInt(), "${MusicRepository.artists(all).size} sanatçı")
+                entry(Tab.ALBUM_ARTISTS, R.drawable.ic_mic, 0xFF6A5FA8.toInt(), "${MusicRepository.albumArtists(all).size} albüm sanatçısı")
+                entry(Tab.GENRES, R.drawable.ic_headphones, 0xFF7A4A8C.toInt(), "${MusicRepository.genres(all).size} tarz")
+                entry(Tab.YEARS, R.drawable.ic_calendar, 0xFF3F8FA0.toInt(), "${MusicRepository.years(all).size} yıl")
+                entry(Tab.COMPOSERS, R.drawable.ic_person, 0xFF2F7D4F.toInt(), "${MusicRepository.composers(all).size} besteci")
+                rows += Row("Çalma listeleri", "Favoriler ve listeleriniz", null, icon = R.drawable.ic_list, iconBg = 0xFF8A4B3F.toInt()) {
+                    startActivity(Intent(this, PlaylistActivity::class.java).putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.MUSIC))
+                }
+            }
             tab == Tab.SONGS -> {
                 titleView.text = "Müzik"
                 val sorted = MusicRepository.sort(all, settings.musicSort)
@@ -455,18 +582,41 @@ class MusicActivity : AppCompatActivity() {
                 }
                 songRows(sorted)
             }
+            tab == Tab.TREE -> {
+                val root = treeRoot()
+                val cur = treePath ?: root
+                titleView.text = cur.substringAfterLast('/').ifEmpty { "Klasör hiyerarşisi" }
+                val prefix = cur.trimEnd('/') + "/"
+                val under = all.filter { it.folderPath.startsWith(prefix) || it.folderPath == cur }
+                val dirs = under.filter { it.folderPath != cur }.groupBy { it.folderPath.removePrefix(prefix).substringBefore('/') }
+                for ((name, list) in dirs.entries.sortedWith(compareBy(NaturalOrder) { it.key })) {
+                    rows += Row(name, "${list.size} şarkı", null, icon = R.drawable.ic_folder) {
+                        treePath = prefix + name
+                        render()
+                    }
+                }
+                songRows(MusicRepository.sort(under.filter { it.folderPath == cur }, settings.musicSort))
+            }
             else -> {
                 titleView.text = "Müzik"
                 val groups = when (tab) {
                     Tab.ALBUMS -> MusicRepository.albums(all)
                     Tab.ARTISTS -> MusicRepository.artists(all)
+                    Tab.ALBUM_ARTISTS -> MusicRepository.albumArtists(all)
+                    Tab.GENRES -> MusicRepository.genres(all)
+                    Tab.YEARS -> MusicRepository.years(all)
+                    Tab.COMPOSERS -> MusicRepository.composers(all)
                     else -> MusicRepository.folders(all)
                 }
+                val icon = when (tab) {
+                    Tab.FOLDERS -> R.drawable.ic_folder
+                    Tab.GENRES -> R.drawable.ic_music_note
+                    Tab.YEARS -> R.drawable.ic_calendar
+                    Tab.COMPOSERS -> R.drawable.ic_person
+                    else -> 0
+                }
                 for (g in groups) {
-                    rows += Row(
-                        g.title, g.subtitle, g.tracks.firstOrNull(),
-                        icon = if (tab == Tab.FOLDERS) R.drawable.ic_folder else 0,
-                    ) {
+                    rows += Row(g.title, g.subtitle, g.tracks.firstOrNull(), icon = icon) {
                         detail = g
                         render()
                     }
@@ -484,6 +634,12 @@ class MusicActivity : AppCompatActivity() {
         val pos = lm.findFirstVisibleItemPosition()
         adapter.rows = rows
         if (keepScroll && pos >= 0) lm.scrollToPosition(pos) else if (!keepScroll) list.scrollToPosition(0)
+    }
+
+    /** Klasör ağacının kökü: cihaz depolamasının ortak üst yolu. */
+    private fun treeRoot(): String {
+        val storage = "/storage/emulated/0"
+        return if (all.any { it.folderPath.startsWith(storage) }) storage else "/"
     }
 
     private fun afterPlay() {
@@ -749,6 +905,7 @@ class MusicActivity : AppCompatActivity() {
             val trailing: TextView,
             val more: ImageView,
             val check: ImageView,
+            val artBox: View,
         ) : RecyclerView.ViewHolder(root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -777,13 +934,20 @@ class MusicActivity : AppCompatActivity() {
                 addView(trailing)
                 addView(more)
             }
-            return VH(root, art, title, sub, trailing, more, check)
+            return VH(root, art, title, sub, trailing, more, check, artBox)
         }
 
         override fun getItemCount() = rows.size
 
         override fun onBindViewHolder(h: VH, position: Int) {
             val r = rows[position]
+            val sc = settings.musicScale / 100f
+            val tm = Math.pow(sc.toDouble(), 0.4).toFloat().coerceIn(0.8f, 1.5f)
+            val box = (dp(52) * sc).toInt().coerceAtLeast(dp(28))
+            h.artBox.layoutParams = (h.artBox.layoutParams as LinearLayout.LayoutParams).apply { width = box; height = box }
+            h.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f * tm)
+            h.sub.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f * tm)
+            h.trailing.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f * tm)
             val sel = r.trackId >= 0 && r.trackId in selected
             h.check.visibility = if (sel) View.VISIBLE else View.GONE
             h.itemView.setBackgroundColor(if (sel) 0x33FFFFFF else 0)
@@ -794,16 +958,25 @@ class MusicActivity : AppCompatActivity() {
             val more = r.onMore
             h.more.visibility = if (more != null && !selectionOn) View.VISIBLE else View.GONE
             h.more.setOnClickListener { more?.invoke() }
+            h.art.clipToOutline = r.iconBg == 0
             if (r.icon != 0) {
                 h.art.tag = null
                 h.art.setImageResource(r.icon)
                 h.art.scaleType = ImageView.ScaleType.CENTER_INSIDE
                 val pad = dp(12)
                 h.art.setPadding(pad, pad, pad, pad)
-                h.art.setColorFilter(UiColors.accent)
-                h.art.setBackgroundColor(UiColors.surface)
+                if (r.iconBg != 0) {
+                    h.art.setColorFilter(Color.WHITE)
+                    h.art.background = GradientDrawable().apply {
+                        shape = GradientDrawable.OVAL
+                        setColor(r.iconBg)
+                    }
+                } else {
+                    h.art.setColorFilter(UiColors.accent)
+                    h.art.setBackgroundColor(UiColors.surface)
+                }
             } else {
-                ArtLoader.load(h.art, r.art, dp(104))
+                ArtLoader.load(h.art, r.art, (dp(104) * sc).toInt().coerceIn(96, 800))
             }
             h.itemView.setOnClickListener { r.onClick() }
             val long = r.onLong
