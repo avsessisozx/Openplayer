@@ -667,10 +667,13 @@ class PlayerActivity : AppCompatActivity() {
         val next = order.firstOrNull { it !in triedDecoders }
         if (next != null && settings.autoDecoderFallback) {
             // MX gibi: sormadan sıradaki çözücüyle aynı konumdan yeniden dener.
-            PlayerHolder.decoderOverride = next
-            PlayerHolder.rebuild(this)
             decoderLabel.text = next.short
             toast("${next.label} çözücüyle yeniden deneniyor")
+            handler.post {
+                if (isDestroyed) return@post
+                PlayerHolder.decoderOverride = next
+                PlayerHolder.rebuild(this)
+            }
             return
         }
         if (settings.playbackEngine != PlaybackEngine.EXO && openInVlc(fromError = true)) return

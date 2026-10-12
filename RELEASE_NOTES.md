@@ -1,3 +1,27 @@
+# 1.0.0-beta9
+
+Büyük sürüm. **Cihazda henüz denenmedi** — hata bulursanız lütfen bildirin.
+
+**Müzik**
+- **Kitaplık ekranı:** Müzik açılışta Kitaplık ile açılır (Tüm Şarkılar, Klasörler, Klasör Hiyerarşisi, Albümler, Sanatçılar, Albüm Sanatçıları, Tarzlar, Yıllar, Besteciler, Çalma Listeleri). Ayarlar → Müzik'ten kapatılabilir.
+- **Sekmeler arası kaydırma:** Listede sağa/sola kaydırınca sekme değişir; sekmelere dokunmak da çalışır.
+- **Çimdikle boyut:** Müzik listelerinde iki parmakla simge/yazı boyutu (Ayarlar → Liste'den sıfırlanır).
+- **Yeni "Çalıyor" ekranı:** kapak üzerinde favori/kuyruk/⋮ düğmeleri, yuvarlak başlık ve sanatçı etiketleri, kapaktan türeyen arka plan, dalga biçimli ilerleme çubuğu (şarkıya özgü desen; gerçek ses dalgası değildir), ±10 sn sarma, kHz/kbps/biçim bilgisi.
+- **Ses:** bas güçlendirme, stereo genişletme, denge (sol/sağ), mono karıştırma, EQ hazır ayarları, ReplayGain (yalnız ses kısar), geçişte yumuşatma (şarkıları üst üste bindirmez). Bas/genişletme cihazın efekt desteğine bağlıdır.
+- **M3U / M3U8 / PLS** listeleri içe/dışa aktarma; **albüm kapağını internetten bul** (iTunes Search, onayla); ana ekran **widget'ı**.
+
+**Video**
+- **VLC yedek motoru:** ExoPlayer açamazsa libVLC ile açılır (Ayarlar → Oynatıcı → Oynatma motoru: Otomatik / Yalnız ExoPlayer / Yalnız VLC). VLC ekranı sadedir. Uygulama boyutu büyüdü; x86_64 (emülatör) desteği kaldırıldı.
+- **Çözücü zinciri:** açılamayan videoda HW → HW+ → SW sormadan, ayarınız değişmeden denenir.
+- **Bölümler:** MKV ve MP4 (Nero chpl) bölümleri; ⋮ → Bölümler, çubukta işaretler.
+- **Döndür düğmesi** tek basışta dikey↔yatay çevirir; **kısayol satırı** sürükleyerek açılır/kapanır.
+- **Jest bölgeleri:** sol/orta/sağ şeritler, sürüklenebilir sınırlar; işlevler: parlaklık, ses, hız, sarma, altyazı konumu/boyutu, yakınlaştırma.
+- **Sarma:** "Bırakınca tam konuma git" seçeneği (kapalıysa daha akıcı), daha seyrek arama isteği.
+
+Bilinen sınırlar: parametrik 64 bant EQ, bit-perfect/USB DAC, .cue (müzik) ve dosyaya gerçek etiket yazma henüz yok.
+
+---
+
 # 1.0.0-beta8
 
 Büyük sürüm. **Cihazda henüz denenmedi** — hata bulursanız lütfen bildirin.

@@ -63,7 +63,8 @@ GNU AGPLv3. Herkes kullanabilir ve değiştirebilir; değiştirilmiş sürümler
 
 Bu proje [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg uzantısı, GPLv3),
 [smbj](https://github.com/hierynomus/smbj) (Apache-2.0), [Apache Commons Net](https://commons.apache.org/proper/commons-net/) (Apache-2.0),
-[OkHttp](https://square.github.io/okhttp/) (Apache-2.0) ve [Coil](https://coil-kt.github.io/coil/) (Apache-2.0) kullanır.
+[OkHttp](https://square.github.io/okhttp/) (Apache-2.0), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0) ve yedek oynatma motoru olarak
+[libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1) kullanır.
 
 
 ## Güvenlik
