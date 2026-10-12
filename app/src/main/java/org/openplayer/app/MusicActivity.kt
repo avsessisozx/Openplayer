@@ -861,12 +861,43 @@ class MusicActivity : AppCompatActivity() {
         e += SheetEntry(R.drawable.ic_playlist_add, "Oynatma listesine ekle") {
             showAddToPlaylist(PlaylistStore.MUSIC, listOf(u))
         }
+        e += SheetEntry(R.drawable.ic_cloud_download, "Albüm kapağını internetten bul") { fetchCover(t) }
         e += SheetEntry(R.drawable.ic_edit, "Etiketleri düzenle") { editTags(listOf(t)) }
         e += SheetEntry(R.drawable.ic_share, "Paylaş") { shareTracks(listOf(t)) }
         e += SheetEntry(R.drawable.ic_edit, "Dosyayı yeniden adlandır") { renameTrack(t) }
         e += SheetEntry(R.drawable.ic_info, "Özellikler") { showTrackInfo(t) }
         e += SheetEntry(R.drawable.ic_delete, "Sil", danger = true) { deleteTracks(listOf(t)) }
         showSheet(t.title, e)
+    }
+
+    /** Albüm kapağını iTunes Search'ten indirir ve albümdeki tüm şarkılara uygular (onayla). */
+    private fun fetchCover(t: MusicTrack) {
+        PanelBuilder(this)
+            .setTitle("Kapak internetten aransın mı?")
+            .setMessage("Sanatçı ve albüm adı (\"${t.artist} — ${t.album}\") Apple'ın herkese açık iTunes Search servisine gönderilir. Bulunan kapak bu albümdeki şarkılara uygulanır.")
+            .setPositiveButton("Ara") { _, _ ->
+                val app = applicationContext
+                val same = all.filter { it.albumId == t.albumId && it.album == t.album }
+                Toast.makeText(this, "Aranıyor…", Toast.LENGTH_SHORT).show()
+                loader.execute {
+                    val bytes = CoverFetcher.fetch(t.artist, t.album)
+                    var ok = false
+                    if (bytes != null) {
+                        val tmp = java.io.File(app.cacheDir, "cover_dl.jpg")
+                        runCatching {
+                            tmp.writeBytes(bytes)
+                            same.forEach { tr -> if (MusicTagStore.setCover(app, tr.id, android.net.Uri.fromFile(tmp))) ok = true }
+                        }
+                        tmp.delete()
+                    }
+                    runOnUiThread {
+                        Toast.makeText(this, if (ok) "Kapak uygulandı" else "Kapak bulunamadı veya indirilemedi", Toast.LENGTH_LONG).show()
+                        if (ok) load()
+                    }
+                }
+            }
+            .setNegativeButton("İptal", null)
+            .show()
     }
 
     private fun updateMini() {

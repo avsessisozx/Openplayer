@@ -205,6 +205,7 @@ object MusicController {
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
+            appCtx?.let { MusicWidget.update(it) }
             main.removeCallbacks(fadeTicker)
             if (isPlaying) main.post(fadeTicker)
             val item = PlayerHolder.player?.currentMediaItem
@@ -222,6 +223,7 @@ object MusicController {
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            appCtx?.let { MusicWidget.update(it) }
             main.post(fadeTicker)
             PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
         }
