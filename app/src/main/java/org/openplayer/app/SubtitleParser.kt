@@ -48,6 +48,9 @@ object SubtitleParser {
         }
     }
 
+    private const val MAX_CUES = 50_000
+    private const val MAX_CUE_CHARS = 2_000
+
     fun parse(fileName: String, text: String): List<SubCue> {
         val ext = fileName.substringAfterLast('.', "").lowercase()
         val clean = text.replace("\r\n", "\n").replace('\r', '\n')
@@ -62,7 +65,12 @@ object SubtitleParser {
             Regex("""^\d{1,2}:\d{2}:\d{2}[:=,]""", RegexOption.MULTILINE).containsMatchIn(head) -> parseTmPlayer(clean)
             else -> emptyList()
         }
-        return cues.filter { it.endMs > it.startMs && it.text.isNotBlank() }.sortedBy { it.startMs }
+        return cues.asSequence()
+            .filter { it.endMs > it.startMs && it.text.isNotBlank() }
+            .take(MAX_CUES)
+            .map { if (it.text.length > MAX_CUE_CHARS) it.copy(text = it.text.take(MAX_CUE_CHARS)) else it }
+            .toList()
+            .sortedBy { it.startMs }
     }
 
     // ---------- SRT / WebVTT ----------

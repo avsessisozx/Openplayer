@@ -42,7 +42,7 @@ data class NetServer(
     val summary: String get() = "${protocol.name} · $host:$effectivePort"
 }
 
-/** Kayıtlı ağ sunucuları. Parolalar uygulamanın özel alanında düz metin olarak saklanır. */
+/** Kayıtlı ağ sunucuları. Parolalar Android Keystore ile şifrelenerek saklanır (SecretBox). */
 object NetworkStore {
 
     private fun prefs(c: Context) = c.getSharedPreferences("network", Context.MODE_PRIVATE)
@@ -61,7 +61,7 @@ object NetworkStore {
                     port = o.optInt("port"),
                     path = o.optString("path"),
                     user = o.optString("user"),
-                    pass = o.optString("pass"),
+                    pass = SecretBox.decrypt(o.optString("pass")),
                     secure = o.optBoolean("secure"),
                 )
             }
@@ -75,7 +75,7 @@ object NetworkStore {
                 JSONObject()
                     .put("id", it.id).put("protocol", it.protocol.name).put("name", it.name)
                     .put("host", it.host).put("port", it.port).put("path", it.path)
-                    .put("user", it.user).put("pass", it.pass).put("secure", it.secure)
+                    .put("user", it.user).put("pass", SecretBox.encrypt(it.pass)).put("secure", it.secure)
             )
         }
         prefs(c).edit().putString("servers", arr.toString()).apply()
@@ -99,6 +99,15 @@ object NetworkStore {
             "http", "https" -> NetProtocol.WEBDAV
             else -> return null
         }
-        return all(c).firstOrNull { it.protocol == wanted && it.host.equals(host, ignoreCase = true) }
+        // Kimlik bilgisi yalnızca host + port + şema birebir eşleşirse eklenir; böylece
+        // saldırganın verdiği başka bir adrese kayıtlı parola gönderilmez.
+        val port = if (uri.port > 0) uri.port else when (uri.scheme?.lowercase()) {
+            "https" -> 443; "http" -> 80; "smb" -> 445; else -> 21
+        }
+        return all(c).firstOrNull {
+            it.protocol == wanted && it.host.equals(host, ignoreCase = true) &&
+                it.effectivePort == port &&
+                (wanted != NetProtocol.WEBDAV || it.scheme == uri.scheme?.lowercase())
+        }
     }
 }

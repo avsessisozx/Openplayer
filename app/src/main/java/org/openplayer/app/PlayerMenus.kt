@@ -327,8 +327,10 @@ class PlayerMenus(private val a: PlayerActivity) {
                 val bytes = client.download(r.fileId)
                 val base = OsHash.cleanTitle(SubtitleFiles.displayName(a, a.currentUri ?: return@Thread))
                     .replace(Regex("""[^\p{L}\p{N}]+"""), "_").take(40)
-                val file = File(SubtitleFiles.downloadDir(a), "${base}_${r.language}_${r.fileId}.srt")
+                val lang = r.language.replace(Regex("[^A-Za-z-]"), "").take(8)
+                val file = File(SubtitleFiles.downloadDir(a), "${UriGuard.safeFileName(base)}_${lang}_${r.fileId}.srt")
                 file.writeBytes(bytes)
+                SubtitleFiles.pruneDownloads(a)
                 a.runOnUiThread {
                     busy.dismiss()
                     a.loadExternalSubtitle(file)

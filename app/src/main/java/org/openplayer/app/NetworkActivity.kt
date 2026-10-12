@@ -354,6 +354,14 @@ class NetworkActivity : AppCompatActivity() {
                     Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
+                val insecure = protocol == NetProtocol.FTP || (protocol == NetProtocol.WEBDAV && !secure.isChecked)
+                if (insecure && pass.text.isNotEmpty()) {
+                    Toast.makeText(
+                        this,
+                        "Uyarı: bu protokol parolayı şifrelemeden gönderir; yalnızca güvendiğiniz ağda kullanın (WebDAV için https önerilir).",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
                 NetworkStore.save(
                     this,
                     NetServer(

@@ -192,16 +192,16 @@ class AppSettings private constructor(context: Context) {
 
     // --- OpenSubtitles (kullanıcı kendi anahtarını girer) ---
     var osApiKey: String
-        get() = prefs.getString("os_key", "") ?: ""
-        set(v) = prefs.edit().putString("os_key", v.trim()).apply()
+        get() = SecretBox.decrypt(prefs.getString("os_key", "") ?: "")
+        set(v) = prefs.edit().putString("os_key", SecretBox.encrypt(v.trim())).apply()
 
     var osUser: String
         get() = prefs.getString("os_user", "") ?: ""
         set(v) = prefs.edit().putString("os_user", v.trim()).apply()
 
     var osPass: String
-        get() = prefs.getString("os_pass", "") ?: ""
-        set(v) = prefs.edit().putString("os_pass", v).apply()
+        get() = SecretBox.decrypt(prefs.getString("os_pass", "") ?: "")
+        set(v) = prefs.edit().putString("os_pass", SecretBox.encrypt(v)).apply()
 
     // --- Ses ---
     var eqEnabled: Boolean

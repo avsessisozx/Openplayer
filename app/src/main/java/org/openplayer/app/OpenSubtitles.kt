@@ -96,12 +96,17 @@ class OpenSubtitlesClient(
         val response = JSONObject(call("POST", "$base/download", JSONObject().put("file_id", fileId).toString(), token))
         val link = response.optString("link")
         if (link.isEmpty()) throw IOException("İndirme bağlantısı alınamadı")
-        val conn = URL(link).openConnection() as HttpURLConnection
+        // Sunucudan gelen bağlantı güvenilmez: yalnızca https, yönlendirme yok, boyut sınırlı.
+        val url = URL(link)
+        if (url.protocol != "https") throw IOException("Güvensiz indirme bağlantısı reddedildi")
+        val conn = url.openConnection() as HttpURLConnection
         try {
+            conn.instanceFollowRedirects = false
             conn.connectTimeout = 15_000
             conn.readTimeout = 30_000
+            if (conn.responseCode !in 200..299) throw IOException("İndirme hatası ${conn.responseCode}")
             val out = ByteArrayOutputStream()
-            conn.inputStream.use { it.copyTo(out) }
+            if (!SubtitleFiles.copyLimited(conn.inputStream, out)) throw IOException("Altyazı çok büyük, reddedildi")
             return out.toByteArray()
         } finally {
             conn.disconnect()

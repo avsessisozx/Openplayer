@@ -51,6 +51,9 @@ object NetworkBrowser {
         }
         return entries
             .filter { it.name.isNotEmpty() && it.name != "." && it.name != ".." }
+            // Sunucudan gelen adlar güvenilmezdir: yol ayracı/kontrol karakteri içerenler atılır, sayı sınırlanır.
+            .filter { e -> e.name.none { it.isISOControl() || it == '/' || it == '\\' } && e.name.length <= 255 }
+            .take(5000)
             .filter { it.isDir || isVideo(it.name) }
             .sortedWith(compareByDescending<NetEntry> { it.isDir }.thenBy { it.name.lowercase() })
     }

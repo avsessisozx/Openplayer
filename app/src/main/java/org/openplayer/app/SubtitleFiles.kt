@@ -66,4 +66,27 @@ object SubtitleFiles {
     }
 
     fun downloadDir(context: Context): File = File(context.filesDir, "subtitles").apply { mkdirs() }
+
+    /** Altyazı dosyası için en büyük kabul edilen boyut (gerçek altyazılar birkaç yüz KB'dir). */
+    const val MAX_BYTES = 5L * 1024 * 1024
+
+    /** [input]'u en fazla [MAX_BYTES] kadar kopyalar; sınır aşılırsa false döner. */
+    fun copyLimited(input: java.io.InputStream, output: java.io.OutputStream): Boolean {
+        val buf = ByteArray(16 * 1024)
+        var total = 0L
+        while (true) {
+            val n = input.read(buf)
+            if (n < 0) return true
+            total += n
+            if (total > MAX_BYTES) return false
+            output.write(buf, 0, n)
+        }
+    }
+
+    /** İndirilen/içe aktarılan altyazılar sınırsız birikmesin: en yeni 200 dosya kalır. */
+    fun pruneDownloads(context: Context, keep: Int = 200) {
+        runCatching {
+            downloadDir(context).listFiles()?.sortedByDescending { it.lastModified() }?.drop(keep)?.forEach { it.delete() }
+        }
+    }
 }

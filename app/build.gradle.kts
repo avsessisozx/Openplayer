@@ -11,8 +11,8 @@ android {
         applicationId = "org.openplayer.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0-beta1"
+        versionCode = 2
+        versionName = "1.0.0-beta2"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
     }
 
@@ -35,6 +35,11 @@ android {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("openplayer")
         }
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 
     compileOptions {

@@ -5,7 +5,9 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -79,9 +81,14 @@ object PlayerHolder {
         }
         renderers.setEnableDecoderFallback(true)
 
-        val http = DefaultHttpDataSource.Factory()
-            .setAllowCrossProtocolRedirects(true)
-            .setUserAgent("OpenPlayer/0.3")
+        // OkHttp: farklı bir sunucuya yönlendirmede Authorization başlığını otomatik düşürür;
+        // https -> http düşürme yönlendirmesi izlenmez.
+        val client = OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .followSslRedirects(false)
+            .build()
+        val http = OkHttpDataSource.Factory(client).setUserAgent("OpenPlayer/1.0")
         val authedHttp = NetworkDataSourceFactory.withWebDavAuth(app, http)
         val dataSources = NetworkDataSourceFactory(app, DefaultDataSource.Factory(app, authedHttp))
         val mediaSources = DefaultMediaSourceFactory(app)

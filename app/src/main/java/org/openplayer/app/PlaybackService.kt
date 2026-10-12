@@ -26,7 +26,9 @@ class PlaybackService : MediaSessionService() {
         PlayerHolder.addRebuildListener(rebuildListener)
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = session
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
+        // Yalnızca kendi uygulamamız ve sistem (bildirim, kilit ekranı, Bluetooth) denetleyebilir.
+        if (controllerInfo.packageName == packageName || controllerInfo.isTrusted) session else null
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         val p = PlayerHolder.player

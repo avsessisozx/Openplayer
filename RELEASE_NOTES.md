@@ -1,3 +1,11 @@
+# 1.0.0-beta2
+
+**Düzeltmeler:** video küçük resimleri, saydam ses/ilerleme göstergesi, ayna ve dikey çevirme (TextureView), klasöre girişte gecikme (arka plan yükleme), Ayarlar MX tarzı gruplara ayrıldı (Oynatıcı, Hareketler, Video/Senkron, Ses, Altyazı, Çevrimiçi, Liste), ses dili tercihi.
+
+**Güvenlik:** dış adres doğrulaması, altyazı boyut/satır sınırları, güvenli dosya adları, OpenSubtitles yalnızca https, parola/anahtar şifreleme (Keystore), yedekleme kapalı, kimlik bilgisi sızıntısı önlemleri, medya oturumu kısıtlaması, release (debuggable olmayan) derleme, salt okunur CI + SHA-256. Ayrıntı: SECURITY.md
+
+---
+
 ## OpenPlayer 1.0.0-beta1
 
 İlk kapsamlı sürüm. **Beta:** kod derleniyor ancak gerçek cihazlarda henüz kapsamlı sınanmadı; hataları Issues'tan bildirin.

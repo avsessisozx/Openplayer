@@ -91,9 +91,13 @@ class PlayerActivity : AppCompatActivity() {
     private fun importSubtitle(uri: Uri) {
         Thread {
             try {
-                val name = SubtitleFiles.displayName(this, uri)
+                val name = UriGuard.safeFileName(SubtitleFiles.displayName(this, uri))
                 val file = File(SubtitleFiles.downloadDir(this), "import_${System.currentTimeMillis()}_$name")
-                contentResolver.openInputStream(uri)?.use { input -> file.outputStream().use { input.copyTo(it) } }
+                val ok = contentResolver.openInputStream(uri)?.use { input ->
+                    file.outputStream().use { SubtitleFiles.copyLimited(input, it) }
+                } ?: false
+                if (!ok) { file.delete(); throw java.io.IOException("too large") }
+                SubtitleFiles.pruneDownloads(this)
                 runOnUiThread { loadExternalSubtitle(file) }
             } catch (e: Exception) {
                 runOnUiThread { toast("Dosya okunamadı") }
@@ -414,10 +418,26 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun loadFromIntent(intent: Intent): Boolean {
         @Suppress("DEPRECATION")
-        val uris: List<Uri> = intent.getParcelableArrayListExtra<Uri>(EXTRA_URIS) ?: listOfNotNull(intent.data)
-        if (uris.isEmpty()) return false
-        val titles = intent.getStringArrayListExtra(EXTRA_TITLES)
-        val index = intent.getIntExtra(EXTRA_INDEX, 0).coerceIn(0, uris.size - 1)
+        // Dışarıdan gelen her şey güvenilmezdir: şema/yol doğrulanır, sayı ve uzunluk sınırlanır.
+        val rawUris: List<Uri> = runCatching {
+            intent.getParcelableArrayListExtra<Uri>(EXTRA_URIS) ?: listOfNotNull(intent.data)
+        }.getOrDefault(emptyList())
+        val rawTitles = runCatching { intent.getStringArrayListExtra(EXTRA_TITLES) }.getOrNull()
+        val rawIndex = intent.getIntExtra(EXTRA_INDEX, 0)
+        val uris = ArrayList<Uri>()
+        val titles = ArrayList<String>()
+        var index = 0
+        rawUris.take(UriGuard.MAX_ITEMS).forEachIndexed { i, u ->
+            if (u != null && UriGuard.isAllowed(this, u)) {
+                if (i == rawIndex) index = uris.size
+                uris += u
+                titles += UriGuard.sanitizeTitle(rawTitles?.getOrNull(i)) ?: ""
+            }
+        }
+        if (uris.isEmpty()) {
+            if (rawUris.isNotEmpty()) toast("Bu adres güvenlik nedeniyle açılmadı")
+            return false
+        }
         openItems(uris, titles, index)
         return true
     }
@@ -428,7 +448,7 @@ class PlayerActivity : AppCompatActivity() {
                 .setUri(uri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
-                        .setTitle(titles?.getOrNull(i) ?: SubtitleFiles.displayName(this, uri))
+                        .setTitle(titles?.getOrNull(i)?.takeIf { it.isNotBlank() } ?: SubtitleFiles.displayName(this, uri))
                         .build()
                 )
                 .build()
@@ -443,11 +463,13 @@ class PlayerActivity : AppCompatActivity() {
 
     fun openStream(url: String) {
         val uri = Uri.parse(url.trim())
-        if (uri.scheme.isNullOrEmpty()) {
+        if (uri.scheme?.lowercase() !in setOf("http", "https", "rtsp") || uri.host.isNullOrBlank() ||
+            !UriGuard.isAllowed(this, uri)
+        ) {
             toast("Geçerli bir adres girin (http://, https:// veya rtsp://)")
             return
         }
-        openItems(listOf(uri), listOf(url.trim().substringAfterLast('/').ifEmpty { url }), 0)
+        openItems(listOf(uri), listOf(UriGuard.sanitizeTitle(url.trim().substringAfterLast('/')) ?: "Akış"), 0)
     }
 
     private fun onItemChanged() {
@@ -492,6 +514,7 @@ class PlayerActivity : AppCompatActivity() {
     fun loadExternalSubtitle(file: File, remember: Boolean = true, quiet: Boolean = false) {
         Thread {
             val result = runCatching {
+                require(file.length() <= SubtitleFiles.MAX_BYTES) { "too large" }
                 val text = SubtitleParser.decode(file.readBytes(), settings.subtitleCharset, settings.subtitleFallbackCharset)
                 SubtitleParser.parse(file.name, text)
             }
