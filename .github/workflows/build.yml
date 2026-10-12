@@ -46,7 +46,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: OpenPlayer-debug.apk
-          generate_release_notes: true
+          body_path: RELEASE_NOTES.md
+          prerelease: ${{ contains(github.ref_name, '-') }}
 
       - name: Publish release (manual run)
         if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
@@ -55,4 +56,5 @@ jobs:
           tag_name: ${{ inputs.release_tag }}
           target_commitish: ${{ github.sha }}
           files: OpenPlayer-debug.apk
-          generate_release_notes: true
+          body_path: RELEASE_NOTES.md
+          prerelease: ${{ contains(inputs.release_tag, '-') }}

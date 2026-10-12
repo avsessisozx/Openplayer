@@ -12,13 +12,28 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "0.3.0"
+        versionName = "1.0.0-beta1"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
     }
 
+    // Herkese açık TEST imzası: her derleme aynı anahtarla imzalanır, böylece sürümler birbirinin
+    // üstüne güncellenebilir. Bu anahtar gizli değildir; mağaza yayını için kendi anahtarınızı kullanın.
+    signingConfigs {
+        create("openplayer") {
+            storeFile = file("openplayer-test.jks")
+            storePassword = "openplayer"
+            keyAlias = "openplayer"
+            keyPassword = "openplayer"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("openplayer")
+        }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("openplayer")
         }
     }
 
