@@ -565,6 +565,18 @@ class PlayerMenus(private val a: PlayerActivity) {
         a.showTrimDialog(uri, title, a.player.duration.coerceAtLeast(0L), { a.player.currentPosition })
     }
 
+    fun showChapters() {
+        val list = a.chapters
+        if (list.isEmpty()) {
+            a.toast("Bu videoda bölüm bilgisi yok (MKV ve MP4 bölümleri okunur)")
+            return
+        }
+        val pos = a.player.currentPosition
+        val current = list.indexOfLast { it.startMs <= pos }.coerceAtLeast(0)
+        val labels = list.map { "${formatDuration(it.startMs)}  ${it.title}" }
+        a.showChoice("Bölümler", labels, current) { a.player.seekTo(list[it].startMs) }
+    }
+
     /** 360° biçim seçimi ve bakış ayarları. */
     fun showVrMenu() {
         val modes = VrMode.choices
@@ -607,6 +619,7 @@ class PlayerMenus(private val a: PlayerActivity) {
                 item(R.drawable.ic_subtitles, "Özel stil") { showSubtitleStyle() },
                 item(R.drawable.ic_bookmark, "Yer imi") { showBookmarks() },
                 item(R.drawable.ic_info, "Bilgi") { showInfo() },
+                item(R.drawable.ic_list, "Bölümler") { showChapters() },
                 item(R.drawable.ic_cut, "Kes") { showTrim() },
                 item(R.drawable.ic_share, "Paylaş") { a.shareCurrent() },
                 item(R.drawable.ic_public, "Ağ akışı") { showStreamDialog() },

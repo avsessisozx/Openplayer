@@ -123,7 +123,9 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var decoderLabel: TextView
     private lateinit var shortcutScroll: HorizontalScrollView
     private lateinit var shortcutRow: LinearLayout
-    private lateinit var seekBar: SeekBar
+    private lateinit var seekBar: ChapterSeekBar
+    var chapters: List<Chapter> = emptyList()
+        private set
     private lateinit var elapsedView: TextView
     private lateinit var remainingView: TextView
     private lateinit var playButton: ImageView
@@ -564,6 +566,19 @@ class PlayerActivity : AppCompatActivity() {
             if (vr != VrMode.NONE) setVr(VrMode.NONE, remember = false)
         }
         currentUri = uri
+        chapters = emptyList()
+        seekBar.startsSec = emptyList()
+        if (uri != null) {
+            Thread {
+                val list = Chapters.load(applicationContext, uri)
+                runOnUiThread {
+                    if (!isDestroyed && currentUri == uri && list.isNotEmpty()) {
+                        chapters = list
+                        seekBar.startsSec = list.map { (it.startMs / 1000).toInt() }
+                    }
+                }
+            }.start()
+        }
         titleView.text = item.mediaMetadata.title ?: uri?.let { SubtitleFiles.displayName(this, it) } ?: ""
         abA = -1L
         abB = -1L
@@ -724,7 +739,7 @@ class PlayerActivity : AppCompatActivity() {
                 updateProgress(player.currentPosition)
             }
         }
-        seekBar = SeekBar(this).apply {
+        seekBar = ChapterSeekBar(this).apply {
             val accent = ColorStateList.valueOf(UiColors.accent)
             progressTintList = accent
             thumbTintList = accent
