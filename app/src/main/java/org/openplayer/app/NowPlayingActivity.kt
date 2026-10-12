@@ -161,7 +161,7 @@ class NowPlayingActivity : AppCompatActivity() {
         lyricsScroll = ScrollView(this).apply {
             visibility = View.GONE
             isVerticalScrollBarEnabled = false
-            background = chipBg(0x99000000, 24)
+            background = chipBg(0x99000000.toInt(), 24)
             addView(lyricsBox)
         }
         favButton = circle(R.drawable.ic_favorite_border, 48, 12, 0x66000000) { toggleFavorite() }
