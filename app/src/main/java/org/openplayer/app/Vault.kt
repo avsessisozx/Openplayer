@@ -246,7 +246,7 @@ class VaultActivity : AppCompatActivity() {
         val entries = Vault.list(this)
         if (entries.isEmpty()) {
             body.addView(TextView(this).apply {
-                text = "Özel klasör boş.\nBir videonun ⋮ menüsünden \\"Özel klasöre kilitle\\" ile ekleyebilirsin."
+                text = "Özel klasör boş.\nBir videonun ⋮ menüsünden \"Özel klasöre kilitle\" ile ekleyebilirsin."
                 setTextColor(UiColors.textSecondary)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                 gravity = Gravity.CENTER
