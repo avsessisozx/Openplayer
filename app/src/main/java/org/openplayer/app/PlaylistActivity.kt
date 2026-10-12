@@ -12,6 +12,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 
 /** Oynatma listeleri ve favoriler (video ve müzik için ortak ekran). */
@@ -42,6 +43,69 @@ class PlaylistActivity : AppCompatActivity() {
     private var videos: Map<String, VideoItem> = emptyMap()
     private var tracks: Map<String, MusicTrack> = emptyMap()
     private var loaded = false
+
+    private var exportId: String? = null
+
+    private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("audio/x-mpegurl")) { uri ->
+        val id = exportId
+        exportId = null
+        if (uri == null || id == null) return@registerForActivityResult
+        val entries = entriesOf(id)
+        runCatching {
+            contentResolver.openOutputStream(uri)?.bufferedWriter(Charsets.UTF_8)?.use { w ->
+                w.write("#EXTM3U\n")
+                for (e in entries) {
+                    val dur = (e.track?.durationMs ?: e.video?.durationMs ?: 0L) / 1000
+                    w.write("#EXTINF:$dur,${e.title}\n")
+                    val path = e.track?.path?.takeIf { it.isNotEmpty() } ?: e.video?.path?.takeIf { it.isNotEmpty() } ?: e.uri
+                    w.write(path + "\n")
+                }
+            }
+            Toast.makeText(this, "${entries.size} öğe dışa aktarıldı", Toast.LENGTH_SHORT).show()
+        }.onFailure { Toast.makeText(this, "Dışa aktarılamadı", Toast.LENGTH_LONG).show() }
+    }
+
+    private val importLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri == null) return@registerForActivityResult
+        importList(uri)
+    }
+
+    /** .m3u/.m3u8/.pls dosyasını okur; dosya yollarını kütüphanedeki öğelerle eşleştirip yeni liste yapar. */
+    private fun importList(uri: android.net.Uri) {
+        val lines = runCatching {
+            contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readLines() }
+        }.getOrNull()
+        if (lines == null) {
+            Toast.makeText(this, "Dosya okunamadı", Toast.LENGTH_LONG).show()
+            return
+        }
+        val paths = ArrayList<String>()
+        for (raw in lines) {
+            val l = raw.trim().removePrefix("\uFEFF")
+            when {
+                l.isEmpty() || l.startsWith("#") || l.startsWith("[") -> Unit
+                l.startsWith("File", ignoreCase = true) && l.contains('=') -> paths += l.substringAfter('=').trim()
+                l.contains('=') && !l.contains('/') -> Unit
+                else -> paths += l
+            }
+        }
+        val pool: List<Pair<String, String>> = if (kind == PlaylistStore.MUSIC) tracks.values.map { it.uri.toString() to it.path }
+        else videos.values.map { it.uri.toString() to it.path }
+        val matched = ArrayList<String>()
+        for (p in paths) {
+            val name = p.replace('\\', '/').substringAfterLast('/')
+            val hit = pool.firstOrNull { it.second == p }
+                ?: pool.firstOrNull { it.second.endsWith("/" + p.replace('\\', '/').removePrefix("./")) }
+                ?: pool.firstOrNull { it.second.substringAfterLast('/').equals(name, ignoreCase = true) }
+            if (hit != null && hit.first !in matched) matched += hit.first
+        }
+        val displayName = (uri.lastPathSegment ?: "Liste").substringAfterLast('/').substringBeforeLast('.').ifBlank { "İçe aktarılan liste" }
+        val pl = PlaylistStore.create(this, kind, displayName)
+        PlaylistStore.add(this, pl.id, matched)
+        Toast.makeText(this, "${matched.size} / ${paths.size} öğe eşleşti", Toast.LENGTH_LONG).show()
+        openId = pl.id
+        render()
+    }
 
     private val back = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -187,6 +251,9 @@ class PlaylistActivity : AppCompatActivity() {
         moreButton.visibility = View.GONE
         body.addView(row(R.drawable.ic_favorite, "Favoriler", "${PlaylistStore.favorites(this, kind).size} öğe", { openId = FAV; render() }))
         for (s in smartIds()) body.addView(row(R.drawable.ic_timer, smartTitle(s), "Otomatik liste", { openId = s; render() }))
+        body.addView(row(R.drawable.ic_cloud_download, "M3U / M3U8 / PLS içe aktar", "Dosya yollarını kütüphanedekilerle eşleştirir", {
+            importLauncher.launch(arrayOf("audio/x-mpegurl", "application/x-mpegurl", "audio/mpegurl", "audio/x-scpls", "application/vnd.apple.mpegurl", "text/plain", "*/*"))
+        }))
         body.addView(row(R.drawable.ic_add, "Yeni liste oluştur", "", {
             showInput("Yeni liste", "Liste adı") { n ->
                 val p = PlaylistStore.create(this, kind, n)
@@ -211,7 +278,7 @@ class PlaylistActivity : AppCompatActivity() {
             id.startsWith("smart:") -> smartTitle(id)
             else -> PlaylistStore.get(this, id)?.name ?: "Liste"
         }
-        moreButton.visibility = if (user) View.VISIBLE else View.GONE
+        moreButton.visibility = View.VISIBLE
         val entries = entriesOf(id)
         if (entries.isEmpty()) {
             body.addView(label(
@@ -272,13 +339,24 @@ class PlaylistActivity : AppCompatActivity() {
 
     private fun showListMenu() {
         val id = openId ?: return
-        showSheet("Liste", listOf(
-            SheetEntry(R.drawable.ic_edit, "Yeniden adlandır") {
+        val user = !(id == FAV || id.startsWith("smart:"))
+        val items = ArrayList<SheetEntry>()
+        items += SheetEntry(R.drawable.ic_share, "M3U olarak dışa aktar") {
+            exportId = id
+            val name = when {
+                id == FAV -> "Favoriler"
+                id.startsWith("smart:") -> smartTitle(id)
+                else -> PlaylistStore.get(this, id)?.name ?: "Liste"
+            }
+            exportLauncher.launch("$name.m3u8")
+        }
+        if (user) {
+            items += SheetEntry(R.drawable.ic_edit, "Yeniden adlandır") {
                 showInput("Listeyi yeniden adlandır", "Liste adı", PlaylistStore.get(this, id)?.name ?: "") { n ->
                     PlaylistStore.rename(this, id, n); render()
                 }
-            },
-            SheetEntry(R.drawable.ic_delete, "Listeyi sil", danger = true) {
+            }
+            items += SheetEntry(R.drawable.ic_delete, "Listeyi sil", danger = true) {
                 PanelBuilder(this).setTitle("Liste silinsin mi?")
                     .setMessage("Yalnızca liste silinir, dosyalar silinmez.")
                     .setPositiveButton("Sil") { _, _ ->
@@ -287,7 +365,8 @@ class PlaylistActivity : AppCompatActivity() {
                         if (intent.getStringExtra(EXTRA_OPEN) != null) finish() else render()
                     }
                     .setNegativeButton("İptal", null).show()
-            },
-        ))
+            }
+        }
+        showSheet("Liste", items)
     }
 }
