@@ -214,6 +214,7 @@ class PlayerActivity : AppCompatActivity() {
 
         override fun onTracksChanged(tracks: Tracks) {
             autoSelectSubtitle(tracks)
+            applyPendingAudio(tracks)
         }
 
         override fun onCues(cueGroup: CueGroup) {
@@ -479,9 +480,58 @@ class PlayerActivity : AppCompatActivity() {
         openItems(listOf(uri), listOf(UriGuard.sanitizeTitle(url.trim().substringAfterLast('/')) ?: "Akış"), 0)
     }
 
+    /** Geçerli videonun görünüm/hız/altyazı ayarlarını kaydeder. */
+    private fun saveMemory() {
+        val uri = currentUri ?: return
+        if (!settings.perVideoMemory || settings.incognito || !::player.isInitialized) return
+        val old = VideoMemory.get(this, uri)
+        VideoMemory.put(
+            this, uri,
+            VideoMemory.Entry(
+                speed = player.playbackParameters.speed,
+                aspect = aspect.name,
+                zoom = zoom,
+                subDelayMs = subtitles.delayMs,
+                subSpeed = subtitles.speed,
+                audioIndex = old?.audioIndex ?: -1,
+            )
+        )
+    }
+
+    private var pendingAudioIndex = -1
+
+    private fun restoreMemory(uri: Uri?) {
+        pendingAudioIndex = -1
+        if (uri == null || !settings.perVideoMemory) return
+        val e = VideoMemory.get(this, uri) ?: return
+        player.setPlaybackSpeed(e.speed)
+        AspectMode.entries.firstOrNull { it.name == e.aspect }?.let { setAspect(it) }
+        zoom = e.zoom
+        if (zoom <= 1f) { panX = 0f; panY = 0f }
+        applyTransform()
+        subtitles.delayMs = e.subDelayMs
+        subtitles.speed = e.subSpeed
+        pendingAudioIndex = e.audioIndex
+        refreshShortcuts()
+    }
+
+    private fun applyPendingAudio(tracks: Tracks) {
+        val idx = pendingAudioIndex
+        if (idx < 0) return
+        val groups = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
+        if (groups.isEmpty()) return
+        pendingAudioIndex = -1
+        val g = groups.getOrNull(idx) ?: return
+        if (g.isSelected || !g.isSupported) return
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setOverrideForType(androidx.media3.common.TrackSelectionOverride(g.mediaTrackGroup, 0))
+            .build()
+    }
+
     private fun onItemChanged() {
         val item = player.currentMediaItem ?: return
         val uri = item.localConfiguration?.uri
+        if (uri != currentUri) saveMemory()
         currentUri = uri
         titleView.text = item.mediaMetadata.title ?: uri?.let { SubtitleFiles.displayName(this, it) } ?: ""
         abA = -1L
@@ -498,6 +548,7 @@ class PlayerActivity : AppCompatActivity() {
                 sidecars.isNotEmpty() -> loadExternalSubtitle(sidecars.first(), remember = false, quiet = true)
             }
         }
+        restoreMemory(uri)
         updateNavButtons()
         refreshShortcuts()
     }
@@ -905,6 +956,7 @@ class PlayerActivity : AppCompatActivity() {
         val duration = player.duration
         val pos = player.currentPosition
         val finished = duration > 0 && pos > duration - 5_000
+        saveMemory()
         ResumeStore.save(this, uri, if (finished) 0L else pos)
         if (duration > 0 && pos > duration * 0.9) ResumeStore.markPlayed(this, uri)
     }

@@ -56,6 +56,31 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private val exportAll = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) runCatching {
+            contentResolver.openOutputStream(uri)?.use { it.write(SettingsBackup.export(this).toByteArray()) }
+            android.widget.Toast.makeText(this, "Ayarlar dışa aktarıldı", android.widget.Toast.LENGTH_SHORT).show()
+        }.onFailure { android.widget.Toast.makeText(this, "Yazılamadı", android.widget.Toast.LENGTH_SHORT).show() }
+    }
+
+    private val importAll = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            val text = runCatching {
+                contentResolver.openInputStream(uri)?.use { it.readBytes(262_145).toString(Charsets.UTF_8) }
+            }.getOrNull()
+            if (text != null && SettingsBackup.import(this, text)) {
+                android.widget.Toast.makeText(this, "Ayarlar yüklendi", android.widget.Toast.LENGTH_SHORT).show()
+                recreate()
+            } else {
+                android.widget.Toast.makeText(this, "Geçersiz ayar dosyası", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun java.io.InputStream.readBytes(max: Int): ByteArray {
         val out = java.io.ByteArrayOutputStream()
         val buf = ByteArray(1024)
@@ -116,6 +141,13 @@ class SettingsActivity : AppCompatActivity() {
                 startActivity(Intent(this, SettingsActivity::class.java).putExtra(EXTRA_PAGE, p.name))
             }
         }
+        section("Yedekleme")
+        action("Ayarları dışa aktar", "Tüm ayarları dosyaya kaydeder (parola ve API anahtarı hariç)") {
+            exportAll.launch("openplayer-ayarlar.json")
+        }
+        action("Ayarları içe aktar", "Daha önce kaydettiğiniz ayar dosyasını yükler") {
+            importAll.launch(arrayOf("application/json", "text/plain", "*/*"))
+        }
         section("Hakkında")
         action("OpenPlayer ${versionName()}", "AGPLv3 lisanslı açık kaynak yazılım. Kaynak kodu için dokunun.") {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/avsessisozx/Openplayer")))
@@ -127,6 +159,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun playerPage() {
         section("Oynatma")
+        toggle("Her video için ayarları hatırla", "Hız, görünüm, yakınlaştırma, altyazı eşitleme ve ses parçası videoya özel saklanır", s.perVideoMemory) { s.perVideoMemory = it }
         toggle("Sessizlikleri atla", "Videodaki sessiz bölümleri hızla geçer", s.skipSilence) { s.skipSilence = it }
         val intro = listOf(30, 60, 85, 90, 120, 180)
         choice("İntro atla süresi", "${s.skipIntroSec} sn (kısayol olarak eklenebilir)", intro.map { "$it sn" }, intro.indexOf(s.skipIntroSec)) {

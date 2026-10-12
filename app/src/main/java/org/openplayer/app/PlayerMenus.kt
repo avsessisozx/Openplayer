@@ -66,6 +66,8 @@ class PlayerMenus(private val a: PlayerActivity) {
                 p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
                     .setOverrideForType(TrackSelectionOverride(groups[which].mediaTrackGroup, 0))
                     .build()
+                val u = a.currentUri
+                if (u != null && a.settings.perVideoMemory && !a.settings.incognito) VideoMemory.setAudio(a, u, which)
                 d.dismiss()
             }
             .setPositiveButton("Ses gecikmesi") { _, _ -> showAudioDelay() }

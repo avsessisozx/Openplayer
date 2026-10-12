@@ -162,6 +162,10 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("natural_sort", true)
         set(v) = prefs.edit().putBoolean("natural_sort", v).apply()
 
+    var perVideoMemory: Boolean
+        get() = prefs.getBoolean("per_video_memory", true)
+        set(v) = prefs.edit().putBoolean("per_video_memory", v).apply()
+
     var skipSilence: Boolean
         get() = prefs.getBoolean("skip_silence", false)
         set(v) = prefs.edit().putBoolean("skip_silence", v).apply()
