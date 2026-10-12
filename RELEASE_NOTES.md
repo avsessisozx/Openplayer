@@ -1,3 +1,9 @@
+# 1.0.0-beta3
+
+**Yeni:** Sararken canlı önizleme (çubuğu veya ekranı kaydırırken görüntü akar, bırakınca tam konuma gider; Ayarlar → Hareketler → Sarma). Sarma göstergesi `00:27 [+00:09]` biçiminde.
+
+---
+
 # 1.0.0-beta2
 
 **Düzeltmeler:** video küçük resimleri, saydam ses/ilerleme göstergesi, ayna ve dikey çevirme (TextureView), klasöre girişte gecikme (arka plan yükleme), Ayarlar MX tarzı gruplara ayrıldı (Oynatıcı, Hareketler, Video/Senkron, Ses, Altyazı, Çevrimiçi, Liste), ses dili tercihi.

@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Rational
 import android.util.TypedValue
@@ -53,6 +54,7 @@ import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.SubtitleView
@@ -624,17 +626,21 @@ class PlayerActivity : AppCompatActivity() {
             progressBackgroundTintList = ColorStateList.valueOf(0x66FFFFFF)
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(s: SeekBar, progress: Int, fromUser: Boolean) {
-                    if (fromUser) elapsedView.text = formatDuration(progress * 1000L)
+                    if (fromUser) {
+                        elapsedView.text = formatDuration(progress * 1000L)
+                        scrubMove(progress * 1000L)
+                    }
                 }
 
                 override fun onStartTrackingTouch(s: SeekBar) {
                     scrubbing = true
+                    scrubStart()
                     handler.removeCallbacks(hideControlsRunnable)
                 }
 
                 override fun onStopTrackingTouch(s: SeekBar) {
                     scrubbing = false
-                    player.seekTo(s.progress * 1000L)
+                    scrubEnd(s.progress * 1000L)
                     scheduleAutoHide()
                 }
             })
@@ -771,6 +777,37 @@ class PlayerActivity : AppCompatActivity() {
     /** Menüler açıkken kontrollerin kapanmaması için. */
     fun keepControls() {
         handler.removeCallbacks(hideControlsRunnable)
+    }
+
+    // ---- Canlı sarma: kaydırırken görüntü akar (yakın anahtar kare), bırakınca tam konuma gidilir ----
+    private var scrubActive = false
+    private var scrubWasPlaying = false
+    private var lastScrubAt = 0L
+
+    fun scrubStart() {
+        if (scrubActive) return
+        scrubActive = true
+        scrubWasPlaying = player.playWhenReady
+        if (settings.liveScrub) {
+            player.pause()
+            player.setSeekParameters(SeekParameters.CLOSEST_SYNC)
+        }
+    }
+
+    fun scrubMove(posMs: Long) {
+        if (!scrubActive || !settings.liveScrub) return
+        val now = SystemClock.uptimeMillis()
+        if (now - lastScrubAt < 60) return
+        lastScrubAt = now
+        player.seekTo(posMs)
+    }
+
+    fun scrubEnd(posMs: Long) {
+        if (!scrubActive) return
+        scrubActive = false
+        player.setSeekParameters(SeekParameters.EXACT)
+        player.seekTo(posMs)
+        if (settings.liveScrub && scrubWasPlaying) player.play()
     }
 
     fun showHud(text: String) {

@@ -110,6 +110,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         section("Sarma")
+        toggle("Sararken canlı önizleme", "Çubuğu veya ekranı kaydırırken görüntü akar; bırakınca tam konuma gider", s.liveScrub) { s.liveScrub = it }
         toggle("Yatay kaydırma ile sarma", null, s.horizontalSeekEnabled) { s.horizontalSeekEnabled = it }
         val swipeOptions = listOf(30, 60, 90, 120, 180, 300)
         choice("Ekranı baştan sona kaydırınca sarma", "${s.swipeSeekSec} sn", swipeOptions.map { "$it sn" }, swipeOptions.indexOf(s.swipeSeekSec)) {

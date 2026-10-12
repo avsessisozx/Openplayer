@@ -133,7 +133,9 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                     val delta = (totalX / width * a.settings.swipeSeekSec * 1000f).toLong()
                     val duration = a.player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
                     seekTarget = (startPos + delta).coerceIn(0L, duration)
-                    a.showHud("${formatDuration(seekTarget)}  (${if (delta >= 0) "+" else "-"}${abs(delta) / 1000} sn)")
+                    a.scrubStart()
+                    a.scrubMove(seekTarget)
+                    a.showHud("${formatDuration(seekTarget)}\n[${if (delta >= 0) "+" else "-"}${formatDuration(abs(delta))}]")
                 }
                 Mode.VERTICAL -> applyVertical(-totalY / height)
                 Mode.SUB_H -> {
@@ -219,7 +221,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
 
         if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
             when (mode) {
-                Mode.HORIZONTAL -> if (a.settings.horizontalSeekEnabled) a.player.seekTo(seekTarget)
+                Mode.HORIZONTAL -> if (a.settings.horizontalSeekEnabled) a.scrubEnd(seekTarget)
                 Mode.SUB_H -> if (abs(subSwipe) > a.dp(60)) a.jumpSubtitle(subSwipe > 0)
                 else -> Unit
             }

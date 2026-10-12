@@ -129,6 +129,11 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("horizontal_seek", true)
         set(v) = prefs.edit().putBoolean("horizontal_seek", v).apply()
 
+    /** Sararken görüntü canlı akar (ileri-geri sararken önizleme). */
+    var liveScrub: Boolean
+        get() = prefs.getBoolean("live_scrub", true)
+        set(v) = prefs.edit().putBoolean("live_scrub", v).apply()
+
     var pinchZoomEnabled: Boolean
         get() = prefs.getBoolean("pinch_zoom", true)
         set(v) = prefs.edit().putBoolean("pinch_zoom", v).apply()
