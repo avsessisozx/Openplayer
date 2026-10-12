@@ -43,6 +43,12 @@ enum class DoubleTapAction(val label: String) {
     NONE("Hiçbir şey"),
 }
 
+enum class PlaybackEngine(val label: String) {
+    AUTO("Otomatik: ExoPlayer, açamazsa VLC motoru"),
+    EXO("Yalnız ExoPlayer"),
+    VLC("Yalnız VLC motoru"),
+}
+
 enum class OrientationMode(val label: String) {
     AUTO("Videoya göre otomatik"),
     SENSOR("Sensör (serbest)"),
@@ -279,6 +285,10 @@ class AppSettings private constructor(context: Context) {
         set(v) = prefs.edit().putBoolean("horizontal_seek", v).apply()
 
     /** Açılamayan videoda çözücüler sırayla otomatik denenir (HW → HW+ → SW). */
+    var playbackEngine: PlaybackEngine
+        get() = enumOf("playback_engine", PlaybackEngine.AUTO)
+        set(v) = putEnum("playback_engine", v)
+
     var autoDecoderFallback: Boolean
         get() = prefs.getBoolean("auto_decoder_fallback", true)
         set(v) = prefs.edit().putBoolean("auto_decoder_fallback", v).apply()

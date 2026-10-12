@@ -258,7 +258,11 @@ class SettingsActivity : AppCompatActivity() {
         choice("Varsayılan çözücü", s.decoder.label, DecoderMode.entries.map { it.label }, DecoderMode.entries.indexOf(s.decoder)) {
             s.decoder = DecoderMode.entries[it]
         }
+        choice("Oynatma motoru", s.playbackEngine.label, PlaybackEngine.entries.map { it.label }, s.playbackEngine.ordinal) {
+            s.playbackEngine = PlaybackEngine.entries[it]
+        }
         toggle("Açılamazsa otomatik dene", "Video açılmazsa çözücüler sırayla (HW → HW+ → SW) sormadan denenir; ayarınız değişmez", s.autoDecoderFallback) { s.autoDecoderFallback = it }
+        note("VLC motoru, ExoPlayer'ın açamadığı eski/nadir biçimler için yedektir (WMV, RealMedia, bozuk AVI vb.). Daha sade bir arayüzü vardır: oynat/duraklat, sarma, ses ve altyazı seçimi, hız, dış altyazı.")
         note("HW: sistemin donanım çözücüsü, en az pil harcar. HW+: donanımın desteklemediği biçimlerde FFmpeg kullanır. SW: önce FFmpeg ile işlemci çözmesi. Oynatma sırasında üstteki etiketten de değiştirilebilir.")
     }
 

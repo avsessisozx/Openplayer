@@ -13,7 +13,7 @@ android {
         targetSdk = 35
         versionCode = 8
         versionName = "1.0.0-beta8"
-        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
+        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
 
     // Herkese açık TEST imzası: her derleme aynı anahtarla imzalanır, böylece sürümler birbirinin
@@ -78,6 +78,8 @@ dependencies {
     implementation("com.hierynomus:smbj:0.13.0")
     implementation("commons-net:commons-net:3.11.1")
     implementation("io.github.anilbeesetti:nextlib-media3ext:1.10.1-0.13.0")
+    // Yedek oynatma motoru: ExoPlayer açamayan biçimler için (LGPL-2.1).
+    implementation("org.videolan.android:libvlc-all:3.6.0")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")

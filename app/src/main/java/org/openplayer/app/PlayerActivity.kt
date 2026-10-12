@@ -303,7 +303,9 @@ class PlayerActivity : AppCompatActivity() {
         bindPlayer(player)
         PlayerHolder.addRebuildListener(rebuildListener)
 
-        if (!loadFromIntent(intent)) {
+        val loaded = loadFromIntent(intent)
+        if (isFinishing) return
+        if (!loaded) {
             if (player.mediaItemCount == 0) {
                 finish()
                 return
@@ -469,6 +471,11 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     fun openItems(uris: List<Uri>, titles: List<String>?, index: Int) {
+        if (settings.playbackEngine == PlaybackEngine.VLC) {
+            VlcPlayerActivity.launch(this, uris, titles, index, if (settings.resumePlayback) ResumeStore.position(this, uris[index]) else 0L)
+            finish()
+            return
+        }
         val items = uris.mapIndexed { i, uri ->
             MediaItem.Builder()
                 .setUri(uri)
@@ -638,6 +645,21 @@ class PlayerActivity : AppCompatActivity() {
 
     private val triedDecoders = HashSet<DecoderMode>()
 
+    /** Mevcut kuyruğu VLC yedek motoruna devreder ve bu ekranı kapatır. */
+    private fun openInVlc(fromError: Boolean): Boolean {
+        if (!::player.isInitialized || player.mediaItemCount == 0) return false
+        val uris = List(player.mediaItemCount) { player.getMediaItemAt(it).localConfiguration?.uri }.filterNotNull()
+        if (uris.isEmpty()) return false
+        val titles = List(player.mediaItemCount) { player.getMediaItemAt(it).mediaMetadata.title?.toString() ?: "" }
+        val idx = player.currentMediaItemIndex.coerceIn(0, uris.size - 1)
+        val pos = player.currentPosition
+        player.pause()
+        if (fromError) toast("ExoPlayer açamadı; VLC motoruyla açılıyor")
+        VlcPlayerActivity.launch(this, uris, titles, idx, pos)
+        finish()
+        return true
+    }
+
     private fun onPlaybackError(error: PlaybackException) {
         val cur = PlayerHolder.effectiveDecoder(this)
         triedDecoders += cur
@@ -651,6 +673,7 @@ class PlayerActivity : AppCompatActivity() {
             toast("${next.label} çözücüyle yeniden deneniyor")
             return
         }
+        if (settings.playbackEngine != PlaybackEngine.EXO && openInVlc(fromError = true)) return
         if (errorDialogShown) return
         errorDialogShown = true
         showMessage("Oynatma hatası", "Bu video oynatılamadı (${error.errorCodeName}). Tüm çözücüler denendi.")
