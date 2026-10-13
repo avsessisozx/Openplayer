@@ -1,0 +1,63 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebug
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:compressDebugAssets
+> Task :app:mergeDebugJniLibFolders
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugNativeLibs
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libavcodec.so, libavutil.so, libc++_shared.so, libmedia3ext.so, libswresample.so, libswscale.so, libvlc.so, libvlcjni.so. Run with --info option to learn more.
+
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioDelay.kt:36:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:6:8 'class Virtualizer : AudioEffect' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:16:23 'class Virtualizer : AudioEffect' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:52:20 'constructor(p0: Int, p1: Int): Virtualizer' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:53:19 'fun setStrength(p0: Short): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:73:19 'fun setStrength(p0: Short): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/PlayerActivity.kt:459:17 Condition is always 'true'.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/PlayerMenus.kt:39:83 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/ThemeManager.kt:95:25 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/ThemeManager.kt:96:25 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/Vr360.kt:160:75 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:processDebugJavaRes
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1791879378138.json
+
+BUILD SUCCESSFUL in 1m 58s
+35 actionable tasks: 35 executed
