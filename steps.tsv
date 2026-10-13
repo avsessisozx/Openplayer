@@ -1,0 +1,111 @@
+Ana ekran (ilk açılış)	ok	
+Ana ekran yazıları	bilgi	Klasörler | Videolar | Müzik | 6 | Test | 6 video | Son oynatılanı aç
+Video aç: Yatay video.mp4	ok	
+Video kontrolleri: Yatay video.mp4	ok	
+Video yatay kaydırma (sarma): Yatay video.mp4	ok	
+Video kapat: Yatay video.mp4	ok	
+Video aç: Dikey video.mp4	ok	
+Video kontrolleri: Dikey video.mp4	ok	
+Video yatay kaydırma (sarma): Dikey video.mp4	ok	
+Video kapat: Dikey video.mp4	ok	
+Video aç: Bolumlu.mkv	ok	bölüm + altyazı
+Video kontrolleri: Bolumlu.mkv	ok	
+Video yatay kaydırma (sarma): Bolumlu.mkv	ok	
+Video kapat: Bolumlu.mkv	ok	
+Video aç: HEVC 10bit.mp4	ok	çözücü zinciri
+Video kontrolleri: HEVC 10bit.mp4	ok	
+Video yatay kaydırma (sarma): HEVC 10bit.mp4	ok	
+Video kapat: HEVC 10bit.mp4	ok	
+Video aç: Eski bicim.wmv	ok	VLC yedeği beklenir
+Video kontrolleri: Eski bicim.wmv	ok	
+Video yatay kaydırma (sarma): Eski bicim.wmv	ok	
+Video kapat: Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Bozuk dosya.mp4	ok	hata mesajı beklenir ön planda: com.google.android.apps.nexuslauncher
+Video kontrolleri: Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video yatay kaydırma (sarma): Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatırken ekran yatay	ok	
+Oynatırken ekran dikey	ok	
+Oynatırken ana ekrana dön (PiP olabilir)	ok	ön planda: com.google.android.apps.nexuslauncher
+Uygulamaya geri dön	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran: 5 tıklanabilir öğe	bilgi	ImageView | ImageView | Müzik | 6 | Son oynatılanı aç
+Ana ekran > ImageView	ok	
+Ana ekran > ImageView > geri	ok	
+Ana ekran > ImageView	ok	
+Ana ekran > ImageView > geri	ok	
+Ana ekran > Müzik	ok	
+Ana ekran > Müzik > geri	ok	
+Ana ekran > 6	ok	
+Ana ekran > 6 > geri	ok	
+Ana ekran > Son oynatılanı aç	ok	
+Ana ekran > Son oynatılanı aç > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik sekmesi	ok	
+Müzik: 20 tıklanabilir öğe	bilgi	ImageView | ImageView | ImageView | Listeler | Videolar | Kitaplık | Şarkılar | Albümler | Sanatçılar | Albüm sanatçıları | Şarkılar | Klasörler | Klasör hiyerarşisi | Albümler | Sanatçılar | Albüm sanatçıları | Tarzlar | Yıllar | Besteciler | Çalma listeleri
+Müzik > ImageView	ok	
+Müzik > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > ImageView	ok	
+Müzik > ImageView > geri	ok	
+Müzik > ImageView	ok	
+Müzik > ImageView > geri	ok	
+Müzik > Listeler	ok	
+Müzik > Listeler > geri	ok	
+Müzik > Videolar	ok	
+Müzik > Videolar > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Kitaplık	ok	
+Müzik > Kitaplık > geri	ok	
+Müzik > Şarkılar	ok	
+Müzik > Şarkılar > geri	ok	
+Müzik > Albümler	ok	
+Müzik > Albümler > geri	ok	
+Müzik > Sanatçılar	ok	
+Müzik > Sanatçılar > geri	ok	
+Müzik > Albüm sanatçıları	ok	
+Müzik > Albüm sanatçıları > geri	ok	
+Müzik > Şarkılar	ok	
+Müzik > Şarkılar > geri	ok	
+Müzik > Klasörler	ok	
+Müzik > Klasörler > geri	ok	
+Müzik > Klasör hiyerarşisi	ok	
+Müzik > Klasör hiyerarşisi > geri	ok	
+Müzik > Albümler	ok	
+Müzik > Albümler > geri	ok	
+Müzik > Sanatçılar	ok	
+Müzik > Sanatçılar > geri	ok	
+Müzik > Albüm sanatçıları	ok	
+Müzik > Albüm sanatçıları > geri	ok	
+Müzik > Tarzlar	ok	
+Müzik > Tarzlar > geri	ok	
+Müzik > Yıllar	ok	
+Müzik > Yıllar > geri	ok	
+Müzik > Besteciler	ok	
+Müzik > Besteciler > geri	ok	
+Müzik > Çalma listeleri	ok	
+Müzik > Çalma listeleri > geri	ok	
+Oynatıcı: 0 tıklanabilir öğe	bilgi	
+Oynatıcı ⋮ menüsü: 0 tıklanabilir öğe	bilgi	
+Ana ekran ⋮ menüsü: 0 tıklanabilir öğe	bilgi	
+Ayarlar: 6 tıklanabilir öğe	bilgi	ImageView | Oynatıcı | Hareketler | Video ve çözücü | Ses | Altyazı
+Ayarlar > ImageView	ok	
+Ayarlar > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Oynatıcı	ok	
+Ayarlar > Oynatıcı > geri	ok	
+Ayarlar > Hareketler	ok	
+Ayarlar > Hareketler > geri	ok	
+Ayarlar > Video ve çözücü	ok	
+Ayarlar > Video ve çözücü > geri	ok	
+Ayarlar > Ses	ok	
+Ayarlar > Ses > geri	ok	
+Ayarlar > Altyazı	ok	
+Ayarlar > Altyazı > geri	ok	
+Şarkı bulunamadı: Birinci Şarkı	bilgi	
+Müzik: şarkıya dokun	ok	
+Müzik çalarken video aç	ok	
+Videodan çık	ok	
+Müziğe geri dön	ok	
+Müzik: başka şarkı çal (videodan sonra)	ok	
+Medya oturumu durumu	bilgi	state=PlaybackState {state=PLAYING(3), position=0, buffered position=25000, speed=1.0, updated=803730, actions=7340027, custom actions=[], active item id=2, error=null}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=28719, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=28772, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+İzin kalıcı reddedildi, ana ekran 10 sn	ok	izin ekranı 1 kez açıldı ön planda: com.google.android.providers.media.module
+İzin isteği sayısı (10 sn)	ok	1
+Monkey 2500 rastgele olay	ok	
