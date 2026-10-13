@@ -13,7 +13,11 @@ android {
         targetSdk = 35
         versionCode = 9
         versionName = "1.0.0-beta9"
-        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+            // Yalnız emülatör testi için (-PemulatorAbi=true): x86_64 kütüphanelerini de pakete koy.
+            if (project.findProperty("emulatorAbi") == "true") abiFilters += "x86_64"
+        }
     }
 
     // Herkese açık TEST imzası: her derleme aynı anahtarla imzalanır, böylece sürümler birbirinin
