@@ -55,7 +55,6 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     }
 
     fun setOff() {
-        android.util.Log.d("OPSUB", "setOff")
         mode = Mode.OFF
         external = emptyList()
         externalName = null
@@ -68,7 +67,6 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     }
 
     fun useEmbedded(group: Tracks.Group) {
-        android.util.Log.d("OPSUB", "useEmbedded ${group.getTrackFormat(0).sampleMimeType}")
         mode = Mode.EMBEDDED
         external = emptyList()
         externalName = null
@@ -81,7 +79,6 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     }
 
     fun useExternal(cues: List<SubCue>, name: String) {
-        android.util.Log.d("OPSUB", "useExternal $name ${cues.size}")
         val p = host.player
         p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
             .clearOverridesOfType(C.TRACK_TYPE_TEXT)
@@ -104,7 +101,6 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     }
 
     fun onEmbeddedCues(cues: List<Cue>) {
-        android.util.Log.d("OPSUB", "embeddedCues mode=$mode n=${cues.size}")
         if (mode != Mode.EMBEDDED) return
         if (delayMs > 0) {
             val r = Runnable { view.setCues(cues) }
@@ -121,7 +117,6 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         val t = ((positionMs - delayMs) * speed).toLong()
         val active = activeIndexes(t)
         if (active != lastKey) {
-            android.util.Log.d("OPSUB", "tick t=$t active=$active view=${view.width}x${view.height} vis=${view.visibility} shown=${view.isShown}")
             lastKey = active
             view.setCues(active.map { toCue(external[it]) })
         }

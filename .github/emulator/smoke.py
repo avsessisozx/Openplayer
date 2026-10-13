@@ -131,6 +131,13 @@ def find_text(root, *wanted):
     return None
 
 
+def cur_size():
+    """Ekranın şu anki (döndürmeye göre) boyutu; yatay videoda wm size dikey değeri verir."""
+    o = sh("dumpsys window displays | grep -m1 -o 'cur=[0-9]*x[0-9]*'")
+    m = re.search(r"cur=(\d+)x(\d+)", o)
+    return (int(m.group(1)), int(m.group(2))) if m else screen
+
+
 def tap(c):
     sh(f"input tap {c[0]} {c[1]}")
 
@@ -199,14 +206,14 @@ def play_controls(path):
     # Video oynarken ekran hiç "durgun" olmadığı için arayüz ağacı okunamıyor; önce duraklat.
     sh("input keyevent KEYCODE_MEDIA_PAUSE")
     time.sleep(0.8)
-    w, h = screen
+    w, h = cur_size()
     tap((w // 2, h // 2))
     time.sleep(1)
 
 
 def top_right_icon(root):
     """Üst çubuktaki en sağdaki tıklanabilir öğe (genelde ⋮)."""
-    h = screen[1]
+    h = cur_size()[1]
     cands = [c for c in clickables(root) if c[1][1] < h * 0.12]
     return max(cands, key=lambda c: c[1][0])[1] if cands else None
 
@@ -338,7 +345,7 @@ for f, note in (("Yatay video.mp4", ""), ("Dikey video.mp4", ""), ("Bolumlu.mkv"
                 ("Bozuk dosya.mp4", "hata mesajı beklenir")):
     play(f"/sdcard/Movies/Test/{f}")
     record(f"Video aç: {f}", 3, note)
-    w, h = screen
+    w, h = cur_size()
     tap((w // 2, h // 2)); record(f"Video kontrolleri: {f}", 1.5)
     sh(f"input swipe {w//2} {h//2} {w//2 + w//3} {h//2} 400"); record(f"Video yatay kaydırma (sarma): {f}", 1.5)
     sh("input keyevent KEYCODE_BACK"); record(f"Video kapat: {f}", 1.5)
@@ -371,7 +378,7 @@ if QUICK:
         steps.append((f"Paylaş deneme {attempt}", "bilgi", f"öğeler: {[i[0] for i in clickables(root)]}"))
         if c:
             break
-        w, h = screen; tap((w // 2, h // 2)); time.sleep(1.2)
+        w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
     if c:
         tap(c); time.sleep(1.5)
         root = dump(); shot("Paylaş menü")

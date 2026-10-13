@@ -60,7 +60,7 @@ object SubtitleParser {
             "[Script Info]" in head || ext == "ass" || ext == "ssa" -> parseAss(clean)
             "<SAMI" in head.uppercase() || ext == "smi" || ext == "sami" -> parseSami(clean)
             "-->" in clean -> parseTimed(clean, skipHeader = false)
-            Regex("""^\{\d+}\{\d+}""", RegexOption.MULTILINE).containsMatchIn(head) -> parseMicroDvd(clean)
+            Regex("""^\{\d+\}\{\d+\}""", RegexOption.MULTILINE).containsMatchIn(head) -> parseMicroDvd(clean)
             Regex("""^\[\d+]\[\d+]""", RegexOption.MULTILINE).containsMatchIn(head) -> parseMpl2(clean)
             Regex("""^\d{1,2}:\d{2}:\d{2}[:=,]""", RegexOption.MULTILINE).containsMatchIn(head) -> parseTmPlayer(clean)
             else -> emptyList()
@@ -114,7 +114,7 @@ object SubtitleParser {
 
     /** <i>, <b>, <u>, <font color> gibi basit etiketleri biçime çevirir; diğerlerini temizler. */
     private fun styled(raw: String): CharSequence {
-        val noAss = raw.replace(Regex("""\{\\[^}]*}"""), "")
+        val noAss = raw.replace(Regex("""\{\\[^\}]*\}"""), "")
         if ('<' !in noAss) return noAss
         val html = noAss
             .replace("\n", "<br>")
@@ -309,7 +309,7 @@ object SubtitleParser {
     private fun parseMicroDvd(text: String): List<SubCue> {
         var fps = 23.976
         val out = ArrayList<SubCue>()
-        val re = Regex("""^\{(\d+)}\{(\d+)}(.*)$""")
+        val re = Regex("""^\{(\d+)\}\{(\d+)\}(.*)$""")
         for ((n, line) in text.split('\n').withIndex()) {
             val m = re.find(line.trim()) ?: continue
             val a = m.groupValues[1].toLong()
@@ -320,7 +320,7 @@ object SubtitleParser {
                 continue
             }
             out += SubCue((a * 1000 / fps).toLong(), (b * 1000 / fps).toLong(),
-                body.replace("|", "\n").replace(Regex("""\{[^}]*}"""), ""))
+                body.replace("|", "\n").replace(Regex("""\{[^\}]*\}"""), ""))
         }
         return out
     }

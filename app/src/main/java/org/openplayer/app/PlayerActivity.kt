@@ -615,7 +615,6 @@ class PlayerActivity : AppCompatActivity() {
         subtitles.setOff()
         sidecars = if (uri != null) SubtitleFiles.findSidecars(this, uri) else emptyList()
         val remembered = uri?.let { SubtitleFiles.remembered(this, it) }
-        android.util.Log.d("OPSUB", "item uri=$uri sidecars=${sidecars.map { it.name }} remembered=$remembered auto=${settings.autoEnableSubtitle}")
         if (settings.autoEnableSubtitle) {
             when {
                 remembered != null -> loadExternalSubtitle(remembered, remember = false, quiet = true)
@@ -640,7 +639,10 @@ class PlayerActivity : AppCompatActivity() {
                 l.startsWith(lang) || (lang == "tr" && l.startsWith("tur"))
             }
         }
-        val pick = byLang ?: groups.firstOrNull { it.getTrackFormat(0).selectionFlags and C.SELECTION_FLAG_DEFAULT != 0 }
+        val pick = byLang
+            ?: groups.firstOrNull { it.getTrackFormat(0).selectionFlags and C.SELECTION_FLAG_DEFAULT != 0 }
+            // Dil etiketi olmayan tek/ilk parça: otomatik altyazı açıkken onu göster (MX gibi).
+            ?: groups.firstOrNull { g -> g.getTrackFormat(0).language.let { it.isNullOrBlank() || it == "und" } }
         if (pick != null) subtitles.useEmbedded(pick)
     }
 
@@ -651,7 +653,6 @@ class PlayerActivity : AppCompatActivity() {
                 val text = SubtitleParser.decode(file.readBytes(), settings.subtitleCharset, settings.subtitleFallbackCharset)
                 SubtitleParser.parse(file.name, text)
             }
-            android.util.Log.d("OPSUB", "load ${file.name}: ${result.getOrNull()?.size} cues err=${result.exceptionOrNull()}")
             runOnUiThread {
                 val cues = result.getOrNull()
                 if (cues.isNullOrEmpty()) {
