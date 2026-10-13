@@ -196,6 +196,9 @@ def play(path, mime="video/*"):
 
 def play_controls(path):
     play(path)
+    # Video oynarken ekran hiç "durgun" olmadığı için arayüz ağacı okunamıyor; önce duraklat.
+    sh("input keyevent KEYCODE_MEDIA_PAUSE")
+    time.sleep(0.8)
     w, h = screen
     tap((w // 2, h // 2))
     time.sleep(1)
@@ -344,8 +347,8 @@ for f, note in (("Yatay video.mp4", ""), ("Dikey video.mp4", ""), ("Bolumlu.mkv"
 for f in ("Bolumlu.mkv", "Yatay video.mp4"):
     sh(f"am force-stop {PKG}")
     sh(f"am start -a android.intent.action.VIEW -t 'video/*' -d 'file:///sdcard/Movies/Test/{f}' -n {PKG}/.PlayerActivity")
-    time.sleep(2.8); shot(f"Altyazı 2-3 sn {f}")
-    time.sleep(3.7); shot(f"Altyazı 6-7 sn {f}")
+    for k in range(12):
+        time.sleep(0.9); shot(f"Altyazı {f} kare {k:02d}")
     steps.append((f"Altyazı ekran görüntüleri: {f}", "bilgi", "ekranda 'Merhaba…' ve 'İkinci satır' görünmeli"))
 
 # Bozuk dosya: sessizce kapanmamalı, hata mesajı göstermeli
