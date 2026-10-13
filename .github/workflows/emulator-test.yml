@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   emulator:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 75
     # Yalnız sonuçları ayrı "emulator-results/<run>" dalına yazmak için.
     permissions:
@@ -91,5 +91,5 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
           git add -A
           git commit -q -m "Emülatör test sonuçları: run ${GITHUB_RUN_ID}"
-          git push -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$b"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$b"
           echo "Sonuçlar dalı: $b"
