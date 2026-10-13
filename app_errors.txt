@@ -1,0 +1,1137 @@
+10-13 06:24:55.775  5027  5027 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:24:55.775  5027  5027 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:24:55.975  5027  5027 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:24:55.975  5027  5027 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:24:56.573  5027  5027 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:24:57.230   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:24:57.267   524   928 W InputManager-JNI: Input channel object 'daf702b Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:25:05.476   524  1779 W ActivityTaskManager: Force removing ActivityRecord{438163c u0 org.openplayer.app/.MainActivity t8 f}}: app died, no saved state
+10-13 06:25:05.510   524  1784 W InputManager-JNI: Input channel object '579307c org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:25:05.518   524   599 W WindowManager: Failed to deliver inset control state change to w=Window{579307c u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:25:05.745  5369  5369 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:25:05.745  5369  5369 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:25:05.909   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{579307c u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:25:05.943  5369  5369 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:05.943  5369  5369 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:05.965   524  2450 W WindowManager: Exception thrown during dispatchAppVisibility Window{579307c u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:25:05.968   524  2450 W WindowManager: Failed to deliver inset control state change to w=Window{579307c u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:25:06.589  5369  5369 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:25:07.132   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:07.173   524  1764 W InputManager-JNI: Input channel object 'e001e24 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:25:07.818  5369  5402 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:25:15.805   524   624 W InputDispatcher: Not sending touch gesture to 4d358ea ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:25:19.425   524   624 W InputDispatcher: Not sending touch gesture to 4d358ea ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:25:25.733   524  2443 W InputManager-JNI: Input channel object 'c41df26 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:25:28.101  5668  5668 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:25:28.101  5668  5668 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:25:28.166  5668  5668 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:28.168  5668  5668 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:28.882  5668  5668 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:25:29.450   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:29.476   524   599 W InputManager-JNI: Input channel object '34edc77 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:25:30.568  5668  5711 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:25:45.191   524  2450 W InputManager-JNI: Input channel object '1d06a9 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:25:47.921  6270  6270 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:25:47.921  6270  6270 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:25:48.325  6270  6270 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:48.325  6270  6270 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:49.200  6270  6270 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:25:50.062   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:25:50.129   524  1779 W InputManager-JNI: Input channel object '6dc0567 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:25:50.865  6270  6315 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:25:58.991   524   624 W InputDispatcher: Not sending touch gesture to be174e4 ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:26:01.420   524   624 W InputDispatcher: Not sending touch gesture to be174e4 ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:26:05.624   524   833 W InputManager-JNI: Input channel object 'bee3ba6 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:26:07.478  6601  6601 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:26:07.478  6601  6601 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:26:07.705  6601  6601 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:07.705  6601  6601 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:08.077  6601  6601 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:26:08.598   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:08.674   524   537 W InputManager-JNI: Input channel object '4a13126 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:26:16.743   524   624 W InputDispatcher: Not sending touch gesture to 962dd49 ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:26:19.007   524   624 W InputDispatcher: Not sending touch gesture to 962dd49 ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:26:22.870   524   598 W InputManager-JNI: Input channel object '12caf53 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:26:24.349  6887  6887 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:26:24.349  6887  6887 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:26:24.434  6887  6887 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:24.434  6887  6887 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:24.762  6887  6887 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:26:25.030   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:25.052   524  2443 W InputManager-JNI: Input channel object '67b10d3 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal: Playback error
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FlvExtractor, FlacExtractor, WavExtractor, FragmentedMp4Extractor, Mp4Extractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:26:25.646  6887  6911 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:26:25.658  6887  6887 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal: Playback error
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FlvExtractor, FlacExtractor, WavExtractor, FragmentedMp4Extractor, Mp4Extractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:26:26.270  6887  6925 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:26:26.281  6887  6887 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal: Playback error
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FlvExtractor, FlacExtractor, WavExtractor, FragmentedMp4Extractor, Mp4Extractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:26:26.707  6887  6930 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:26:26.788  6887  6935 E VLC-std : Warning: input_item_SetURI("file:///sdcard/Movies/Test/Eski bicim.wmv"): file path instead of URL.
+10-13 06:26:26.861  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:26.861  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:26.913  6887  6941 E VLC     : [00007014dc0ac6a0/1b1d] libvlc window: request 1 not implemented
+10-13 06:26:26.921  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:26.921  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:26.978  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:26.978  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:26.978  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 2 name localCoord
+10-13 06:26:27.109  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 0 name inPosition
+10-13 06:26:27.110  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 1 name inColor
+10-13 06:26:27.110  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+10-13 06:26:27.187  6887  6941 E VLC     : [00007014dc0ac6a0/1b1d] libvlc window: request 0 not implemented
+10-13 06:26:27.187  6887  6941 E VLC     : [00007014dc0ac6a0/1b1d] libvlc window: request 0 not implemented
+10-13 06:26:27.188  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:27.188  6887  6935 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:27.189  6887  6941 E VLC     : [00007014dc0ac6a0/1b1d] libvlc window: request 1 not implemented
+10-13 06:26:27.617  6887  6941 E VLC     : [00007014dc0ac6a0/1b1d] libvlc window: request 1 not implemented
+10-13 06:26:27.997   524  2443 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@5a76689
+10-13 06:26:28.058  6887  6941 E VLC     : [00007014dc0ac6a0/1b1d] libvlc window: request 3 not implemented
+10-13 06:26:28.326   524   599 W InputManager-JNI: Input channel object '205b3ed org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:26:30.618   524  1810 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@e912411
+10-13 06:26:33.323   524   599 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@ea1c74a
+10-13 06:26:37.198  6887  6895 W .openplayer.app: Cleared Reference was only reachable from finalizer (only reported once)
+10-13 06:26:38.802   524  1543 W InputManager-JNI: Input channel object 'e675ddf org.openplayer.app/org.openplayer.app.VlcPlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:26:38.828   524  2437 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{fee1e00 u0 org.openplayer.app/.VlcPlayerActivity t13} (client)' was disposed without first being removed with the input manager!
+10-13 06:26:42.655  7153  7153 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:26:42.655  7153  7153 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:26:42.753  7153  7153 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:42.754  7153  7153 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:43.044  7153  7153 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:26:43.404   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:43.423   524  2394 W InputManager-JNI: Input channel object 'f2ee805 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal: Playback error
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FragmentedMp4Extractor, Mp4Extractor, FlvExtractor, FlacExtractor, WavExtractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:26:43.955  7153  7176 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:26:43.967  7153  7153 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal: Playback error
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FragmentedMp4Extractor, Mp4Extractor, FlvExtractor, FlacExtractor, WavExtractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:26:44.519  7153  7192 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:26:44.537  7153  7153 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal: Playback error
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FragmentedMp4Extractor, Mp4Extractor, FlvExtractor, FlacExtractor, WavExtractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:26:44.959  7153  7196 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:26:45.032  7153  7200 E VLC-std : Warning: input_item_SetURI("file:///sdcard/Movies/Test/Bozuk dosya.mp4"): file path instead of URL.
+10-13 06:26:45.091  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:45.091  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:45.099  7153  7200 E VLC-std : [mov,mp4,m4a,3gp,3g2,mj2 @ 0x70137c129d00] 
+10-13 06:26:45.099  7153  7200 E VLC-std : moov atom not found
+10-13 06:26:45.099  7153  7201 E VLC     : [00007014dc0a5480/1c21] libvlc demux: Could not open /sdcard/Movies/Test/Bozuk dosya.mp4: Unknown error 1094995529
+10-13 06:26:45.133  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:45.133  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:45.176  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:45.176  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:45.176  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 2 name localCoord
+10-13 06:26:45.259  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 0 name inPosition
+10-13 06:26:45.259  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 1 name inColor
+10-13 06:26:45.259  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+10-13 06:26:45.309  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:26:45.309  7153  7200 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:26:45.575   524  2394 W InputManager-JNI: Input channel object '470904f org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:26:46.312   524  2394 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@8e9e3f4
+10-13 06:26:48.898   524  2450 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@c6d7fa7
+10-13 06:26:51.480   524  2043 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@742fb24
+10-13 06:26:53.746  7153  7153 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:26:54.123  7153  7161 W .openplayer.app: Cleared Reference was only reachable from finalizer (only reported once)
+10-13 06:26:55.174   524  2450 W InputManager-JNI: Input channel object '5a50607 org.openplayer.app/org.openplayer.app.VlcPlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:26:55.180   524  2198 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{b62e688 u0 org.openplayer.app/.VlcPlayerActivity t14} (client)' was disposed without first being removed with the input manager!
+10-13 06:26:57.023  7355  7355 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:26:57.023  7355  7355 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:26:57.175  7355  7355 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:57.175  7355  7355 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:57.637  7355  7355 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:26:57.969   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:26:57.987   524   928 W InputManager-JNI: Input channel object '4f08b95 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:26:58.393  7355  7379 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:27:05.428   524  2449 W ActivityTaskManager: Force removing ActivityRecord{4c27120 u0 org.openplayer.app/.PlayerActivity t15 f}}: app died, no saved state
+10-13 06:27:05.481   524   833 W InputManager-JNI: Input channel object '3ac899 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:27:05.547   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{3ac899 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:05.803  7441  7441 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:27:05.803  7441  7441 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:27:05.830   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{3ac899 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:05.960  7441  7441 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:05.960  7441  7441 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:06.066   524  1810 W WindowManager: Exception thrown during dispatchAppVisibility Window{3ac899 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:06.098   524  1810 W WindowManager: Failed to deliver inset control state change to w=Window{3ac899 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:06.983  7441  7441 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:27:07.306   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:07.343   524  1440 W InputManager-JNI: Input channel object '6b64992 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:27:07.951  7441  7468 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:27:08.170  7441  7499 W .openplayer.app: Verification of void androidx.emoji2.text.MetadataRepo.put(androidx.emoji2.text.TypefaceEmojiRasterizer) took 195.207ms (163.93 bytecodes/s) (2008B approximate peak alloc)
+10-13 06:27:14.291   524  2439 W ActivityTaskManager: Force removing ActivityRecord{7dd0306 u0 org.openplayer.app/.PlayerActivity t16 f}}: app died, no saved state
+10-13 06:27:14.331   524  2033 W InputManager-JNI: Input channel object 'c463295 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:27:14.386   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{c463295 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:14.568   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{c463295 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:14.606  7530  7530 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:27:14.606  7530  7530 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:27:14.842  7530  7530 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:14.842  7530  7530 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:14.871   524  2033 W WindowManager: Exception thrown during dispatchAppVisibility Window{c463295 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:14.914   524  2033 W WindowManager: Failed to deliver inset control state change to w=Window{c463295 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:27:15.749  7530  7530 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:27:16.073   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:16.111   524  2394 W InputManager-JNI: Input channel object '3f299f9 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal: Playback error
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FragmentedMp4Extractor, Mp4Extractor, FlvExtractor, FlacExtractor, WavExtractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:27:16.699  7530  7555 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:27:16.723  7530  7530 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal: Playback error
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FragmentedMp4Extractor, Mp4Extractor, FlvExtractor, FlacExtractor, WavExtractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:27:17.266  7530  7570 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:27:17.276  7530  7530 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal: Playback error
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FragmentedMp4Extractor, Mp4Extractor, FlvExtractor, FlacExtractor, WavExtractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:27:17.705  7530  7574 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:27:17.767  7530  7578 E VLC-std : Warning: input_item_SetURI("file:///sdcard/Movies/Test/Bozuk dosya.mp4"): file path instead of URL.
+10-13 06:27:17.802  7530  7579 E VLC     : [00007014dc0a6920/1d9b] libvlc demux: Could not open /sdcard/Movies/Test/Bozuk dosya.mp4: Unknown error 1094995529
+10-13 06:27:17.803  7530  7578 E VLC-std : [mov,mp4,m4a,3gp,3g2,mj2 @ 0x70137c1425b0] moov atom not found
+10-13 06:27:17.825  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:27:17.825  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:27:17.876  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:27:17.876  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:27:17.914  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:27:17.914  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:27:17.914  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 2 name localCoord
+10-13 06:27:17.971  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 0 name inPosition
+10-13 06:27:17.971  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 1 name inColor
+10-13 06:27:17.971  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 2 name inTextureCoords
+10-13 06:27:18.018  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:27:18.018  7530  7578 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:27:18.328   524  2033 W InputManager-JNI: Input channel object '86954f1 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:27:19.046   524  2449 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@59c4c7a
+10-13 06:27:21.629   524  2033 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@5e9b5a3
+10-13 06:27:24.214   524  2043 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@2e361b
+10-13 06:27:26.289  7530  7540 W .openplayer.app: Cleared Reference was only reachable from finalizer (only reported once)
+10-13 06:27:29.170   524  2033 W ActivityTaskManager: Force removing ActivityRecord{f8dee7d u0 org.openplayer.app/.VlcPlayerActivity t17 f}}: app died, no saved state
+10-13 06:27:29.175   524  2033 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{f8dee7d u0 org.openplayer.app/.VlcPlayerActivity t17} (client)' was disposed without first being removed with the input manager!
+10-13 06:27:29.176   524  2033 W InputManager-JNI: Input channel object '48a9240 org.openplayer.app/org.openplayer.app.VlcPlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:27:29.651  7664  7664 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:27:29.651  7664  7664 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:27:29.836  7664  7664 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:29.836  7664  7664 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:30.243  7664  7664 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:27:30.567   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:30.607   524  2246 W InputManager-JNI: Input channel object '76e507f Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:27:31.392  7664  7688 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:27:44.444   524  1440 W WindowManager: prepareSync with mDrawHandlers, Window{1a2ed75 u0 org.openplayer.app/org.openplayer.app.PlayerActivity}, com.android.server.wm.WindowContainer.prepareSync:3872 com.android.server.wm.WindowToken.prepareSync:690 com.android.server.wm.WindowContainer.prepareSync:3872 com.android.server.wm.WindowContainer.prepareSync:3872 com.android.server.wm.WindowContainer.prepareSync:3872 com.android.server.wm.WindowContainer.prepareSync:3872 com.android.server.wm.WindowContainer.prepareSync:3872 com.android.server.wm.WindowContainer.prepareSync:3872 
+10-13 06:27:49.038   524  2246 W InputManager-JNI: Input channel object 'f85341b Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:27:52.690   524  2445 W ActivityTaskManager: Force removing ActivityRecord{ab7ccc u0 org.openplayer.app/.MainActivity t18 f}}: app died, no saved state
+10-13 06:27:52.693   524  2445 W ActivityTaskManager: Force removing ActivityRecord{e17fda1 u0 org.openplayer.app/.PlayerActivity t18 f}}: app died, no saved state
+10-13 06:27:52.694   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.PlayerActivity event : 23 instanceId : 203945863)
+10-13 06:27:52.723   524  2445 W InputManager-JNI: Input channel object '3943c9 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:27:52.737   524  2445 W InputManager-JNI: Input channel object '1a2ed75 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:27:52.771   524   544 W ActivityManager: ProcessRecord{3d9b6b4 0:org.openplayer.app/u0a192} is attached to a previous process 7664
+10-13 06:27:52.774   524   544 W ActivityManager: ProcessRecord{3d9b6b4 0:org.openplayer.app/u0a192} is attached to a previous process 7664
+10-13 06:27:52.775   524   544 W ActivityManager: ProcessRecord{3d9b6b4 0:org.openplayer.app/u0a192} is attached to a previous process 7664
+10-13 06:27:53.039  7878  7878 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:27:53.039  7878  7878 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:27:53.180  7878  7878 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:53.181  7878  7878 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:53.444  7878  7878 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:27:53.954   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:54.022   524  1440 W InputManager-JNI: Input channel object '5ba7b63 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:27:59.009   524  2439 W ActivityTaskManager: Force removing ActivityRecord{d40f348 u0 org.openplayer.app/.MainActivity t19 f}}: app died, no saved state
+10-13 06:27:59.025   524   599 W InputManager-JNI: Input channel object 'abb89cb org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:27:59.047   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{abb89cb u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:27:59.137   524  2438 W WindowManager: Exception thrown during dispatchAppVisibility Window{abb89cb u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:27:59.659  7950  7950 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:27:59.659  7950  7950 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:27:59.844  7950  7950 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:27:59.844  7950  7950 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:00.139  7950  7950 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:28:00.566   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:00.603   524  2246 W InputManager-JNI: Input channel object '7f2acb8 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:28:08.272   524  1440 W ActivityTaskManager: Force removing ActivityRecord{76949a0 u0 org.openplayer.app/.MainActivity t20 f}}: app died, no saved state
+10-13 06:28:08.298   524  2198 W InputManager-JNI: Input channel object '371fdf org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:08.320   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{371fdf u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:08.508  8104  8104 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:28:08.508  8104  8104 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:28:08.573   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{371fdf u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:08.587  8104  8104 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:08.587  8104  8104 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:08.599   524  1440 W WindowManager: Exception thrown during dispatchAppVisibility Window{371fdf u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:08.602   524  1440 W WindowManager: Failed to deliver inset control state change to w=Window{371fdf u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:08.885  8104  8104 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:28:09.338   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:09.356   524  2043 W InputManager-JNI: Input channel object '7776ca5 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:28:17.026   524  1008 W ActivityTaskManager: Force removing ActivityRecord{4fad770 u0 org.openplayer.app/.MainActivity t21 f}}: app died, no saved state
+10-13 06:28:17.052   524  2043 W InputManager-JNI: Input channel object '121fc3d org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:17.080   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{121fc3d u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:17.213  8211  8211 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:28:17.213  8211  8211 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:28:17.279   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{121fc3d u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:17.354  8211  8211 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:17.354  8211  8211 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:17.393   524  2043 W WindowManager: Exception thrown during dispatchAppVisibility Window{121fc3d u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:17.452   524  2043 W WindowManager: Failed to deliver inset control state change to w=Window{121fc3d u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:17.717  8211  8211 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:28:18.189   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:18.232   524  1440 W InputManager-JNI: Input channel object '31bc2b4 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:28:24.308   524  1764 W InputManager-JNI: Input channel object '6ddb4c3 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:25.859   524  1764 W ActivityTaskManager: Force removing ActivityRecord{a3147ab u0 org.openplayer.app/.MainActivity t22 f}}: app died, no saved state
+10-13 06:28:25.878   524  1810 W InputManager-JNI: Input channel object 'f9d5d0a org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:25.918   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{f9d5d0a u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:26.098   524  2347 W WindowManager: Exception thrown during dispatchAppVisibility Window{f9d5d0a u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:26.100   524  2347 W WindowManager: Failed to deliver inset control state change to w=Window{f9d5d0a u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:26.187  8333  8333 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:28:26.187  8333  8333 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:28:26.515  8333  8333 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:26.515  8333  8333 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:26.823  8333  8333 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:28:27.271   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:27.301   524  2043 W InputManager-JNI: Input channel object '3b2bae1 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:28:35.005   524  2437 W ActivityTaskManager: Force removing ActivityRecord{da300e2 u0 org.openplayer.app/.MainActivity t23 f}}: app died, no saved state
+10-13 06:28:35.068   524  1191 W WindowManager: Failed to deliver inset control state change to w=Window{8e46cb u0 org.openplayer.app/org.openplayer.app.MainActivity}
+10-13 06:28:35.070   524   538 W InputManager-JNI: Input channel object '8e46cb org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:35.187   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{8e46cb u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:35.256  8501  8501 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:28:35.256  8501  8501 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:28:35.329   524  2043 W WindowManager: Exception thrown during dispatchAppVisibility Window{8e46cb u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:35.338  8501  8501 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:35.338  8501  8501 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:35.344   524  2043 W WindowManager: Failed to deliver inset control state change to w=Window{8e46cb u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:28:35.639  8501  8501 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:28:36.073   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:36.084   524  1764 W InputManager-JNI: Input channel object '5c433b3 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:28:41.485   524   538 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@a7b5624
+10-13 06:28:42.356   524  2439 W InputManager-JNI: Input channel object 'efa2ce8 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:44.474  8613  8613 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:28:44.474  8613  8613 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:28:44.511  8613  8613 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:44.511  8613  8613 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:44.759  8613  8613 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:28:45.250   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:45.269   524  1191 W InputManager-JNI: Input channel object '70bf7aa Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:28:55.630   524  2437 W ActivityTaskManager: Force removing ActivityRecord{5d121ce u0 org.openplayer.app/.MusicActivity t25 f}}: app died, no saved state
+10-13 06:28:55.635   524  2437 W ActivityTaskManager: Force removing ActivityRecord{bb509d9 u0 org.openplayer.app/.MainActivity t25 f}}: app died, no saved state
+10-13 06:28:55.656   524  1543 W InputManager-JNI: Input channel object 'de1d13d org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:55.668   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 106670719)
+10-13 06:28:55.676   524  2437 W InputManager-JNI: Input channel object '289adbd org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:28:55.677   524  2437 W WindowManager: Failed to deliver inset control state change to w=Window{de1d13d u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:28:55.848  8716  8716 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:28:55.848  8716  8716 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:28:55.918  8716  8716 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:55.918  8716  8716 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:55.926   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{de1d13d u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:28:55.947   524  2043 W WindowManager: Exception thrown during dispatchAppVisibility Window{de1d13d u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:28:55.953   524  2043 W WindowManager: Failed to deliver inset control state change to w=Window{de1d13d u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:28:56.253  8716  8716 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:28:56.721   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:28:56.753   524  1543 W InputManager-JNI: Input channel object 'cd890c0 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:29:06.789   524   537 W ActivityTaskManager: Force removing ActivityRecord{e28a972 u0 org.openplayer.app/.MusicActivity t26 f}}: app died, no saved state
+10-13 06:29:06.790   524   537 W ActivityTaskManager: Force removing ActivityRecord{51ae2a7 u0 org.openplayer.app/.MainActivity t26 f}}: app died, no saved state
+10-13 06:29:06.797   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 65635069)
+10-13 06:29:06.850   524  2437 W InputManager-JNI: Input channel object 'a80374e org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:06.854   524  2443 W InputManager-JNI: Input channel object 'e4292b1 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:06.935   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{e4292b1 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:06.965  8826  8826 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:29:06.965  8826  8826 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:29:07.037  8826  8826 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:07.041  8826  8826 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:07.090   524  2043 W WindowManager: Exception thrown during dispatchAppVisibility Window{e4292b1 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:07.096   524  2043 W WindowManager: Failed to deliver inset control state change to w=Window{e4292b1 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:07.326  8826  8826 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:29:07.815   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:07.856   524   537 W InputManager-JNI: Input channel object 'cf59792 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:29:16.091   524  2437 W InputManager-JNI: Input channel object 'de8b9f8 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:19.154   524   537 W InputManager-JNI: Input channel object '59ede31 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:21.124  8977  8977 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:29:21.124  8977  8977 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:29:21.247  8977  8977 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:21.248  8977  8977 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:21.493  8977  8977 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:29:22.051   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:22.107   524  2043 W InputManager-JNI: Input channel object 'd28aed9 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:29:34.762   524  1784 W ActivityTaskManager: Force removing ActivityRecord{451251f u0 org.openplayer.app/.MusicActivity t28 f}}: app died, no saved state
+10-13 06:29:34.770   524  1784 W ActivityTaskManager: Force removing ActivityRecord{aec51b4 u0 org.openplayer.app/.MainActivity t28 f}}: app died, no saved state
+10-13 06:29:34.772   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 64479570)
+10-13 06:29:34.781   524  1779 W InputManager-JNI: Input channel object '4b44922 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:34.782   524  1751 W InputManager-JNI: Input channel object '3800f68 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:34.809   524  1779 W WindowManager: Failed to deliver inset control state change to w=Window{4b44922 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:34.988  9149  9149 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:29:34.988  9149  9149 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:29:35.070   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{4b44922 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:35.174  9149  9149 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:35.175  9149  9149 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:35.183   524  1779 W WindowManager: Failed to deliver inset control state change to w=Window{4b44922 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:35.203   524  2033 W WindowManager: Exception thrown during dispatchAppVisibility Window{4b44922 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:35.510  9149  9149 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:29:36.026   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:36.068   524  2033 W InputManager-JNI: Input channel object '9d015e4 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:29:46.927   524  1751 W InputManager-JNI: Input channel object 'f9b1be1 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:48.723   524  1784 W ActivityTaskManager: Force removing ActivityRecord{c42e3ef u0 org.openplayer.app/.MusicActivity t29 f}}: app died, no saved state
+10-13 06:29:48.726   524  1784 W ActivityTaskManager: Force removing ActivityRecord{bc3ea9b u0 org.openplayer.app/.MainActivity t29 f}}: app died, no saved state
+10-13 06:29:48.744   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 242126353)
+10-13 06:29:48.782   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{3fb0432 u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:29:48.797   524  2450 W InputManager-JNI: Input channel object 'b45a612 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:48.800   524   538 W InputManager-JNI: Input channel object '3fb0432 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:29:48.930  9300  9300 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:29:48.930  9300  9300 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:29:48.940   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{3fb0432 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:49.047   524  2449 W WindowManager: Exception thrown during dispatchAppVisibility Window{3fb0432 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:49.050   524  2449 W WindowManager: Failed to deliver inset control state change to w=Window{3fb0432 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:29:49.082  9300  9300 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:49.082  9300  9300 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:49.344  9300  9300 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:29:49.807   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:29:49.837   524  2033 W InputManager-JNI: Input channel object 'dbb7113 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:30:00.971   524  1543 W InputManager-JNI: Input channel object '17fd99f org.openplayer.app/org.openplayer.app.PlaylistActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:02.453   524   928 W ActivityTaskManager: Force removing ActivityRecord{af55c1d u0 org.openplayer.app/.MusicActivity t30 f}}: app died, no saved state
+10-13 06:30:02.460   524   928 W ActivityTaskManager: Force removing ActivityRecord{73fa511 u0 org.openplayer.app/.MainActivity t30 f}}: app died, no saved state
+10-13 06:30:02.461   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 218432631)
+10-13 06:30:02.482   524   598 W InputManager-JNI: Input channel object '72f00e3 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:02.489   524  2437 W InputManager-JNI: Input channel object '2d11eb6 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:02.499   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{2d11eb6 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:30:02.677   524  1543 W WindowManager: Exception thrown during dispatchAppVisibility Window{2d11eb6 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:30:02.765  9451  9451 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:30:02.765  9451  9451 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:30:03.109  9451  9451 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:03.110  9451  9451 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:03.582  9451  9451 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:30:04.059   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:04.154   524  1574 W InputManager-JNI: Input channel object '60b18f8 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:30:12.385   524  2222 W InputManager-JNI: Input channel object 'c361784 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:15.389   524  1574 W InputManager-JNI: Input channel object 'd7b89da org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:17.509  9739  9739 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:30:17.509  9739  9739 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:30:17.620  9739  9739 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:17.620  9739  9739 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:17.911  9739  9739 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:30:18.399   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:18.449   524  2198 W InputManager-JNI: Input channel object 'd2ceb15 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:30:29.490   524   833 W InputManager-JNI: Input channel object 'd4f619b org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:31.069   524   833 W ActivityTaskManager: Force removing ActivityRecord{80f8259 u0 org.openplayer.app/.MainActivity t32 f}}: app died, no saved state
+10-13 06:30:31.082   524  1543 W InputManager-JNI: Input channel object '9292139 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:31.113   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{9292139 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:30:31.223   524   599 W WindowManager: Exception thrown during dispatchAppVisibility Window{9292139 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:30:31.630  9894  9894 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:30:31.630  9894  9894 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:30:31.703  9894  9894 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:31.704  9894  9894 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:31.992  9894  9894 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:30:32.481   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:32.487   524  2198 W InputManager-JNI: Input channel object 'ea74d9c Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:30:45.134   524  1764 W ActivityTaskManager: Force removing ActivityRecord{ec0f966 u0 org.openplayer.app/.MusicActivity t33 f}}: app died, no saved state
+10-13 06:30:45.141   524  1764 W ActivityTaskManager: Force removing ActivityRecord{1bb7858 u0 org.openplayer.app/.MainActivity t33 f}}: app died, no saved state
+10-13 06:30:45.145   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 26428595)
+10-13 06:30:45.192   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{e1536b5 u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:30:45.192   524  1810 W InputManager-JNI: Input channel object 'e1536b5 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:45.196   524  2394 W InputManager-JNI: Input channel object 'f82aaef org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:45.386   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{e1536b5 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:30:45.396 10041 10041 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:30:45.396 10041 10041 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:30:45.475 10041 10041 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:45.478 10041 10041 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:45.496   524  1784 W WindowManager: Exception thrown during dispatchAppVisibility Window{e1536b5 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:30:45.499   524  1784 W WindowManager: Failed to deliver inset control state change to w=Window{e1536b5 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:30:45.858 10041 10041 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:30:46.315   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:46.374   524  2222 W InputManager-JNI: Input channel object '9aff099 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:30:58.978   524  2222 W ActivityTaskManager: Force removing ActivityRecord{58a4bfa u0 org.openplayer.app/.MusicActivity t34 f}}: app died, no saved state
+10-13 06:30:58.982   524  2222 W ActivityTaskManager: Force removing ActivityRecord{faceae u0 org.openplayer.app/.MainActivity t34 f}}: app died, no saved state
+10-13 06:30:58.992   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 19630044)
+10-13 06:30:59.016   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{12879d9 u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:30:59.022   524  2442 W InputManager-JNI: Input channel object '12879d9 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:59.024   524  2198 W InputManager-JNI: Input channel object '1400d22 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:30:59.229   524  1784 W WindowManager: Exception thrown during dispatchAppVisibility Window{12879d9 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:30:59.233   524  1784 W WindowManager: Failed to deliver inset control state change to w=Window{12879d9 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:30:59.494 10195 10195 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:30:59.494 10195 10195 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:30:59.654 10195 10195 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:59.654 10195 10195 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:30:59.929 10195 10195 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:31:00.415   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:00.452   524   833 W InputManager-JNI: Input channel object '43800c2 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:31:13.101   524   538 W ActivityTaskManager: Force removing ActivityRecord{280fcaf u0 org.openplayer.app/.MusicActivity t35 f}}: app died, no saved state
+10-13 06:31:13.105   524   538 W ActivityTaskManager: Force removing ActivityRecord{30e30d1 u0 org.openplayer.app/.MainActivity t35 f}}: app died, no saved state
+10-13 06:31:13.117   524  2442 W InputManager-JNI: Input channel object '5adbdd2 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:13.118   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 72209975)
+10-13 06:31:13.120   524  1784 W InputManager-JNI: Input channel object 'c67bbf2 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:13.148   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{c67bbf2 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:13.250   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{c67bbf2 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:13.353 10340 10340 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:31:13.353 10340 10340 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:31:13.397 10340 10340 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:13.397 10340 10340 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:13.463   524   538 W WindowManager: Exception thrown during dispatchAppVisibility Window{c67bbf2 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:13.491   524   538 W WindowManager: Failed to deliver inset control state change to w=Window{c67bbf2 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:13.755 10340 10340 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:31:14.191   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:14.220   524   538 W InputManager-JNI: Input channel object 'ca1de0a Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:31:26.867   524   538 W ActivityTaskManager: Force removing ActivityRecord{c72d351 u0 org.openplayer.app/.MusicActivity t36 f}}: app died, no saved state
+10-13 06:31:26.868   524   538 W ActivityTaskManager: Force removing ActivityRecord{1508fb9 u0 org.openplayer.app/.MainActivity t36 f}}: app died, no saved state
+10-13 06:31:26.877   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 158225247)
+10-13 06:31:26.927   524  2437 W InputManager-JNI: Input channel object '8ada42f org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:26.933   524  2442 W InputManager-JNI: Input channel object '2b6bbbc org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:26.945   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{2b6bbbc u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:27.101   524  2449 W WindowManager: Exception thrown during dispatchAppVisibility Window{2b6bbbc u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:27.196 10488 10488 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:31:27.196 10488 10488 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:31:27.499 10488 10488 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:27.499 10488 10488 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:27.915 10488 10488 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:31:28.283   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:28.307   524  1543 W InputManager-JNI: Input channel object '950fe2d Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:31:40.953   524   538 W ActivityTaskManager: Force removing ActivityRecord{f41c883 u0 org.openplayer.app/.MusicActivity t37 f}}: app died, no saved state
+10-13 06:31:40.955   524   538 W ActivityTaskManager: Force removing ActivityRecord{fa2e5b2 u0 org.openplayer.app/.MainActivity t37 f}}: app died, no saved state
+10-13 06:31:40.992   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{9b3c156 u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:31:40.997   524   928 W InputManager-JNI: Input channel object '8fada4 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:40.998   524  1574 W InputManager-JNI: Input channel object '9b3c156 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:41.002   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 175988864)
+10-13 06:31:41.157   524  1764 W WindowManager: Exception thrown during dispatchAppVisibility Window{9b3c156 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:41.221 10637 10637 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:31:41.221 10637 10637 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:31:41.516 10637 10637 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:41.516 10637 10637 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:41.837 10637 10637 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:31:42.247   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:42.302   524   538 W InputManager-JNI: Input channel object 'c1841dd Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:31:54.838   524   928 W ActivityTaskManager: Force removing ActivityRecord{3c4afd0 u0 org.openplayer.app/.MusicActivity t38 f}}: app died, no saved state
+10-13 06:31:54.840   524   928 W ActivityTaskManager: Force removing ActivityRecord{5f2b033 u0 org.openplayer.app/.MainActivity t38 f}}: app died, no saved state
+10-13 06:31:54.892   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{b32163d u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:31:54.895   524   537 W InputManager-JNI: Input channel object '63ff2bd org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:54.899   524  2347 W InputManager-JNI: Input channel object 'b32163d org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:31:54.931   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 145426793)
+10-13 06:31:55.055   524  1008 W WindowManager: Exception thrown during dispatchAppVisibility Window{b32163d u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:31:55.142 10779 10779 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:31:55.142 10779 10779 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:31:55.311 10779 10779 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:55.311 10779 10779 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:55.766 10779 10779 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:31:56.156   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:31:56.183   524  1574 W InputManager-JNI: Input channel object 'ff3b2f0 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:32:08.803   524  1008 W ActivityTaskManager: Force removing ActivityRecord{d707eb3 u0 org.openplayer.app/.MusicActivity t39 f}}: app died, no saved state
+10-13 06:32:08.812   524  1008 W ActivityTaskManager: Force removing ActivityRecord{c9a9c9f u0 org.openplayer.app/.MainActivity t39 f}}: app died, no saved state
+10-13 06:32:08.815   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 203159989)
+10-13 06:32:08.833   524  1764 W InputManager-JNI: Input channel object 'd245d6f org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:08.857   524  2439 W InputManager-JNI: Input channel object '2c4c634 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:08.858   524  2439 W WindowManager: Failed to deliver inset control state change to w=Window{2c4c634 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:09.046   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{2c4c634 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:09.052   524  1191 W WindowManager: Exception thrown during dispatchAppVisibility Window{2c4c634 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:09.327 10934 10934 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:32:09.327 10934 10934 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:32:09.460 10934 10934 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:09.460 10934 10934 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:09.752 10934 10934 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:32:10.157   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:10.174   524  2033 W InputManager-JNI: Input channel object '8a04a16 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:32:22.789   524  2445 W ActivityTaskManager: Force removing ActivityRecord{632335d u0 org.openplayer.app/.MusicActivity t40 f}}: app died, no saved state
+10-13 06:32:22.793   524  2445 W ActivityTaskManager: Force removing ActivityRecord{e99a4bc u0 org.openplayer.app/.MainActivity t40 f}}: app died, no saved state
+10-13 06:32:22.798   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 69249010)
+10-13 06:32:22.822   524  1764 W InputManager-JNI: Input channel object 'b9ffe11 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:22.824   524  2198 W InputManager-JNI: Input channel object '2a187b8 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:22.844   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{2a187b8 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:23.027   524  2449 W WindowManager: Exception thrown during dispatchAppVisibility Window{2a187b8 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:23.041   524  2449 W WindowManager: Failed to deliver inset control state change to w=Window{2a187b8 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:23.097 11080 11080 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:32:23.097 11080 11080 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:32:23.366 11080 11080 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:23.367 11080 11080 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:23.678 11080 11080 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:32:24.083   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:24.107   524  2043 W InputManager-JNI: Input channel object '4fab86d Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:32:36.693   524  1008 W ActivityTaskManager: Force removing ActivityRecord{b205940 u0 org.openplayer.app/.MusicActivity t41 f}}: app died, no saved state
+10-13 06:32:36.698   524  1008 W ActivityTaskManager: Force removing ActivityRecord{59d9a9a u0 org.openplayer.app/.MainActivity t41 f}}: app died, no saved state
+10-13 06:32:36.711   524  1751 W InputManager-JNI: Input channel object 'f80f14d org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:36.717   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 167060392)
+10-13 06:32:36.725   524  2394 W InputManager-JNI: Input channel object 'c73bed org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:36.758   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{c73bed u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:36.929   524  2445 W WindowManager: Exception thrown during dispatchAppVisibility Window{c73bed u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:37.194 11226 11226 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:32:37.194 11226 11226 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:32:37.314 11226 11226 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:37.314 11226 11226 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:37.622 11226 11226 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:32:38.023   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:38.056   524  2439 W InputManager-JNI: Input channel object 'c1c4063 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:32:50.631   524  2394 W ActivityTaskManager: Force removing ActivityRecord{49cd647 u0 org.openplayer.app/.MusicActivity t42 f}}: app died, no saved state
+10-13 06:32:50.636   524  2394 W ActivityTaskManager: Force removing ActivityRecord{f795806 u0 org.openplayer.app/.MainActivity t42 f}}: app died, no saved state
+10-13 06:32:50.636   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 190893300)
+10-13 06:32:50.688   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{33cb6a u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:32:50.692   524  2449 W InputManager-JNI: Input channel object '33cb6a org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:50.701   524  2445 W InputManager-JNI: Input channel object '7ce59d8 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:32:50.825   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{33cb6a u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:50.852 11385 11385 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:32:50.852 11385 11385 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:32:50.948 11385 11385 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:50.948 11385 11385 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:50.968   524  2043 W WindowManager: Exception thrown during dispatchAppVisibility Window{33cb6a u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:50.978   524  2043 W WindowManager: Failed to deliver inset control state change to w=Window{33cb6a u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:32:51.225 11385 11385 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:32:51.683   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:32:51.725   524  2449 W InputManager-JNI: Input channel object '31e71ef Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:33:04.329   524  2445 W ActivityTaskManager: Force removing ActivityRecord{a01c24c u0 org.openplayer.app/.MusicActivity t43 f}}: app died, no saved state
+10-13 06:33:04.333   524  2445 W ActivityTaskManager: Force removing ActivityRecord{ea51af7 u0 org.openplayer.app/.MainActivity t43 f}}: app died, no saved state
+10-13 06:33:04.334   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 216955856)
+10-13 06:33:04.351   524   916 W InputManager-JNI: Input channel object '7161f13 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:04.356   524  2439 W InputManager-JNI: Input channel object 'bd04ff4 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:04.357   524  2439 W WindowManager: Failed to deliver inset control state change to w=Window{7161f13 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:04.526   524   599 W WindowManager: Exception thrown during dispatchAppVisibility Window{7161f13 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:04.590 11528 11528 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:33:04.590 11528 11528 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:33:04.860 11528 11528 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:04.860 11528 11528 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:05.201 11528 11528 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:33:05.625   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:05.655   524  2445 W InputManager-JNI: Input channel object 'ccbe1ca Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:33:18.334   524   599 W ActivityTaskManager: Force removing ActivityRecord{b93db54 u0 org.openplayer.app/.MusicActivity t44 f}}: app died, no saved state
+10-13 06:33:18.339   524   599 W ActivityTaskManager: Force removing ActivityRecord{177be1a u0 org.openplayer.app/.MainActivity t44 f}}: app died, no saved state
+10-13 06:33:18.342   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 113816360)
+10-13 06:33:18.361   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{feb6f31 u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:33:18.370   524  1779 W InputManager-JNI: Input channel object 'f8c0b8 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:18.381   524  2443 W InputManager-JNI: Input channel object 'feb6f31 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:18.534   524  2449 W WindowManager: Exception thrown during dispatchAppVisibility Window{feb6f31 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:18.653 11670 11670 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:33:18.653 11670 11670 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:33:18.888 11670 11670 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:18.889 11670 11670 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:19.415 11670 11670 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:33:19.799   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:19.837   524   598 W InputManager-JNI: Input channel object '3543447 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:33:32.442   524  1810 W ActivityTaskManager: Force removing ActivityRecord{313038a u0 org.openplayer.app/.MusicActivity t45 f}}: app died, no saved state
+10-13 06:33:32.445   524  1810 W ActivityTaskManager: Force removing ActivityRecord{67ac498 u0 org.openplayer.app/.MainActivity t45 f}}: app died, no saved state
+10-13 06:33:32.478   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 246032598)
+10-13 06:33:32.533   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{f9e4ca9 u0 org.openplayer.app/org.openplayer.app.MusicActivity}
+10-13 06:33:32.541   524   599 W InputManager-JNI: Input channel object 'b4e3172 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:32.547   524  2394 W InputManager-JNI: Input channel object 'f9e4ca9 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:32.689 11812 11812 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:33:32.689 11812 11812 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:33:32.747 11812 11812 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:32.747 11812 11812 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:32.759   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{f9e4ca9 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:32.787   524  2439 W WindowManager: Exception thrown during dispatchAppVisibility Window{f9e4ca9 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:32.795   524  2439 W WindowManager: Failed to deliver inset control state change to w=Window{f9e4ca9 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:33.054 11812 11812 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:33:33.486   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:33.522   524   598 W InputManager-JNI: Input channel object '623d9fa Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:33:44.546   524   833 W InputManager-JNI: Input channel object 'edd787e org.openplayer.app/org.openplayer.app.PlaylistActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:46.121   524   833 W ActivityTaskManager: Force removing ActivityRecord{fc7af07 u0 org.openplayer.app/.MusicActivity t46 f}}: app died, no saved state
+10-13 06:33:46.123   524   833 W ActivityTaskManager: Force removing ActivityRecord{c454a69 u0 org.openplayer.app/.MainActivity t46 f}}: app died, no saved state
+10-13 06:33:46.139   524  1191 W InputManager-JNI: Input channel object 'db1bd7b org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:46.140   524  2449 W InputManager-JNI: Input channel object 'f0ee6b8 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:46.151   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 58508687)
+10-13 06:33:46.158   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{f0ee6b8 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:46.309   524   599 W WindowManager: Exception thrown during dispatchAppVisibility Window{f0ee6b8 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:33:46.401 11966 11966 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:33:46.401 11966 11966 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:33:46.464 11966 11966 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:46.464 11966 11966 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:47.159 11966 11966 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:33:47.434   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:47.470   524   833 W InputManager-JNI: Input channel object 'd516b4c Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:33:47.734 11966 11989 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:33:51.515   524   624 W InputDispatcher: Not sending touch gesture to e8d3a2 ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:33:55.214   524   537 W ActivityTaskManager: Force removing ActivityRecord{4e9a833 u0 org.openplayer.app/.PlayerActivity t47 f}}: app died, no saved state
+10-13 06:33:55.287   524  1191 W InputManager-JNI: Input channel object '5c7ea98 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:33:55.294   524  1191 W WindowManager: Failed to deliver inset control state change to w=Window{5c7ea98 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:33:55.443   524  2449 W WindowManager: Exception thrown during dispatchAppVisibility Window{5c7ea98 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:33:55.517 12076 12076 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:33:55.517 12076 12076 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:33:55.688 12076 12076 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:55.688 12076 12076 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:56.303 12076 12076 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:33:56.702   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:33:56.725   524  2443 W InputManager-JNI: Input channel object 'f2eb3be Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:33:56.898 12076 12100 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:34:00.767   524   624 W InputDispatcher: Not sending touch gesture to c4d6b3c ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:34:06.550   524  2438 W ActivityTaskManager: Force removing ActivityRecord{6172a1a u0 org.openplayer.app/.PlayerActivity t48 f}}: app died, no saved state
+10-13 06:34:06.584   524  1008 W InputManager-JNI: Input channel object 'c4f5132 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:34:06.689   524  1191 W WindowManager: Failed to deliver inset control state change to w=Window{c4f5132 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:34:06.854 12193 12193 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:34:06.854 12193 12193 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:34:06.921   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{c4f5132 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:34:06.938   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{c4f5132 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:34:06.944   524  2450 W WindowManager: Exception thrown during dispatchAppVisibility Window{c4f5132 u0 org.openplayer.app/org.openplayer.app.PlayerActivity EXITING}
+10-13 06:34:06.954 12193 12193 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:06.954 12193 12193 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:07.501 12193 12193 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:34:08.021   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:08.058   524  1191 W InputManager-JNI: Input channel object 'a0b71d3 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:34:16.627   524  1008 W ActivityTaskManager: Force removing ActivityRecord{a9b5bd1 u0 org.openplayer.app/.MainActivity t49 f}}: app died, no saved state
+10-13 06:34:16.634   524  1008 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{a9b5bd1 u0 org.openplayer.app/.MainActivity t49} (client)' was disposed without first being removed with the input manager!
+10-13 06:34:16.648   524  1008 W WindowManager: Failed to deliver inset control state change to w=Window{5ffb4f7 u0 org.openplayer.app/org.openplayer.app.MainActivity}
+10-13 06:34:16.673   524  2450 W WindowManager: Failed to deliver inset control state change to w=Window{5ffb4f7 u0 org.openplayer.app/org.openplayer.app.MainActivity}
+10-13 06:34:16.696   524   537 W InputManager-JNI: Input channel object '5ffb4f7 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:34:16.986   524  2438 W WindowManager: Exception thrown during dispatchAppVisibility Window{5ffb4f7 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:34:16.995   524  2438 W WindowManager: Failed to deliver inset control state change to w=Window{5ffb4f7 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:34:17.051 12303 12303 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:34:17.051 12303 12303 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:34:17.329 12303 12303 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:17.329 12303 12303 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:17.778 12303 12303 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:34:18.287   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:18.304   524  1574 W InputManager-JNI: Input channel object '9d889be Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:34:31.305   524  1751 W ActivityTaskManager: Force removing ActivityRecord{1a27976 u0 org.openplayer.app/.SettingsActivity t50 f}}: app died, no saved state
+10-13 06:34:31.306   524  1751 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{1a27976 u0 org.openplayer.app/.SettingsActivity t50} (client)' was disposed without first being removed with the input manager!
+10-13 06:34:31.307   524  1751 W ActivityTaskManager: Force removing ActivityRecord{4f5ed0c u0 org.openplayer.app/.MainActivity t50 f}}: app died, no saved state
+10-13 06:34:31.307   524  1751 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{4f5ed0c u0 org.openplayer.app/.MainActivity t50} (client)' was disposed without first being removed with the input manager!
+10-13 06:34:31.318   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 116099178)
+10-13 06:34:31.352   524  2043 W InputManager-JNI: Input channel object '714af2a org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:34:31.372   524   538 W InputManager-JNI: Input channel object 'fbb414e org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:34:31.398   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{fbb414e u0 org.openplayer.app/org.openplayer.app.SettingsActivity EXITING}
+10-13 06:34:31.623 12429 12429 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:34:31.623 12429 12429 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:34:31.720 12429 12429 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:31.720 12429 12429 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:31.847   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{fbb414e u0 org.openplayer.app/org.openplayer.app.SettingsActivity EXITING}
+10-13 06:34:31.863   524  2438 W WindowManager: Exception thrown during dispatchAppVisibility Window{fbb414e u0 org.openplayer.app/org.openplayer.app.SettingsActivity EXITING}
+10-13 06:34:31.932   524  2438 W WindowManager: Failed to deliver inset control state change to w=Window{fbb414e u0 org.openplayer.app/org.openplayer.app.SettingsActivity EXITING}
+10-13 06:34:32.324 12429 12429 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:34:32.913   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:32.938   524   599 W InputManager-JNI: Input channel object '95a44b1 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:34:44.173   524  1751 W InputManager-JNI: Input channel object '42dae9d org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:34:44.176   524   538 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{bb167e5 u0 org.openplayer.app/.SettingsActivity t51} (client)' was disposed without first being removed with the input manager!
+10-13 06:34:47.490   524  2438 W InputManager-JNI: Input channel object '5b8a3f5 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:34:47.498   524  2222 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{99446c u0 org.openplayer.app/.MainActivity t51} (client)' was disposed without first being removed with the input manager!
+10-13 06:34:49.467 12613 12613 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:34:49.467 12613 12613 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:34:49.809 12613 12613 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:49.809 12613 12613 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:50.643 12613 12613 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:34:51.041   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:34:51.071   524  1751 W InputManager-JNI: Input channel object '7a5ecaf Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:35:05.175   524  2450 W InputManager-JNI: Input channel object 'ad3de9a org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:05.184   524  1784 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{ea63baf u0 org.openplayer.app/.SettingsActivity t52} (client)' was disposed without first being removed with the input manager!
+10-13 06:35:06.865   524   537 W ActivityTaskManager: Force removing ActivityRecord{2c204a9 u0 org.openplayer.app/.SettingsActivity t52 f}}: app died, no saved state
+10-13 06:35:06.869   524   537 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{2c204a9 u0 org.openplayer.app/.SettingsActivity t52} (client)' was disposed without first being removed with the input manager!
+10-13 06:35:06.870   524   537 W ActivityTaskManager: Force removing ActivityRecord{fec3c8d u0 org.openplayer.app/.MainActivity t52 f}}: app died, no saved state
+10-13 06:35:06.871   524   537 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{fec3c8d u0 org.openplayer.app/.MainActivity t52} (client)' was disposed without first being removed with the input manager!
+10-13 06:35:06.948   524  1764 W InputManager-JNI: Input channel object '497197f org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:06.958   524  1008 W InputManager-JNI: Input channel object '1e103c7 org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:06.977   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{1e103c7 u0 org.openplayer.app/org.openplayer.app.SettingsActivity EXITING}
+10-13 06:35:07.057   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 57130579)
+10-13 06:35:07.342   524  1751 W WindowManager: Exception thrown during dispatchAppVisibility Window{1e103c7 u0 org.openplayer.app/org.openplayer.app.SettingsActivity EXITING}
+10-13 06:35:07.386 12786 12786 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:35:07.386 12786 12786 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:35:07.606   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{1e103c7 u0 org.openplayer.app/org.openplayer.app.SettingsActivity EXITING}
+10-13 06:35:07.684 12786 12786 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:07.684 12786 12786 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:08.602 12786 12786 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:35:08.623   524  1008 W InputManager-JNI: Input channel object '107f670 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:09.109   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:09.140   524  1764 W InputManager-JNI: Input channel object '85bcf62 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:35:23.072   524  1764 W InputManager-JNI: Input channel object '3ec40a org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:24.655   524  1764 W ActivityTaskManager: Force removing ActivityRecord{8c983f1 u0 org.openplayer.app/.MainActivity t53 f}}: app died, no saved state
+10-13 06:35:24.658   524  1764 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{8c983f1 u0 org.openplayer.app/.MainActivity t53} (client)' was disposed without first being removed with the input manager!
+10-13 06:35:24.696   524   537 W InputManager-JNI: Input channel object 'fdddf7a org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:24.717   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{fdddf7a u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:24.818   524  1784 W WindowManager: Exception thrown during dispatchAppVisibility Window{fdddf7a u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:24.942 12959 12959 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:35:24.942 12959 12959 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:35:25.048 12959 12959 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:25.048 12959 12959 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:25.332 12959 12959 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:35:25.679   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:25.701   524  2394 W InputManager-JNI: Input channel object '2ac8446 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:35:39.688   524  2450 W InputManager-JNI: Input channel object '7688b5b org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:41.248   524  1764 W ActivityTaskManager: Force removing ActivityRecord{7afb6a5 u0 org.openplayer.app/.MainActivity t54 f}}: app died, no saved state
+10-13 06:35:41.259   524   537 W InputManager-JNI: Input channel object '43d783 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:41.287   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{43d783 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:41.487 13124 13124 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:35:41.487 13124 13124 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:35:41.541 13124 13124 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:41.541 13124 13124 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:41.547   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{43d783 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:41.566   524  1784 W WindowManager: Exception thrown during dispatchAppVisibility Window{43d783 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:41.571   524  1784 W WindowManager: Failed to deliver inset control state change to w=Window{43d783 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:41.813 13124 13124 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:35:42.202   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:42.222   524  1784 W InputManager-JNI: Input channel object 'fc328a6 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:35:56.241   524  1543 W InputManager-JNI: Input channel object '60d1c0d org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:57.812   524  2450 W ActivityTaskManager: Force removing ActivityRecord{6fcd285 u0 org.openplayer.app/.MainActivity t55 f}}: app died, no saved state
+10-13 06:35:57.883   524  1764 W InputManager-JNI: Input channel object 'e0a4adb org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:35:57.914   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{e0a4adb u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:58.059   524  2043 W WindowManager: Exception thrown during dispatchAppVisibility Window{e0a4adb u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:35:58.147 13291 13291 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:35:58.147 13291 13291 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:35:58.286 13291 13291 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:58.286 13291 13291 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:58.747 13291 13291 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:35:59.146   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:35:59.186   524  2043 W InputManager-JNI: Input channel object '1ea72d7 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:36:13.182   524  1784 W InputManager-JNI: Input channel object 'f5395df org.openplayer.app/org.openplayer.app.SettingsActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:36:14.742   524  2246 W ActivityTaskManager: Force removing ActivityRecord{6981583 u0 org.openplayer.app/.MainActivity t56 f}}: app died, no saved state
+10-13 06:36:14.758   524  1008 W InputManager-JNI: Input channel object 'ebf77af org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:36:14.804   524   545 W WindowManager: Failed to deliver inset control state change to w=Window{ebf77af u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:36:14.889   524  2198 W WindowManager: Exception thrown during dispatchAppVisibility Window{ebf77af u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:36:14.937 13490 13490 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:36:14.937 13490 13490 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:36:15.078 13490 13490 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:15.078 13490 13490 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:15.654 13490 13490 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:36:15.987   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:16.000   524  2442 W InputManager-JNI: Input channel object 'ef614aa Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:36:16.180 13490 13516 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:36:20.122   524   624 W InputDispatcher: Not sending touch gesture to 8b4deab ActivityRecordInputSink org.openplayer.app/.PlayerActivity because it has config NO_INPUT_CHANNEL
+10-13 06:36:24.758   524  1784 W ActivityTaskManager: Force removing ActivityRecord{41d1908 u0 org.openplayer.app/.PlayerActivity t57 f}}: app died, no saved state
+10-13 06:36:24.870   524  1543 W InputManager-JNI: Input channel object 'afc912d org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:36:25.151 13604 13604 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:36:25.151 13604 13604 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:36:25.508 13604 13604 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:25.511 13604 13604 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:26.123 13604 13604 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:36:26.606   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:26.643   524  2246 W InputManager-JNI: Input channel object '52a027f Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:36:52.005   524  2198 W ActivityTaskManager: Force removing ActivityRecord{29e017a u0 org.openplayer.app/.MusicActivity t58 f}}: app died, no saved state
+10-13 06:36:52.006   524  2198 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{29e017a u0 org.openplayer.app/.MusicActivity t58} (client)' was disposed without first being removed with the input manager!
+10-13 06:36:52.009   524  2198 W ActivityTaskManager: Force removing ActivityRecord{9556c08 u0 org.openplayer.app/.MainActivity t58 f}}: app died, no saved state
+10-13 06:36:52.016   524  2198 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{9556c08 u0 org.openplayer.app/.MainActivity t58} (client)' was disposed without first being removed with the input manager!
+10-13 06:36:52.054   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 133313990)
+10-13 06:36:52.195   524  1784 W InputManager-JNI: Input channel object '1f7c857 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:36:52.196   524  2438 W InputManager-JNI: Input channel object '4eb49ff org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:36:52.332 13822 13822 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:36:52.332 13822 13822 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:36:52.361   524  1784 W WindowManager: Exception thrown during dispatchAppVisibility Window{4eb49ff u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:36:52.692 13822 13822 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:52.692 13822 13822 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:53.274 13822 13822 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:36:53.708   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:36:53.757   524  1751 W InputManager-JNI: Input channel object 'cb05bc5 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:36:54.089 13822 13846 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:37:02.732   524  2222 W InputManager-JNI: Input channel object '84e8f7 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:37:02.737   524  2222 W InputManager-JNI: Input channel object 'Letterbox_fullWindow_ActivityRecord{a1be5d3 u0 org.openplayer.app/.PlayerActivity t59} (client)' was disposed without first being removed with the input manager!
+10-13 06:37:04.715 13947 13947 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:37:04.715 13947 13947 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:37:04.854 13947 13947 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:04.854 13947 13947 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:05.095 13947 13947 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:37:05.464   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:05.484   524  2222 W InputManager-JNI: Input channel object '92f38dc Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:37:21.919  1032  1032 W AudioMediaPlayerWrapper: onMetadataChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:21.919  1032  1032 W AudioMediaPlayerWrapper: onPlaybackStateChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:21.994  1032  1032 W AudioMediaPlayerWrapper: onPlaybackStateChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:21.995  1032  1032 W AudioMediaPlayerWrapper: onPlaybackStateChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.044 13947 13955 W .openplayer.app: Suspending all threads took: 5.672ms
+10-13 06:37:22.071 13947 14011 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:37:22.120  1032  1032 W AudioMediaPlayerWrapper: onPlaybackStateChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.121  1032  1032 W AudioMediaPlayerWrapper: onPlaybackStateChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.345  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.346  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.432  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.432  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.494  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.494  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.590  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:22.590  1032  1032 W AudioMediaPlayerWrapper: onQueueChanged(): org.openplayer.app tried to update with no new data
+10-13 06:37:25.111   524  2394 W ActivityTaskManager: Force removing ActivityRecord{595828d u0 org.openplayer.app/.MusicActivity t60 f}}: app died, no saved state
+10-13 06:37:25.112   524  2394 W ActivityTaskManager: Force removing ActivityRecord{9e250f3 u0 org.openplayer.app/.MainActivity t60 f}}: app died, no saved state
+10-13 06:37:25.119   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.MainActivity event : 23 instanceId : 103249961)
+10-13 06:37:25.145   524  1764 W InputManager-JNI: Input channel object '785f5a4 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:37:25.151  1032  1032 W AudioMediaPlayerWrapper: The session was destroyed org.openplayer.app
+10-13 06:37:25.153   524  2438 W InputManager-JNI: Input channel object '87c72a8 org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:37:25.167  1032  1032 W AudioMediaPlayerWrapper: The session was destroyed org.openplayer.app
+10-13 06:37:25.172   524  2394 W WindowManager: Failed to deliver inset control state change to w=Window{87c72a8 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:37:25.286   524  1784 W WindowManager: Exception thrown during dispatchAppVisibility Window{87c72a8 u0 org.openplayer.app/org.openplayer.app.MusicActivity EXITING}
+10-13 06:37:25.691 14172 14172 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:37:25.691 14172 14172 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:37:25.832 14172 14172 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:25.832 14172 14172 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:26.110 14172 14172 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:37:26.520   524  2437 W InputManager-JNI: Input channel object '3400139 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:37:36.417   524  2438 W ActivityTaskManager: Force removing ActivityRecord{a79b394 u0 org.openplayer.app/.MainActivity t61 f}}: app died, no saved state
+10-13 06:37:36.492   524  2443 W InputManager-JNI: Input channel object '4d2951 org.openplayer.app/org.openplayer.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:37:36.811   524  2438 W WindowManager: Exception thrown during dispatchAppVisibility Window{4d2951 u0 org.openplayer.app/org.openplayer.app.MainActivity EXITING}
+10-13 06:37:39.918 14340 14340 W Monkey  : args: [-p, org.openplayer.app, -s, 4242, --throttle, 120, --pct-syskeys, 0, --pct-appswitch, 5, --ignore-security-exceptions, -v, 2500]
+10-13 06:37:39.919 14340 14340 W Monkey  :  arg: "org.openplayer.app"
+10-13 06:37:39.919 14340 14340 W Monkey  : data="org.openplayer.app"
+10-13 06:37:40.025 14353 14353 W .openplayer.app: Unexpected CPU variant for x86: x86_64.
+10-13 06:37:40.025 14353 14353 W .openplayer.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-13 06:37:40.302   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{decfbd8 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:40.323 14353 14353 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:40.323 14353 14353 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:40.688 14353 14353 W .openplayer.app: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-13 06:37:41.092   524   541 W ziparchive: Unable to open '/data/app/~~k5W0_VK2lGZk4TT1WZRnPg==/org.openplayer.app-6Z_JRaGiWDVWKtRCUoEnxg==/base.dm': No such file or directory
+10-13 06:37:41.118   524  1764 W InputManager-JNI: Input channel object '151f69 Splash Screen org.openplayer.app (client)' was disposed without first being removed with the input manager!
+10-13 06:37:41.597   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{9ef9862 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:43.186   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{9ef9862 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:44.534   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{10dd2cc u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:45.998   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{5c3c32 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:49.826   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{b85a9a1 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:51.353   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{8ce587c u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:52.156   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{b2b9912 u0 org.openplayer.app/.MusicActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:53.507   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{bad8335 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:54.251 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:37:56.306   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{2e7bc94 u0 org.openplayer.app/.PlayerActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:56.872 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:37:56.978   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{c55e7bf u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:57.110 14353 14427 W .openplayer.app: Accessing hidden method Landroid/media/AudioTrack;->getLatency()I (unsupported, reflection, allowed)
+10-13 06:37:57.271   524  1764 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@1b154a7
+10-13 06:37:58.079 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:37:58.079 14353 14353 W FrameTracker: Missed SF frame:JANK_SURFACEFLINGER_DEADLINE_MISSED, 91705, 0, CUJ=J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:37:59.151   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{d67c2ec u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:37:59.440 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:02.411 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:04.548   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{9f8067 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:06.065   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{5e536a u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:08.523   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{19a9734 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:09.658   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{1223018 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:10.443 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:11.718   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{89c8f8f u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:14.069   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{ff52775 u0 org.openplayer.app/.PlayerActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:15.772 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal: Playback error
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FlvExtractor, FlacExtractor, WavExtractor, FragmentedMp4Extractor, Mp4Extractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:38:16.586 14353 14427 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:38:16.976 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:17.039 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:17.062 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:17.141 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:17.141 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:17.404   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{6072601 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:17.809   524  1810 W InputManager-JNI: Input channel object 'f874057 org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:38:18.109 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:18.149 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:18.317 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:38:18.317 14353 14353 W FrameTracker: Missed SF frame:PREDICTION_ERROR, 96102, 0, CUJ=J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal: Playback error
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FlvExtractor, FlacExtractor, WavExtractor, FragmentedMp4Extractor, Mp4Extractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:38:18.797 14353 14566 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:38:18.844 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:19.012 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:19.084 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:19.108 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:19.146 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:19.146 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:19.291   524  1810 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@293dbb4
+10-13 06:38:19.330   844   844 W ToastPresenter: Error while attempting to show toast from org.openplayer.app
+10-13 06:38:19.450 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:19.611   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{f168211 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal: Playback error
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FlvExtractor, FlacExtractor, WavExtractor, FragmentedMp4Extractor, Mp4Extractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:38:20.011 14353 14579 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:38:20.087   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{31fa03 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:20.259 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:20.375 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:20.402 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:20.422 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:20.422 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:20.423 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:20.423 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:20.574 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal: Playback error
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:   androidx.media3.exoplayer.ExoPlaybackException: Source error
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleIoException(ExoPlayerImplInternal.java:963)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:933)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at android.os.Handler.dispatchMessage(Handler.java:102)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at android.os.Looper.loopOnce(Looper.java:205)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at android.os.Looper.loop(Looper.java:294)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at android.os.HandlerThread.run(HandlerThread.java:67)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:   Caused by: androidx.media3.exoplayer.source.UnrecognizedInputFormatException: None of the available extractors (FlvExtractor, FlacExtractor, WavExtractor, FragmentedMp4Extractor, Mp4Extractor, AmrExtractor, PsExtractor, OggExtractor, TsExtractor, MatroskaExtractor, AdtsExtractor, Ac3Extractor, Ac4Extractor, Mp3Extractor, AviExtractor, JpegExtractor, PngExtractor, WebpExtractor, BmpExtractor, HeifExtractor, AvifExtractor) could read the stream. {contentIsMalformed=false, dataType=1}
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:   sniff failures: [NoDeclaredBrand, NoDeclaredBrand]
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.BundledExtractorsAdapter.init(BundledExtractorsAdapter.java:110)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.source.ProgressiveMediaPeriod$ExtractingLoadable.load(ProgressiveMediaPeriod.java:1219)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at androidx.media3.exoplayer.upstream.Loader$LoadTask.run(Loader.java:453)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+10-13 06:38:20.717 14353 14593 E ExoPlayerImplInternal:       at java.lang.Thread.run(Thread.java:1012)
+10-13 06:38:20.720   524  1440 E NotificationService: Package has already queued 5 toasts. Not showing more. Package=org.openplayer.app
+10-13 06:38:20.742   524  2450 E NotificationService: Package has already queued 5 toasts. Not showing more. Package=org.openplayer.app
+10-13 06:38:20.776   524  2450 W InputManager-JNI: Input channel object '2060a2c org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:38:20.785   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.PlayerActivity event : 23 instanceId : 110662461)
+10-13 06:38:20.792   524  1810 W InputManager-JNI: Input channel object '48844eb org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:38:20.806   524   554 W UsageStatsService: Unexpected activity event reported! (org.openplayer.app/org.openplayer.app.PlayerActivity event : 23 instanceId : 225500464)
+10-13 06:38:20.858   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{2a8dbc2 u0 org.openplayer.app/.VlcPlayerActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:20.927 14353 14598 E VLC-std : s_glBindAttribLocation: bind attrib 0 name position
+10-13 06:38:20.927 14353 14598 E VLC-std : s_glBindAttribLocation: bind attrib 1 name color
+10-13 06:38:21.479 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:21.727   524  1810 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@2716b04
+10-13 06:38:22.536   524   624 W InputDispatcher: Untrusted touch due to occlusion by org.openplayer.app/10192 (obscuring opacity = 1.00, maximum allowed = 0.80)
+10-13 06:38:22.536   524   624 W InputDispatcher: Dropping untrusted touch event due to org.openplayer.app/10192
+10-13 06:38:23.214 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:24.313   524   538 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@d893adf
+10-13 06:38:25.843 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:38:26.572   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{3161942 u0 org.openplayer.app/.MusicActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:26.900   524   538 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@6bbc916
+10-13 06:38:27.284   524  1810 W InputManager-JNI: Input channel object '98b2baf org.openplayer.app/org.openplayer.app.MusicActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:38:28.521   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{6654d23 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:29.094   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{8a026b9 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:29.496   524  1810 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@c5a6010
+10-13 06:38:29.918   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{3849d6c u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:32.063   524  1008 W NotificationService: Toast already killed. pkg=org.openplayer.app token=android.os.BinderProxy@1bbeba9
+10-13 06:38:34.347   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{1c9ba8d u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:39.652 14353 14361 W .openplayer.app: Cleared Reference was only reachable from finalizer (only reported once)
+10-13 06:38:39.736 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:40.022 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:40.696 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:38:42.116 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:42.329 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:38:43.226 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:45.500 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:46.018   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{64fe678 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:47.303   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{39c7c9f u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:51.365   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{c10616b u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:54.238   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{7952634 u0 org.openplayer.app/.PlayerActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:54.275 14353 14353 W ExoPlayerImplInternal: Ignoring messages sent after release.
+10-13 06:38:56.358   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{c10616b u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:56.812   524  1779 W InputManager-JNI: Input channel object '2dcf11e org.openplayer.app/org.openplayer.app.PlayerActivity (client)' was disposed without first being removed with the input manager!
+10-13 06:38:57.110   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{9bbde38 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:38:58.230 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:38:58.489   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{57d206b u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:39:01.722   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{c4b4717 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:39:02.461 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::1@0@org.openplayer.app>
+10-13 06:39:04.078 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:39:07.230   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{b81d194 u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:39:07.384 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:39:08.160 14353 14353 E FrameTracker: force finish cuj, time out: J<IME_INSETS_ANIMATION::0@0@org.openplayer.app>
+10-13 06:39:09.453   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{157f290 u0 org.openplayer.app/.PlayerActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
+10-13 06:39:10.915   524   624 W InputDispatcher: Dispatching key to 71f4ca2 org.openplayer.app/org.openplayer.app.PlayerActivity even though there are other unprocessed events
+10-13 06:39:11.984   524   624 W InputDispatcher: Waiting because no window has focus but ActivityRecord{8f7c90e u0 org.openplayer.app/.MainActivity t61} may eventually add a window when it finishes starting up. Will wait for 5000ms
