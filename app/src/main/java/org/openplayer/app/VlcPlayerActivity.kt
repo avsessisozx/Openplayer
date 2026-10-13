@@ -76,6 +76,8 @@ class VlcPlayerActivity : AppCompatActivity() {
     private var speed = 1f
     private var resumeAt = 0L
     private var subtitleSeq = 0
+    /** Geçerli dosyada oynatma gerçekten ilerledi mi (bozuk dosyayı ayırt etmek için). */
+    private var progressed = false
 
     private val hideRunnable = Runnable { showControls(false) }
 
@@ -269,7 +271,13 @@ class VlcPlayerActivity : AppCompatActivity() {
         mp.setEventListener { e ->
             runOnUiThread {
                 when (e.type) {
-                    MediaPlayer.Event.EndReached -> if (index < uris.size - 1) step(1) else finish()
+                    MediaPlayer.Event.TimeChanged -> if (e.timeChanged > 0) progressed = true
+                    MediaPlayer.Event.EndReached -> when {
+                        // Hiç ilerlemeden "bitti" geldiyse dosya açılamamıştır: sessizce kapatmak yerine söyle.
+                        !progressed && (vlc?.length ?: 0L) <= 0L -> fail("Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir.")
+                        index < uris.size - 1 -> step(1)
+                        else -> finish()
+                    }
                     MediaPlayer.Event.EncounteredError -> fail("Bu dosya VLC motoruyla da açılamadı.")
                     MediaPlayer.Event.Playing, MediaPlayer.Event.Paused, MediaPlayer.Event.Stopped -> updatePlayIcon()
                 }
@@ -284,6 +292,7 @@ class VlcPlayerActivity : AppCompatActivity() {
         val lib = libVlc ?: return
         val mp = vlc ?: return
         index = i
+        progressed = false
         message.visibility = View.GONE
         val uri = uris[i]
         titleView.text = titles.getOrNull(i)?.takeIf { it.isNotBlank() } ?: SubtitleFiles.displayName(this, uri)

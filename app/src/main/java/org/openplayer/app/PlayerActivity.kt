@@ -470,6 +470,21 @@ class PlayerActivity : AppCompatActivity() {
         return true
     }
 
+    /** Özel klasördeki (kasa) bir dosya mı? */
+    private fun isVaultUri(uri: Uri?): Boolean =
+        uri?.scheme == "file" && uri.path?.let { Vault.isVaultFile(this, File(it)) } == true
+
+    private var vaultSecure = false
+
+    /** Kasadaki video oynarken ekran görüntüsü ve son uygulamalar önizlemesi engellenir. */
+    private fun applyVaultSecurity(uri: Uri?) {
+        val secure = isVaultUri(uri)
+        if (secure == vaultSecure) return
+        vaultSecure = secure
+        if (secure) window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+    }
+
     fun openItems(uris: List<Uri>, titles: List<String>?, index: Int) {
         if (settings.playbackEngine == PlaybackEngine.VLC) {
             VlcPlayerActivity.launch(this, uris, titles, index, if (settings.resumePlayback) ResumeStore.position(this, uris[index]) else 0L)
@@ -481,7 +496,10 @@ class PlayerActivity : AppCompatActivity() {
                 .setUri(uri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
-                        .setTitle(titles?.getOrNull(i)?.takeIf { it.isNotBlank() } ?: SubtitleFiles.displayName(this, uri))
+                        .setTitle(
+                            if (isVaultUri(uri)) "Özel klasör videosu"
+                            else titles?.getOrNull(i)?.takeIf { it.isNotBlank() } ?: SubtitleFiles.displayName(this, uri)
+                        )
                         .build()
                 )
                 .build()
@@ -492,6 +510,7 @@ class PlayerActivity : AppCompatActivity() {
             player.repeatMode = Player.REPEAT_MODE_OFF
             player.shuffleModeEnabled = false
         }
+        player.volume = if (muted) 0f else 1f
         player.setMediaItems(items, index, if (saved > 5_000) saved else 0L)
         player.prepare()
         player.playWhenReady = true
@@ -513,7 +532,7 @@ class PlayerActivity : AppCompatActivity() {
     /** Geçerli videonun görünüm/hız/altyazı ayarlarını kaydeder. */
     private fun saveMemory() {
         val uri = currentUri ?: return
-        if (!settings.perVideoMemory || settings.incognito || !::player.isInitialized) return
+        if (!settings.perVideoMemory || settings.incognito || !::player.isInitialized || isVaultUri(uri)) return
         val old = VideoMemory.get(this, uri)
         VideoMemory.put(
             this, uri,
@@ -573,6 +592,7 @@ class PlayerActivity : AppCompatActivity() {
             if (vr != VrMode.NONE) setVr(VrMode.NONE, remember = false)
         }
         currentUri = uri
+        applyVaultSecurity(uri)
         chapters = emptyList()
         seekBar.startsSec = emptyList()
         if (uri != null) {
@@ -619,7 +639,10 @@ class PlayerActivity : AppCompatActivity() {
                 l.startsWith(lang) || (lang == "tr" && l.startsWith("tur"))
             }
         }
-        val pick = byLang ?: groups.firstOrNull { it.getTrackFormat(0).selectionFlags and C.SELECTION_FLAG_DEFAULT != 0 }
+        val pick = byLang
+            ?: groups.firstOrNull { it.getTrackFormat(0).selectionFlags and C.SELECTION_FLAG_DEFAULT != 0 }
+            // Dil etiketi olmayan tek/ilk parça: otomatik altyazı açıkken onu göster (MX gibi).
+            ?: groups.firstOrNull { g -> g.getTrackFormat(0).language.let { it.isNullOrBlank() || it == "und" } }
         if (pick != null) subtitles.useEmbedded(pick)
     }
 
@@ -1039,7 +1062,7 @@ class PlayerActivity : AppCompatActivity() {
 
     fun saveResume() {
         val uri = currentUri ?: return
-        if (!::player.isInitialized || settings.incognito) return
+        if (!::player.isInitialized || settings.incognito || isVaultUri(uri)) return
         val duration = player.duration
         val pos = player.currentPosition
         val finished = duration > 0 && pos > duration - 5_000
@@ -1594,12 +1617,47 @@ class PlayerActivity : AppCompatActivity() {
 
     fun shareCurrent() {
         val uri = currentUri ?: return
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = "video/*"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        if (isVaultUri(uri)) {
+            toast("Özel klasördeki videolar paylaşılamaz")
+            return
         }
-        startActivity(Intent.createChooser(send, "Paylaş"))
+        // file:// adresi başka uygulamaya verilemez (Android 7+ uygulamayı çökertir); MediaStore adresi kullanılır.
+        val shareUri = when (uri.scheme) {
+            "content" -> uri
+            "file" -> uri.path?.let { mediaStoreUri(it) }
+            else -> null
+        }
+        val send = Intent(Intent.ACTION_SEND).apply {
+            if (shareUri != null) {
+                type = "video/*"
+                putExtra(Intent.EXTRA_STREAM, shareUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } else if (uri.scheme == "http" || uri.scheme == "https" || uri.scheme == "rtsp") {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, uri.toString())
+            } else {
+                toast("Bu video paylaşılamıyor")
+                return
+            }
+        }
+        runCatching { startActivity(Intent.createChooser(send, "Paylaş")) }
+            .onFailure { toast("Paylaşılamadı") }
+    }
+
+    /** Dosya yolunu galerideki (MediaStore) içerik adresine çevirir; bulunamazsa null. */
+    private fun mediaStoreUri(path: String): Uri? {
+        val files = MediaStore.Files.getContentUri("external")
+        // /sdcard/... ile /storage/emulated/0/... aynı dosyadır; MediaStore ikincisini tutar.
+        val candidates = listOfNotNull(path, runCatching { File(path).canonicalPath }.getOrNull()).distinct()
+        for (p in candidates) {
+            val found = runCatching {
+                @Suppress("DEPRECATION")
+                contentResolver.query(files, arrayOf(MediaStore.MediaColumns._ID), "${MediaStore.MediaColumns.DATA}=?", arrayOf(p), null)
+                    ?.use { c -> if (c.moveToFirst()) android.content.ContentUris.withAppendedId(files, c.getLong(0)) else null }
+            }.getOrNull()
+            if (found != null) return found
+        }
+        return null
     }
 
     private fun requestNotificationPermissionIfNeeded() {

@@ -1,3 +1,18 @@
+# 1.0.0-beta10
+
+Hata düzeltme sürümü. Android 14 emülatöründe otomatik testten geçti (çökme yok).
+
+- **Altyazı dosyaları yeniden çalışıyor:** .srt/.ass/.sub gibi harici altyazılar Android'de hiç yüklenmiyordu (ayrıştırıcıdaki bir düzenli ifade Android'de hata veriyordu). Videonun yanındaki altyazı artık otomatik açılır.
+- **Gömülü altyazı:** dil etiketi olmayan altyazı parçası, otomatik altyazı açıkken seçilir.
+- **Bozuk/açılamayan dosya:** ekran sessizce kapanmak yerine "Bu dosya açılamadı" mesajı gösterilir.
+- **Paylaş çökmesi giderildi:** dosya yöneticisinden açılan videoyu paylaşmak uygulamayı çökertiyordu.
+- **Widget çökmesi giderildi:** ana ekran widget'ı varken müzik çalıp dururken çökebiliyordu.
+- **Özel klasör:** kasadaki video oynarken ekran görüntüsü engellenir, geçmişe yazılmaz, bildirimde adı görünmez, paylaşılamaz.
+- **Sessize alma:** müzikten sonra açılan videoda sessiz ayarı kendiliğinden geri açılmıyor.
+- **Taşı/kopyala/kasaya ekle:** işlem yarıda kalırsa yarım dosya bırakılmıyor.
+
+---
+
 # 1.0.0-beta9
 
 Büyük sürüm. **Cihazda henüz denenmedi** — hata bulursanız lütfen bildirin.

@@ -1,0 +1,95 @@
+name: Emulator test
+
+# Yalnız test dalında ve elle çalışır; ana daldaki sürüm akışını etkilemez.
+on:
+  push:
+    branches: ['claude/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  emulator:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    # Yalnız sonuçları ayrı "emulator-results/<run>" dalına yazmak için.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.14.3
+
+      - name: Build debug APK (x86_64 dahil)
+        run: |
+          set -o pipefail
+          gradle assembleDebug -PemulatorAbi=true --stacktrace 2>&1 | tee build.log
+
+      - name: Lint
+        continue-on-error: true
+        run: gradle lintDebug -PemulatorAbi=true 2>&1 | tail -30
+
+      - name: Make sample media
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          bash .github/emulator/make_media.sh media
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run on emulator (Android 14)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          ram-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: SMOKE_QUICK=${{ contains(github.event.head_commit.message, '[hizli]') && '1' || '0' }} python3 .github/emulator/smoke.py app/build/outputs/apk/debug/app-debug.apk media out
+
+      - name: Collect reports
+        if: always()
+        run: |
+          mkdir -p out/lint
+          cp app/build/reports/lint-results-debug.* out/lint/ 2>/dev/null || true
+          cp build.log out/ 2>/dev/null || true
+          cat out/report.md 2>/dev/null >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-results
+          path: out
+
+      # Sonuçları ayrı bir dala yaz (ana dala ve test dalına dokunmaz).
+      - name: Publish results to branch
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          [ -d out ] || exit 0
+          b="emulator-results/${GITHUB_RUN_ID}"
+          cd out
+          git init -q -b "$b"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Emülatör test sonuçları: run ${GITHUB_RUN_ID}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$b"
+          echo "Sonuçlar dalı: $b"

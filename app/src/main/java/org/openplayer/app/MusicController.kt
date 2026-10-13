@@ -157,7 +157,9 @@ object MusicController {
     /** ReplayGain (yalnızca ses kısma) ve geçiş yumuşatmasını birleştirip oynatıcı sesine uygular. */
     private fun applyVolume() {
         val p = PlayerHolder.player ?: return
-        p.volume = if (isMusic(p.currentMediaItem)) (replayFactor * fadeFactor).coerceIn(0f, 1f) else 1f
+        // Video oynarken ses düzeyine dokunma: video ekranının "sessiz" ayarını bozmasın.
+        if (!isMusic(p.currentMediaItem)) return
+        p.volume = (replayFactor * fadeFactor).coerceIn(0f, 1f)
     }
 
     private fun updateReplayGain() {
