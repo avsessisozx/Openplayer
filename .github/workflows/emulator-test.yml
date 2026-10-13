@@ -12,7 +12,10 @@ permissions:
 jobs:
   emulator:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
+    # Yalnız sonuçları ayrı "emulator-results/<run>" dalına yazmak için.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,3 +75,21 @@ jobs:
         with:
           name: emulator-results
           path: out
+
+      # Sonuçları ayrı bir dala yaz (ana dala ve test dalına dokunmaz).
+      - name: Publish results to branch
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          [ -d out ] || exit 0
+          b="emulator-results/${GITHUB_RUN_ID}"
+          cd out
+          git init -q -b "$b"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Emülatör test sonuçları: run ${GITHUB_RUN_ID}"
+          git push -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$b"
+          echo "Sonuçlar dalı: $b"

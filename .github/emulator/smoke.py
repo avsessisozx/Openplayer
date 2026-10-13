@@ -201,6 +201,80 @@ def play_controls(path):
     time.sleep(1)
 
 
+def top_right_icon(root):
+    """Üst çubuktaki en sağdaki tıklanabilir öğe (genelde ⋮)."""
+    h = screen[1]
+    cands = [c for c in clickables(root) if c[1][1] < h * 0.12]
+    return max(cands, key=lambda c: c[1][0])[1] if cands else None
+
+
+def open_overflow(reset):
+    def go():
+        reset()
+        c = top_right_icon(dump())
+        if c:
+            tap(c)
+            time.sleep(1.5)
+    return go
+
+
+def open_settings():
+    start_main()
+    c = top_right_icon(dump())
+    if c:
+        tap(c); time.sleep(1.5)
+        s = find_text_any(dump(), "Ayarlar")
+        if s:
+            tap(s); time.sleep(2.5)
+
+
+def find_text_any(root, *wanted):
+    """find_text gibi ama sistem açılır menülerini de (başka paket adıyla) kabul eder."""
+    if root is None:
+        return None
+    for w in wanted:
+        for n in root.iter("node"):
+            if (n.get("text") or "").strip() == w or (n.get("content-desc") or "").strip() == w:
+                c = bounds_center(n.get("bounds"))
+                if c:
+                    return c
+    return None
+
+
+def find_contains(root, part):
+    if root is None:
+        return None
+    for n in root.iter("node"):
+        t = (n.get("text") or "") + " " + (n.get("content-desc") or "")
+        if part in t:
+            c = bounds_center(n.get("bounds"))
+            if c:
+                return c
+    return None
+
+
+def play_song(title):
+    """Müzik ekranında şarkıyı bulup dokunur; gerekirse Şarkılar sekmesine geçer, aşağı kaydırır."""
+    for attempt in range(4):
+        root = dump()
+        c = find_contains(root, title)
+        if c:
+            tap(c)
+            return True
+        tab = find_contains(root, "Şarkılar")
+        if tab and attempt == 0:
+            tap(tab); time.sleep(2); continue
+        w, h = screen
+        sh(f"input swipe {w//2} {int(h*0.75)} {w//2} {int(h*0.3)} 300"); time.sleep(1)
+    steps.append((f"Şarkı bulunamadı: {title}", "bilgi", ""))
+    return False
+
+
+def count_permission_requests():
+    log = adb("logcat", "-d", "-b", "main,system", "-s", "ActivityTaskManager:I")
+    return len(re.findall(r"START u0 .*(REQUEST_PERMISSIONS|GrantPermissionsActivity)", log))
+
+
 def crawl(name, reset, limit=30, skip=()):
     reset()
     root = dump()
@@ -228,6 +302,13 @@ sh("settings put global window_animation_scale 0; settings put global transition
 sh("settings put system screen_off_timeout 1800000; svc power stayon true; input keyevent KEYCODE_WAKEUP; wm dismiss-keyguard")
 print(adb("install", "-r", "-g", APK, timeout=300), flush=True)
 sh(f"appops set {PKG} MANAGE_EXTERNAL_STORAGE allow")
+# Müzik sekmesini açık başlat (varsayılanda kapalı): hata ayıklanabilir derlemede run-as ile ayar dosyası yazılır.
+open("/tmp/settings.xml", "w").write(
+    "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n"
+    '    <boolean name="music_mode" value="true" />\n</map>\n')
+adb("push", "/tmp/settings.xml", "/data/local/tmp/settings.xml")
+sh("chmod 644 /data/local/tmp/settings.xml")
+print(sh(f"run-as {PKG} sh -c 'mkdir -p shared_prefs && cp /data/local/tmp/settings.xml shared_prefs/settings.xml && ls -l shared_prefs'"), flush=True)
 sh("mkdir -p /sdcard/Movies/Test /sdcard/Music/Test")
 for sub, dst in (("Movies", "/sdcard/Movies/Test/"), ("Music", "/sdcard/Music/Test/")):
     for f in sorted(os.listdir(f"{MEDIA}/{sub}")):
@@ -270,6 +351,46 @@ if start_music():
     record("Müzik sekmesi", 2)
     crawl("Müzik", start_music, limit=30)
 crawl("Oynatıcı", lambda: play_controls("/sdcard/Movies/Test/Bolumlu.mkv"), limit=35)
+crawl("Oynatıcı ⋮ menüsü", open_overflow(lambda: play_controls("/sdcard/Movies/Test/Bolumlu.mkv")), limit=25)
+crawl("Ana ekran ⋮ menüsü", open_overflow(start_main), limit=12)
+crawl("Ayarlar", open_settings, limit=30)
+
+# Paylaş: dosya (file://) adresiyle açılmış videoyu paylaşmak
+play_controls("/sdcard/Movies/Test/Yatay video.mp4")
+c = top_right_icon(dump())
+if c:
+    tap(c); time.sleep(1.5)
+    s = find_text(dump(), "Paylaş")
+    if s:
+        tap(s)
+        record("Dosya adresli videoyu paylaş", 3, "file:// paylaşımı")
+    else:
+        steps.append(("Paylaş düğmesi bulunamadı", "bilgi", ""))
+sh("input keyevent KEYCODE_BACK"); sh("input keyevent KEYCODE_BACK")
+
+# Müzik çalarken video aç, kapat, müziğe dön
+if start_music():
+    play_song("Birinci Şarkı"); record("Müzik: şarkıya dokun", 3)
+    sh("input keyevent KEYCODE_HOME")
+    play("/sdcard/Movies/Test/Dikey video.mp4"); record("Müzik çalarken video aç", 3)
+    sh("input keyevent KEYCODE_BACK"); record("Videodan çık", 2)
+    start_music(); record("Müziğe geri dön", 2)
+    play_song("Kayıpsız Parça"); record("Müzik: başka şarkı çal (videodan sonra)", 3)
+    print(sh("dumpsys media_session | grep -E 'state=|description=' | head -6"), flush=True)
+    steps.append(("Medya oturumu durumu", "bilgi", sh("dumpsys media_session | grep -E 'state=PlaybackState' | head -3").strip()))
+
+# İzin reddedilince (bir daha sorma) ana ekran davranışı
+sh(f"am force-stop {PKG}")
+sh(f"pm revoke {PKG} android.permission.READ_MEDIA_VIDEO")
+sh(f"pm set-permission-flags {PKG} android.permission.READ_MEDIA_VIDEO user-fixed")
+adb("logcat", "-b", "main,system", "-c")
+sh(f"am start -n {PKG}/.MainActivity")
+time.sleep(10)
+n = count_permission_requests()
+record("İzin kalıcı reddedildi, ana ekran 10 sn", 0.5, f"izin ekranı {n} kez açıldı")
+steps.append(("İzin isteği sayısı (10 sn)", "SORUN" if n > 3 else "ok", str(n)))
+sh(f"pm clear-permission-flags {PKG} android.permission.READ_MEDIA_VIDEO user-fixed")
+sh(f"pm grant {PKG} android.permission.READ_MEDIA_VIDEO")
 
 # Rastgele dokunma testi (monkey)
 start_main()
