@@ -1,0 +1,34 @@
+Ana ekran (ilk açılış)	ok	
+Ana ekran yazıları	bilgi	Klasörler | Videolar | Müzik | 6 | Test | 6 video | Son oynatılanı aç
+Video aç: Yatay video.mp4	ok	
+Video kontrolleri: Yatay video.mp4	ok	
+Video yatay kaydırma (sarma): Yatay video.mp4	ok	
+Video kapat: Yatay video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Dikey video.mp4	ok	
+Video kontrolleri: Dikey video.mp4	ok	
+Video yatay kaydırma (sarma): Dikey video.mp4	ok	
+Video kapat: Dikey video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Bolumlu.mkv	ok	bölüm + altyazı
+Video kontrolleri: Bolumlu.mkv	ok	
+Video yatay kaydırma (sarma): Bolumlu.mkv	ok	
+Video kapat: Bolumlu.mkv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: HEVC 10bit.mp4	ok	çözücü zinciri
+Video kontrolleri: HEVC 10bit.mp4	ok	
+Video yatay kaydırma (sarma): HEVC 10bit.mp4	ok	
+Video kapat: HEVC 10bit.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Eski bicim.wmv	ok	VLC yedeği beklenir
+Video kontrolleri: Eski bicim.wmv	ok	
+Video yatay kaydırma (sarma): Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Bozuk dosya.mp4	ok	hata mesajı beklenir
+Video kontrolleri: Bozuk dosya.mp4	ok	
+Video yatay kaydırma (sarma): Bozuk dosya.mp4	ok	
+Video kapat: Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Altyazı ekran görüntüleri: Bolumlu.mkv	bilgi	ekranda 'Merhaba…' ve 'İkinci satır' görünmeli
+Altyazı ekran görüntüleri: Yatay video.mp4	bilgi	ekranda 'Merhaba…' ve 'İkinci satır' görünmeli
+Bozuk dosya: hata mesajı	ok	Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir. (ön plan: org.openplayer.app)
+Bozuk dosya sonucu	ok	Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir.
+Paylaş deneme 0	bilgi	öğeler: []
+Paylaş deneme 1	bilgi	öğeler: ['ImageView', 'ImageView', 'ImageView', 'DONANIM+', 'ImageView', '-0:17', 'ImageView', 'ImageView', 'ImageView', 'ImageView', 'ImageView', 'ImageView', 'ImageView']
+Dosya adresli videoyu paylaş	ok	file:// paylaşımı
+Paylaş sonucu	ok	ön plan: org.openplayer.app
