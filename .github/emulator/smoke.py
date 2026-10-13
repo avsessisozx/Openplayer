@@ -361,6 +361,39 @@ record("Bozuk dosya: hata mesajı", 0.5, (msg[0] if msg else "MESAJ YOK") + f" (
 steps.append(("Bozuk dosya sonucu", "ok" if msg and fg == PKG else "SORUN", msg[0] if msg else "ekran kapandı / mesaj yok"))
 sh("input keyevent KEYCODE_BACK")
 
+QUICK = os.environ.get("SMOKE_QUICK") == "1"
+if QUICK:
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    for attempt in range(3):
+        sh("input keyevent KEYCODE_MEDIA_PAUSE"); time.sleep(0.8)
+        root = dump(); shot(f"Paylaş hazırlık {attempt}")
+        c = top_right_icon(root)
+        steps.append((f"Paylaş deneme {attempt}", "bilgi", f"öğeler: {[i[0] for i in clickables(root)]}"))
+        if c:
+            break
+        w, h = screen; tap((w // 2, h // 2)); time.sleep(1.2)
+    if c:
+        tap(c); time.sleep(1.5)
+        root = dump(); shot("Paylaş menü")
+        s2 = find_text(root, "Paylaş")
+        if s2:
+            tap(s2)
+            ok = record("Dosya adresli videoyu paylaş", 3, "file:// paylaşımı")
+            steps.append(("Paylaş sonucu", "ok" if ok else "SORUN", f"ön plan: {foreground_pkg()}"))
+        else:
+            steps.append(("Paylaş düğmesi yok", "SORUN", " | ".join(texts(root))))
+    logcat.terminate()
+    full = open(f"{OUT}/logcat.txt", "rb").read().decode(errors="replace")
+    open(f"{OUT}/opsub.txt", "w").write("\n".join(l for l in full.splitlines() if "OPSUB" in l))
+    with open(f"{OUT}/steps.tsv", "w") as fh:
+        for st in steps:
+            fh.write("\t".join(st) + "\n")
+    with open(f"{OUT}/crashes.txt", "w") as fh:
+        for st, txt in crashes:
+            fh.write(f"===== ADIM: {st}\n{txt}\n\n")
+    open(f"{OUT}/report.md", "w").write(f"# Hızlı test\nÇökme: {len(crashes)}\n")
+    sys.exit(0)
+
 # Döndürme ve arka plana alma
 play("/sdcard/Movies/Test/Yatay video.mp4")
 sh("settings put system accelerometer_rotation 0; settings put system user_rotation 1"); record("Oynatırken ekran yatay", 3)
