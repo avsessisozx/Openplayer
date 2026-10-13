@@ -1645,12 +1645,20 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     /** Dosya yolunu galerideki (MediaStore) içerik adresine çevirir; bulunamazsa null. */
-    private fun mediaStoreUri(path: String): Uri? = runCatching {
+    private fun mediaStoreUri(path: String): Uri? {
         val files = MediaStore.Files.getContentUri("external")
-        @Suppress("DEPRECATION")
-        contentResolver.query(files, arrayOf(MediaStore.MediaColumns._ID), "${MediaStore.MediaColumns.DATA}=?", arrayOf(path), null)
-            ?.use { c -> if (c.moveToFirst()) android.content.ContentUris.withAppendedId(files, c.getLong(0)) else null }
-    }.getOrNull()
+        // /sdcard/... ile /storage/emulated/0/... aynı dosyadır; MediaStore ikincisini tutar.
+        val candidates = listOfNotNull(path, runCatching { File(path).canonicalPath }.getOrNull()).distinct()
+        for (p in candidates) {
+            val found = runCatching {
+                @Suppress("DEPRECATION")
+                contentResolver.query(files, arrayOf(MediaStore.MediaColumns._ID), "${MediaStore.MediaColumns.DATA}=?", arrayOf(p), null)
+                    ?.use { c -> if (c.moveToFirst()) android.content.ContentUris.withAppendedId(files, c.getLong(0)) else null }
+            }.getOrNull()
+            if (found != null) return found
+        }
+        return null
+    }
 
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= 33 && settings.backgroundPlay &&
