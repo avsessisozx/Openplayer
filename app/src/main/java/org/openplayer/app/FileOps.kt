@@ -222,25 +222,32 @@ class FileOps(private val a: AppCompatActivity) {
             val oldPaths = ArrayList<String>()
             for ((i, it) in items.withIndex()) {
                 if (cancelled.get()) break
+                var target: File? = null
+                var copying = false
                 try {
-                    val target = uniqueFile(dest, it.name)
+                    val dst = uniqueFile(dest, it.name)
+                    target = dst
                     val src = it.path?.let { p -> File(p) }
                     if (src != null && src.exists() && move &&
-                        runCatching { src.renameTo(target) }.getOrDefault(false)
+                        runCatching { src.renameTo(dst) }.getOrDefault(false)
                     ) {
                         // Aynı birimde anında taşındı
                     } else {
+                        copying = true
                         app.contentResolver.openInputStream(it.uri)?.use { input ->
-                            target.outputStream().use { out -> input.copyTo(out, 1 shl 16) }
+                            dst.outputStream().use { out -> input.copyTo(out, 1 shl 16) }
                         } ?: throw java.io.IOException("açılamadı")
+                        copying = false
                         if (move) {
                             if (src != null) src.delete()
                         }
                     }
-                    newPaths += target.absolutePath
+                    newPaths += dst.absolutePath
                     it.path?.let { p -> oldPaths += p }
                     ok++
                 } catch (e: Exception) {
+                    // Yarım kalan kopyayı hedefte bırakma.
+                    if (copying) target?.delete()
                     fail++
                 }
                 val done = i + 1

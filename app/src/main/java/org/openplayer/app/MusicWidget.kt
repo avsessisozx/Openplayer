@@ -35,14 +35,20 @@ class MusicWidget : AppWidgetProvider() {
             val mgr = AppWidgetManager.getInstance(app)
             val ids = mgr.getAppWidgetIds(ComponentName(app, MusicWidget::class.java))
             if (ids.isEmpty()) return
+            // ExoPlayer yalnız ana iş parçacığından okunabilir; durumu burada alıp kapak işini arka plana veriyoruz.
+            if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+                android.os.Handler(android.os.Looper.getMainLooper()).post { update(app) }
+                return
+            }
+            val p = PlayerHolder.player
+            val item = p?.currentMediaItem
+            val music = MusicController.isMusic(item)
+            val playing = p?.isPlaying == true
             worker.execute {
-                val p = PlayerHolder.player
-                val item = p?.currentMediaItem
-                val music = MusicController.isMusic(item)
                 val views = RemoteViews(app.packageName, R.layout.widget_music)
                 views.setTextViewText(R.id.widget_title, if (music) item?.mediaMetadata?.title ?: "" else "OpenPlayer")
                 views.setTextViewText(R.id.widget_artist, if (music) item?.mediaMetadata?.artist ?: "" else "Çalan şarkı yok")
-                views.setImageViewResource(R.id.widget_play, if (p?.isPlaying == true) R.drawable.ic_pause else R.drawable.ic_play)
+                views.setImageViewResource(R.id.widget_play, if (playing) R.drawable.ic_pause else R.drawable.ic_play)
                 var bmp: android.graphics.Bitmap? = null
                 if (music && Build.VERSION.SDK_INT >= 29) {
                     val uri = item?.localConfiguration?.uri

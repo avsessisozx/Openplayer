@@ -300,6 +300,8 @@ def crawl(name, reset, limit=30, skip=()):
 adb("wait-for-device")
 sh("settings put global window_animation_scale 0; settings put global transition_animation_scale 0; settings put global animator_duration_scale 0")
 sh("settings put system screen_off_timeout 1800000; svc power stayon true; input keyevent KEYCODE_WAKEUP; wm dismiss-keyguard")
+# "Tam ekran görüntüleniyor" bilgi balonu testleri örtmesin
+sh("settings put secure immersive_mode_confirmations confirmed")
 print(adb("install", "-r", "-g", APK, timeout=300), flush=True)
 sh(f"appops set {PKG} MANAGE_EXTERNAL_STORAGE allow")
 # Müzik sekmesini açık başlat (varsayılanda kapalı): hata ayıklanabilir derlemede run-as ile ayar dosyası yazılır.
@@ -338,6 +340,24 @@ for f, note in (("Yatay video.mp4", ""), ("Dikey video.mp4", ""), ("Bolumlu.mkv"
     sh(f"input swipe {w//2} {h//2} {w//2 + w//3} {h//2} 400"); record(f"Video yatay kaydırma (sarma): {f}", 1.5)
     sh("input keyevent KEYCODE_BACK"); record(f"Video kapat: {f}", 1.5)
 
+# Altyazı: zamanlı ekran görüntüleri (satır 1: 1-4 sn, satır 2: 5-9 sn)
+for f in ("Bolumlu.mkv", "Yatay video.mp4"):
+    sh(f"am force-stop {PKG}")
+    sh(f"am start -a android.intent.action.VIEW -t 'video/*' -d 'file:///sdcard/Movies/Test/{f}' -n {PKG}/.PlayerActivity")
+    time.sleep(2.8); shot(f"Altyazı 2-3 sn {f}")
+    time.sleep(3.7); shot(f"Altyazı 6-7 sn {f}")
+    steps.append((f"Altyazı ekran görüntüleri: {f}", "bilgi", "ekranda 'Merhaba…' ve 'İkinci satır' görünmeli"))
+
+# Bozuk dosya: sessizce kapanmamalı, hata mesajı göstermeli
+play("/sdcard/Movies/Test/Bozuk dosya.mp4")
+time.sleep(6)
+root = dump()
+msg = [t for t in texts(root) if "açılamadı" in t or "oynatılamadı" in t]
+fg = foreground_pkg()
+record("Bozuk dosya: hata mesajı", 0.5, (msg[0] if msg else "MESAJ YOK") + f" (ön plan: {fg})")
+steps.append(("Bozuk dosya sonucu", "ok" if msg and fg == PKG else "SORUN", msg[0] if msg else "ekran kapandı / mesaj yok"))
+sh("input keyevent KEYCODE_BACK")
+
 # Döndürme ve arka plana alma
 play("/sdcard/Movies/Test/Yatay video.mp4")
 sh("settings put system accelerometer_rotation 0; settings put system user_rotation 1"); record("Oynatırken ekran yatay", 3)
@@ -363,7 +383,8 @@ if c:
     s = find_text(dump(), "Paylaş")
     if s:
         tap(s)
-        record("Dosya adresli videoyu paylaş", 3, "file:// paylaşımı")
+        ok = record("Dosya adresli videoyu paylaş", 3, "file:// paylaşımı")
+        steps.append(("Paylaş sonucu", "ok" if ok else "SORUN", f"ön plan: {foreground_pkg()}"))
     else:
         steps.append(("Paylaş düğmesi bulunamadı", "bilgi", ""))
 sh("input keyevent KEYCODE_BACK"); sh("input keyevent KEYCODE_BACK")

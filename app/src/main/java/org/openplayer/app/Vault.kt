@@ -62,17 +62,23 @@ object Vault {
     }
 
     /** Dosyayı kasaya kopyalar. Başarılıysa dosyayı döndürür. */
-    fun add(c: Context, uri: Uri, name: String, origPath: String?): File? = runCatching {
+    fun add(c: Context, uri: Uri, name: String, origPath: String?): File? {
         val ext = name.substringAfterLast('.', "")
         val target = File(dir(c), UUID.randomUUID().toString() + if (ext.isEmpty()) "" else ".${UriGuard.safeFileName(ext, 8)}")
+        return runCatching { addInner(c, uri, name, origPath, target) }
+            .onFailure { target.delete() } // yarım kalan kopya kasada görünmez yer kaplamasın
+            .getOrNull()
+    }
+
+    private fun addInner(c: Context, uri: Uri, name: String, origPath: String?, target: File): File? {
         c.contentResolver.openInputStream(uri)?.use { input ->
             target.outputStream().use { out -> input.copyTo(out, 1 shl 16) }
         } ?: return null
         val list = list(c).toMutableList()
         list += Entry(target, UriGuard.sanitizeTitle(name) ?: "video", origPath)
         save(c, list)
-        target
-    }.getOrNull()
+        return target
+    }
 
     fun remove(c: Context, e: Entry) {
         e.file.delete()

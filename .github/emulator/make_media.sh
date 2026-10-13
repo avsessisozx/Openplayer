@@ -48,6 +48,8 @@ ff -f lavfi -i testsrc2=size=1920x1080:rate=25:duration=24 -f lavfi -i sine=freq
    -i "$out/Movies/Bolumlu.srt" -i /tmp/chapters.txt -map 0:v -map 1:a -map 2:s -map_metadata 3 -map_chapters 3 \
    -c:v libx264 -pix_fmt yuv420p -c:a aac -c:s srt -shortest "$out/Movies/Bolumlu.mkv"
 
+cp "$out/Movies/Bolumlu.srt" "$out/Movies/Yatay video.srt"
+
 # ExoPlayer'ın açamayacağı bir biçim (VLC yedek motoru testi)
 ff -f lavfi -i testsrc=size=640x360:rate=25:duration=10 -f lavfi -i sine=frequency=550:duration=10 \
    -c:v wmv2 -c:a wmav2 -shortest "$out/Movies/Eski bicim.wmv"
