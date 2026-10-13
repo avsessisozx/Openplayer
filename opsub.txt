@@ -1,0 +1,34 @@
+10-13 07:32:47.477  6265  6265 D OPSUB   : setOff
+10-13 07:32:47.628  6265  6265 D OPSUB   : item uri=file:///sdcard/Movies/Test/Yatay video.mp4 sidecars=[Yatay video.srt] remembered=null auto=true
+10-13 07:32:48.102  6265  6349 D OPSUB   : load Yatay video.srt: null cues err=java.util.regex.PatternSyntaxException: Syntax error in regexp pattern near index 10
+10-13 07:32:48.102  6265  6349 D OPSUB   : \{\\[^}]*}
+10-13 07:34:50.691  6729  6729 D OPSUB   : setOff
+10-13 07:34:50.728  6729  6729 D OPSUB   : item uri=file:///sdcard/Movies/Test/Dikey video.mp4 sidecars=[] remembered=null auto=true
+10-13 07:36:17.713  7495  7495 D OPSUB   : setOff
+10-13 07:36:17.747  7495  7495 D OPSUB   : item uri=file:///sdcard/Movies/Test/Bolumlu.mkv sidecars=[Bolumlu.srt] remembered=null auto=true
+10-13 07:36:17.838  7495  7585 D OPSUB   : load Bolumlu.srt: null cues err=java.util.regex.PatternSyntaxException: Syntax error in regexp pattern near index 10
+10-13 07:36:17.838  7495  7585 D OPSUB   : \{\\[^}]*}
+10-13 07:37:51.171  7900  7900 D OPSUB   : setOff
+10-13 07:37:51.242  7900  7900 D OPSUB   : item uri=file:///sdcard/Movies/Test/HEVC 10bit.mp4 sidecars=[] remembered=null auto=true
+10-13 07:39:25.183  8417  8417 D OPSUB   : setOff
+10-13 07:39:25.269  8417  8417 D OPSUB   : item uri=file:///sdcard/Movies/Test/Eski bicim.wmv sidecars=[] remembered=null auto=true
+10-13 07:40:04.888  8417  8417 D OPSUB   : setOff
+10-13 07:40:05.065  8417  8417 D OPSUB   : item uri=file:///sdcard/Movies/Test/Eski bicim.wmv sidecars=[] remembered=null auto=true
+10-13 07:40:33.036  8854  8854 D OPSUB   : setOff
+10-13 07:40:33.121  8854  8854 D OPSUB   : item uri=file:///sdcard/Movies/Test/Bozuk dosya.mp4 sidecars=[] remembered=null auto=true
+10-13 07:40:59.665  8854  8854 D OPSUB   : setOff
+10-13 07:40:59.676  8854  8854 D OPSUB   : item uri=file:///sdcard/Movies/Test/Bozuk dosya.mp4 sidecars=[] remembered=null auto=true
+10-13 07:41:28.506  9181  9181 D OPSUB   : setOff
+10-13 07:41:28.646  9181  9181 D OPSUB   : item uri=file:///sdcard/Movies/Test/Bolumlu.mkv sidecars=[Bolumlu.srt] remembered=null auto=true
+10-13 07:41:29.490  9181  9222 D OPSUB   : load Bolumlu.srt: null cues err=java.util.regex.PatternSyntaxException: Syntax error in regexp pattern near index 10
+10-13 07:41:29.490  9181  9222 D OPSUB   : \{\\[^}]*}
+10-13 07:42:52.390  9379  9379 D OPSUB   : setOff
+10-13 07:42:52.541  9379  9379 D OPSUB   : item uri=file:///sdcard/Movies/Test/Yatay video.mp4 sidecars=[Yatay video.srt] remembered=null auto=true
+10-13 07:42:53.234  9379  9515 D OPSUB   : load Yatay video.srt: null cues err=java.util.regex.PatternSyntaxException: Syntax error in regexp pattern near index 10
+10-13 07:42:53.234  9379  9515 D OPSUB   : \{\\[^}]*}
+10-13 07:44:06.134  9668  9668 D OPSUB   : setOff
+10-13 07:44:06.221  9668  9668 D OPSUB   : item uri=file:///sdcard/Movies/Test/Bozuk dosya.mp4 sidecars=[] remembered=null auto=true
+10-13 07:44:36.631  9880  9880 D OPSUB   : setOff
+10-13 07:44:36.673  9880  9880 D OPSUB   : item uri=file:///sdcard/Movies/Test/Yatay video.mp4 sidecars=[Yatay video.srt] remembered=null auto=true
+10-13 07:44:37.127  9880  9968 D OPSUB   : load Yatay video.srt: null cues err=java.util.regex.PatternSyntaxException: Syntax error in regexp pattern near index 10
+10-13 07:44:37.127  9880  9968 D OPSUB   : \{\\[^}]*}
