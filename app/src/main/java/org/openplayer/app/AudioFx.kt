@@ -5,6 +5,7 @@ import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import android.media.audiofx.LoudnessEnhancer
+import android.media.audiofx.PresetReverb
 
 /** Ekolayzır ve yazılımsal ses artırma (%200'e kadar). */
 class AudioFx(context: Context) {
@@ -14,6 +15,33 @@ class AudioFx(context: Context) {
     private var loud: LoudnessEnhancer? = null
     private var bass: BassBoost? = null
     private var virt: Virtualizer? = null
+    private var reverb: PresetReverb? = null
+
+    companion object {
+        val reverbLabels = listOf("Kapalı", "Küçük oda", "Orta oda", "Büyük oda", "Orta salon", "Büyük salon", "Sahne (plate)")
+    }
+
+    /** Oynatıcıya bağlanacak yardımcı efekt (yankı) kimliği; 0 = yok. */
+    val reverbId: Int get() = if (settings.reverbPreset > 0) runCatching { reverb?.id ?: 0 }.getOrDefault(0) else 0
+
+    fun setReverb(preset: Int): Int {
+        settings.reverbPreset = preset
+        applyReverb()
+        return reverbId
+    }
+
+    private fun applyReverb() {
+        val preset = settings.reverbPreset
+        if (preset == 0) {
+            runCatching { reverb?.enabled = false }
+            return
+        }
+        if (reverb == null) reverb = runCatching { PresetReverb(1, 0) }.getOrNull()
+        runCatching {
+            reverb?.preset = preset.toShort()
+            reverb?.enabled = true
+        }
+    }
 
     val available: Boolean get() = eq != null
 
@@ -54,6 +82,7 @@ class AudioFx(context: Context) {
                 v.enabled = settings.virtualizerStrength > 0
             }
         }
+        applyReverb()
     }
 
     val bassAvailable: Boolean get() = bass != null
@@ -121,6 +150,8 @@ class AudioFx(context: Context) {
         runCatching { loud?.release() }
         runCatching { bass?.release() }
         runCatching { virt?.release() }
+        runCatching { reverb?.release() }
+        reverb = null
         eq = null
         loud = null
         bass = null

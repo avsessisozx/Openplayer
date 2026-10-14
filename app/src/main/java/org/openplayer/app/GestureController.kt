@@ -105,6 +105,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
     private var scaling = false
     private var width = 1
     private var height = 1
+    private var brightnessSet = -1f
 
     private val scaleDetector = ScaleGestureDetector(a, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScaleBegin(d: ScaleGestureDetector): Boolean {
@@ -197,6 +198,11 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             return true
         }
 
+        override fun onLongPress(e: MotionEvent) {
+            if (a.vr != VrMode.NONE || scaling) return
+            if (a.startFastPlay()) mode = Mode.NONE
+        }
+
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
             a.onScreenTap()
             return true
@@ -232,6 +238,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             GestureAction.BRIGHTNESS -> {
                 val value = (startBrightness + fraction).coerceIn(0.01f, 1f)
                 a.window.attributes = a.window.attributes.apply { screenBrightness = value }
+                brightnessSet = value
                 a.showHud("Parlaklık ${(value * 100).roundToInt()}%")
             }
             GestureAction.VOLUME -> {
@@ -296,6 +303,11 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         val handled = detector.onTouchEvent(event)
 
         if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
+            a.stopFastPlay()
+            if (brightnessSet > 0f) {
+                if (a.settings.rememberBrightness) a.settings.savedBrightness = brightnessSet
+                brightnessSet = -1f
+            }
             when (mode) {
                 Mode.HORIZONTAL -> if (a.settings.horizontalSeekEnabled) a.scrubEnd(seekTarget)
                 Mode.VERTICAL -> if (verticalSeeking) {

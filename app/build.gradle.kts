@@ -11,8 +11,8 @@ android {
         applicationId = "org.openplayer.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.0.0-beta10"
+        versionCode = 11
+        versionName = "1.0.0-beta11"
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
             // Yalnız emülatör testi için (-PemulatorAbi=true): x86_64 kütüphanelerini de pakete koy.
@@ -87,5 +87,6 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.documentfile:documentfile:1.0.1")
 }

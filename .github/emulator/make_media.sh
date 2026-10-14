@@ -43,6 +43,10 @@ Merhaba, bu bir altyazı testidir. ğüşıöç
 İkinci satır
 <i>italik</i> yazı
 
+3
+00:00:10,000 --> 00:00:14,000
+/Eğik çizgiyle başlayan satır
+
 SRT
 ff -f lavfi -i testsrc2=size=1920x1080:rate=25:duration=24 -f lavfi -i sine=frequency=330:duration=24 \
    -i "$out/Movies/Bolumlu.srt" -i /tmp/chapters.txt -map 0:v -map 1:a -map 2:s -map_metadata 3 -map_chapters 3 \

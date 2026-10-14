@@ -14,6 +14,9 @@ class BalanceProcessor : BaseAudioProcessor() {
     @Volatile var balance = 0f
     @Volatile var mono = false
 
+    /** Sol ve sağ kanalı yer değiştirir (ters stereo). */
+    @Volatile var swap = false
+
     override fun onConfigure(inputAudioFormat: AudioProcessor.AudioFormat): AudioProcessor.AudioFormat =
         if (inputAudioFormat.encoding == C.ENCODING_PCM_16BIT && inputAudioFormat.channelCount == 2) inputAudioFormat
         else AudioProcessor.AudioFormat.NOT_SET
@@ -26,9 +29,12 @@ class BalanceProcessor : BaseAudioProcessor() {
         val lg = if (b > 0f) 1f - b else 1f
         val rg = if (b < 0f) 1f + b else 1f
         val m = mono
+        val sw = swap
         while (inputBuffer.remaining() >= 4) {
-            val l = inputBuffer.short.toInt()
-            val r = inputBuffer.short.toInt()
+            val first = inputBuffer.short.toInt()
+            val second = inputBuffer.short.toInt()
+            val l = if (sw) second else first
+            val r = if (sw) first else second
             val outL: Float
             val outR: Float
             if (m) {
@@ -55,6 +61,7 @@ object AudioBalance {
     fun attach(p: BalanceProcessor, settings: AppSettings) {
         p.balance = settings.audioBalance / 100f
         p.mono = settings.monoMix
+        p.swap = settings.reverseStereo
         current = p
     }
 
@@ -62,6 +69,7 @@ object AudioBalance {
         current?.let {
             it.balance = settings.audioBalance / 100f
             it.mono = settings.monoMix
+            it.swap = settings.reverseStereo
         }
     }
 }

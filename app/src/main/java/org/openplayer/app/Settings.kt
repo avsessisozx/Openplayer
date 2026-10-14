@@ -56,6 +56,34 @@ enum class OrientationMode(val label: String) {
     PORTRAIT("Dikey"),
 }
 
+enum class ResumeMode(val label: String) {
+    YES("Evet, kaldığı yerden devam et"),
+    NO("Hayır, baştan başlat"),
+    ASK("Her seferinde sor"),
+}
+
+/** Ekrana tek dokunuşun işlevi. */
+enum class TapAction(val label: String) {
+    TOGGLE_UI("Arayüzü göster / gizle"),
+    SHOW_THEN_PAUSE("Arayüzü göster; açıkken oynat / duraklat"),
+    BOTH("Arayüzü göster ve oynat / duraklat"),
+    PLAY_PAUSE("Yalnız oynat / duraklat"),
+}
+
+/** Kontroller gizliyken köşede sürekli görünen bilgi. */
+enum class OsdInfo(val label: String) {
+    NONE("Kapalı"),
+    CLOCK("Saat ve pil"),
+    ELAPSED("Geçen süre"),
+    BOTH("Saat, pil ve geçen süre"),
+}
+
+enum class StereoMode(val label: String) {
+    STEREO("Stereo"),
+    MONO("Mono (iki kanal birleşik)"),
+    REVERSE("Ters stereo (sol ↔ sağ)"),
+}
+
 enum class UiMode(val label: String, val scale: Float) {
     AUTO("Otomatik (ekrana göre)", 1f),
     PHONE("Telefon", 1f),
@@ -120,9 +148,102 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("auto_pip", true)
         set(v) = prefs.edit().putBoolean("auto_pip", v).apply()
 
+    /** Eski açık/kapalı ayardan türetilir; yeni ayar üç seçeneklidir (Evet / Hayır / Sor). */
+    var resumeMode: ResumeMode
+        get() = enumOf("resume_mode", if (prefs.getBoolean("resume_playback", true)) ResumeMode.YES else ResumeMode.NO)
+        set(v) = putEnum("resume_mode", v)
+
     var resumePlayback: Boolean
-        get() = prefs.getBoolean("resume_playback", true)
-        set(v) = prefs.edit().putBoolean("resume_playback", v).apply()
+        get() = resumeMode != ResumeMode.NO
+        set(v) { resumeMode = if (v) ResumeMode.YES else ResumeMode.NO }
+
+    /** Yalnız ilk açılan videoda kaldığı yerden devam et; listedeki sonrakiler baştan başlar. */
+    var resumeOnlyFirst: Boolean
+        get() = prefs.getBoolean("resume_only_first", false)
+        set(v) = prefs.edit().putBoolean("resume_only_first", v).apply()
+
+    /** Ekrana uzun basılı tutunca hızlı oynat (bırakınca normale döner). */
+    var longPressSpeed: Boolean
+        get() = prefs.getBoolean("long_press_speed", true)
+        set(v) = prefs.edit().putBoolean("long_press_speed", v).apply()
+
+    var longPressSpeedValue: Float
+        get() = prefs.getFloat("long_press_speed_value", 2f)
+        set(v) = prefs.edit().putFloat("long_press_speed_value", v.coerceIn(1.25f, 4f)).apply()
+
+    var backToList: Boolean
+        get() = prefs.getBoolean("back_to_list", false)
+        set(v) = prefs.edit().putBoolean("back_to_list", v).apply()
+
+    var doubleBackToExit: Boolean
+        get() = prefs.getBoolean("double_back_exit", false)
+        set(v) = prefs.edit().putBoolean("double_back_exit", v).apply()
+
+    /** Açılamayan videoda hata göstermeden sonrakine geç. */
+    var skipOnError: Boolean
+        get() = prefs.getBoolean("skip_on_error", false)
+        set(v) = prefs.edit().putBoolean("skip_on_error", v).apply()
+
+    /** Başka uygulama ses çalınca/arama gelince dur (ses odağı). */
+    var audioFocus: Boolean
+        get() = prefs.getBoolean("audio_focus", true)
+        set(v) = prefs.edit().putBoolean("audio_focus", v).apply()
+
+    var pauseOnNoisy: Boolean
+        get() = prefs.getBoolean("pause_on_noisy", true)
+        set(v) = prefs.edit().putBoolean("pause_on_noisy", v).apply()
+
+    /** Oynatma başlarken ve sarınca ses kısa sürede yükselir (ani ses patlaması olmaz). */
+    var audioFade: Boolean
+        get() = prefs.getBoolean("audio_fade", true)
+        set(v) = prefs.edit().putBoolean("audio_fade", v).apply()
+
+    var osdInfo: OsdInfo
+        get() = enumOf("osd_info", OsdInfo.NONE)
+        set(v) = putEnum("osd_info", v)
+
+    /** Kontroller açıkken üst çubukta saat ve pil. */
+    var topBarClock: Boolean
+        get() = prefs.getBoolean("top_bar_clock", true)
+        set(v) = prefs.edit().putBoolean("top_bar_clock", v).apply()
+
+    var keepScreenOn: Boolean
+        get() = prefs.getBoolean("keep_screen_on", true)
+        set(v) = prefs.edit().putBoolean("keep_screen_on", v).apply()
+
+    var showControlsAtStart: Boolean
+        get() = prefs.getBoolean("controls_at_start", false)
+        set(v) = prefs.edit().putBoolean("controls_at_start", v).apply()
+
+    var rememberBrightness: Boolean
+        get() = prefs.getBoolean("remember_brightness", false)
+        set(v) = prefs.edit().putBoolean("remember_brightness", v).apply()
+
+    /** Son ayarlanan oynatıcı parlaklığı (0..1); -1 = sistem. */
+    var savedBrightness: Float
+        get() = prefs.getFloat("saved_brightness", -1f)
+        set(v) = prefs.edit().putFloat("saved_brightness", v).apply()
+
+    var showSeekButtons: Boolean
+        get() = prefs.getBoolean("seek_buttons", false)
+        set(v) = prefs.edit().putBoolean("seek_buttons", v).apply()
+
+    var seekButtonSec: Int
+        get() = prefs.getInt("seek_button_sec", 10)
+        set(v) = prefs.edit().putInt("seek_button_sec", v.coerceIn(1, 600)).apply()
+
+    var showPrevNext: Boolean
+        get() = prefs.getBoolean("show_prev_next", true)
+        set(v) = prefs.edit().putBoolean("show_prev_next", v).apply()
+
+    var tapAction: TapAction
+        get() = enumOf("tap_action", TapAction.TOGGLE_UI)
+        set(v) = putEnum("tap_action", v)
+
+    /** Ekran kilitlenince ekran yönü de sabitlenir. */
+    var lockRotation: Boolean
+        get() = prefs.getBoolean("lock_rotation", true)
+        set(v) = prefs.edit().putBoolean("lock_rotation", v).apply()
 
     var orientation: OrientationMode
         get() = enumOf("orientation", OrientationMode.AUTO)
@@ -340,8 +461,37 @@ class AppSettings private constructor(context: Context) {
         set(v) = prefs.edit().putInt("sub_bg", v).apply()
 
     var subtitleOutline: Boolean
-        get() = prefs.getBoolean("sub_outline", true)
-        set(v) = prefs.edit().putBoolean("sub_outline", v).apply()
+        get() = subtitleEdge != SubtitleLook.EDGE_NONE
+        set(v) { subtitleEdge = if (v) SubtitleLook.EDGE_OUTLINE else SubtitleLook.EDGE_NONE }
+
+    /** Kenar türü (SubtitleLook.EDGE_*); eski "kenar çizgisi" ayarından türetilir. */
+    var subtitleEdge: Int
+        get() = prefs.getInt("sub_edge", if (prefs.getBoolean("sub_outline", true)) SubtitleLook.EDGE_OUTLINE else SubtitleLook.EDGE_NONE)
+        set(v) = prefs.edit().putInt("sub_edge", v).apply()
+
+    var subtitleEdgeColor: Int
+        get() = prefs.getInt("sub_edge_color", 0xFF000000.toInt())
+        set(v) = prefs.edit().putInt("sub_edge_color", v).apply()
+
+    /** "default", "sans", "serif", "mono", "condensed" ya da "file:<ad>" (içe aktarılmış yazı tipi). */
+    var subtitleFont: String
+        get() = prefs.getString("sub_font", "default") ?: "default"
+        set(v) = prefs.edit().putString("sub_font", v).apply()
+
+    /** 0 sol, 1 orta, 2 sağ. */
+    var subtitleAlign: Int
+        get() = prefs.getInt("sub_align", 1).coerceIn(0, 2)
+        set(v) = prefs.edit().putInt("sub_align", v.coerceIn(0, 2)).apply()
+
+    /** "/" ile başlayan satırları italik göster. */
+    var subtitleItalicSlash: Boolean
+        get() = prefs.getBoolean("sub_italic_slash", false)
+        set(v) = prefs.edit().putBoolean("sub_italic_slash", v).apply()
+
+    /** Her videoda başlangıç altyazı gecikmesi (ms). */
+    var subtitleDefaultDelayMs: Long
+        get() = prefs.getLong("sub_default_delay", 0L)
+        set(v) = prefs.edit().putLong("sub_default_delay", v.coerceIn(-60_000L, 60_000L)).apply()
 
     var subtitleBold: Boolean
         get() = prefs.getBoolean("sub_bold", false)
@@ -423,6 +573,26 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("mono_mix", false)
         set(v) = prefs.edit().putBoolean("mono_mix", v).apply()
 
+    var reverseStereo: Boolean
+        get() = prefs.getBoolean("reverse_stereo", false)
+        set(v) = prefs.edit().putBoolean("reverse_stereo", v).apply()
+
+    var stereoMode: StereoMode
+        get() = when {
+            monoMix -> StereoMode.MONO
+            reverseStereo -> StereoMode.REVERSE
+            else -> StereoMode.STEREO
+        }
+        set(v) {
+            monoMix = v == StereoMode.MONO
+            reverseStereo = v == StereoMode.REVERSE
+        }
+
+    /** 0 = kapalı; 1..6 = PresetReverb hazır ayarları (küçük oda .. sahne). */
+    var reverbPreset: Int
+        get() = prefs.getInt("reverb_preset", 0).coerceIn(0, 6)
+        set(v) = prefs.edit().putInt("reverb_preset", v.coerceIn(0, 6)).apply()
+
     /** 0 kapalı, 1 parça, 2 albüm. Yalnızca ses kısma uygulanır. */
     var replayGainMode: Int
         get() = prefs.getInt("replay_gain", 0)
@@ -479,4 +649,30 @@ class AppSettings private constructor(context: Context) {
     var showHiddenFolders: Boolean
         get() = prefs.getBoolean("show_hidden", false)
         set(v) = prefs.edit().putBoolean("show_hidden", v).apply()
+
+    /** Klasör içinde en son oynatılan videoyu vurgula (kapalıysa yalnız genel son video). */
+    var markLastInFolder: Boolean
+        get() = prefs.getBoolean("mark_last_in_folder", true)
+        set(v) = prefs.edit().putBoolean("mark_last_in_folder", v).apply()
+
+    var scrollToLast: Boolean
+        get() = prefs.getBoolean("scroll_to_last", false)
+        set(v) = prefs.edit().putBoolean("scroll_to_last", v).apply()
+
+    var showFab: Boolean
+        get() = prefs.getBoolean("show_fab", true)
+        set(v) = prefs.edit().putBoolean("show_fab", v).apply()
+
+    var swipeRefresh: Boolean
+        get() = prefs.getBoolean("swipe_refresh", true)
+        set(v) = prefs.edit().putBoolean("swipe_refresh", v).apply()
+
+    /** Tüm ayarları varsayılana döndürür; OpenSubtitles hesabı korunur. */
+    fun resetAll(context: Context) {
+        val keep = listOf("os_key", "os_user", "os_pass").associateWith { prefs.getString(it, null) }
+        val editor = prefs.edit().clear()
+        for ((k, v) in keep) if (v != null) editor.putString(k, v)
+        editor.apply()
+        context.getSharedPreferences("gestures", Context.MODE_PRIVATE).edit().clear().apply()
+    }
 }

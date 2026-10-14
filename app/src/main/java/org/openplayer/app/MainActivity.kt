@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selTitle: TextView
     private lateinit var actionBar: LinearLayout
     private lateinit var fabView: View
+    private lateinit var swipe: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
     private var all: List<VideoItem> = emptyList()
     private var currentFolder: FolderItem? = null
@@ -121,6 +122,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         modeTabs.visibility = if (settings.musicMode) View.VISIBLE else View.GONE
+        swipe.isEnabled = settings.swipeRefresh
+        fabView.visibility = if (settings.showFab && !selectionOn) View.VISIBLE else View.GONE
         if (hasPermission()) refresh() else requestPermission.launch(permission)
     }
 
@@ -255,8 +258,16 @@ class MainActivity : AppCompatActivity() {
             addView(topBar, LinearLayout.LayoutParams(-1, -2))
             addView(selBar, LinearLayout.LayoutParams(-1, -2))
             addView(modeTabs, LinearLayout.LayoutParams(-1, -2))
+            swipe = androidx.swiperefreshlayout.widget.SwipeRefreshLayout(this@MainActivity).apply {
+                setColorSchemeColors(UiColors.accent)
+                setProgressBackgroundColorSchemeColor(UiColors.surface)
+                addView(list, android.view.ViewGroup.LayoutParams(-1, -1))
+                setOnRefreshListener {
+                    if (hasPermission()) refresh() else isRefreshing = false
+                }
+            }
             addView(FrameLayout(this@MainActivity).apply {
-                addView(list, FrameLayout.LayoutParams(-1, -1))
+                addView(swipe, FrameLayout.LayoutParams(-1, -1))
                 addView(emptyView, FrameLayout.LayoutParams(-1, -1))
                 pinchHud = TextView(this@MainActivity).apply {
                     setTextColor(Color.WHITE)
@@ -310,6 +321,7 @@ class MainActivity : AppCompatActivity() {
             val loaded = VideoRepository.loadAll(app)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
+                swipe.isRefreshing = false
                 val first = all.isEmpty()
                 all = if (settings.show360) loaded else loaded.filter { !Vr360.isSpherical(this, it.uri.toString(), it.title) }
                 selVideos.retainAll(loaded.map { it.id }.toSet())
@@ -349,10 +361,12 @@ class MainActivity : AppCompatActivity() {
                 titleView.text = folder.name
                 backButton.visibility = View.VISIBLE
                 shown = VideoRepository.sort(this, all.filter { it.bucketId == folder.bucketId }, settings)
+                applyHighlight(if (settings.markLastInFolder) lastPlayedIn(shown) else null)
                 showVideos(shown, "Bu klasörde video yok")
             }
             settings.listMode == ListMode.FILES -> {
                 titleView.text = "Videolar"
+                applyHighlight(null)
                 backButton.visibility = View.GONE
                 shown = VideoRepository.sort(this, visibleVideos(), settings)
                 showVideos(shown, "Video bulunamadı")
@@ -478,7 +492,29 @@ class MainActivity : AppCompatActivity() {
     private fun openFolder(folder: FolderItem) {
         currentFolder = folder
         render()
-        list.scrollToPosition(0)
+        val target = if (settings.scrollToLast) lastPlayedIn(shown)?.let { u -> shown.indexOfFirst { it.uri.toString() == u } } ?: -1 else -1
+        list.scrollToPosition(target.coerceAtLeast(0))
+    }
+
+    /** Listedeki en son oynatılan videonun adresi (hiç oynatılmadıysa null). */
+    private fun lastPlayedIn(videos: List<VideoItem>): String? {
+        var best: VideoItem? = null
+        var bestAt = 0L
+        for (v in videos) {
+            val at = ResumeStore.lastPlayed(this, v.uri)
+            if (at > bestAt) {
+                bestAt = at
+                best = v
+            }
+        }
+        return best?.uri?.toString()
+    }
+
+    /** Vurgulanacak video: verilen (klasördeki son) ya da genel son oynatılan. */
+    private fun applyHighlight(uri: String?) {
+        val h = uri ?: ResumeStore.lastUri(this)
+        listAdapter.highlightUri = h
+        gridAdapter.highlightUri = h
     }
 
     private fun openSearch() {
@@ -594,7 +630,7 @@ class MainActivity : AppCompatActivity() {
         topBarView.visibility = if (selectionOn) View.GONE else View.VISIBLE
         selBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
         actionBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
-        fabView.visibility = if (selectionOn) View.GONE else View.VISIBLE
+        fabView.visibility = if (selectionOn || !settings.showFab) View.GONE else View.VISIBLE
         if (::modeTabs.isInitialized) modeTabs.visibility = if (settings.musicMode && !selectionOn) View.VISIBLE else View.GONE
         val total = if (folders) folderAdapter.items.size else shown.size
         selTitle.text = "$count / $total Seçildi"

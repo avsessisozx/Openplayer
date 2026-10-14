@@ -64,13 +64,20 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-enum class AspectMode(val label: String, val resize: Int, val ratio: Float?) {
+enum class AspectMode(val label: String, val resize: Int, val ratio: Float?, val inCycle: Boolean = true) {
     FIT("Sığdır", AspectRatioFrameLayout.RESIZE_MODE_FIT, null),
     FILL("Esnet (doldur)", AspectRatioFrameLayout.RESIZE_MODE_FILL, null),
     CROP("Kırp (yakınlaştır)", AspectRatioFrameLayout.RESIZE_MODE_ZOOM, null),
     R16_9("16:9", AspectRatioFrameLayout.RESIZE_MODE_FIT, 16f / 9f),
     R4_3("4:3", AspectRatioFrameLayout.RESIZE_MODE_FIT, 4f / 3f),
     R21_9("21:9", AspectRatioFrameLayout.RESIZE_MODE_FIT, 21f / 9f),
+    ORIGINAL("Özgün boyut (%100)", AspectRatioFrameLayout.RESIZE_MODE_FIT, null, false),
+    R1_1("1:1", AspectRatioFrameLayout.RESIZE_MODE_FIT, 1f, false),
+    R5_4("5:4", AspectRatioFrameLayout.RESIZE_MODE_FIT, 5f / 4f, false),
+    R16_10("16:10", AspectRatioFrameLayout.RESIZE_MODE_FIT, 16f / 10f, false),
+    R18_9("18:9 (2:1)", AspectRatioFrameLayout.RESIZE_MODE_FIT, 2f, false),
+    R235("2.35:1", AspectRatioFrameLayout.RESIZE_MODE_FIT, 2.35f, false),
+    R239("2.39:1", AspectRatioFrameLayout.RESIZE_MODE_FIT, 2.39f, false),
 }
 
 class PlayerActivity : AppCompatActivity() {
@@ -90,6 +97,60 @@ class PlayerActivity : AppCompatActivity() {
 
     fun pickSubtitleFile() {
         subtitlePicker.launch(arrayOf("*/*"))
+    }
+
+    private val audioPicker =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) attachExternalAudio(uri)
+        }
+
+    /** Videoya ayrı bir ses dosyası ekler (örn. farklı dilde dublaj). */
+    fun pickExternalAudio() {
+        if (currentUri == null) return
+        audioPicker.launch(arrayOf("audio/*", "video/*", "application/octet-stream"))
+    }
+
+    private var pendingExternalAudio = false
+
+    private fun attachExternalAudio(audioUri: Uri) {
+        val factory = PlayerHolder.mediaSourceFactory
+        if (factory == null || player.mediaItemCount == 0) {
+            toast("Ses dosyası eklenemedi")
+            return
+        }
+        runCatching {
+            val index = player.currentMediaItemIndex
+            val pos = player.currentPosition
+            val wasPlaying = player.playWhenReady
+            val sources = MutableList(player.mediaItemCount) { factory.createMediaSource(player.getMediaItemAt(it)) }
+            val audio = factory.createMediaSource(MediaItem.fromUri(audioUri))
+            sources[index] = androidx.media3.exoplayer.source.MergingMediaSource(true, true, sources[index], audio)
+            pendingExternalAudio = true
+            player.setMediaSources(sources, index, pos)
+            player.prepare()
+            player.playWhenReady = wasPlaying
+            toast("Ses dosyası eklendi: ${SubtitleFiles.displayName(this, audioUri)}")
+        }.onFailure {
+            pendingExternalAudio = false
+            toast("Ses dosyası eklenemedi")
+        }
+    }
+
+    /** Eklenen dış ses, ses parçalarının sonuncusu olarak gelir; onu seç. */
+    private fun selectExternalAudio(tracks: Tracks) {
+        if (!pendingExternalAudio) return
+        val groups = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
+        if (groups.isEmpty()) return
+        pendingExternalAudio = false
+        if (groups.size < 2) return
+        val g = groups.last()
+        if (!g.isSupported) {
+            toast("Eklenen ses biçimi desteklenmiyor")
+            return
+        }
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setOverrideForType(androidx.media3.common.TrackSelectionOverride(g.mediaTrackGroup, 0))
+            .build()
     }
 
     private fun importSubtitle(uri: Uri) {
@@ -135,6 +196,10 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var lockButton: ImageView
     private lateinit var unlockButton: ImageView
     private lateinit var hud: TextView
+    private lateinit var clockView: TextView
+    private lateinit var osdView: TextView
+    private lateinit var rewButton: ImageView
+    private lateinit var ffButton: ImageView
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -176,6 +241,13 @@ class PlayerActivity : AppCompatActivity() {
     private var kidsLastTap = 0L
     private var ticks = 0
     private var errorDialogShown = false
+    private var lastBackPress = 0L
+    private var fastPlaying = false
+    private var fastPrevSpeed = 1f
+    private var fadeAnim: android.animation.ValueAnimator? = null
+    private var resumeDialog: androidx.appcompat.app.AlertDialog? = null
+    private var batteryText = ""
+    private var batteryReadAt = 0L
 
     // ---------------------------------------------------------------- yaşam döngüsü
 
@@ -191,11 +263,19 @@ class PlayerActivity : AppCompatActivity() {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             updatePlayButton()
             scheduleAutoHide()
+            if (isPlaying) fadeIn()
         }
 
         override fun onPlaybackStateChanged(state: Int) {
             updatePlayButton()
-            if (state == Player.STATE_ENDED) showControls(sticky = true)
+            if (state == Player.STATE_ENDED) {
+                stopFastPlay()
+                if (settings.backToList && player.repeatMode == Player.REPEAT_MODE_OFF && !sleepAtEnd) {
+                    finish()
+                    return
+                }
+                showControls(sticky = true)
+            }
         }
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
@@ -207,7 +287,13 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED) onItemChanged()
+            if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED) {
+                onItemChanged()
+                // Listede sonraki/önceki videoya geçince de kaldığı yerden devam (MX gibi).
+                if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT && !settings.resumeOnlyFirst) {
+                    mediaItem?.localConfiguration?.uri?.let { offerResume(it, autoPlay = true) }
+                }
+            }
         }
 
         override fun onVideoSizeChanged(videoSize: VideoSize) {
@@ -219,6 +305,7 @@ class PlayerActivity : AppCompatActivity() {
         override fun onTracksChanged(tracks: Tracks) {
             autoSelectSubtitle(tracks)
             applyPendingAudio(tracks)
+            selectExternalAudio(tracks)
             detectVr(tracks)
         }
 
@@ -228,6 +315,7 @@ class PlayerActivity : AppCompatActivity() {
 
         override fun onAudioSessionIdChanged(audioSessionId: Int) {
             audioFx.attach(audioSessionId)
+            applyAuxEffect()
         }
 
         override fun onPlayerError(error: PlaybackException) {
@@ -260,6 +348,10 @@ class PlayerActivity : AppCompatActivity() {
                     showUnlockButton()
                     toast("Ekran kilitli")
                 }
+                settings.doubleBackToExit && SystemClock.uptimeMillis() - lastBackPress > 2000 -> {
+                    lastBackPress = SystemClock.uptimeMillis()
+                    toast("Çıkmak için tekrar basın")
+                }
                 else -> {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
@@ -284,7 +376,10 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (settings.rememberBrightness && settings.savedBrightness > 0f) {
+            window.attributes = window.attributes.apply { screenBrightness = settings.savedBrightness.coerceIn(0.01f, 1f) }
+        }
         if (Build.VERSION.SDK_INT >= 28) {
             window.attributes = window.attributes.apply {
                 layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -313,6 +408,7 @@ class PlayerActivity : AppCompatActivity() {
             onItemChanged()
         }
         refreshAll()
+        if (settings.showControlsAtStart) showControls()
         requestNotificationPermissionIfNeeded()
         if (intent.getBooleanExtra("org.openplayer.app.OPEN_SUBTITLE_SEARCH", false)) {
             handler.postDelayed({ if (!isFinishing) menus.showOnlineSearch() }, 700)
@@ -439,9 +535,23 @@ class PlayerActivity : AppCompatActivity() {
         if (::player.isInitialized) player.removeListener(playerListener)
         player = p
         p.skipSilenceEnabled = settings.skipSilence
+        runCatching {
+            p.setAudioAttributes(androidx.media3.common.AudioAttributes.DEFAULT, settings.audioFocus)
+            p.setHandleAudioBecomingNoisy(settings.pauseOnNoisy)
+        }
         p.addListener(playerListener)
         bindVideo(p)
         audioFx.attach(p.audioSessionId)
+        applyAuxEffect()
+    }
+
+    /** Yankı (reverb) gibi yardımcı efekti oynatıcıya bağlar. */
+    fun applyAuxEffect() {
+        if (!::player.isInitialized) return
+        val id = audioFx.reverbId
+        runCatching { player.setAuxEffectInfo(androidx.media3.common.AuxEffectInfo(id, if (id != 0) 1f else 0f)) }
+            .onFailure { android.util.Log.w("OPFEAT", "aux effect failed", it) }
+        if (settings.reverbPreset > 0) android.util.Log.i("OPFEAT", "reverb preset=${settings.reverbPreset} id=$id")
     }
 
     private fun loadFromIntent(intent: Intent): Boolean {
@@ -504,7 +614,9 @@ class PlayerActivity : AppCompatActivity() {
                 )
                 .build()
         }
-        val saved = if (settings.resumePlayback) ResumeStore.position(this, uris[index]) else 0L
+        val stored = if (settings.resumeMode != ResumeMode.NO && !settings.incognito) ResumeStore.position(this, uris[index]) else 0L
+        val ask = settings.resumeMode == ResumeMode.ASK && stored > 5_000
+        val saved = if (ask) 0L else stored
         if (MusicController.isMusic(player.currentMediaItem)) {
             // Müzikten kalan tekrar/karıştırma ayarları videoya taşınmasın.
             player.repeatMode = Player.REPEAT_MODE_OFF
@@ -513,9 +625,48 @@ class PlayerActivity : AppCompatActivity() {
         player.volume = if (muted) 0f else 1f
         player.setMediaItems(items, index, if (saved > 5_000) saved else 0L)
         player.prepare()
-        player.playWhenReady = true
+        player.playWhenReady = !ask
         errorDialogShown = false
         onItemChanged()
+        if (ask) askResume(uris[index], stored)
+    }
+
+    /**
+     * Listede başka videoya geçildiğinde kaldığı yeri uygular (Evet: sormadan, Sor: pencereyle).
+     * İlk açılışta openItems zaten konumu verir; bu yalnız geçişlerde çağrılır.
+     */
+    private fun offerResume(uri: Uri, autoPlay: Boolean) {
+        if (settings.resumeMode == ResumeMode.NO || settings.incognito || isVaultUri(uri)) return
+        val stored = ResumeStore.position(this, uri)
+        if (stored <= 5_000) return
+        if (settings.resumeMode == ResumeMode.ASK) {
+            player.pause()
+            askResume(uri, stored)
+        } else {
+            player.seekTo(stored)
+            if (autoPlay) player.play()
+        }
+    }
+
+    private fun askResume(uri: Uri, positionMs: Long) {
+        resumeDialog?.dismiss()
+        android.util.Log.i("OPFEAT", "resume ask at=$positionMs")
+        var decided = false
+        fun decide(resume: Boolean) {
+            if (decided) return
+            decided = true
+            if (currentUri == uri) {
+                if (resume) player.seekTo(positionMs) else player.seekTo(0L)
+                player.play()
+            }
+        }
+        resumeDialog = PanelBuilder(this)
+            .setTitle("Kaldığı yerden devam edilsin mi?")
+            .setMessage("Son konum: ${formatDuration(positionMs)}")
+            .setPositiveButton("Devam et") { _, _ -> decide(true) }
+            .setNegativeButton("Baştan başla") { _, _ -> decide(false) }
+            .setOnCancelListener { decide(false) }
+            .show()
     }
 
     fun openStream(url: String) {
@@ -590,6 +741,9 @@ class PlayerActivity : AppCompatActivity() {
             }
             vrManual = null
             if (vr != VrMode.NONE) setVr(VrMode.NONE, remember = false)
+            if (fastPlaying) fastPlaying = false
+            // Her yeni video varsayılan hızla başlar; videoya özel hafıza varsa aşağıda geri yüklenir.
+            player.setPlaybackSpeed(settings.playbackSpeed)
         }
         currentUri = uri
         applyVaultSecurity(uri)
@@ -610,7 +764,7 @@ class PlayerActivity : AppCompatActivity() {
         abA = -1L
         abB = -1L
         subtitleAutoDone = false
-        subtitles.delayMs = 0L
+        subtitles.delayMs = settings.subtitleDefaultDelayMs
         subtitles.speed = 1.0
         subtitles.setOff()
         sidecars = if (uri != null) SubtitleFiles.findSidecars(this, uri) else emptyList()
@@ -700,6 +854,13 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
         if (settings.playbackEngine != PlaybackEngine.EXO && openInVlc(fromError = true)) return
+        if (settings.skipOnError && player.hasNextMediaItem()) {
+            toast("Açılamadı, sonraki videoya geçiliyor")
+            player.seekToNextMediaItem()
+            player.prepare()
+            player.play()
+            return
+        }
         if (errorDialogShown) return
         errorDialogShown = true
         showMessage("Oynatma hatası", "Bu video oynatılamadı (${error.errorCodeName}). Tüm çözücüler denendi.")
@@ -747,6 +908,13 @@ class PlayerActivity : AppCompatActivity() {
             gravity = Gravity.CENTER_VERTICAL
             addView(iconView(R.drawable.ic_back).apply { setOnClickListener { onBackPressedDispatcher.onBackPressed() } })
             addView(titleView, LinearLayout.LayoutParams(0, -2, 1f).apply { marginStart = dp(4) })
+            clockView = TextView(this@PlayerActivity).apply {
+                setTextColor(0xDDFFFFFF.toInt())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                setPadding(dp(6), 0, dp(6), 0)
+                visibility = View.GONE
+            }
+            addView(clockView)
             addView(iconView(R.drawable.ic_music_note).apply { setOnClickListener { menus.showAudioTracks() } })
             addView(iconView(R.drawable.ic_subtitles).apply { setOnClickListener { menus.showSubtitleMenu() } })
             addView(decoderLabel, LinearLayout.LayoutParams(-2, dp(48)))
@@ -827,6 +995,14 @@ class PlayerActivity : AppCompatActivity() {
         prevButton = iconView(R.drawable.ic_prev, 56, 14).apply { setOnClickListener { previous() } }
         playButton = iconView(R.drawable.ic_pause, 64, 14).apply { setOnClickListener { togglePlay() } }
         nextButton = iconView(R.drawable.ic_next, 56, 14).apply { setOnClickListener { next() } }
+        rewButton = iconView(R.drawable.ic_replay10, 52, 13).apply {
+            contentDescription = "Geri sar"
+            setOnClickListener { stepSeek(-1) }
+        }
+        ffButton = iconView(R.drawable.ic_forward10, 52, 13).apply {
+            contentDescription = "İleri sar"
+            setOnClickListener { stepSeek(+1) }
+        }
         aspectButton = iconView(R.drawable.ic_aspect).apply { setOnClickListener { cycleAspect() } }
         val pipButton = iconView(R.drawable.ic_pip).apply { setOnClickListener { enterPip() } }
 
@@ -846,7 +1022,9 @@ class PlayerActivity : AppCompatActivity() {
                 })
             }, LinearLayout.LayoutParams(0, -2, 1f))
             addView(prevButton)
+            addView(rewButton)
             addView(playButton)
+            addView(ffButton)
             addView(nextButton)
             addView(LinearLayout(context).apply {
                 gravity = Gravity.END
@@ -885,6 +1063,13 @@ class PlayerActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             visibility = View.GONE
         }
+        osdView = TextView(this).apply {
+            setTextColor(0xE6FFFFFF.toInt())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setShadowLayer(dp(4).toFloat(), 0f, 0f, Color.BLACK)
+            setPadding(dp(14), dp(10), dp(14), dp(10))
+            visibility = View.GONE
+        }
         unlockButton = iconView(R.drawable.ic_lock_open, 56, 16).apply {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
@@ -900,6 +1085,7 @@ class PlayerActivity : AppCompatActivity() {
             addView(nightOverlay, FrameLayout.LayoutParams(-1, -1))
             addView(subtitleView, FrameLayout.LayoutParams(-1, -1))
             addView(controls, FrameLayout.LayoutParams(-1, -1))
+            addView(osdView, FrameLayout.LayoutParams(-2, -2, Gravity.TOP or Gravity.END))
             addView(hud, FrameLayout.LayoutParams(-2, -2, Gravity.CENTER))
             addView(unlockButton, FrameLayout.LayoutParams(dp(56), dp(56), Gravity.START or Gravity.CENTER_VERTICAL)
                 .apply { marginStart = dp(24) })
@@ -908,6 +1094,11 @@ class PlayerActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val i = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             controls.setPadding(i.left, i.top, i.right, i.bottom)
+            (osdView.layoutParams as? FrameLayout.LayoutParams)?.let { lp ->
+                lp.topMargin = i.top
+                lp.rightMargin = i.right
+                osdView.layoutParams = lp
+            }
             insets
         }
         return root
@@ -924,13 +1115,77 @@ class PlayerActivity : AppCompatActivity() {
     // ---------------------------------------------------------------- kontroller
 
     fun onScreenTap() {
-        if (controlsVisible) hideControls() else showControls()
+        when (settings.tapAction) {
+            TapAction.TOGGLE_UI -> if (controlsVisible) hideControls() else showControls()
+            TapAction.SHOW_THEN_PAUSE -> if (controlsVisible) togglePlay() else showControls()
+            TapAction.BOTH -> {
+                togglePlay()
+                showControls()
+            }
+            TapAction.PLAY_PAUSE -> {
+                togglePlay()
+                showHud(if (player.playWhenReady) "▶" else "❚❚")
+                hideHudSoon()
+            }
+        }
+    }
+
+    // ---- Uzun bas: hızlı oynat (MX gibi). Bırakınca önceki hıza döner. ----
+
+    fun startFastPlay(): Boolean {
+        if (!settings.longPressSpeed || locked || kidsLocked || fastPlaying) return false
+        if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) return false
+        fastPrevSpeed = player.playbackParameters.speed
+        val fast = settings.longPressSpeedValue
+        fastPlaying = true
+        player.setPlaybackSpeed(fast)
+        if (!player.playWhenReady) player.play()
+        val label = if (fast == fast.roundToInt().toFloat()) fast.roundToInt().toString() else "%.2f".format(fast).trimEnd('0').trimEnd(',', '.')
+        showHud("${label}x ▶▶")
+        android.util.Log.i("OPFEAT", "fast on speed=$fast prev=$fastPrevSpeed")
+        return true
+    }
+
+    fun stopFastPlay() {
+        if (!fastPlaying) return
+        fastPlaying = false
+        player.setPlaybackSpeed(fastPrevSpeed)
+        hideHudSoon()
+        android.util.Log.i("OPFEAT", "fast off speed=$fastPrevSpeed")
+    }
+
+    /** ±N sn düğmeleri. */
+    private fun stepSeek(direction: Int) {
+        val sec = settings.seekButtonSec
+        seekRelative(direction * sec * 1000L)
+        showHud(if (direction > 0) "+$sec sn" else "-$sec sn")
+        hideHudSoon()
+        scheduleAutoHide()
+    }
+
+    /** Başlarken/sarınca sesi kısa sürede açar (ani ses patlaması olmasın). */
+    fun fadeIn() {
+        if (!settings.audioFade || muted || !::player.isInitialized) return
+        fadeAnim?.cancel()
+        player.volume = 0f
+        fadeAnim = android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 350
+            addUpdateListener { if (!muted) player.volume = it.animatedValue as Float }
+            start()
+        }
+    }
+
+    private fun cancelFade() {
+        fadeAnim?.cancel()
+        fadeAnim = null
+        if (::player.isInitialized) player.volume = if (muted) 0f else 1f
     }
 
     fun showControls(sticky: Boolean = false) {
         if (locked || kidsLocked) return
         controlsVisible = true
         controls.visibility = View.VISIBLE
+        updateClock()
         updateProgress(player.currentPosition)
         updatePlayButton()
         handler.removeCallbacks(hideControlsRunnable)
@@ -941,6 +1196,7 @@ class PlayerActivity : AppCompatActivity() {
         controlsVisible = false
         controls.visibility = View.GONE
         handler.removeCallbacks(hideControlsRunnable)
+        if (::osdView.isInitialized) updateClock()
     }
 
     private fun scheduleAutoHide() {
@@ -986,6 +1242,7 @@ class PlayerActivity : AppCompatActivity() {
         player.setSeekParameters(if (settings.exactSeekOnRelease) SeekParameters.EXACT else SeekParameters.CLOSEST_SYNC)
         player.seekTo(posMs)
         if (settings.liveScrub && scrubWasPlaying) player.play()
+        if (scrubWasPlaying) fadeIn()
     }
 
     fun showHud(text: String) {
@@ -1015,6 +1272,7 @@ class PlayerActivity : AppCompatActivity() {
     fun seekRelative(deltaMs: Long) {
         val duration = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
         player.seekTo((player.currentPosition + deltaMs).coerceIn(0L, duration))
+        if (player.isPlaying) fadeIn()
     }
 
     private fun previous() {
@@ -1025,9 +1283,10 @@ class PlayerActivity : AppCompatActivity() {
         if (player.hasNextMediaItem()) player.seekToNextMediaItem() else toast("Sonraki video yok")
     }
 
+    /** Bu oturumdaki hızı değiştirir (varsayılan hız Ayarlar → Oynatıcı'dan seçilir). */
     fun setSpeed(speed: Float) {
+        fastPlaying = false
         player.setPlaybackSpeed(speed)
-        settings.playbackSpeed = speed
         refreshShortcuts()
     }
 
@@ -1038,6 +1297,49 @@ class PlayerActivity : AppCompatActivity() {
     private fun updateNavButtons() {
         prevButton.alpha = 1f
         nextButton.alpha = if (player.hasNextMediaItem()) 1f else 0.4f
+        val nav = if (settings.showPrevNext) View.VISIBLE else View.GONE
+        prevButton.visibility = nav
+        nextButton.visibility = nav
+        val seek = if (settings.showSeekButtons) View.VISIBLE else View.GONE
+        rewButton.visibility = seek
+        ffButton.visibility = seek
+    }
+
+    /** Saat ve pil yazısı ("14:05 · %85"). */
+    private fun clockText(): String {
+        val now = System.currentTimeMillis()
+        if (now - batteryReadAt > 30_000) {
+            batteryReadAt = now
+            batteryText = runCatching {
+                val bm = getSystemService(BATTERY_SERVICE) as android.os.BatteryManager
+                val pct = bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                val charging = Build.VERSION.SDK_INT >= 23 && bm.isCharging
+                if (pct in 0..100) "%$pct" + (if (charging) " ⚡" else "") else ""
+            }.getOrDefault("")
+        }
+        val time = android.text.format.DateFormat.getTimeFormat(this).format(java.util.Date(now))
+        return if (batteryText.isEmpty()) time else "$time · $batteryText"
+    }
+
+    private fun updateClock() {
+        if (settings.topBarClock) {
+            clockView.text = clockText()
+            clockView.visibility = View.VISIBLE
+        } else {
+            clockView.visibility = View.GONE
+        }
+        val osd = settings.osdInfo
+        val inPip = Build.VERSION.SDK_INT >= 24 && isInPictureInPictureMode
+        if (osd == OsdInfo.NONE || controlsVisible || inPip) {
+            osdView.visibility = View.GONE
+            return
+        }
+        val parts = ArrayList<String>()
+        if (osd == OsdInfo.CLOCK || osd == OsdInfo.BOTH) parts += clockText()
+        if (osd == OsdInfo.ELAPSED || osd == OsdInfo.BOTH) parts += formatDuration(player.currentPosition)
+        osdView.text = parts.joinToString("  ")
+        if (osdView.visibility != View.VISIBLE) android.util.Log.i("OPFEAT", "osd visible: ${osdView.text}")
+        osdView.visibility = View.VISIBLE
     }
 
     private fun updateProgress(pos: Long) {
@@ -1057,6 +1359,7 @@ class PlayerActivity : AppCompatActivity() {
         subtitles.tick(pos)
         if (abA >= 0 && abB > abA && pos >= abB) player.seekTo(abA)
         if (controlsVisible) updateProgress(pos)
+        if (ticks % 5 == 0) updateClock()
         if (++ticks % 50 == 0 && player.isPlaying) saveResume()
     }
 
@@ -1075,6 +1378,9 @@ class PlayerActivity : AppCompatActivity() {
 
     fun setLocked(value: Boolean) {
         locked = value
+        stopFastPlay()
+        if (value && settings.lockRotation) requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+        if (!value && settings.lockRotation) applyOrientation()
         if (value) {
             hideControls()
             showHud("Ekran kilitlendi")
@@ -1132,8 +1438,9 @@ class PlayerActivity : AppCompatActivity() {
     // ---------------------------------------------------------------- görüntü dönüşümleri
 
     fun cycleAspect() {
-        val all = AspectMode.entries
-        setAspect(all[(aspect.ordinal + 1) % all.size])
+        val all = AspectMode.entries.filter { it.inCycle }
+        val i = all.indexOf(aspect)
+        setAspect(all[(i + 1) % all.size])
         showHud(aspect.label)
         hideHudSoon()
     }
@@ -1310,6 +1617,15 @@ class PlayerActivity : AppCompatActivity() {
         if (target != null && videoRatio > 0f) {
             if (target > videoRatio) sx = target / videoRatio else sy = videoRatio / target
         }
+        if (aspect == AspectMode.ORIGINAL && size.width > 0 && size.height > 0 && playerView.width > 0 && playerView.height > 0) {
+            // Görüntü ekrana sığdırılmış hâlinden, videonun kendi piksel boyutuna ölçeklenir.
+            val vw = size.width * size.pixelWidthHeightRatio
+            val fit = minOf(playerView.width / vw, playerView.height / size.height.toFloat())
+            if (fit > 0f) {
+                sx = 1f / fit
+                sy = 1f / fit
+            }
+        }
         surface.scaleX = sx * zoom * (if (mirror) -1f else 1f)
         surface.scaleY = sy * zoom * (if (vflip) -1f else 1f)
         surface.translationX = panX
@@ -1470,7 +1786,7 @@ class PlayerActivity : AppCompatActivity() {
             }
             Shortcut.MUTE -> {
                 muted = !muted
-                player.volume = if (muted) 0f else 1f
+                cancelFade()
                 refreshShortcuts()
             }
             Shortcut.EQUALIZER -> menus.showEqualizer()

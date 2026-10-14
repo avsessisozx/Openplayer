@@ -27,6 +27,10 @@ object PlayerHolder {
 
     val player: ExoPlayer? get() = current
 
+    /** Harici ses dosyası eklemek için kullanılan kaynak fabrikası (son kurulan oynatıcınınki). */
+    var mediaSourceFactory: androidx.media3.exoplayer.source.MediaSource.Factory? = null
+        private set
+
     /** O an açık video için geçici çözücü modu (ayarı değiştirmez). */
     @Volatile var decoderOverride: DecoderMode? = null
 
@@ -120,10 +124,11 @@ object PlayerHolder {
         val mediaSources = DefaultMediaSourceFactory(app)
             .setDataSourceFactory(dataSources)
 
+        mediaSourceFactory = mediaSources
         val exo = ExoPlayer.Builder(app, renderers)
             .setMediaSourceFactory(mediaSources)
-            .setAudioAttributes(AudioAttributes.DEFAULT, true)
-            .setHandleAudioBecomingNoisy(true)
+            .setAudioAttributes(AudioAttributes.DEFAULT, settings.audioFocus)
+            .setHandleAudioBecomingNoisy(settings.pauseOnNoisy)
             .setSeekBackIncrementMs(10_000)
             .setSeekForwardIncrementMs(10_000)
             .build()

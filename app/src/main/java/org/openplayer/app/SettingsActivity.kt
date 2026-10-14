@@ -82,6 +82,27 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private val importFont = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            val app = applicationContext
+            Thread {
+                val value = SubtitleLook.importFont(app, uri)
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    if (value == null) {
+                        android.widget.Toast.makeText(this, "Geçerli bir .ttf / .otf yazı tipi seçin", android.widget.Toast.LENGTH_LONG).show()
+                    } else {
+                        s.subtitleFont = value
+                        android.widget.Toast.makeText(this, "Yazı tipi eklendi", android.widget.Toast.LENGTH_SHORT).show()
+                        render()
+                    }
+                }
+            }.start()
+        }
+    }
+
     private fun java.io.InputStream.readBytes(max: Int): ByteArray {
         val out = java.io.ByteArrayOutputStream()
         val buf = ByteArray(1024)
@@ -160,6 +181,19 @@ class SettingsActivity : AppCompatActivity() {
         action("Ayarları içe aktar", "Daha önce kaydettiğiniz ayar dosyasını yükler") {
             importAll.launch(arrayOf("application/json", "text/plain", "*/*"))
         }
+        action("Tüm ayarları sıfırla", "Oynatıcı, hareket, altyazı, ses, tema ve liste ayarları varsayılana döner (geçmiş ve OpenSubtitles hesabı korunur)") {
+            PanelBuilder(this)
+                .setTitle("Tüm ayarlar sıfırlansın mı?")
+                .setMessage("Bu işlem geri alınamaz.")
+                .setPositiveButton("Sıfırla") { _, _ ->
+                    s.resetAll(this)
+                    ThemeManager.reload()
+                    android.widget.Toast.makeText(this, "Ayarlar sıfırlandı", android.widget.Toast.LENGTH_SHORT).show()
+                    recreate()
+                }
+                .setNegativeButton("Vazgeç", null)
+                .show()
+        }
         section("Hakkında")
         action("OpenPlayer ${versionName()}", "AGPLv3 lisanslı açık kaynak yazılım. Kaynak kodu için dokunun.") {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/avsessisozx/Openplayer")))
@@ -170,8 +204,26 @@ class SettingsActivity : AppCompatActivity() {
         runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull() ?: ""
 
     private fun playerPage() {
+        section("Devam etme")
+        choice("Kaldığı yerden devam et", s.resumeMode.label, ResumeMode.entries.map { it.label }, s.resumeMode.ordinal) {
+            s.resumeMode = ResumeMode.entries[it]
+        }
+        toggle("Yalnız ilk videoda devam et", "Listede sonraki videolar baştan başlar", s.resumeOnlyFirst) { s.resumeOnlyFirst = it }
+        section("Hız")
+        val speeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
+        choice("Varsayılan oynatma hızı", "${s.playbackSpeed}x", speeds.map { "${it}x" }, speeds.indexOfFirst { kotlin.math.abs(it - s.playbackSpeed) < 0.01f }) {
+            s.playbackSpeed = speeds[it]
+        }
+        toggle("Uzun basınca hızlı oynat", "Ekrana basılı tutunca hızlanır, bırakınca normale döner", s.longPressSpeed) { s.longPressSpeed = it }
+        val fast = listOf(1.5f, 2f, 2.5f, 3f, 4f)
+        choice("Uzun basma hızı", "${s.longPressSpeedValue}x", fast.map { "${it}x" }, fast.indexOfFirst { kotlin.math.abs(it - s.longPressSpeedValue) < 0.01f }) {
+            s.longPressSpeedValue = fast[it]
+        }
         section("Oynatma")
         toggle("Her video için ayarları hatırla", "Hız, görünüm, yakınlaştırma, altyazı eşitleme ve ses parçası videoya özel saklanır", s.perVideoMemory) { s.perVideoMemory = it }
+        toggle("Bitince listeye dön", "Son video bitince oynatıcı kapanır", s.backToList) { s.backToList = it }
+        toggle("Hatalı videoyu atla", "Açılamayan videoda hata göstermeden sonrakine geçer", s.skipOnError) { s.skipOnError = it }
+        toggle("Çıkmak için geri tuşuna iki kez bas", null, s.doubleBackToExit) { s.doubleBackToExit = it }
         toggle("Sessizlikleri atla", "Videodaki sessiz bölümleri hızla geçer", s.skipSilence) { s.skipSilence = it }
         val intro = listOf(30, 60, 85, 90, 120, 180)
         choice("İntro atla süresi", "${s.skipIntroSec} sn (kısayol olarak eklenebilir)", intro.map { "$it sn" }, intro.indexOf(s.skipIntroSec)) {
@@ -183,7 +235,22 @@ class SettingsActivity : AppCompatActivity() {
         }
         toggle("Arka planda oynat", "Ana ekrana çıkınca ses çalmaya devam eder", s.backgroundPlay) { s.backgroundPlay = it }
         toggle("Otomatik pencere içinde pencere (PiP)", "Ana ekrana çıkınca küçük pencerede devam eder", s.autoPip) { s.autoPip = it }
-        toggle("Kaldığı yerden devam et", null, s.resumePlayback) { s.resumePlayback = it }
+        section("Ekran")
+        toggle("Ekranı açık tut", "Oynatırken ekran kararmaz", s.keepScreenOn) { s.keepScreenOn = it }
+        toggle("Açılışta kontrolleri göster", null, s.showControlsAtStart) { s.showControlsAtStart = it }
+        toggle("Parlaklığı hatırla", "Kaydırarak ayarladığınız parlaklık sonraki videolarda da kullanılır", s.rememberBrightness) { s.rememberBrightness = it }
+        choice("Köşede sürekli göster", s.osdInfo.label, OsdInfo.entries.map { it.label }, s.osdInfo.ordinal) {
+            s.osdInfo = OsdInfo.entries[it]
+        }
+        toggle("Üst çubukta saat ve pil", "Kontroller açıkken başlığın yanında görünür", s.topBarClock) { s.topBarClock = it }
+        toggle("Kilitlenince ekran yönünü sabitle", null, s.lockRotation) { s.lockRotation = it }
+        section("Düğmeler")
+        toggle("Önceki / sonraki düğmeleri", null, s.showPrevNext) { s.showPrevNext = it }
+        toggle("İleri / geri sarma düğmeleri", "Oynat düğmesinin iki yanında", s.showSeekButtons) { s.showSeekButtons = it }
+        val steps = listOf(5, 10, 15, 20, 30, 60)
+        choice("Sarma düğmesi aralığı", "${s.seekButtonSec} sn", steps.map { "$it sn" }, steps.indexOf(s.seekButtonSec)) {
+            s.seekButtonSec = steps[it]
+        }
         section("Görünüm")
         toggle("Kalan süreyi göster", "Kapalıyken toplam süre gösterilir", s.showRemainingTime) { s.showRemainingTime = it }
         toggle("Kısayol satırı açık başlasın", "Kapalıyken oynatıcıda alt soldaki düğmeyle açılır. Hangilerinin görüneceğini \"Öğeleri özelleştir\" ile seçin.", s.showShortcuts) { s.showShortcuts = it }
@@ -240,6 +307,9 @@ class SettingsActivity : AppCompatActivity() {
             s.swipeSeekSec = swipeOptions[it]
         }
         section("Dokunma")
+        choice("Tek dokunma", s.tapAction.label, TapAction.entries.map { it.label }, s.tapAction.ordinal) {
+            s.tapAction = TapAction.entries[it]
+        }
         choice("Çift dokunma", s.doubleTapAction.label, DoubleTapAction.entries.map { it.label }, s.doubleTapAction.ordinal) {
             s.doubleTapAction = DoubleTapAction.entries[it]
         }
@@ -273,6 +343,18 @@ class SettingsActivity : AppCompatActivity() {
             s.volumeBoostPercent = boosts[it]
         }
         note("Yazılımsal artırmadır; yüksek değerlerde bozulma olabilir. Oynatıcıdaki ses menüsünden de ayarlanır.")
+        section("Kanallar ve efektler")
+        choice("Stereo modu", s.stereoMode.label, StereoMode.entries.map { it.label }, s.stereoMode.ordinal) {
+            s.stereoMode = StereoMode.entries[it]
+            AudioBalance.update(s)
+        }
+        choice("Yankı (reverb)", AudioFx.reverbLabels[s.reverbPreset], AudioFx.reverbLabels, s.reverbPreset) {
+            s.reverbPreset = it
+        }
+        toggle("Sesi yumuşak başlat", "Oynatma başlarken ve sarınca ses kısa sürede yükselir", s.audioFade) { s.audioFade = it }
+        section("Diğer uygulamalar ve kulaklık")
+        toggle("Tek başına çal", "Başka uygulama ses çalınca veya arama gelince durur (kapalıysa birlikte çalar)", s.audioFocus) { s.audioFocus = it }
+        toggle("Kulaklık çıkınca duraklat", "Kablolu veya Bluetooth kulaklık ayrılınca", s.pauseOnNoisy) { s.pauseOnNoisy = it }
         section("Ekolayzır")
         toggle("Ekolayzırı açık başlat", "Bantlar oynatıcıdaki ekolayzır düğmesinden ayarlanır", s.eqEnabled) { s.eqEnabled = it }
         section("Ses parçası")
@@ -284,18 +366,46 @@ class SettingsActivity : AppCompatActivity() {
         toggle("Altyazıyı otomatik seç", "Videonun yanındaki dosya veya tercih ettiğiniz dildeki gömülü parça", s.autoEnableSubtitle) { s.autoEnableSubtitle = it }
         text("Tercih edilen altyazı dilleri", s.subtitleLanguages, "Virgülle ayırın, örn. tr,en") { s.subtitleLanguages = it.ifBlank { "tr,en" } }
         section("Görünüm")
-        val sizes = listOf(14, 16, 18, 20, 24, 28, 32, 36)
+        val sizes = listOf(12, 14, 16, 18, 20, 22, 24, 28, 32, 36, 42, 48)
         choice("Yazı boyutu", "${s.subtitleSizeSp.toInt()}", sizes.map { "$it" }, sizes.indexOf(s.subtitleSizeSp.toInt())) {
             s.subtitleSizeSp = sizes[it].toFloat()
         }
-        val colors = listOf("Beyaz" to 0xFFFFFFFF.toInt(), "Sarı" to 0xFFFFE600.toInt(), "Yeşil" to 0xFF7CFF7C.toInt(), "Camgöbeği" to 0xFF66E5FF.toInt())
+        val colors = listOf("Beyaz" to 0xFFFFFFFF.toInt(), "Sarı" to 0xFFFFE600.toInt(), "Yeşil" to 0xFF7CFF7C.toInt(), "Camgöbeği" to 0xFF66E5FF.toInt(),
+            "Turuncu" to 0xFFFFB347.toInt(), "Pembe" to 0xFFFF8AD8.toInt(), "Açık gri" to 0xFFD0D0D0.toInt())
         choice("Yazı rengi", colors.firstOrNull { it.second == s.subtitleColor }?.first ?: "Özel", colors.map { it.first },
             colors.indexOfFirst { it.second == s.subtitleColor }) { s.subtitleColor = colors[it].second }
         val bgs = listOf("Şeffaf" to 0x00000000, "Yarı saydam" to 0x99000000.toInt(), "Siyah" to 0xFF000000.toInt())
         choice("Arka plan", bgs.firstOrNull { it.second == s.subtitleBackground }?.first ?: "Özel", bgs.map { it.first },
             bgs.indexOfFirst { it.second == s.subtitleBackground }) { s.subtitleBackground = bgs[it].second }
-        toggle("Kenar çizgisi", null, s.subtitleOutline) { s.subtitleOutline = it }
+        val fonts = SubtitleLook.builtInFonts + SubtitleLook.importedFonts(this).map { "file:$it" to it }
+        choice("Yazı tipi", SubtitleLook.fontLabel(this, s.subtitleFont), fonts.map { it.second } + "＋ Dosyadan yazı tipi ekle (.ttf / .otf)",
+            fonts.indexOfFirst { it.first == s.subtitleFont }) { i ->
+            if (i < fonts.size) s.subtitleFont = fonts[i].first
+            else importFont.launch(arrayOf("font/ttf", "font/otf", "application/x-font-ttf", "application/octet-stream", "*/*"))
+        }
+        if (s.subtitleFont.startsWith("file:")) {
+            action("Bu yazı tipini kaldır", SubtitleLook.fontLabel(this, s.subtitleFont)) {
+                SubtitleLook.deleteFont(this, s.subtitleFont.removePrefix("file:"))
+                s.subtitleFont = "default"
+                render()
+            }
+        }
         toggle("Kalın yazı", null, s.subtitleBold) { s.subtitleBold = it }
+        val edges = SubtitleLook.edges
+        choice("Kenar", edges.firstOrNull { it.first == s.subtitleEdge }?.second ?: "Kenar çizgisi", edges.map { it.second },
+            edges.indexOfFirst { it.first == s.subtitleEdge }) { s.subtitleEdge = edges[it].first }
+        val edgeColors = listOf("Siyah" to 0xFF000000.toInt(), "Koyu gri" to 0xFF333333.toInt(), "Beyaz" to 0xFFFFFFFF.toInt(),
+            "Mavi" to 0xFF1E40AF.toInt(), "Kırmızı" to 0xFFB91C1C.toInt())
+        choice("Kenar rengi", edgeColors.firstOrNull { it.second == s.subtitleEdgeColor }?.first ?: "Özel", edgeColors.map { it.first },
+            edgeColors.indexOfFirst { it.second == s.subtitleEdgeColor }) { s.subtitleEdgeColor = edgeColors[it].second }
+        choice("Hizalama", SubtitleLook.alignLabels[s.subtitleAlign], SubtitleLook.alignLabels, s.subtitleAlign) { s.subtitleAlign = it }
+        toggle("\"/\" ile başlayan satırları italik yap", "Bazı altyazılarda italik yerine satır başına \"/\" konur", s.subtitleItalicSlash) { s.subtitleItalicSlash = it }
+        section("Senkron")
+        val delays = listOf(-2000L, -1000L, -500L, -250L, 0L, 250L, 500L, 1000L, 2000L)
+        choice("Varsayılan altyazı gecikmesi", "${s.subtitleDefaultDelayMs} ms", delays.map { (if (it > 0) "+" else "") + "$it ms" }, delays.indexOf(s.subtitleDefaultDelayMs)) {
+            s.subtitleDefaultDelayMs = delays[it]
+        }
+        note("+ altyazıyı geç gösterir, − erken gösterir. Her video bu değerle başlar; oynatırken altyazı menüsünden değiştirilebilir.")
         section("Karakter kodlaması")
         val charsets = listOf("auto", "UTF-8", "windows-1254", "ISO-8859-9", "windows-1252", "windows-1250", "windows-1251")
         choice("Karakter kodlaması", s.subtitleCharset, charsets, charsets.indexOf(s.subtitleCharset)) {
@@ -440,6 +550,11 @@ class SettingsActivity : AppCompatActivity() {
             android.widget.Toast.makeText(this, "Boyutlar sıfırlandı", android.widget.Toast.LENGTH_SHORT).show()
         }
         toggle("Gizli klasörleri göster", "Klasöre uzun basarak gizleyebilirsiniz", s.showHiddenFolders) { s.showHiddenFolders = it }
+        section("Son oynatılan")
+        toggle("Her klasörde son izleneni işaretle", "Kapalıyken yalnız en son izlenen video vurgulanır", s.markLastInFolder) { s.markLastInFolder = it }
+        toggle("Klasör açılınca son izlenene kaydır", null, s.scrollToLast) { s.scrollToLast = it }
+        toggle("Yüzen oynat düğmesi", "Sağ alttaki düğme son oynatılan videoyu açar", s.showFab) { s.showFab = it }
+        toggle("Aşağı çekerek yenile", "Listenin en üstünde aşağı çekince videolar yeniden taranır", s.swipeRefresh) { s.swipeRefresh = it }
         section("Gizlilik")
         toggle("Gizli mod", "Açıkken kaldığı yer ve geçmiş kaydedilmez", s.incognito) { s.incognito = it }
         action("Geçmişi temizle", "Kaldığı yerleri, izlenme durumunu ve yer imlerini siler") {

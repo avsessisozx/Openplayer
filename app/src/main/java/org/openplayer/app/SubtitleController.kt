@@ -36,6 +36,12 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     private val handler = Handler(Looper.getMainLooper())
     private val pendingEmbedded = ArrayList<Runnable>()
 
+    private var align = 1
+    private var italicSlash = false
+
+    private fun styled(cues: List<Cue>): List<Cue> =
+        if (align == 1 && !italicSlash) cues else cues.map { SubtitleLook.align(it, align, italicSlash) }
+
     val hasExternal: Boolean get() = mode == Mode.EXTERNAL && external.isNotEmpty()
 
     fun applyStyle() {
@@ -45,11 +51,15 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
                 s.subtitleColor,
                 s.subtitleBackground,
                 Color.TRANSPARENT,
-                if (s.subtitleOutline) CaptionStyleCompat.EDGE_TYPE_OUTLINE else CaptionStyleCompat.EDGE_TYPE_NONE,
-                Color.BLACK,
-                if (s.subtitleBold) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
+                s.subtitleEdge,
+                s.subtitleEdgeColor,
+                SubtitleLook.typeface(host, s.subtitleFont, s.subtitleBold)
             )
         )
+        align = s.subtitleAlign
+        italicSlash = s.subtitleItalicSlash
+        // Görünüm değişince ekrandaki satırlar yeni ayarla yeniden çizilsin.
+        if (mode == Mode.EXTERNAL) lastKey = listOf(-1)
         view.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, s.subtitleSizeSp)
         view.setBottomPaddingFraction(s.subtitleBottomFraction)
     }
@@ -103,11 +113,11 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     fun onEmbeddedCues(cues: List<Cue>) {
         if (mode != Mode.EMBEDDED) return
         if (delayMs > 0) {
-            val r = Runnable { view.setCues(cues) }
+            val r = Runnable { view.setCues(styled(cues)) }
             pendingEmbedded += r
             handler.postDelayed(r, delayMs)
         } else {
-            view.setCues(cues)
+            view.setCues(styled(cues))
         }
     }
 
@@ -118,7 +128,7 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         val active = activeIndexes(t)
         if (active != lastKey) {
             lastKey = active
-            view.setCues(active.map { toCue(external[it]) })
+            view.setCues(styled(active.map { toCue(external[it]) }))
         }
     }
 

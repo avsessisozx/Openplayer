@@ -122,6 +122,15 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showEqualizer() {
         val fx = a.audioFx
         val root = a.vertical {}
+        fun rowButton(text: String, onClick: () -> Unit) = TextView(a).apply {
+            this.text = text
+            setTextColor(Color.WHITE)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            setPadding(0, a.dp(10), 0, a.dp(10))
+            setOnClickListener { onClick() }
+        }
+        root.addView(rowButton("Stereo modu: ${a.settings.stereoMode.label}") { showStereoMode() })
+        root.addView(rowButton("Yankı: ${AudioFx.reverbLabels[a.settings.reverbPreset]}") { showReverb() })
         val boostLabel = a.label("Ses artırma: %${a.settings.volumeBoostPercent}")
         root.addView(boostLabel)
         root.addView(a.seekBar(100, 200, a.settings.volumeBoostPercent) { v ->
@@ -442,17 +451,61 @@ class PlayerMenus(private val a: PlayerActivity) {
         val speeds = listOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f, 4f)
         val cur = a.player.playbackParameters.speed
         val sel = speeds.indexOfFirst { abs(it - cur) < 0.01f }
-        a.showChoice("Oynatma hızı", speeds.map { "${it}x" }, sel) { a.setSpeed(speeds[it]) }
+        val labels = speeds.map { "${it}x" } + "Özel…"
+        a.showChoice("Oynatma hızı", labels, sel) { i ->
+            if (i < speeds.size) a.setSpeed(speeds[i]) else showCustomSpeed()
+        }
+    }
+
+    /** 0.25x – 4.00x arası, 0.05 adımlı serbest hız. */
+    fun showCustomSpeed() {
+        val cur = (a.player.playbackParameters.speed * 100).toInt().coerceIn(25, 400)
+        var value = cur - cur % 5
+        val root = a.vertical {}
+        val label = a.label("${"%.2f".format(value / 100f)}x", 22f)
+        label.gravity = Gravity.CENTER
+        root.addView(label, LinearLayout.LayoutParams(-1, -2))
+        root.addView(a.seekBar(5, 80, value / 5) { v ->
+            value = v * 5
+            label.text = "${"%.2f".format(value / 100f)}x"
+        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) })
+        PanelBuilder(a)
+            .setTitle("Özel hız")
+            .setView(root)
+            .setPositiveButton("Uygula") { _, _ -> a.setSpeed(value / 100f) }
+            .setNeutralButton("1.0x") { _, _ -> a.setSpeed(1f) }
+            .setNegativeButton("Vazgeç", null)
+            .show()
     }
 
     fun showSleepTimer() {
-        val options = listOf("Kapalı", "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika", "120 dakika", "Video bitince")
+        val options = listOf("Kapalı", "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika", "120 dakika", "Video bitince", "Özel süre…")
         a.showChoice("Uyku zamanlayıcısı", options, -1) { i ->
             when (i) {
                 0 -> a.setSleepTimer(0, false)
                 7 -> a.setSleepTimer(0, true)
+                8 -> a.showInput("Kaç dakika sonra dursun?", "Dakika (1-600)") { txt ->
+                    val m = txt.trim().toIntOrNull()
+                    if (m == null || m !in 1..600) a.toast("1 ile 600 arasında bir sayı girin") else a.setSleepTimer(m, false)
+                }
                 else -> a.setSleepTimer(listOf(0, 15, 30, 45, 60, 90, 120)[i], false)
             }
+        }
+    }
+
+    fun showStereoMode() {
+        val modes = StereoMode.entries
+        a.showChoice("Stereo modu", modes.map { it.label }, modes.indexOf(a.settings.stereoMode)) { i ->
+            a.settings.stereoMode = modes[i]
+            AudioBalance.update(a.settings)
+        }
+    }
+
+    fun showReverb() {
+        a.showChoice("Yankı (reverb)", AudioFx.reverbLabels, a.settings.reverbPreset) { i ->
+            a.audioFx.setReverb(i)
+            a.applyAuxEffect()
+            if (i > 0 && a.audioFx.reverbId == 0) a.toast("Bu cihaz yankı efektini desteklemiyor")
         }
     }
 
@@ -626,6 +679,8 @@ class PlayerMenus(private val a: PlayerActivity) {
                 item(R.drawable.ic_lock, "Çocuk kilidi") { a.startKidsLock() },
                 item(R.drawable.ic_tune, "Ses ayarları") { showEqualizer() },
                 item(R.drawable.ic_headphones, "Ses gecikmesi") { showAudioDelay() },
+                item(R.drawable.ic_music_note, "Ses dosyası ekle") { a.pickExternalAudio() },
+                item(R.drawable.ic_timer, "Uyku zamanlayıcısı") { showSleepTimer() },
                 item(R.drawable.ic_timer, "Altyazı senkronu") { showSubtitleSync() },
                 item(R.drawable.ic_settings, "Ayarlar") { a.openSettings() },
             )
