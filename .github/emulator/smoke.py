@@ -306,6 +306,28 @@ def crawl(name, reset, limit=30, skip=()):
             record(f"{name} > {lab} > geri", 1.5)
 
 
+import atexit
+
+
+def _emergency_report():
+    """Betik yarıda kesilirse de adımlar ve çökmeler yazılsın."""
+    if os.path.exists(f"{OUT}/report.md"):
+        return
+    try:
+        with open(f"{OUT}/steps.tsv", "w") as fh:
+            for st in steps:
+                fh.write("\t".join(st) + "\n")
+        with open(f"{OUT}/crashes.txt", "w") as fh:
+            for st, txt in crashes:
+                fh.write(f"===== ADIM: {st}\n{txt}\n\n")
+            fh.write("===== ÇÖKME TAMPONU\n" + adb("logcat", "-d", "-b", "crash"))
+        open(f"{OUT}/report.md", "w").write(f"# Yarıda kalan test\nAdım: {len(steps)}  Çökme: {len(crashes)}\n")
+    except Exception:
+        pass
+
+
+atexit.register(_emergency_report)
+
 # ---------------------------------------------------------------- kurulum
 adb("wait-for-device")
 sh("settings put global window_animation_scale 0; settings put global transition_animation_scale 0; settings put global animator_duration_scale 0")
@@ -487,102 +509,114 @@ def resumed_activity():
     return sh("dumpsys activity activities | grep -m1 -E 'mResumedActivity|topResumedActivity'")
 
 
-# 1) Uzun bas = hızlı oynat
-write_prefs({})
-adb("logcat", "-c")
-play("/sdcard/Movies/Test/Yatay video.mp4")
-w, h = cur_size()
-lp = subprocess.Popen(["adb", "shell", f"input swipe {w//2} {h//2} {w//2} {h//2} 3000"])
-time.sleep(1.6); shot("Uzun bas hızlı oynat (basılıyken)")
-lp.wait(timeout=20)
-time.sleep(0.8)
-lg = feat_log()
-feat("Uzun bas: hızlı oynatma açıldı", "fast on" in lg, lg.strip()[-200:])
-feat("Uzun bas: bırakınca normale döndü", "fast off" in lg, "")
-record("Uzun bas sonrası", 1)
-sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+def feature_tests():
+    # 1) Uzun bas = hızlı oynat
+    write_prefs({})
+    adb("logcat", "-c")
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    w, h = cur_size()
+    lp = subprocess.Popen(["adb", "shell", f"input swipe {w//2} {h//2} {w//2} {h//2} 3000"])
+    time.sleep(1.6); shot("Uzun bas hızlı oynat (basılıyken)")
+    lp.wait(timeout=20)
+    time.sleep(0.8)
+    lg = feat_log()
+    feat("Uzun bas: hızlı oynatma açıldı", "fast on" in lg, lg.strip()[-200:])
+    feat("Uzun bas: bırakınca normale döndü", "fast off" in lg, "")
+    record("Uzun bas sonrası", 1)
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 
-# 2) Kaldığı yerden devam: "Sor"
-write_prefs({"resume_mode": ("string", "ASK")})
-play("/sdcard/Movies/Test/Yatay video.mp4")
-time.sleep(8)
-sh("input keyevent KEYCODE_BACK"); time.sleep(2)
-adb("logcat", "-c")
-play("/sdcard/Movies/Test/Yatay video.mp4")
-time.sleep(1.5)
-root = dump(); shot("Devam sorusu")
-c = find_text_any(root, "Devam et")
-feat("Devam et sorusu göründü", c is not None or "resume ask" in feat_log(), " | ".join(texts(root)[:12]))
-if c:
-    tap(c); record("Devam et seçildi", 2)
-sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    # 2) Kaldığı yerden devam: "Sor"
+    write_prefs({"resume_mode": ("string", "ASK")})
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    time.sleep(8)
+    sh("input keyevent KEYCODE_BACK"); time.sleep(2)
+    adb("logcat", "-c")
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    time.sleep(1.5)
+    root = dump(); shot("Devam sorusu")
+    c = find_text_any(root, "Devam et")
+    feat("Devam et sorusu göründü", c is not None or "resume ask" in feat_log(), " | ".join(texts(root)[:12]))
+    if c:
+        tap(c); record("Devam et seçildi", 2)
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 
-# 3) Köşe bilgisi, sarma düğmeleri, altyazı hizalama/italik/yazı tipi/kenar
-write_prefs({"osd_info": ("string", "BOTH"), "seek_buttons": ("boolean", "true"), "sub_align": ("int", "0"),
-             "sub_italic_slash": ("boolean", "true"), "sub_edge": ("int", "2"), "sub_font": ("string", "serif"),
-             "top_bar_clock": ("boolean", "true")})
-adb("logcat", "-c")
-play("/sdcard/Movies/Test/Bolumlu.mkv")
-time.sleep(2); shot("Köşe bilgisi + sol hizalı altyazı")
-time.sleep(5); shot("Eğik çizgi satırı (italik beklenir)")
-feat("Köşede saat/pil/süre görünüyor", "osd visible" in feat_log(), feat_log().strip()[-160:])
-sh("input keyevent KEYCODE_MEDIA_PAUSE"); time.sleep(0.8)
-w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
-root = dump(); shot("Kontroller: sarma düğmeleri")
-feat("İleri/geri sarma düğmeleri var", find_text(root, "İleri sar") is not None and find_text(root, "Geri sar") is not None)
-c = find_text(root, "İleri sar")
-if c:
-    tap(c); record("İleri sar düğmesi", 1.5)
-sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    # 3) Köşe bilgisi, sarma düğmeleri, altyazı hizalama/italik/yazı tipi/kenar
+    write_prefs({"osd_info": ("string", "BOTH"), "seek_buttons": ("boolean", "true"), "sub_align": ("int", "0"),
+                 "sub_italic_slash": ("boolean", "true"), "sub_edge": ("int", "2"), "sub_font": ("string", "serif"),
+                 "top_bar_clock": ("boolean", "true")})
+    adb("logcat", "-c")
+    play("/sdcard/Movies/Test/Bolumlu.mkv")
+    time.sleep(2); shot("Köşe bilgisi + sol hizalı altyazı")
+    time.sleep(5); shot("Eğik çizgi satırı (italik beklenir)")
+    feat("Köşede saat/pil/süre görünüyor", "osd visible" in feat_log(), feat_log().strip()[-160:])
+    sh("input keyevent KEYCODE_MEDIA_PAUSE"); time.sleep(0.8)
+    w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
+    root = dump(); shot("Kontroller: sarma düğmeleri")
+    feat("İleri/geri sarma düğmeleri var", find_text(root, "İleri sar") is not None and find_text(root, "Geri sar") is not None)
+    c = find_text(root, "İleri sar")
+    if c:
+        tap(c); record("İleri sar düğmesi", 1.5)
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 
-# 4) Ses: ters stereo + yankı + yumuşak başlatma, tek dokunuş = oynat/duraklat
-write_prefs({"reverse_stereo": ("boolean", "true"), "reverb_preset": ("int", "3"), "audio_fade": ("boolean", "true"),
-             "tap_action": ("string", "PLAY_PAUSE")})
-adb("logcat", "-c")
-play("/sdcard/Movies/Test/Yatay video.mp4")
-w, h = cur_size(); tap((w // 2, h // 2))
-record("Tek dokunuş = duraklat (ses efektleri açık)", 2, feat_log().strip()[-200:])
-tap((w // 2, h // 2)); record("Tek dokunuş = oynat", 2)
-sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    # 4) Ses: ters stereo + yankı + yumuşak başlatma, tek dokunuş = oynat/duraklat
+    write_prefs({"reverse_stereo": ("boolean", "true"), "reverb_preset": ("int", "3"), "audio_fade": ("boolean", "true"),
+                 "tap_action": ("string", "PLAY_PAUSE")})
+    adb("logcat", "-c")
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    w, h = cur_size(); tap((w // 2, h // 2))
+    record("Tek dokunuş = duraklat (ses efektleri açık)", 2, feat_log().strip()[-200:])
+    tap((w // 2, h // 2)); record("Tek dokunuş = oynat", 2)
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 
-# 5) Geri tuşuna iki kez basarak çık, bitince listeye dön
-write_prefs({"double_back_exit": ("boolean", "true"), "back_to_list": ("boolean", "true")})
-play("/sdcard/Movies/Test/Dikey video.mp4")
-sh("input keyevent KEYCODE_BACK"); time.sleep(1)
-r1 = resumed_activity()
-sh("input keyevent KEYCODE_BACK"); time.sleep(1.5)
-r2 = resumed_activity()
-feat("Geri: ilk basışta kapanmadı", "PlayerActivity" in r1, r1.strip()[-120:])
-feat("Geri: ikinci basışta kapandı", "PlayerActivity" not in r2, r2.strip()[-120:])
-play("/sdcard/Movies/Test/Dikey video.mp4")
-time.sleep(12)
-r3 = resumed_activity()
-feat("Bitince listeye döndü", "PlayerActivity" not in r3, r3.strip()[-120:])
-record("Bitince listeye dön", 1)
+    # 5) Geri tuşuna iki kez basarak çık, bitince listeye dön
+    write_prefs({"double_back_exit": ("boolean", "true"), "back_to_list": ("boolean", "true")})
+    play("/sdcard/Movies/Test/Dikey video.mp4")
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    r1 = resumed_activity()
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1.5)
+    r2 = resumed_activity()
+    feat("Geri: ilk basışta kapanmadı", "PlayerActivity" in r1, r1.strip()[-120:])
+    feat("Geri: ikinci basışta kapandı", "PlayerActivity" not in r2, r2.strip()[-120:])
+    play("/sdcard/Movies/Test/Dikey video.mp4")
+    time.sleep(12)
+    r3 = resumed_activity()
+    feat("Bitince listeye döndü", "PlayerActivity" not in r3, r3.strip()[-120:])
+    record("Bitince listeye dön", 1)
 
-# 6) Ayar sayfaları: her sayfada her satıra dokun (üst ve kaydırılmış alt kısım)
-write_prefs({})
-
-
-def open_settings_page(title, scrolls=0):
-    def go():
-        open_settings()
-        c = find_text(dump(), title)
-        if c:
-            tap(c); time.sleep(2)
-            for _ in range(scrolls):
-                sh(f"input swipe {screen[0]//2} {int(screen[1]*0.8)} {screen[0]//2} {int(screen[1]*0.25)} 400"); time.sleep(1)
-    return go
+    # 6) Ayar sayfaları: her sayfada her satıra dokun (üst ve kaydırılmış alt kısım)
+    write_prefs({})
 
 
-for page in ("Oynatıcı", "Hareketler", "Ses", "Altyazı", "Liste ve dosyalar"):
-    crawl(f"Ayarlar › {page}", open_settings_page(page), limit=18, skip=("Ayarları içe aktar", "Tema içe aktar", "Tüm dosyalara erişim"))
-    crawl(f"Ayarlar › {page} (alt)", open_settings_page(page, 2), limit=18, skip=("dosyadan", "Dosyadan", "Tüm dosyalara erişim"))
+    def open_settings_page(title, scrolls=0):
+        def go():
+            open_settings()
+            c = find_text(dump(), title)
+            if c:
+                tap(c); time.sleep(2)
+                for _ in range(scrolls):
+                    sh(f"input swipe {screen[0]//2} {int(screen[1]*0.8)} {screen[0]//2} {int(screen[1]*0.25)} 400"); time.sleep(1)
+        return go
 
-# Ana ekranda aşağı çekerek yenile
-start_main()
-sh(f"input swipe {screen[0]//2} {int(screen[1]*0.3)} {screen[0]//2} {int(screen[1]*0.8)} 500")
-record("Aşağı çekerek yenile", 3)
+
+    for page in ("Oynatıcı", "Hareketler", "Ses", "Altyazı", "Liste ve dosyalar"):
+        crawl(f"Ayarlar › {page}", open_settings_page(page), limit=18, skip=("Ayarları içe aktar", "Tema içe aktar", "Tüm dosyalara erişim"))
+        crawl(f"Ayarlar › {page} (alt)", open_settings_page(page, 2), limit=18, skip=("dosyadan", "Dosyadan", "Tüm dosyalara erişim"))
+
+    # Ana ekranda aşağı çekerek yenile
+    start_main()
+    sh(f"input swipe {screen[0]//2} {int(screen[1]*0.3)} {screen[0]//2} {int(screen[1]*0.8)} 500")
+    record("Aşağı çekerek yenile", 3)
+
+
+
+try:
+    feature_tests()
+except Exception as e:
+    import traceback
+    tb = traceback.format_exc()
+    print(tb, flush=True)
+    steps.append(("Özellik testleri yarıda kaldı", "SORUN", tb.strip().splitlines()[-1][:300]))
+    open(f"{OUT}/feature_error.txt", "w").write(tb)
 
 # Rastgele dokunma testi (monkey)
 start_main()

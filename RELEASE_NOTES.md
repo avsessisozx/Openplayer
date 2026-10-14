@@ -1,3 +1,42 @@
+# 1.0.0-beta11
+
+MX Player'ın ayar ve menüleri tek tek karşılaştırıldı; eksik kalanlar kendi kodumuzla eklendi. Android 14 emülatöründe otomatik testten geçti.
+
+**Oynatma**
+- **Uzun bas = hızlı oynat:** ekrana basılı tutunca video 2x hızlanır, bırakınca normale döner (Ayarlar → Oynatıcı: 1.5x–4x).
+- **Kaldığı yerden devam:** Evet / Hayır / **Her seferinde sor**. Listede sonraki videoya geçince de kaldığı yerden devam eder ("Yalnız ilk videoda" seçeneğiyle kapatılabilir).
+- **Varsayılan hız** ayarı ve hız menüsünde **Özel…** (0.25x–4x, 0.05 adım). Hız değişikliği artık sonraki videolara taşınmaz.
+- **Bitince listeye dön**, **çıkmak için geri tuşuna iki kez bas**, **hatalı videoyu atla** seçenekleri.
+- **Uyku zamanlayıcısında özel süre** (1–600 dk); ⋮ menüsüne de eklendi.
+
+**Ekran ve kontroller**
+- **Köşede sürekli bilgi:** saat, pil ve/veya geçen süre (kontroller gizliyken).
+- Kontroller açıkken **üst çubukta saat ve pil**.
+- **±10 sn sarma düğmeleri** (aralık 5–60 sn) ve önceki/sonraki düğmelerini gizleme.
+- **Tek dokunma davranışı:** arayüzü göster/gizle, göster sonra duraklat, ikisi birden ya da yalnız oynat/duraklat.
+- **Kilitlenince ekran yönü de sabitlenir** (kapatılabilir), **parlaklığı hatırla**, **ekranı açık tut**, **açılışta kontrolleri göster**.
+- **Yeni en boy oranları:** Özgün boyut (%100), 1:1, 5:4, 16:10, 18:9, 2.35:1, 2.39:1.
+
+**Ses**
+- **Stereo modu:** stereo / mono / **ters stereo** (sol ↔ sağ).
+- **Yankı (reverb):** küçük oda … sahne (cihaz desteğine bağlı).
+- **Ses dosyası ekle:** videoya ayrı bir ses dosyası (ör. başka dilde dublaj) bağlanır (⋮ → Ses dosyası ekle).
+- **Sesi yumuşak başlat:** oynatma başlarken ve sarınca ani ses patlaması olmaz.
+- **Tek başına çal** (başka uygulama/arama gelince dur) ve **kulaklık çıkınca duraklat** artık açılıp kapatılabilir.
+
+**Altyazı**
+- **Yazı tipi:** Varsayılan, Sans, Serif, Eş aralıklı, Dar, Orta kalın ya da **kendi .ttf/.otf dosyanız**.
+- **Kenar:** yok, çizgi, gölge, kabartma, gömme ve **kenar rengi**.
+- **Hizalama:** sol / orta / sağ. Daha fazla yazı boyutu ve renk.
+- **"/" ile başlayan satırları italik yap**, **varsayılan altyazı gecikmesi**.
+
+**Liste**
+- **Her klasörde son izlenen video işaretlenir**; isteğe bağlı olarak klasör açılınca oraya kaydırılır.
+- **Aşağı çekerek yenile**, yüzen oynat düğmesini gizleme.
+- Ayarlar ana sayfasında **Tüm ayarları sıfırla**.
+
+---
+
 # 1.0.0-beta10
 
 Hata düzeltme sürümü. Android 14 emülatöründe otomatik testten geçti (çökme yok).

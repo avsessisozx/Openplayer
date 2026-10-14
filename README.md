@@ -7,7 +7,7 @@ Android için **açık kaynak, reklamsız** bir video oynatıcı. Amaç: popüle
 
 ## İndirme
 
-[Sürümler sayfasından](../../releases) `OpenPlayer-debug.apk` dosyasını indirip kurun (Android 7.0+). "Bilinmeyen kaynaklardan kurulum" izni gerekebilir.
+[Sürümler sayfasından](../../releases) `OpenPlayer.apk` dosyasını indirip kurun (Android 7.0+). "Bilinmeyen kaynaklardan kurulum" izni gerekebilir.
 
 > **Durum: beta.** Kod GitHub Actions'ta derleniyor ancak gerçek cihazlarda henüz kapsamlı sınanmadı. Hataları [Issues](../../issues) bölümünden bildirin.
 
@@ -15,18 +15,20 @@ Android için **açık kaynak, reklamsız** bir video oynatıcı. Amaç: popüle
 
 **Oynatma**
 - Üç çözücü modu: **HW** (MediaCodec), **HW+** (MediaCodec + FFmpeg uzantısı: AC3, E-AC3, DTS, TrueHD, FLAC, Opus…), **SW** (FFmpeg tercihli yazılım çözme). Çalışırken değiştirilebilir.
-- Hız (0.25x–4x), A-B tekrar, tekrarla/karıştır, uyku zamanlayıcısı, ekolayzır, %200'e kadar ses artırma, gece modu
-- Ayna ve dikey çevirme, en-boy oranı seçimi, çimdikle yakınlaştırma ve kaydırma, ekran döndürme kipleri, ekran görüntüsü
+- Hız (0.25x–4x, özel hız), **uzun basınca 2x hızlı oynatma**, A-B tekrar, tekrarla/karıştır, uyku zamanlayıcısı, gece modu
+- Ekolayzır, %200'e kadar ses artırma, bas/genişletme, ters stereo/mono, yankı, ses gecikmesi, videoya ayrı ses dosyası ekleme
+- Kaldığı yerden devam (evet/hayır/sor), köşede saat-pil-süre, ±N sn sarma düğmeleri
+- Ayna ve dikey çevirme, en-boy oranı seçimi (özgün boyut, 1:1 … 2.39:1), çimdikle yakınlaştırma ve kaydırma, ekran döndürme kipleri, ekran görüntüsü
 - Arka planda oynatma (bildirim ve medya tuşlarıyla), Picture-in-Picture, ekran kilidi ve çocuk kilidi (4 köşeye sırayla dokunma)
 - Klavye, fare tekerleği ve Bluetooth/kablolu medya tuşları
 
 **Ekran hareketleri**
-- Ekran 4 bölgeye ayrılır (sol/sağ × üst/alt). Her bölgenin dikey kaydırması ayarlardan seçilir: parlaklık, ses, hız
+- Ekran sol/orta/sağ şeritlere ayrılır, sınırlar sürüklenerek ayarlanır. Her şeridin dikey kaydırması seçilir: parlaklık, ses, hız, sarma, altyazı konumu/boyutu, yakınlaştırma
 - Yatay kaydırma ile sarma, çift dokunma ile oynat/duraklat ya da ileri/geri atlama
 
 **Altyazı**
 - Okunan biçimler: SRT, WebVTT, SSA/ASS (renk, kalın/italik/altı çizili, konum), SAMI, MicroDVD, MPL2, TMPlayer; gömülü altyazı parçaları
-- Elle gecikme/öne alma ayarı, otomatik karakter kodlaması (UTF-8 / Windows-1254 yedekli), boyut/renk/arka plan/kenar çizgisi/konum ayarları
+- Elle gecikme/öne alma ayarı, otomatik karakter kodlaması (UTF-8 / Windows-1254 yedekli), boyut/renk/arka plan/kenar/konum/hizalama ayarları, kendi yazı tipiniz (.ttf/.otf)
 - Altyazı hareketleri: yatay kaydırma önceki/sonraki satır, dikey kaydırma konum, çimdik boyut
 - Çevrimiçi altyazı arama (OpenSubtitles.com). Ayarlar → Altyazı bölümüne [kendi API anahtarınızı](https://www.opensubtitles.com/consumers) girmeniz gerekir
 
@@ -38,10 +40,9 @@ Android için **açık kaynak, reklamsız** bir video oynatıcı. Amaç: popüle
 ## Bilinen eksikler
 
 - **Tam ASS/SSA işleme (libass):** Stil, renk ve konum desteklenir; ancak animasyonlar, gelişmiş efektler, çizim komutları ve gömülü yazı tipleri yoktur.
-- **Ses gecikmesi (A/V senkron kaydırma)** henüz yok. Altyazı gecikmesi vardır.
 - Resim tabanlı altyazılar (VobSub, PGS) ve Teletext çizilmez.
 - Ağdaki videolar için yan dosya altyazısı otomatik bulunmaz; oynatıcıdan elle eklenebilir.
-- Chromecast, video kesme, favoriler ve özel çözücü eklentileri yok.
+- Chromecast, video kenar taraması (deinterlace) ve özel çözücü eklentileri yok.
 - SMB paylaşım listesi çıkarılamaz; paylaşım adı elle girilir.
 
 ## Derleme
