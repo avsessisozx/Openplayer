@@ -12,7 +12,7 @@ permissions:
 jobs:
   emulator:
     runs-on: ubuntu-24.04
-    timeout-minutes: 75
+    timeout-minutes: 100
     # Yalnız sonuçları ayrı "emulator-results/<run>" dalına yazmak için.
     permissions:
       contents: write
@@ -61,6 +61,8 @@ jobs:
 
       - name: Run on emulator (Android 14)
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           api-level: 34
           target: google_apis

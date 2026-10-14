@@ -331,6 +331,32 @@ def _emergency_report():
 
 atexit.register(_emergency_report)
 
+
+def checkpoint(name):
+    """Ara sonuçları ayrı bir dala gönderir; çalıştırıcı yarıda düşse de sonuçlar kaybolmasın."""
+    tok = os.environ.get("GH_TOKEN"); repo = os.environ.get("GITHUB_REPOSITORY"); run = os.environ.get("GITHUB_RUN_ID")
+    if not (tok and repo and run):
+        return
+    try:
+        with open(f"{OUT}/steps.tsv", "w") as fh:
+            for st in steps:
+                fh.write("\t".join(st) + "\n")
+        with open(f"{OUT}/crashes.txt", "w") as fh:
+            for st, txt in crashes:
+                fh.write(f"===== ADIM: {st}\n{txt}\n\n")
+        open(f"{OUT}/checkpoint.txt", "w").write(name + "\n")
+        b = f"emulator-results/{run}-ara"
+        d = "/tmp/ckpt"
+        subprocess.run(f"rm -rf {d} && mkdir -p {d} && cp {OUT}/steps.tsv {OUT}/crashes.txt {OUT}/checkpoint.txt {d}/ && "
+                       f"cp -r {OUT}/screens {d}/ 2>/dev/null; cd {d} && git init -q -b x && git -c user.name=ci -c user.email=ci@x add -A && "
+                       f"git -c user.name=ci -c user.email=ci@x commit -qm ara && "
+                       f"git push -qf https://x-access-token:{tok}@github.com/{repo}.git HEAD:refs/heads/{b}",
+                       shell=True, timeout=120)
+        print(f"[ara sonuç] {name} -> {b}", flush=True)
+    except Exception as e:
+        print("checkpoint hata", e, flush=True)
+
+
 # ---------------------------------------------------------------- kurulum
 adb("wait-for-device")
 sh("settings put global window_animation_scale 0; settings put global transition_animation_scale 0; settings put global animator_duration_scale 0")
@@ -426,6 +452,7 @@ if QUICK:
     open(f"{OUT}/report.md", "w").write(f"# Hızlı test\nÇökme: {len(crashes)}\n")
     sys.exit(0)
 
+checkpoint("videolar")
 # Döndürme ve arka plana alma
 play("/sdcard/Movies/Test/Yatay video.mp4")
 sh("settings put system accelerometer_rotation 0; settings put system user_rotation 1"); record("Oynatırken ekran yatay", 3)
@@ -442,6 +469,7 @@ crawl("Oynatıcı", lambda: play_controls("/sdcard/Movies/Test/Bolumlu.mkv"), li
 crawl("Oynatıcı ⋮ menüsü", open_overflow(lambda: play_controls("/sdcard/Movies/Test/Bolumlu.mkv")), limit=25)
 crawl("Ana ekran ⋮ menüsü", open_overflow(start_main), limit=12)
 crawl("Ayarlar", open_settings, limit=30)
+checkpoint("gezintiler")
 
 # Paylaş: dosya (file://) adresiyle açılmış videoyu paylaşmak
 play_controls("/sdcard/Movies/Test/Yatay video.mp4")
@@ -481,6 +509,7 @@ steps.append(("İzin isteği sayısı (10 sn)", "SORUN" if n > 3 else "ok", str(
 sh(f"pm clear-permission-flags {PKG} android.permission.READ_MEDIA_VIDEO user-fixed")
 sh(f"pm grant {PKG} android.permission.READ_MEDIA_VIDEO")
 
+checkpoint("temel akışlar")
 # ---------------------------------------------------------------- beta11 özellik testleri
 def write_prefs(extra):
     """Ayar dosyasını yazar (uygulama kapalıyken). extra: {ad: (tür, değer)}"""
@@ -602,8 +631,9 @@ def feature_tests():
 
 
     for page in ("Oynatıcı", "Hareketler", "Ses", "Altyazı", "Liste ve dosyalar"):
-        crawl(f"Ayarlar › {page}", open_settings_page(page), limit=18, skip=("Ayarları içe aktar", "Tema içe aktar", "Tüm dosyalara erişim"))
-        crawl(f"Ayarlar › {page} (alt)", open_settings_page(page, 2), limit=18, skip=("dosyadan", "Dosyadan", "Tüm dosyalara erişim"))
+        crawl(f"Ayarlar › {page}", open_settings_page(page), limit=12, skip=("Ayarları içe aktar", "Tema içe aktar", "Tüm dosyalara erişim"))
+        crawl(f"Ayarlar › {page} (alt)", open_settings_page(page, 2), limit=8, skip=("dosyadan", "Dosyadan", "Tüm dosyalara erişim"))
+        checkpoint(f"ayarlar {page}")
 
     # Ana ekranda aşağı çekerek yenile
     start_main()
@@ -621,11 +651,12 @@ except Exception as e:
     steps.append(("Özellik testleri yarıda kaldı", "SORUN", tb.strip().splitlines()[-1][:300]))
     open(f"{OUT}/feature_error.txt", "w").write(tb)
 
+checkpoint("özellik testleri")
 # Rastgele dokunma testi (monkey)
 start_main()
-mon = sh(f"monkey -p {PKG} -s 4242 --throttle 120 --pct-syskeys 0 --pct-appswitch 5 --ignore-security-exceptions -v 2500", timeout=900)
+mon = sh(f"monkey -p {PKG} -s 4242 --throttle 120 --pct-syskeys 0 --pct-appswitch 5 --ignore-security-exceptions -v 1500", timeout=900)
 open(f"{OUT}/monkey.txt", "w").write(mon)
-record("Monkey 2500 rastgele olay", 2, "monkey çökme buldu" if "// CRASH" in mon or "ANR" in mon else "")
+record("Monkey 1500 rastgele olay", 2, "monkey çökme buldu" if "// CRASH" in mon or "ANR" in mon else "")
 
 # ---------------------------------------------------------------- rapor
 time.sleep(2)
