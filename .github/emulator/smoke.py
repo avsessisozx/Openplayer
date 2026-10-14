@@ -183,7 +183,7 @@ def start_main():
     # Önceki adımda açık kalan dosya seçici (documentsui) ana ekranı örtmesin.
     sh("am force-stop com.google.android.documentsui")
     sh(f"am force-stop {PKG}")
-    sh(f"am start -W -n {PKG}/.MainActivity", timeout=40)
+    sh(f"am start -W -f 0x10008000 -n {PKG}/.MainActivity", timeout=40)
     time.sleep(3)
 
 
@@ -200,7 +200,7 @@ def start_music():
 def play(path, mime="video/*"):
     sh("am force-stop com.google.android.documentsui")
     sh(f"am force-stop {PKG}")
-    sh(f"am start -W -a android.intent.action.VIEW -t '{mime}' -d 'file://{path}' -n {PKG}/.PlayerActivity", timeout=40)
+    sh(f"am start -W -f 0x10008000 -a android.intent.action.VIEW -t '{mime}' -d 'file://{path}' -n {PKG}/.PlayerActivity", timeout=40)
     time.sleep(4)
 
 

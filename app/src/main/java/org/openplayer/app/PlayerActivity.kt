@@ -107,7 +107,7 @@ class PlayerActivity : AppCompatActivity() {
     /** Videoya ayrı bir ses dosyası ekler (örn. farklı dilde dublaj). */
     fun pickExternalAudio() {
         if (currentUri == null) return
-        audioPicker.launch(arrayOf("audio/*", "video/*", "application/octet-stream"))
+        audioPicker.launch(arrayOf("audio/*", "application/octet-stream"))
     }
 
     private var pendingExternalAudio = false
