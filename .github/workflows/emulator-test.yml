@@ -81,7 +81,7 @@ jobs:
           cp build.log out/ 2>/dev/null || true
           cat out/report.md 2>/dev/null >> "$GITHUB_STEP_SUMMARY" || true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: emulator-results
