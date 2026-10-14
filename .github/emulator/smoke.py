@@ -180,6 +180,8 @@ def record(step, wait=2.0, note=""):
 
 
 def start_main():
+    # Önceki adımda açık kalan dosya seçici (documentsui) ana ekranı örtmesin.
+    sh("am force-stop com.google.android.documentsui")
     sh(f"am force-stop {PKG}")
     sh(f"am start -W -n {PKG}/.MainActivity", timeout=40)
     time.sleep(3)
@@ -196,6 +198,7 @@ def start_music():
 
 
 def play(path, mime="video/*"):
+    sh("am force-stop com.google.android.documentsui")
     sh(f"am force-stop {PKG}")
     sh(f"am start -W -a android.intent.action.VIEW -t '{mime}' -d 'file://{path}' -n {PKG}/.PlayerActivity", timeout=40)
     time.sleep(4)
@@ -534,7 +537,7 @@ def feature_tests():
     play("/sdcard/Movies/Test/Yatay video.mp4")
     time.sleep(1.5)
     root = dump(); shot("Devam sorusu")
-    c = find_text_any(root, "Devam et")
+    c = find_text_any(root, "Devam et", "DEVAM ET")
     feat("Devam et sorusu göründü", c is not None or "resume ask" in feat_log(), " | ".join(texts(root)[:12]))
     if c:
         tap(c); record("Devam et seçildi", 2)
