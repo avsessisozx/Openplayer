@@ -1,0 +1,224 @@
+Ana ekran (ilk açılış)	ok	
+Ana ekran yazıları	bilgi	Klasörler | Videolar | Müzik | 6 | Test | 6 video | Son oynatılanı aç
+Video aç: Yatay video.mp4	ok	
+Video kontrolleri: Yatay video.mp4	ok	
+Video yatay kaydırma (sarma): Yatay video.mp4	ok	
+Video kapat: Yatay video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Dikey video.mp4	ok	
+Video kontrolleri: Dikey video.mp4	ok	
+Video yatay kaydırma (sarma): Dikey video.mp4	ok	
+Video kapat: Dikey video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Bolumlu.mkv	ok	bölüm + altyazı
+Video kontrolleri: Bolumlu.mkv	ok	
+Video yatay kaydırma (sarma): Bolumlu.mkv	ok	
+Video kapat: Bolumlu.mkv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: HEVC 10bit.mp4	ok	çözücü zinciri
+Video kontrolleri: HEVC 10bit.mp4	ok	
+Video yatay kaydırma (sarma): HEVC 10bit.mp4	ok	
+Video kapat: HEVC 10bit.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Eski bicim.wmv	ok	VLC yedeği beklenir
+Video kontrolleri: Eski bicim.wmv	ok	
+Video yatay kaydırma (sarma): Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Bozuk dosya.mp4	ok	hata mesajı beklenir
+Video kontrolleri: Bozuk dosya.mp4	ok	
+Video yatay kaydırma (sarma): Bozuk dosya.mp4	ok	
+Video kapat: Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Altyazı ekran görüntüleri: Bolumlu.mkv	bilgi	ekranda 'Merhaba…' ve 'İkinci satır' görünmeli
+Altyazı ekran görüntüleri: Yatay video.mp4	bilgi	ekranda 'Merhaba…' ve 'İkinci satır' görünmeli
+Bozuk dosya: hata mesajı	ok	Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir. (ön plan: org.openplayer.app)
+Bozuk dosya sonucu	ok	Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir.
+Oynatırken ekran yatay	ok	
+Oynatırken ekran dikey	ok	
+Oynatırken ana ekrana dön (PiP olabilir)	ok	ön planda: com.google.android.apps.nexuslauncher
+Uygulamaya geri dön	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran: 5 tıklanabilir öğe	bilgi	ImageView | ImageView | Müzik | 6 | Son oynatılanı aç
+Ana ekran > ImageView	ok	
+Ana ekran > ImageView > geri	ok	
+Ana ekran > ImageView	ok	
+Ana ekran > ImageView > geri	ok	
+Ana ekran > Müzik	ok	
+Ana ekran > Müzik > geri	ok	
+Ana ekran > 6	ok	
+Ana ekran > 6 > geri	ok	
+Ana ekran > Son oynatılanı aç	ok	
+Ana ekran > Son oynatılanı aç > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik sekmesi	ok	
+Müzik: 20 tıklanabilir öğe	bilgi	ImageView | ImageView | ImageView | Listeler | Videolar | Kitaplık | Şarkılar | Albümler | Sanatçılar | Albüm sanatçıları | Şarkılar | Klasörler | Klasör hiyerarşisi | Albümler | Sanatçılar | Albüm sanatçıları | Tarzlar | Yıllar | Besteciler | Çalma listeleri
+Müzik > ImageView	ok	
+Müzik > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > ImageView	ok	
+Müzik > ImageView > geri	ok	
+Müzik > ImageView	ok	
+Müzik > ImageView > geri	ok	
+Müzik > Listeler	ok	
+Müzik > Listeler > geri	ok	
+Müzik > Videolar	ok	
+Müzik > Videolar > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Kitaplık	ok	
+Müzik > Kitaplık > geri	ok	
+Müzik > Şarkılar	ok	
+Müzik > Şarkılar > geri	ok	
+Müzik > Albümler	ok	
+Müzik > Albümler > geri	ok	
+Müzik > Sanatçılar	ok	
+Müzik > Sanatçılar > geri	ok	
+Müzik > Albüm sanatçıları	ok	
+Müzik > Albüm sanatçıları > geri	ok	
+Müzik > Şarkılar	ok	
+Müzik > Şarkılar > geri	ok	
+Müzik > Klasörler	ok	
+Müzik > Klasörler > geri	ok	
+Müzik > Klasör hiyerarşisi	ok	
+Müzik > Klasör hiyerarşisi > geri	ok	
+Müzik > Albümler	ok	
+Müzik > Albümler > geri	ok	
+Müzik > Sanatçılar	ok	
+Müzik > Sanatçılar > geri	ok	
+Müzik > Albüm sanatçıları	ok	
+Müzik > Albüm sanatçıları > geri	ok	
+Müzik > Tarzlar	ok	
+Müzik > Tarzlar > geri	ok	
+Müzik > Yıllar	ok	
+Müzik > Yıllar > geri	ok	
+Müzik > Besteciler	ok	
+Müzik > Besteciler > geri	ok	
+Müzik > Çalma listeleri	ok	
+Müzik > Çalma listeleri > geri	ok	
+Oynatıcı: 13 tıklanabilir öğe	bilgi	ImageView | ImageView | ImageView | DONANIM+ | ImageView | -0:11 | ImageView | ImageView | ImageView | ImageView | ImageView | ImageView | ImageView
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	
+Oynatıcı > DONANIM+	ok	
+Oynatıcı > DONANIM+ > geri	ok	
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	
+Oynatıcı > -0:11	ok	
+Oynatıcı > -0:11 > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	
+Oynatıcı > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü: 18 tıklanabilir öğe	bilgi	Listeler | En boy oranı | Özel stil | Yer imi | Bilgi | Bölümler | Kes | Paylaş | Ağ akışı | Çocuk kilidi | Ses ayarları | Ses gecikmesi | Ses dosyası ekle | Uyku zamanlayıcısı | Altyazı senkronu | Ayarlar | Kısayollar | Kalan süreyi göster
+Oynatıcı ⋮ menüsü > Listeler	ok	
+Oynatıcı ⋮ menüsü > Listeler > geri	ok	
+Oynatıcı ⋮ menüsü > En boy oranı	ok	
+Oynatıcı ⋮ menüsü > En boy oranı > geri	ok	
+Oynatıcı ⋮ menüsü > Özel stil	ok	
+Oynatıcı ⋮ menüsü > Özel stil > geri	ok	
+Oynatıcı ⋮ menüsü > Yer imi	ok	
+Oynatıcı ⋮ menüsü > Yer imi > geri	ok	
+Oynatıcı ⋮ menüsü > Bilgi	ok	
+Oynatıcı ⋮ menüsü > Bilgi > geri	ok	
+Oynatıcı ⋮ menüsü > Bölümler	ok	
+Oynatıcı ⋮ menüsü > Bölümler > geri	ok	
+Oynatıcı ⋮ menüsü > Kes	ok	
+Oynatıcı ⋮ menüsü > Kes > geri	ok	
+Oynatıcı ⋮ menüsü > Paylaş	ok	ön planda: com.android.intentresolver
+Oynatıcı ⋮ menüsü > Ağ akışı	süreç yok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Çocuk kilidi	ok	
+Oynatıcı ⋮ menüsü > Çocuk kilidi > geri	ok	
+Oynatıcı ⋮ menüsü > Ses ayarları	ok	
+Oynatıcı ⋮ menüsü > Ses ayarları > geri	ok	
+Oynatıcı ⋮ menüsü > Ses gecikmesi	ok	
+Oynatıcı ⋮ menüsü > Ses gecikmesi > geri	ok	
+Oynatıcı ⋮ menüsü > Ses dosyası ekle	ok	ön planda: com.google.android.documentsui
+Oynatıcı ⋮ menüsü > Uyku zamanlayıcısı	ok	
+Oynatıcı ⋮ menüsü > Uyku zamanlayıcısı > geri	ok	
+Oynatıcı ⋮ menüsü > Altyazı senkronu	ok	
+Oynatıcı ⋮ menüsü > Altyazı senkronu > geri	ok	
+Oynatıcı ⋮ menüsü > Ayarlar	ok	
+Oynatıcı ⋮ menüsü > Ayarlar > geri	ok	
+Oynatıcı ⋮ menüsü > Kısayollar	ok	
+Oynatıcı ⋮ menüsü > Kısayollar > geri	ok	
+Oynatıcı ⋮ menüsü > Kalan süreyi göster	ok	
+Oynatıcı ⋮ menüsü > Kalan süreyi göster > geri	ok	
+Ana ekran ⋮ menüsü: 5 tıklanabilir öğe	bilgi	ImageView | ImageView | Müzik | 6 | Son oynatılanı aç
+Ana ekran ⋮ menüsü > ImageView	ok	
+Ana ekran ⋮ menüsü > ImageView > geri	ok	
+Ana ekran ⋮ menüsü > ImageView	ok	
+Ana ekran ⋮ menüsü > ImageView > geri	ok	
+Ana ekran ⋮ menüsü > Müzik	ok	
+Ana ekran ⋮ menüsü > Müzik > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > 6	ok	
+Ana ekran ⋮ menüsü > 6 > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > Son oynatılanı aç	ok	
+Ana ekran ⋮ menüsü > Son oynatılanı aç > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar: 12 tıklanabilir öğe	bilgi	ImageView | Oynatıcı | Hareketler | Video ve çözücü | Ses | Altyazı | Çevrimiçi altyazı | Müzik çalar | Tema ve görünüm | Liste ve dosyalar | Ayarları dışa aktar | Ayarları içe aktar
+Ayarlar > ImageView	ok	
+Ayarlar > ImageView > geri	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Oynatıcı	ok	
+Ayarlar > Oynatıcı > geri	ok	
+Ayarlar > Hareketler	ok	
+Ayarlar > Hareketler > geri	ok	
+Ayarlar > Video ve çözücü	ok	
+Ayarlar > Video ve çözücü > geri	ok	
+Ayarlar > Ses	ok	
+Ayarlar > Ses > geri	ok	
+Ayarlar > Altyazı	ok	
+Ayarlar > Altyazı > geri	ok	
+Ayarlar > Çevrimiçi altyazı	ok	
+Ayarlar > Çevrimiçi altyazı > geri	ok	
+Ayarlar > Müzik çalar	ok	
+Ayarlar > Müzik çalar > geri	ok	
+Ayarlar > Tema ve görünüm	ok	
+Ayarlar > Tema ve görünüm > geri	ok	
+Ayarlar > Liste ve dosyalar	ok	
+Ayarlar > Liste ve dosyalar > geri	ok	
+Ayarlar > Ayarları dışa aktar	ok	ön planda: com.google.android.documentsui
+Ayarlar > Ayarları içe aktar	ok	ön planda: com.google.android.documentsui
+Dosya adresli videoyu paylaş	ok	file:// paylaşımı ön planda: com.android.intentresolver
+Paylaş sonucu	ok	ön plan: com.android.intentresolver
+Şarkı bulunamadı: Birinci Şarkı	bilgi	
+Müzik: şarkıya dokun	ok	
+Müzik çalarken video aç	ok	
+Videodan çık	ok	ön planda: com.google.android.apps.nexuslauncher
+Müziğe geri dön	ok	
+Müzik: başka şarkı çal (videodan sonra)	ok	
+Medya oturumu durumu	bilgi	state=PlaybackState {state=PLAYING(3), position=0, buffered position=24973, speed=1.0, updated=1453137, actions=7340027, custom actions=[], active item id=2, error=null}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=24528, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=24584, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+İzin kalıcı reddedildi, ana ekran 10 sn	ok	izin ekranı 1 kez açıldı ön planda: com.google.android.providers.media.module
+İzin isteği sayısı (10 sn)	ok	1
+Uzun bas: hızlı oynatma açıldı	ok	--------- beginning of main
+10-14 07:35:31.115 22356 22356 I OPFEAT  : fast on speed=2.0 prev=1.0
+10-14 07:35:33.759 22356 22356 I OPFEAT  : fast off speed=1.0
+Uzun bas: bırakınca normale döndü	ok	
+Uzun bas sonrası	ok	
+Devam et sorusu göründü	ok	Kaldığı yerden devam edilsin mi? | Son konum: 0:08 | BAŞTAN BAŞLA | DEVAM ET
+Devam et seçildi	ok	
+Köşede saat/pil/süre görünüyor	ok	--------- beginning of main
+10-14 07:36:12.481 22840 22840 I OPFEAT  : osd visible: 7:36 AM · %100 ⚡  0:00
+İleri/geri sarma düğmeleri var	ok	
+İleri sar düğmesi	ok	
+Tek dokunuş = duraklat (ses efektleri açık)	ok	--------- beginning of main
+10-14 07:36:35.340 23082 23082 I OPFEAT  : reverb preset=3 id=0
+10-14 07:36:35.686 23082 23082 I OPFEAT  : reverb preset=3 id=1843
+Tek dokunuş = oynat	ok	
+Geri: ilk basışta kapanmadı	ok	topResumedActivity=ActivityRecord{5bea136 u0 org.openplayer.app/.PlayerActivity t102}
+Geri: ikinci basışta kapandı	ok	u0 com.google.android.providers.media.module/com.android.providers.media.photopicker.PhotoPickerUserSelectActivity t102}
+Bitince listeye döndü	ok	u0 com.google.android.providers.media.module/com.android.providers.media.photopicker.PhotoPickerUserSelectActivity t102}
+Bitince listeye dön	ok	ön planda: com.google.android.providers.media.module
+Ayarlar › Oynatıcı: 0 tıklanabilir öğe	bilgi	
+Ayarlar › Oynatıcı (alt): 0 tıklanabilir öğe	bilgi	
+Ayarlar › Hareketler: 0 tıklanabilir öğe	bilgi	
+Ayarlar › Hareketler (alt): 0 tıklanabilir öğe	bilgi	
+Ayarlar › Ses: 0 tıklanabilir öğe	bilgi	
+Ayarlar › Ses (alt): 0 tıklanabilir öğe	bilgi	
+Ayarlar › Altyazı: 0 tıklanabilir öğe	bilgi	
+Ayarlar › Altyazı (alt): 0 tıklanabilir öğe	bilgi	
+Ayarlar › Liste ve dosyalar: 0 tıklanabilir öğe	bilgi	
+Ayarlar › Liste ve dosyalar (alt): 0 tıklanabilir öğe	bilgi	
+Aşağı çekerek yenile	süreç yok	ön planda: com.google.android.apps.nexuslauncher
+Monkey 2500 rastgele olay	ok	
