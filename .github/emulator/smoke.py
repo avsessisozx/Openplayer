@@ -384,6 +384,38 @@ adb("logcat", "-c")
 adb("logcat", "-b", "crash", "-c")
 logcat = subprocess.Popen(["adb", "logcat", "-v", "threadtime"], stdout=open(f"{OUT}/logcat.txt", "wb"))
 
+def settings_page(title, scrolls=0):
+    def go():
+        open_settings()
+        c = find_text(dump(), title)
+        if c:
+            tap(c); time.sleep(2)
+            for _ in range(scrolls):
+                sh(f"input swipe {screen[0]//2} {int(screen[1]*0.8)} {screen[0]//2} {int(screen[1]*0.25)} 400"); time.sleep(1)
+    return go
+
+
+if os.environ.get("SMOKE_ONLY") == "ayar":
+    for page in ("Altyazı", "Liste ve dosyalar", "Tema ve görünüm", "Video ve çözücü"):
+        crawl(f"Ayarlar › {page}", settings_page(page), limit=14, skip=("içe aktar", "Tüm dosyalara erişim"))
+        crawl(f"Ayarlar › {page} (alt)", settings_page(page, 2), limit=10, skip=("dosyadan", "Dosyadan", "içe aktar", "Tüm dosyalara erişim"))
+        crawl(f"Ayarlar › {page} (en alt)", settings_page(page, 4), limit=10, skip=("dosyadan", "Dosyadan", "içe aktar", "Tüm dosyalara erişim"))
+        checkpoint(f"ayarlar {page}")
+    start_main()
+    mon = sh(f"monkey -p {PKG} -s 777 --throttle 120 --pct-syskeys 0 --pct-appswitch 5 --ignore-security-exceptions -v 1500", timeout=900)
+    open(f"{OUT}/monkey.txt", "w").write(mon)
+    record("Monkey 1500 rastgele olay", 2, "monkey çökme buldu" if "// CRASH" in mon or "ANR" in mon else "")
+    logcat.terminate()
+    with open(f"{OUT}/steps.tsv", "w") as fh:
+        for st in steps:
+            fh.write("\t".join(st) + "\n")
+    with open(f"{OUT}/crashes.txt", "w") as fh:
+        for st, txt in crashes:
+            fh.write(f"===== ADIM: {st}\n{txt}\n\n")
+        fh.write("===== ÇÖKME TAMPONU\n" + adb("logcat", "-d", "-b", "crash"))
+    open(f"{OUT}/report.md", "w").write(f"# Ayar sayfaları testi\nAdım: {len(steps)}  Çökme: {len(crashes)}\n")
+    sys.exit(0)
+
 # ---------------------------------------------------------------- senaryolar
 start_main(); record("Ana ekran (ilk açılış)", 2)
 root = dump()
