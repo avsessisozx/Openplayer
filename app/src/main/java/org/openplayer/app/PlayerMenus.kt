@@ -637,6 +637,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         modes.forEach { labels += (if (a.vr == it) "✓ " else "") + it.label }
         if (a.vr != VrMode.NONE) {
             labels += if (a.vrSensorEnabled()) "Hareket sensörünü kapat" else "Hareket sensörüyle bak (deneysel)"
+            labels += if (a.vrCardboardEnabled()) "VR gözlük modunu kapat" else "VR gözlük modu (iki göz)"
             labels += "Bakış yönünü sıfırla"
             labels += "360° modundan çık"
         }
@@ -646,6 +647,7 @@ class PlayerMenus(private val a: PlayerActivity) {
                 when {
                     i < modes.size -> a.setVr(modes[i], manual = true)
                     labels[i].startsWith("Hareket") -> a.vrSetSensor(!a.vrSensorEnabled())
+                    labels[i].startsWith("VR gözlük") -> a.vrSetCardboard(!a.vrCardboardEnabled())
                     labels[i].startsWith("Bakış") -> a.vrReset()
                     else -> a.setVr(VrMode.NONE, manual = true)
                 }

@@ -85,6 +85,9 @@ object Vr360 {
 /**
  * Videoyu bir kürenin içinden gösteren GL yüzeyi. ExoPlayer'ın çıktısı [onSurface] ile verilen
  * yüzeye yazılır; bakış yönü [yaw]/[pitch]/[fov] ile (veya hareket sensörüyle) değişir.
+ *
+ * [cardboard] açıkken ekran ikiye bölünür: her göz için küre ayrı çizilir ve lens için
+ * barrel (fıçı) ön-distorsiyonu uygulanır; böylece telefon bir VR gözlüğüne yerleştirilebilir.
  */
 class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : GLSurfaceView(context), SensorEventListener {
 
@@ -97,9 +100,18 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             requestRender()
         }
 
+    /** VR gözlük (Cardboard) modu: iki göz yan yana + lens distorsiyonu. */
+    @Volatile var cardboard = false
+        set(value) {
+            field = value
+            requestRender()
+        }
+
     private var useSensor = false
     private val sensors = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val sensorMatrix = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+    /** "Bakış yönünü sıfırla" anında yakalanan sensör yöneliminin tersi; sonraki kareler buna göre. */
+    private val recenterMat = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
     private val tmpRot = FloatArray(16)
     private val tmpRemap = FloatArray(16)
     private var sensorOn = false
@@ -129,6 +141,8 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         yaw = 0f
         pitch = 0f
         fov = 90f
+        // Sensör açıksa o anki yönelimi yeni "ileri" kabul et.
+        synchronized(sensorMatrix) { Matrix.invertM(recenterMat, 0, sensorMatrix, 0) }
         requestRender()
     }
 
@@ -214,6 +228,8 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         private val mvp = FloatArray(16)
         private val tmp = FloatArray(16)
         private var aspect = 1f
+        private var surfaceW = 0
+        private var surfaceH = 0
         private var meshHalf = false
         private var vertices: FloatBuffer? = null
         private var indices: ShortBuffer? = null
@@ -223,6 +239,20 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         private var uCrop = 0
         private var aPos = 0
         private var aUv = 0
+
+        // Gözlük modu: lens distorsiyon geçişi ve göz başına ara doku (FBO).
+        private var distProgram = 0
+        private var dPos = 0
+        private var dUv = 0
+        private var uDistTex = 0
+        private var uLensCenter = 0
+        private var uK1 = 0
+        private var uK2 = 0
+        private var quad: FloatBuffer? = null
+        private var fbo = 0
+        private var fboTex = 0
+        private var fboW = 0
+        private var fboH = 0
 
         private val vs = """
             uniform mat4 uMvp;
@@ -246,6 +276,37 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             void main() { gl_FragColor = texture2D(uSampler, vUv); }
         """.trimIndent()
 
+        // Tam ekran dörtgen; göz dokusunu barrel distorsiyonla ekrana çizer.
+        private val distVs = """
+            attribute vec2 aPos;
+            attribute vec2 aUv;
+            varying vec2 vUv;
+            void main() {
+                vUv = aUv;
+                gl_Position = vec4(aPos, 0.0, 1.0);
+            }
+        """.trimIndent()
+
+        private val distFs = """
+            precision mediump float;
+            uniform sampler2D uTex;
+            uniform vec2 uLensCenter;
+            uniform float uK1;
+            uniform float uK2;
+            varying vec2 vUv;
+            void main() {
+                vec2 r = vUv - uLensCenter;
+                float r2 = dot(r, r);
+                float f = 1.0 + uK1 * r2 + uK2 * r2 * r2;
+                vec2 src = uLensCenter + r * f;
+                if (src.x < 0.0 || src.x > 1.0 || src.y < 0.0 || src.y > 1.0) {
+                    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                } else {
+                    gl_FragColor = texture2D(uTex, src);
+                }
+            }
+        """.trimIndent()
+
         private fun compile(type: Int, src: String): Int {
             val s = GLES20.glCreateShader(type)
             GLES20.glShaderSource(s, src)
@@ -253,20 +314,48 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             return s
         }
 
+        private fun link(vsrc: String, fsrc: String): Int {
+            val p = GLES20.glCreateProgram()
+            GLES20.glAttachShader(p, compile(GLES20.GL_VERTEX_SHADER, vsrc))
+            GLES20.glAttachShader(p, compile(GLES20.GL_FRAGMENT_SHADER, fsrc))
+            GLES20.glLinkProgram(p)
+            return p
+        }
+
         override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
             st?.release()
             surface?.release()
-            val v = compile(GLES20.GL_VERTEX_SHADER, vs)
-            val f = compile(GLES20.GL_FRAGMENT_SHADER, fs)
-            program = GLES20.glCreateProgram()
-            GLES20.glAttachShader(program, v)
-            GLES20.glAttachShader(program, f)
-            GLES20.glLinkProgram(program)
+            // GL bağlamı yeniden oluştu: eski FBO kimlikleri geçersiz.
+            fbo = 0
+            fboTex = 0
+            fboW = 0
+            fboH = 0
+
+            program = link(vs, fs)
             uMvp = GLES20.glGetUniformLocation(program, "uMvp")
             uTex = GLES20.glGetUniformLocation(program, "uTex")
             uCrop = GLES20.glGetUniformLocation(program, "uCrop")
             aPos = GLES20.glGetAttribLocation(program, "aPos")
             aUv = GLES20.glGetAttribLocation(program, "aUv")
+
+            distProgram = link(distVs, distFs)
+            dPos = GLES20.glGetAttribLocation(distProgram, "aPos")
+            dUv = GLES20.glGetAttribLocation(distProgram, "aUv")
+            uDistTex = GLES20.glGetUniformLocation(distProgram, "uTex")
+            uLensCenter = GLES20.glGetUniformLocation(distProgram, "uLensCenter")
+            uK1 = GLES20.glGetUniformLocation(distProgram, "uK1")
+            uK2 = GLES20.glGetUniformLocation(distProgram, "uK2")
+
+            // Tam ekran dörtgen: [x, y, u, v] × 4 (triangle strip).
+            val q = ByteBuffer.allocateDirect(4 * 4 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
+            q.put(floatArrayOf(
+                -1f, -1f, 0f, 0f,
+                1f, -1f, 1f, 0f,
+                -1f, 1f, 0f, 1f,
+                1f, 1f, 1f, 1f,
+            ))
+            q.position(0)
+            quad = q
 
             val ids = IntArray(1)
             GLES20.glGenTextures(1, ids, 0)
@@ -288,8 +377,35 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         }
 
         override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-            GLES20.glViewport(0, 0, width, height)
+            surfaceW = width
+            surfaceH = height
             aspect = width.toFloat() / height.coerceAtLeast(1)
+        }
+
+        /** Göz başına ara dokuyu (FBO) istenen boyutta hazırlar; boyut değişince yeniden kurar. */
+        private fun ensureFbo(w: Int, h: Int) {
+            if (fbo != 0 && w == fboW && h == fboH) return
+            if (fbo != 0) {
+                GLES20.glDeleteFramebuffers(1, intArrayOf(fbo), 0)
+                GLES20.glDeleteTextures(1, intArrayOf(fboTex), 0)
+            }
+            val fb = IntArray(1)
+            GLES20.glGenFramebuffers(1, fb, 0)
+            fbo = fb[0]
+            val tx = IntArray(1)
+            GLES20.glGenTextures(1, tx, 0)
+            fboTex = tx[0]
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, fboTex)
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, w, h, 0, GLES20.GL_RGB, GLES20.GL_UNSIGNED_BYTE, null)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo)
+            GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0, GLES20.GL_TEXTURE_2D, fboTex, 0)
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
+            fboW = w
+            fboH = h
         }
 
         override fun onDrawFrame(gl: GL10?) {
@@ -300,15 +416,59 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             val half = mode.halfSphere
             if (half != meshHalf) buildMesh(half)
 
-            GLES20.glClearColor(0f, 0f, 0f, 1f)
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
             GLES20.glDisable(GLES20.GL_CULL_FACE)
             GLES20.glDisable(GLES20.GL_DEPTH_TEST)
 
-            Matrix.perspectiveM(proj, 0, fov, aspect, 0.1f, 10f)
+            computeView()
+
+            if (!cardboard || surfaceW <= 1 || surfaceH <= 1) {
+                // Tek görünüm (normal 360°).
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
+                GLES20.glViewport(0, 0, surfaceW.coerceAtLeast(1), surfaceH.coerceAtLeast(1))
+                GLES20.glClearColor(0f, 0f, 0f, 1f)
+                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+                Matrix.perspectiveM(proj, 0, fov, aspect, 0.1f, 10f)
+                Matrix.multiplyMM(mvp, 0, proj, 0, view, 0)
+                val c = eyeCrop(0)
+                drawSphere(mvp, c[0], c[1], c[2], c[3])
+                return
+            }
+
+            // Gözlük modu: iki göz + FBO + barrel distorsiyon.
+            val eyeW = surfaceW / 2
+            val eyeH = surfaceH
+            ensureFbo(eyeW, eyeH)
+            val eyeAspect = eyeW.toFloat() / eyeH.coerceAtLeast(1)
+            Matrix.perspectiveM(proj, 0, fov, eyeAspect, 0.1f, 10f)
+            Matrix.multiplyMM(mvp, 0, proj, 0, view, 0)
+
+            // Ekranı bir kez siyaha boya (gözler arası ve kenarlar siyah kalsın).
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
+            GLES20.glViewport(0, 0, surfaceW, surfaceH)
+            GLES20.glClearColor(0f, 0f, 0f, 1f)
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+            for (eye in 0..1) {
+                val c = eyeCrop(eye)
+                // 1) Küreyi göz dokusuna çiz.
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, fbo)
+                GLES20.glViewport(0, 0, eyeW, eyeH)
+                GLES20.glClearColor(0f, 0f, 0f, 1f)
+                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+                drawSphere(mvp, c[0], c[1], c[2], c[3])
+                // 2) Göz dokusunu ekranın ilgili yarısına lens distorsiyonuyla çiz.
+                GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0)
+                GLES20.glViewport(eye * eyeW, 0, eyeW, eyeH)
+                drawDistortion()
+            }
+        }
+
+        /** Bakış yönü matrisini ([view]) sensör veya parmak girdisine göre hesaplar. */
+        private fun computeView() {
             Matrix.setIdentityM(view, 0)
             if (sensorOn) {
-                synchronized(sensorMatrix) { System.arraycopy(sensorMatrix, 0, view, 0, 16) }
+                // recenter * sensör: "sıfırla" anından bu yana göreli dönüş.
+                synchronized(sensorMatrix) { Matrix.multiplyMM(view, 0, recenterMat, 0, sensorMatrix, 0) }
                 // GL dünyası (Y yukarı) ← sensör dünyası (Z yukarı)
                 Matrix.rotateM(view, 0, -90f, 1f, 0f, 0f)
                 // Parmakla eklenen kaydırma, sensörün üstüne uygulanır.
@@ -321,17 +481,20 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
                 Matrix.rotateM(view, 0, pitch, 1f, 0f, 0f)
                 Matrix.rotateM(view, 0, yaw, 0f, 1f, 0f)
             }
-            Matrix.multiplyMM(mvp, 0, proj, 0, view, 0)
+        }
 
+        /** Göz için doku kırpması: [x, y, genişlik, yükseklik] (0..1). 3B'de her göz kendi yarısını alır. */
+        private fun eyeCrop(eye: Int): FloatArray = when (mode.stereo) {
+            1 -> if (eye == 0) floatArrayOf(0f, 0.5f, 1f, 0.5f) else floatArrayOf(0f, 0f, 1f, 0.5f) // üst-alt: üst = sol göz
+            2 -> if (eye == 0) floatArrayOf(0f, 0f, 0.5f, 1f) else floatArrayOf(0.5f, 0f, 0.5f, 1f) // yan yana: sol = sol göz
+            else -> floatArrayOf(0f, 0f, 1f, 1f)
+        }
+
+        private fun drawSphere(mvpMat: FloatArray, cx: Float, cy: Float, cz: Float, cw: Float) {
             GLES20.glUseProgram(program)
-            GLES20.glUniformMatrix4fv(uMvp, 1, false, mvp, 0)
+            GLES20.glUniformMatrix4fv(uMvp, 1, false, mvpMat, 0)
             GLES20.glUniformMatrix4fv(uTex, 1, false, texMatrix, 0)
-            // Doku (0,0) = görüntünün sol altı; 3B'de yalnızca sol/üst göz kullanılır.
-            when (mode.stereo) {
-                1 -> GLES20.glUniform4f(uCrop, 0f, 0.5f, 1f, 0.5f)
-                2 -> GLES20.glUniform4f(uCrop, 0f, 0f, 0.5f, 1f)
-                else -> GLES20.glUniform4f(uCrop, 0f, 0f, 1f, 1f)
-            }
+            GLES20.glUniform4f(uCrop, cx, cy, cz, cw)
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, texId)
 
@@ -346,6 +509,27 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, ib)
             GLES20.glDisableVertexAttribArray(aPos)
             GLES20.glDisableVertexAttribArray(aUv)
+        }
+
+        private fun drawDistortion() {
+            GLES20.glUseProgram(distProgram)
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, fboTex)
+            GLES20.glUniform1i(uDistTex, 0)
+            GLES20.glUniform2f(uLensCenter, 0.5f, 0.5f)
+            GLES20.glUniform1f(uK1, 0.22f)
+            GLES20.glUniform1f(uK2, 0.24f)
+
+            val q = quad ?: return
+            q.position(0)
+            GLES20.glEnableVertexAttribArray(dPos)
+            GLES20.glVertexAttribPointer(dPos, 2, GLES20.GL_FLOAT, false, 16, q)
+            q.position(2)
+            GLES20.glEnableVertexAttribArray(dUv)
+            GLES20.glVertexAttribPointer(dUv, 2, GLES20.GL_FLOAT, false, 16, q)
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
+            GLES20.glDisableVertexAttribArray(dPos)
+            GLES20.glDisableVertexAttribArray(dUv)
         }
 
         /** Enlem/boylam ızgarasıyla küre (180° için yarım küre). Kamera kürenin içindedir. */

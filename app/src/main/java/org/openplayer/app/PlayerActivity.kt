@@ -1587,6 +1587,21 @@ class PlayerActivity : AppCompatActivity() {
         vrView?.resetLook()
     }
 
+    fun vrCardboardEnabled(): Boolean = vrView?.cardboard == true
+
+    /** VR gözlük (Cardboard) modu: ekranı ikiye bölüp her göze lens distorsiyonuyla çizer. */
+    fun vrSetCardboard(on: Boolean) {
+        val v = vrView ?: return
+        v.cardboard = on
+        if (on) {
+            // Gözlük modu baş takibi ister: sensörü aç ve bakışı sıfırla.
+            v.setSensor(true)
+            v.resetLook()
+            showHud("VR gözlük modu — telefonu gözlüğe yerleştirip yatay tutun")
+            hideHudSoon()
+        }
+    }
+
     fun toggleMirror() {
         if (vr != VrMode.NONE) return
         mirror = !mirror
