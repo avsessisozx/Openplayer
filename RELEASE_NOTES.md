@@ -1,3 +1,20 @@
+# 1.0.0-beta12
+
+Beş yeni özellik. Android 14 emülatöründe otomatik testten geçti; **gerçek cihazda henüz kapsamlı denenmedi** — sorunları Issues'tan bildirin.
+
+**Video / 360°**
+- **VR gözlük (Cardboard) modu:** 360°/180° videoda ekran ikiye bölünür ve her göze lens (barrel) distorsiyonu uygulanır; telefon bir VR gözlüğe takılarak izlenebilir. 3B (üst-alt / yan yana) videolarda her göz kendi yarısını alır. "Bakış yönünü sıfırla" artık hareket sensörüyle de çalışır (recenter). 360° menüsünden açılır.
+
+**Ses (video + müzik)**
+- **Grafik EQ (10 bant):** cihazın donanım ekolayzırından bağımsız, kendi DSP'imizle (peaking biquad) çalışan 10 bantlı ekolayzır — Ses ayarları → "Grafik EQ".
+- **Parametrik EQ:** aynı ekrandaki "Parametrik" seçeneğiyle her bandın frekansı ve Q'su (bant genişliği) de ayarlanabilir.
+
+**Müzik**
+- **Etiketleri dosyaya yazma (MP3):** etiket düzenlemede "Etiketleri dosyaya yaz" ile değişiklikler gerçek dosyaya (ID3v2.4) yazılır. Şimdilik yalnızca MP3.
+- **.cue desteği:** tek ses dosyasını parçalara bölen .cue dosyaları açılıp çalınabilir (üst bardaki ".cue aç"); oynatma ExoPlayer clipping ile yapılır.
+
+---
+
 # 1.0.0-beta11
 
 MX Player'ın ayar ve menüleri tek tek karşılaştırıldı; eksik kalanlar kendi kodumuzla eklendi. Android 14 emülatöründe otomatik testten geçti.
