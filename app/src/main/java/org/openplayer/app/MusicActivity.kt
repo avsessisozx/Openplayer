@@ -795,6 +795,10 @@ class MusicActivity : AppCompatActivity() {
                         pickLyrics.launch(arrayOf("*/*"))
                     }
                 }, LinearLayout.LayoutParams(-1, -2))
+                addView(android.widget.Button(this@MusicActivity).apply {
+                    text = "Etiketleri dosyaya yaz (MP3)"
+                    setOnClickListener { writeTagsToFile(t0, fTitle, fArtist, fAlbum, fAlbumArtist, fGenre, fYear, fTrack) }
+                }, LinearLayout.LayoutParams(-1, -2))
             }
         }
         PanelBuilder(this)
@@ -831,6 +835,46 @@ class MusicActivity : AppCompatActivity() {
             }
             .setNegativeButton("İptal", null)
             .show()
+    }
+
+    /** Diyalogdaki alanları gerçek dosyaya (ID3v2.4) yazar; şimdilik yalnızca MP3. */
+    private fun writeTagsToFile(
+        t: MusicTrack,
+        fTitle: EditText, fArtist: EditText, fAlbum: EditText,
+        fAlbumArtist: EditText, fGenre: EditText, fYear: EditText, fTrack: EditText,
+    ) {
+        if (!TagWriter.isSupported(t.path)) {
+            Toast.makeText(this, "Dosyaya yazma şimdilik yalnızca MP3 içindir", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val fields = TagWriter.Fields(
+            title = fTitle.text.toString(),
+            artist = fArtist.text.toString(),
+            album = fAlbum.text.toString(),
+            albumArtist = fAlbumArtist.text.toString(),
+            genre = fGenre.text.toString(),
+            year = fYear.text.toString().trim().toIntOrNull(),
+            trackNo = fTrack.text.toString().trim().toIntOrNull(),
+        )
+        val path = t.path
+        Toast.makeText(this, "Dosyaya yazılıyor…", Toast.LENGTH_SHORT).show()
+        loader.execute {
+            val res = TagWriter.write(path, fields)
+            if (res.isSuccess) {
+                // Dosya artık etiketlerin kaynağı: MediaStore'u tazele.
+                android.media.MediaScannerConnection.scanFile(applicationContext, arrayOf(path), null, null)
+            }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                Toast.makeText(
+                    this,
+                    if (res.isSuccess) "Etiketler dosyaya yazıldı"
+                    else "Yazılamadı: ${res.exceptionOrNull()?.message ?: "hata"}",
+                    Toast.LENGTH_LONG,
+                ).show()
+                load()
+            }
+        }
     }
 
     // ------------------------------------------------------------ satır menüsü
