@@ -38,7 +38,7 @@ object MusicController {
 
     fun toItem(t: MusicTrack): MediaItem {
         val extras = Bundle().apply { putBoolean(EXTRA_MUSIC, true) }
-        return MediaItem.Builder()
+        val b = MediaItem.Builder()
             .setUri(t.uri)
             .setMediaId(t.id.toString())
             .setMediaMetadata(
@@ -50,7 +50,16 @@ object MusicController {
                     .setExtras(extras)
                     .build()
             )
-            .build()
+        // .cue sanal parçası: aynı dosyayı belirtilen aralıkta kırp (ExoPlayer sınırları yönetir).
+        if (t.clipStartMs > 0 || t.clipEndMs > t.clipStartMs) {
+            b.setClippingConfiguration(
+                MediaItem.ClippingConfiguration.Builder()
+                    .setStartPositionMs(t.clipStartMs.coerceAtLeast(0L))
+                    .apply { if (t.clipEndMs > t.clipStartMs) setEndPositionMs(t.clipEndMs) }
+                    .build()
+            )
+        }
+        return b.build()
     }
 
     /** Verilen listeyi kuyruk yapıp [index]. şarkıdan çalmaya başlar. */

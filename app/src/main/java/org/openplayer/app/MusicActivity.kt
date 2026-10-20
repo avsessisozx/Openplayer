@@ -95,6 +95,10 @@ class MusicActivity : AppCompatActivity() {
         }
     }
 
+    private val pickCue = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) openCue(uri)
+    }
+
     private var all: List<MusicTrack> = emptyList()
     private var tab = Tab.SONGS
     private var treePath: String? = null
@@ -238,6 +242,10 @@ class MusicActivity : AppCompatActivity() {
                     startActivity(Intent(this@MusicActivity, PlaylistActivity::class.java)
                         .putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.MUSIC))
                 }
+            })
+            addView(iconView(R.drawable.ic_album).apply {
+                contentDescription = ".cue dosyası aç"
+                setOnClickListener { pickCue.launch(arrayOf("*/*")) }
             })
         }
 
@@ -831,6 +839,29 @@ class MusicActivity : AppCompatActivity() {
             }
             .setNegativeButton("İptal", null)
             .show()
+    }
+
+    /** Bir .cue dosyasını çözümler, ses dosyasını kütüphanede bulur ve parçalarını çalar. */
+    private fun openCue(uri: android.net.Uri) {
+        Toast.makeText(this, "Çözümleniyor…", Toast.LENGTH_SHORT).show()
+        loader.execute {
+            val bytes = runCatching { contentResolver.openInputStream(uri)?.use { it.readBytes() } }.getOrNull()
+            val cue = bytes?.let { CueSheet.parse(CueSheet.decode(it)) }
+            val audio = cue?.let { CueSheet.resolveAudio(it, MusicRepository.loadAll(this)) }
+            val tracks = if (cue != null && audio != null) CueSheet.buildTracks(cue, audio) else emptyList()
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                when {
+                    bytes == null -> Toast.makeText(this, "Dosya okunamadı", Toast.LENGTH_SHORT).show()
+                    cue == null -> Toast.makeText(this, ".cue çözümlenemedi", Toast.LENGTH_SHORT).show()
+                    audio == null -> Toast.makeText(this, "Ses dosyası kütüphanede bulunamadı: ${cue.file}", Toast.LENGTH_LONG).show()
+                    else -> {
+                        MusicController.play(this, tracks, 0)
+                        startActivity(Intent(this, NowPlayingActivity::class.java))
+                    }
+                }
+            }
+        }
     }
 
     // ------------------------------------------------------------ satır menüsü

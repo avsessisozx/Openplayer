@@ -25,6 +25,9 @@ data class MusicTrack(
     val coverFile: String? = null,
     val sizeBytes: Long = 0L,
     val composer: String = "",
+    // .cue sanal parçaları için: ses dosyasının kırpılacağı aralık (ms). 0/0 = kırpma yok.
+    val clipStartMs: Long = 0L,
+    val clipEndMs: Long = 0L,
 ) {
     val artworkUri: Uri
         get() = if (coverFile != null) Uri.fromFile(java.io.File(coverFile))
