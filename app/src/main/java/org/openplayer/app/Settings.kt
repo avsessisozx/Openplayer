@@ -551,6 +551,16 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getString("eq_levels", "")?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
         set(v) = prefs.edit().putString("eq_levels", v.joinToString(",")).apply()
 
+    /** Cihazdan bağımsız grafik EQ açık mı. */
+    var graphicEqEnabled: Boolean
+        get() = prefs.getBoolean("geq_enabled", false)
+        set(v) = prefs.edit().putBoolean("geq_enabled", v).apply()
+
+    /** 10 bant kazanç (dB), virgülle ayrılmış. Boş = tümü 0. */
+    var graphicEqBands: List<Int>
+        get() = prefs.getString("geq_bands", "")?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+        set(v) = prefs.edit().putString("geq_bands", v.joinToString(",")).apply()
+
     /** Virgülle ayrılmış dil kodları (örn. "tr,en"). Boş = sistem dili. */
     var audioLanguages: String
         get() = prefs.getString("audio_langs", "") ?: ""

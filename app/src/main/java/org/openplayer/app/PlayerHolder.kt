@@ -86,11 +86,12 @@ object PlayerHolder {
             AudioDelay.current = it
         }
         val balance = BalanceProcessor().also { AudioBalance.attach(it, settings) }
+        val eq = EqProcessor().also { AudioEq.attach(it, settings) }
         fun sink(context: Context, floatOut: Boolean, playbackParams: Boolean) =
             DefaultAudioSink.Builder(context)
                 .setEnableFloatOutput(floatOut)
                 .setEnableAudioOutputPlaybackParameters(playbackParams)
-                .setAudioProcessors(arrayOf<AudioProcessor>(delay, balance))
+                .setAudioProcessors(arrayOf<AudioProcessor>(delay, balance, eq))
                 .build()
         val renderers: DefaultRenderersFactory = when (decoderOverride ?: settings.decoder) {
             DecoderMode.HW ->

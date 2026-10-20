@@ -131,6 +131,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         }
         root.addView(rowButton("Stereo modu: ${a.settings.stereoMode.label}") { showStereoMode() })
         root.addView(rowButton("Yankı: ${AudioFx.reverbLabels[a.settings.reverbPreset]}") { showReverb() })
+        root.addView(rowButton("Grafik EQ (10 bant, cihazdan bağımsız)") { showGraphicEq() })
         val boostLabel = a.label("Ses artırma: %${a.settings.volumeBoostPercent}")
         root.addView(boostLabel)
         root.addView(a.seekBar(100, 200, a.settings.volumeBoostPercent) { v ->
@@ -163,6 +164,49 @@ class PlayerMenus(private val a: PlayerActivity) {
             .setNeutralButton("Sıfırla") { _, _ ->
                 fx.reset()
                 fx.setBoostPercent(100)
+            }
+            .show()
+    }
+
+    /** Cihazdan bağımsız 10 bantlı grafik EQ (biquad; [AudioEq] işlemcisi üzerinden). */
+    fun showGraphicEq() {
+        val s = a.settings
+        fun fmtDb(v: Int) = (if (v > 0) "+$v" else "$v") + " dB"
+        val gains = ArrayList<Int>().apply {
+            val saved = s.graphicEqBands
+            for (i in AudioEq.FREQS.indices) add((saved.getOrNull(i) ?: 0).coerceIn(-AudioEq.MAX_DB, AudioEq.MAX_DB))
+        }
+        val root = a.vertical {}
+        val sw = SwitchCompat(a).apply {
+            text = "Grafik EQ"
+            setTextColor(Color.WHITE)
+            isChecked = s.graphicEqEnabled
+            setOnCheckedChangeListener { _, on ->
+                s.graphicEqEnabled = on
+                AudioEq.current?.enabled = on
+            }
+        }
+        root.addView(sw)
+        for (i in AudioEq.FREQS.indices) {
+            val hz = AudioEq.FREQS[i]
+            val name = if (hz >= 1000) "${hz / 1000} kHz" else "$hz Hz"
+            val lab = a.label("$name:  ${fmtDb(gains[i])}", 12f)
+            root.addView(lab)
+            root.addView(a.seekBar(-AudioEq.MAX_DB, AudioEq.MAX_DB, gains[i]) { v ->
+                gains[i] = v
+                lab.text = "$name:  ${fmtDb(v)}"
+                s.graphicEqBands = gains
+                AudioEq.current?.setGain(i, v)
+            })
+        }
+        PanelBuilder(a)
+            .setTitle("Grafik EQ")
+            .setView(ScrollView(a).apply { addView(root) })
+            .setPositiveButton("Tamam", null)
+            .setNeutralButton("Sıfırla") { _, _ ->
+                for (i in gains.indices) gains[i] = 0
+                s.graphicEqBands = gains
+                AudioEq.current?.setGains(gains)
             }
             .show()
     }
