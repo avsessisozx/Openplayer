@@ -1,0 +1,104 @@
+===== ADIM: Ayarlar › Ses (alt) > Sesi yumuşak başlat
+--------- beginning of crash
+10-20 23:23:57.983   519   554 E AndroidRuntime: *** FATAL EXCEPTION IN SYSTEM PROCESS: batterystats-handler
+10-20 23:23:57.983   519   554 E AndroidRuntime: java.lang.RuntimeException: failed to set system property (check logcat for reason)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at android.os.SystemProperties.native_set(Native Method)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at android.os.SystemProperties.set(SystemProperties.java:235)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.internal.os.BatteryStatsHistory$TraceDelegate.traceCounter(BatteryStatsHistory.java:249)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.internal.os.BatteryStatsHistory.recordTraceCounters(BatteryStatsHistory.java:1288)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.internal.os.BatteryStatsHistory.writeHistoryItem(BatteryStatsHistory.java:1328)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.internal.os.BatteryStatsHistory.writeHistoryItem(BatteryStatsHistory.java:1322)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.internal.os.BatteryStatsHistory.recordStateStopEvent(BatteryStatsHistory.java:1115)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.server.power.stats.BatteryStatsImpl.noteWifiRadioPowerState(BatteryStatsImpl.java:6579)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.server.am.BatteryStatsService.lambda$noteWifiRadioPowerState$64(BatteryStatsService.java:1897)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.server.am.BatteryStatsService.$r8$lambda$NWBBkcQTBlHm1p1IyZy36OeGzJg(BatteryStatsService.java:0)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at com.android.server.am.BatteryStatsService$$ExternalSyntheticLambda64.run(R8$$SyntheticClass:0)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at android.os.Handler.handleCallback(Handler.java:958)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:205)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:294)
+10-20 23:23:57.983   519   554 E AndroidRuntime: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: FATAL EXCEPTION: main
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: PID: 1750
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: java.lang.IllegalStateException: Error while registering UiTestAutomationService for user 0.
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.app.UiAutomationConnection.registerUiTestAutomationServiceLocked(UiAutomationConnection.java:579)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.app.UiAutomationConnection.connect(UiAutomationConnection.java:121)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.app.UiAutomation.connectWithTimeout(UiAutomation.java:381)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.app.UiAutomation.connect(UiAutomation.java:326)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at com.android.uiautomator.core.UiAutomationShellWrapper.connect(UiAutomationShellWrapper.java:31)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at com.android.commands.uiautomator.DumpCommand.run(DumpCommand.java:78)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at com.android.commands.uiautomator.Launcher.main(Launcher.java:83)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:359)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: Caused by: android.os.DeadObjectException
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.view.accessibility.IAccessibilityManager$Stub$Proxy.registerUiTestAutomationService(IAccessibilityManager.java:997)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	at android.app.UiAutomationConnection.registerUiTestAutomationServiceLocked(UiAutomationConnection.java:576)
+10-20 23:23:58.268  1750  1750 E AndroidRuntime: 	... 8 more
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: Error reporting crash
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: java.lang.RuntimeException: Bad file descriptor
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.os.IServiceManager$Stub$Proxy.checkService(IServiceManager.java:443)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.os.ServiceManagerProxy.getService(ServiceManagerNative.java:63)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.os.ServiceManager.rawGetService(ServiceManager.java:378)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.os.ServiceManager.getService(ServiceManager.java:147)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.app.ActivityManager$3.create(ActivityManager.java:5214)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.app.ActivityManager$3.create(ActivityManager.java:5211)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.util.Singleton.get(Singleton.java:43)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at android.app.ActivityManager.getService(ActivityManager.java:5202)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$KillApplicationHandler.uncaughtException(RuntimeInit.java:160)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1071)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1066)
+10-20 23:23:58.269  1750  1750 E AndroidRuntime: 	at java.lang.Thread.dispatchUncaughtException(Thread.java:2306)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: FATAL EXCEPTION: main
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: PID: 1782
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: java.lang.IllegalStateException: Error while registering UiTestAutomationService for user 0.
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.UiAutomationConnection.registerUiTestAutomationServiceLocked(UiAutomationConnection.java:579)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.UiAutomationConnection.connect(UiAutomationConnection.java:121)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.UiAutomation.connectWithTimeout(UiAutomation.java:381)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.UiAutomation.connect(UiAutomation.java:326)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at com.android.uiautomator.core.UiAutomationShellWrapper.connect(UiAutomationShellWrapper.java:31)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at com.android.commands.uiautomator.DumpCommand.run(DumpCommand.java:78)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at com.android.commands.uiautomator.Launcher.main(Launcher.java:83)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:359)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: Caused by: android.os.DeadObjectException
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.view.accessibility.IAccessibilityManager$Stub$Proxy.registerUiTestAutomationService(IAccessibilityManager.java:997)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.UiAutomationConnection.registerUiTestAutomationServiceLocked(UiAutomationConnection.java:576)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	... 8 more
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: Error reporting crash
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: java.lang.RuntimeException: Bad file descriptor
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.BinderProxy.transactNative(Native Method)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.BinderProxy.transact(BinderProxy.java:584)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.IServiceManager$Stub$Proxy.checkService(IServiceManager.java:443)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.ServiceManagerProxy.getService(ServiceManagerNative.java:63)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.ServiceManager.rawGetService(ServiceManager.java:378)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.os.ServiceManager.getService(ServiceManager.java:147)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.ActivityManager$3.create(ActivityManager.java:5214)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.ActivityManager$3.create(ActivityManager.java:5211)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.util.Singleton.get(Singleton.java:43)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at android.app.ActivityManager.getService(ActivityManager.java:5202)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$KillApplicationHandler.uncaughtException(RuntimeInit.java:160)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1071)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at java.lang.ThreadGroup.uncaughtException(ThreadGroup.java:1066)
+10-20 23:23:58.502  1782  1782 E AndroidRuntime: 	at java.lang.Thread.dispatchUncaughtException(Thread.java:2306)
+10-20 23:23:58.751  5989  5989 E AndroidRuntime: FATAL EXCEPTION: main
+10-20 23:23:58.751  5989  5989 E AndroidRuntime: Process: com.google.android.gms.persistent, PID: 5989
+10-20 23:23:58.751  5989  5989 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+10-20 23:23:58.752   883  1116 E AndroidRuntime: FATAL EXCEPTION: SimStateTrackerHandler
+10-20 23:23:58.752   883  1116 E AndroidRuntime: Process: com.google.android.apps.messaging, PID: 883
+10-20 23:23:58.752   883  1116 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+10-20 23:23:58.752  1630  1959 E AndroidRuntime: FATAL EXCEPTION: GoogleApiHandler
+10-20 23:23:58.752  1630  1959 E AndroidRuntime: Process: com.google.android.googlequicksearchbox:interactor, PID: 1630
+10-20 23:23:58.752  1630  1959 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+10-20 23:23:58.757  1714  2133 E AndroidRuntime: FATAL EXCEPTION: GoogleApiHandler
+10-20 23:23:58.757  1714  2133 E AndroidRuntime: Process: com.google.android.googlequicksearchbox:search, PID: 1714
+10-20 23:23:58.757  1714  2133 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+10-20 23:23:58.765  5989  6486 E AndroidRuntime: FATAL EXCEPTION: CronetInit
+10-20 23:23:58.765  5989  6486 E AndroidRuntime: Process: com.google.android.gms.persistent, PID: 5989
+10-20 23:23:58.765  5989  6486 E AndroidRuntime: DeadSystemException: The system died; earlier logs will point to the root cause
+
