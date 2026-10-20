@@ -171,42 +171,97 @@ class PlayerMenus(private val a: PlayerActivity) {
     /** Cihazdan bağımsız 10 bantlı grafik EQ (biquad; [AudioEq] işlemcisi üzerinden). */
     fun showGraphicEq() {
         val s = a.settings
+        val n = AudioEq.FREQS.size
         fun fmtDb(v: Int) = (if (v > 0) "+$v" else "$v") + " dB"
+        fun freqLabel(hz: Int) = if (hz >= 1000) "${"%.1f".format(hz / 1000f)} kHz" else "$hz Hz"
+
         val gains = ArrayList<Int>().apply {
             val saved = s.graphicEqBands
-            for (i in AudioEq.FREQS.indices) add((saved.getOrNull(i) ?: 0).coerceIn(-AudioEq.MAX_DB, AudioEq.MAX_DB))
+            for (i in 0 until n) add((saved.getOrNull(i) ?: 0).coerceIn(-AudioEq.MAX_DB, AudioEq.MAX_DB))
         }
+        val freqs = ArrayList<Int>().apply {
+            val saved = s.graphicEqFreqs
+            for (i in 0 until n) add((saved.getOrNull(i) ?: AudioEq.FREQS[i]).coerceIn(AudioEq.MIN_FREQ, AudioEq.MAX_FREQ))
+        }
+        val qMin = (AudioEq.MIN_Q * 100).toInt()
+        val qMax = (AudioEq.MAX_Q * 100).toInt()
+        val qs = ArrayList<Int>().apply {
+            val saved = s.graphicEqQs
+            for (i in 0 until n) add((saved.getOrNull(i) ?: (AudioEq.DEFAULT_Q * 100).toInt()).coerceIn(qMin, qMax))
+        }
+
+        // Frekans ↔ kaydırıcı (0..1000) logaritmik.
+        val logMin = Math.log10(AudioEq.MIN_FREQ.toDouble())
+        val logMax = Math.log10(AudioEq.MAX_FREQ.toDouble())
+        fun freqToBar(hz: Int) = (((Math.log10(hz.toDouble()) - logMin) / (logMax - logMin)) * 1000).toInt().coerceIn(0, 1000)
+        fun barToFreq(bar: Int) = Math.pow(10.0, logMin + (bar / 1000.0) * (logMax - logMin)).toInt().coerceIn(AudioEq.MIN_FREQ, AudioEq.MAX_FREQ)
+
         val root = a.vertical {}
-        val sw = SwitchCompat(a).apply {
+        root.addView(SwitchCompat(a).apply {
             text = "Grafik EQ"
             setTextColor(Color.WHITE)
             isChecked = s.graphicEqEnabled
+            setOnCheckedChangeListener { _, on -> s.graphicEqEnabled = on; AudioEq.current?.enabled = on }
+        })
+        val extraRows = ArrayList<View>()
+        root.addView(SwitchCompat(a).apply {
+            text = "Parametrik (frekans / Q)"
+            setTextColor(Color.WHITE)
+            isChecked = s.graphicEqParametric
             setOnCheckedChangeListener { _, on ->
-                s.graphicEqEnabled = on
-                AudioEq.current?.enabled = on
+                s.graphicEqParametric = on
+                extraRows.forEach { it.visibility = if (on) View.VISIBLE else View.GONE }
+                AudioEq.update(s)
             }
-        }
-        root.addView(sw)
-        for (i in AudioEq.FREQS.indices) {
-            val hz = AudioEq.FREQS[i]
-            val name = if (hz >= 1000) "${hz / 1000} kHz" else "$hz Hz"
-            val lab = a.label("$name:  ${fmtDb(gains[i])}", 12f)
-            root.addView(lab)
+        })
+
+        for (i in 0 until n) {
+            val gLab = a.label("${freqLabel(freqs[i])}:  ${fmtDb(gains[i])}", 12f)
+            root.addView(gLab)
             root.addView(a.seekBar(-AudioEq.MAX_DB, AudioEq.MAX_DB, gains[i]) { v ->
                 gains[i] = v
-                lab.text = "$name:  ${fmtDb(v)}"
+                gLab.text = "${freqLabel(freqs[i])}:  ${fmtDb(v)}"
                 s.graphicEqBands = gains
                 AudioEq.current?.setGain(i, v)
             })
+            val fLab = a.label("   Frekans: ${freqLabel(freqs[i])}", 11f)
+            val fBar = a.seekBar(0, 1000, freqToBar(freqs[i])) { bar ->
+                val hz = barToFreq(bar)
+                freqs[i] = hz
+                fLab.text = "   Frekans: ${freqLabel(hz)}"
+                gLab.text = "${freqLabel(hz)}:  ${fmtDb(gains[i])}"
+                s.graphicEqFreqs = freqs
+                AudioEq.current?.setBand(i, hz.toFloat(), qs[i] / 100f)
+            }
+            val qLab = a.label("   Q: ${"%.2f".format(qs[i] / 100f)}", 11f)
+            val qBar = a.seekBar(qMin, qMax, qs[i]) { v ->
+                qs[i] = v
+                qLab.text = "   Q: ${"%.2f".format(v / 100f)}"
+                s.graphicEqQs = qs
+                AudioEq.current?.setBand(i, freqs[i].toFloat(), v / 100f)
+            }
+            for (v in listOf(fLab, fBar, qLab, qBar)) {
+                v.visibility = if (s.graphicEqParametric) View.VISIBLE else View.GONE
+                root.addView(v)
+                extraRows += v
+            }
         }
+
         PanelBuilder(a)
-            .setTitle("Grafik EQ")
+            .setTitle("Grafik / Parametrik EQ")
             .setView(ScrollView(a).apply { addView(root) })
             .setPositiveButton("Tamam", null)
             .setNeutralButton("Sıfırla") { _, _ ->
-                for (i in gains.indices) gains[i] = 0
+                for (i in 0 until n) {
+                    gains[i] = 0
+                    freqs[i] = AudioEq.FREQS[i]
+                    qs[i] = (AudioEq.DEFAULT_Q * 100).toInt()
+                }
                 s.graphicEqBands = gains
+                s.graphicEqFreqs = freqs
+                s.graphicEqQs = qs
                 AudioEq.current?.setGains(gains)
+                AudioEq.update(s)
             }
             .show()
     }

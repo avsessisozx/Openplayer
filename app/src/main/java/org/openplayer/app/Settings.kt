@@ -561,6 +561,21 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getString("geq_bands", "")?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
         set(v) = prefs.edit().putString("geq_bands", v.joinToString(",")).apply()
 
+    /** Parametrik kip: bant frekansı ve Q'su da ayarlanabilir (kapalıysa sabit grafik bantlar). */
+    var graphicEqParametric: Boolean
+        get() = prefs.getBoolean("geq_param", false)
+        set(v) = prefs.edit().putBoolean("geq_param", v).apply()
+
+    /** Parametrik bant frekansları (Hz), virgülle. Boş = varsayılan [AudioEq.FREQS]. */
+    var graphicEqFreqs: List<Int>
+        get() = prefs.getString("geq_freqs", "")?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+        set(v) = prefs.edit().putString("geq_freqs", v.joinToString(",")).apply()
+
+    /** Parametrik bant Q'ları ×100 (tamsayı), virgülle. Boş = varsayılan. */
+    var graphicEqQs: List<Int>
+        get() = prefs.getString("geq_qs", "")?.split(",")?.mapNotNull { it.toIntOrNull() } ?: emptyList()
+        set(v) = prefs.edit().putString("geq_qs", v.joinToString(",")).apply()
+
     /** Virgülle ayrılmış dil kodları (örn. "tr,en"). Boş = sistem dili. */
     var audioLanguages: String
         get() = prefs.getString("audio_langs", "") ?: ""
