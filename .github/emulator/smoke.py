@@ -669,7 +669,7 @@ def feature_tests():
     srv = http.server.ThreadingHTTPServer(("0.0.0.0", 18080), Mock)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
-        write_prefs({"tr_provider": ("string", "OPENAI"), "tr_url": ("string", "http://10.0.2.2:18080/v1"),
+        write_prefs({"tr_provider": ("string", "openai"), "tr_url": ("string", "http://10.0.2.2:18080/v1"),
                      "tr_model": ("string", "test-model"), "tr_target": ("string", "tr"), "tr_source": ("string", "en")})
         play("/sdcard/Movies/Test/Yatay video.mp4")
         time.sleep(3)
