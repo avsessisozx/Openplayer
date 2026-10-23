@@ -689,11 +689,11 @@ def feature_tests():
                     tap(c)
                 time.sleep(8)
                 shot("Çeviri sonrası")
-                files = sh("find /sdcard -name '*.tr.srt' 2>/dev/null")
+                files = sh(f"run-as {PKG} sh -c \"ls files/subtitles 2>&1\"")
                 feat("Çeviri: .tr.srt dosyası yazıldı", ".tr.srt" in files, files.strip()[-160:])
                 feat("Çeviri: sahte sunucu istek aldı", len(hits) > 0, str(hits[:3]))
                 if ".tr.srt" in files:
-                    content = sh("cat \"$(find /sdcard -name '*.tr.srt' | head -1)\"")
+                    content = sh(f"run-as {PKG} sh -c 'cat files/subtitles/*.tr.srt'")
                     feat("Çeviri: dosyada çevrilmiş metin var", "ÇEVİRİ" in content, content.strip()[:120])
     finally:
         srv.shutdown()
