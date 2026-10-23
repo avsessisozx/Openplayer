@@ -924,7 +924,10 @@ class PlayerActivity : AppCompatActivity() {
             }
             addView(clockView)
             addView(iconView(R.drawable.ic_music_note).apply { setOnClickListener { menus.showAudioTracks() } })
-            addView(iconView(R.drawable.ic_subtitles).apply { setOnClickListener { menus.showSubtitleMenu() } })
+            addView(iconView(R.drawable.ic_subtitles).apply {
+                contentDescription = "Altyazı"
+                setOnClickListener { menus.showSubtitleMenu() }
+            })
             addView(decoderLabel, LinearLayout.LayoutParams(-2, dp(48)))
             addView(iconView(R.drawable.ic_more_vert).apply { setOnClickListener { menus.showOverflow() } })
         }

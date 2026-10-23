@@ -647,6 +647,59 @@ def feature_tests():
     feat("Bitince listeye döndü", "PlayerActivity" not in r3, r3.strip()[-120:])
     record("Bitince listeye dön", 1)
 
+    # 5b) Altyazı çevirisi: sahte OpenAI uyumlu sunucu (emülatörden 10.0.2.2 ile erişilir)
+    import threading, http.server, json as _json
+    hits = []
+
+    class Mock(http.server.BaseHTTPRequestHandler):
+        def log_message(self, *a): pass
+        def do_POST(self):
+            body = self.rfile.read(int(self.headers.get("Content-Length", 0) or 0))
+            hits.append(self.path)
+            try:
+                msgs = _json.loads(body)["messages"]
+                arr = _json.loads(msgs[-1]["content"])
+                out = ["ÇEVİRİ: " + str(x) for x in arr]
+            except Exception:
+                out = ["ÇEVİRİ"]
+            resp = _json.dumps({"choices": [{"message": {"role": "assistant", "content": _json.dumps(out, ensure_ascii=False)}}]}).encode()
+            self.send_response(200); self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(resp))); self.end_headers(); self.wfile.write(resp)
+
+    srv = http.server.ThreadingHTTPServer(("0.0.0.0", 18080), Mock)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        write_prefs({"tr_provider": ("string", "OPENAI"), "tr_url": ("string", "http://10.0.2.2:18080/v1"),
+                     "tr_model": ("string", "test-model"), "tr_target": ("string", "tr"), "tr_source": ("string", "en")})
+        play("/sdcard/Movies/Test/Yatay video.mp4")
+        time.sleep(3)
+        w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
+        c = find_text_any(dump(), "Altyazı")
+        feat("Çeviri: altyazı simgesi bulundu", c is not None)
+        if c:
+            tap(c); time.sleep(1.2)
+            root = dump(); shot("Altyazı menüsü (çeviri girişi)")
+            c = find_contains(root, "Altyazıyı çevir")
+            feat("Çeviri: menüde 'Altyazıyı çevir' var", c is not None, " | ".join(texts(root)[:14]))
+            if c:
+                tap(c); time.sleep(1.2)
+                root = dump(); shot("Çeviri dil seçimi")
+                c = find_contains(root, "Türkçe")
+                if c:
+                    tap(c)
+                time.sleep(8)
+                shot("Çeviri sonrası")
+                files = sh("find /sdcard -name '*.tr.srt' 2>/dev/null")
+                feat("Çeviri: .tr.srt dosyası yazıldı", ".tr.srt" in files, files.strip()[-160:])
+                feat("Çeviri: sahte sunucu istek aldı", len(hits) > 0, str(hits[:3]))
+                if ".tr.srt" in files:
+                    content = sh("cat \"$(find /sdcard -name '*.tr.srt' | head -1)\"")
+                    feat("Çeviri: dosyada çevrilmiş metin var", "ÇEVİRİ" in content, content.strip()[:120])
+    finally:
+        srv.shutdown()
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    check_crash("Altyazı çevirisi")
+
     # 6) Ayar sayfaları: her sayfada her satıra dokun (üst ve kaydırılmış alt kısım)
     write_prefs({})
 
@@ -662,7 +715,7 @@ def feature_tests():
         return go
 
 
-    for page in ("Oynatıcı", "Hareketler", "Ses", "Altyazı", "Liste ve dosyalar"):
+    for page in ("Oynatıcı", "Hareketler", "Ses", "Altyazı", "Altyazı çevirisi", "Liste ve dosyalar"):
         crawl(f"Ayarlar › {page}", open_settings_page(page), limit=12, skip=("Ayarları içe aktar", "Tema içe aktar", "Tüm dosyalara erişim"))
         crawl(f"Ayarlar › {page} (alt)", open_settings_page(page, 2), limit=8, skip=("dosyadan", "Dosyadan", "Tüm dosyalara erişim"))
         checkpoint(f"ayarlar {page}")
