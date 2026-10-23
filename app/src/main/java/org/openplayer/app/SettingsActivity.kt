@@ -28,6 +28,7 @@ class SettingsActivity : AppCompatActivity() {
         AUDIO("Ses", "Ses artırma, ekolayzır, ses dili", R.drawable.ic_volume_up),
         SUBTITLE("Altyazı", "Görünüm, karakter kodlaması, diller", R.drawable.ic_subtitles),
         ONLINE("Çevrimiçi altyazı", "OpenSubtitles hesabı ve API anahtarı", R.drawable.ic_cloud_download),
+        TRANSLATE("Altyazı çevirisi", "Altyazıyı yapay zekâ veya çeviri servisiyle başka dile çevirin", R.drawable.ic_subtitles),
         MUSIC("Müzik çalar", "Videolardan ayrı müzik kütüphanesi ve çalar (isteğe bağlı)", R.drawable.ic_music_note),
         THEME("Tema ve görünüm", "Renk temaları, vurgu rengi, düğme biçimi, panel opaklığı", R.drawable.ic_tune),
         LIST("Liste ve dosyalar", "Yeni etiketi, gizli klasörler, dosya erişimi", R.drawable.ic_view_list),
@@ -162,6 +163,7 @@ class SettingsActivity : AppCompatActivity() {
             Page.AUDIO -> audioPage()
             Page.SUBTITLE -> subtitlePage()
             Page.ONLINE -> onlinePage()
+            Page.TRANSLATE -> translatePage()
             Page.LIST -> listPage()
             Page.THEME -> themePage()
             Page.MUSIC -> musicPage()
@@ -235,6 +237,8 @@ class SettingsActivity : AppCompatActivity() {
         }
         toggle("Arka planda oynat", "Ana ekrana çıkınca ses çalmaya devam eder", s.backgroundPlay) { s.backgroundPlay = it }
         toggle("Otomatik pencere içinde pencere (PiP)", "Ana ekrana çıkınca küçük pencerede devam eder", s.autoPip) { s.autoPip = it }
+        choice("PiP düğmeleri", if (s.pipSeekButtons) "Geri / ileri sar (±10 sn)" else "Önceki / sonraki video",
+            listOf("Önceki / sonraki video", "Geri / ileri sar (±10 sn)"), if (s.pipSeekButtons) 1 else 0) { s.pipSeekButtons = it == 1 }
         section("Ekran")
         toggle("Ekranı açık tut", "Oynatırken ekran kararmaz", s.keepScreenOn) { s.keepScreenOn = it }
         toggle("Açılışta kontrolleri göster", null, s.showControlsAtStart) { s.showControlsAtStart = it }
@@ -418,6 +422,89 @@ class SettingsActivity : AppCompatActivity() {
         note("Altyazı gecikmesi oynatma sırasında altyazı menüsünden ayarlanır.")
     }
 
+    private fun translatePage() {
+        section("Sağlayıcı")
+        val provs = TrProvider.entries
+        choice("Çeviri sağlayıcısı", s.trProvider.label, provs.map { it.label }, s.trProvider.ordinal) { s.trProvider = provs[it] }
+        section("Diller")
+        val langs = TrLangs.all
+        choice("Hedef dil", TrLangs.label(s.trTarget), langs.map { it.tr }, langs.indexOfFirst { it.code == s.trTarget }) { s.trTarget = langs[it].code }
+        val sources = listOf("auto") + langs.map { it.code }
+        choice("Kaynak dil", TrLangs.label(s.trSource), sources.map { TrLangs.label(it) }, sources.indexOf(s.trSource)) { s.trSource = sources[it] }
+        note("Çoğu altyazı İngilizcedir. MyMemory'de \"Otomatik algıla\" her zaman güvenilir değildir; kaynak dili elle seçmek daha sağlamdır.")
+        when (s.trProvider) {
+            TrProvider.MYMEMORY -> {
+                section("MyMemory")
+                text("E-posta (isteğe bağlı)", s.trEmail.ifEmpty { "Girilmedi (günde 5.000 karakter)" }, "ornek@eposta.com") { s.trEmail = it }
+                note("Hesap ya da anahtar gerekmez. E-posta yalnız günlük kotayı 50.000 karaktere çıkarır, doğrulama yapılmaz. " +
+                    "Uzun filmler için kota dar kalabilir; o zaman yapay zekâ ya da kendi LibreTranslate adresinizi kullanın.")
+            }
+            TrProvider.LIBRE -> {
+                section("LibreTranslate")
+                text("Adres", s.trApiUrl.ifEmpty { "Girilmedi" }, "https://sunucunuz.example.com") { s.trApiUrl = it }
+                text("API anahtarı (isteğe bağlı)", if (s.trApiKey.isEmpty()) "Girilmedi" else "••••••••", "Sunucu istiyorsa girin", password = true) { s.trApiKey = it }
+                note("Kendi sunucunuzun ya da anahtar veren bir LibreTranslate servisinin adresi. Adresin sonuna /translate eklenmesi gerekmez.")
+            }
+            TrProvider.OPENAI -> {
+                section("Hazır ayarlar (adres ve modeli doldurur)")
+                action("Groq", "Ücretsiz anahtar: console.groq.com") { preset("https://api.groq.com/openai/v1", "llama-3.3-70b-versatile") }
+                action("OpenRouter", "Ücretsiz modeller var: openrouter.ai") { preset("https://openrouter.ai/api/v1", "meta-llama/llama-3.3-70b-instruct:free") }
+                action("Google Gemini", "Ücretsiz anahtar: aistudio.google.com") { preset("https://generativelanguage.googleapis.com/v1beta/openai", "gemini-2.0-flash") }
+                action("Ollama (aynı ağdaki bilgisayar)", "Adresteki IP'yi kendi bilgisayarınıza göre düzeltin") { preset("http://192.168.1.10:11434/v1", "llama3.1") }
+                section("Bağlantı")
+                text("Adres", s.trApiUrl.ifEmpty { "Girilmedi" }, "https://api.ornek.com/v1") { s.trApiUrl = it }
+                text("API anahtarı", if (s.trApiKey.isEmpty()) "Girilmedi" else "••••••••", "Sağlayıcınızdan alın", password = true) { s.trApiKey = it }
+                text("Model", s.trModel.ifEmpty { "Girilmedi" }, "örn. llama-3.3-70b-versatile") { s.trModel = it }
+                action("Model listesini getir", "Sağlayıcının güncel modellerinden seçin (model adları zamanla değişir)") { pickModel() }
+                note("OpenAI uyumlu (/chat/completions) her adres çalışır. Anahtar cihazda şifrelenerek saklanır ve ayar yedeğine yazılmaz.")
+            }
+        }
+        section("Deneme")
+        action("Bağlantıyı dene", "İki örnek cümleyi çevirir") { testTranslate() }
+        note("Çeviri sırasında altyazı metni seçtiğiniz servise gönderilir. Biçim (italik, renk) çevrilen altyazıda korunmaz.")
+    }
+
+    private fun preset(url: String, model: String) {
+        s.trApiUrl = url
+        s.trModel = model
+        android.widget.Toast.makeText(this, "Adres ve model dolduruldu; şimdi API anahtarınızı girin", android.widget.Toast.LENGTH_LONG).show()
+        render()
+    }
+
+    private fun pickModel() {
+        val cfg = s.translateConfig()
+        Thread {
+            val result = runCatching { SubtitleTranslator(cfg).listModels() }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                result.onSuccess { ids ->
+                    if (ids.isEmpty()) showMessage("Model bulunamadı", "Sağlayıcı boş bir liste döndürdü.")
+                    else {
+                        val shown = ids.take(200)
+                        showChoice("Model seçin", shown, shown.indexOf(s.trModel)) { i ->
+                            s.trModel = shown[i]
+                            render()
+                        }
+                    }
+                }.onFailure { showMessage("Liste alınamadı", it.message ?: "Bilinmeyen hata") }
+            }
+        }.start()
+    }
+
+    private fun testTranslate() {
+        val cfg = s.translateConfig()
+        val sample = listOf("Hello, how are you?", "I'll be right back.")
+        Thread {
+            val result = runCatching { SubtitleTranslator(cfg).translate(sample) }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                result.onSuccess { out ->
+                    showMessage("Bağlantı başarılı", sample.indices.joinToString("\n\n") { "${sample[it]}\n→ ${out[it]}" })
+                }.onFailure { showMessage("Deneme başarısız", it.message ?: "Bilinmeyen hata") }
+            }
+        }.start()
+    }
+
     private fun onlinePage() {
         section("OpenSubtitles hesabı")
         text("API anahtarı", if (s.osApiKey.isEmpty()) "Girilmedi" else "••••••••", "opensubtitles.com hesabınızdan alın") { s.osApiKey = it }
@@ -534,6 +621,8 @@ class SettingsActivity : AppCompatActivity() {
     private fun listPage() {
         section("Liste")
         toggle("Silince çöp kutusuna taşı", "Android 11 ve üstünde silinen videolar geri alınabilir (30 gün). Kapalıyken kalıcı silinir.", s.useTrash) { s.useTrash = it }
+        toggle("Silerken altyazıyı da sil", "Videonun yanındaki aynı adlı altyazı dosyaları da silinir. Yalnız kalıcı silmede çalışır; çöp kutusuna taşırken altyazılara dokunulmaz.", s.deleteSubtitlesToo) { s.deleteSubtitlesToo = it }
+        toggle("Ana menüde çıkış düğmesi", "Menüye uygulamayı tamamen kapatan \"Çıkış\" eklenir", s.exitButton) { s.exitButton = it }
         toggle("Doğal sıralama", "\"Bölüm 2\", \"Bölüm 10\"dan önce gelir", s.naturalSort) { s.naturalSort = it }
         val days = listOf(1, 3, 7, 14, 30)
         choice("\"Yeni\" etiketi süresi", "${s.newVideoDays} gün", days.map { "$it gün" }, days.indexOf(s.newVideoDays)) {
@@ -561,6 +650,9 @@ class SettingsActivity : AppCompatActivity() {
             ResumeStore.clearAll(this)
             android.widget.Toast.makeText(this, "Geçmiş temizlendi", android.widget.Toast.LENGTH_SHORT).show()
         }
+        section("Ağ")
+        text("HTTP User-Agent", s.httpUserAgent.ifEmpty { "Varsayılan (OpenPlayer/1.0)" }, "Boş bırakırsanız varsayılan kullanılır") { s.httpUserAgent = it }
+        note("Ağ akışlarında sunucuya gönderilen tanıtım metni. Uygulama yeniden açılınca geçerli olur.")
         section("Dosya erişimi")
         action("Tüm dosyalara erişim izni", "Videonun yanındaki altyazıları otomatik bulmak için gerekir") { openAllFilesAccess() }
     }

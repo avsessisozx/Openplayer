@@ -287,6 +287,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         }
         entries += "＋  Dosyadan ekle…" to { a.pickSubtitleFile() }
         entries += "＋  Çevrimiçi altyazı ara…" to { showOnlineSearch() }
+        entries += "🌐  Altyazıyı çevir…" to { showTranslate() }
         entries += "⏱  Senkronizasyon (gecikme, hız)…" to { showSubtitleSync() }
         entries += "Aa  Stil ve boyut…" to { showSubtitleStyle() }
         entries += "⚙  Karakter kodlaması…" to { showCharsetMenu() }
@@ -466,6 +467,91 @@ class PlayerMenus(private val a: PlayerActivity) {
                 ?: name?.let { File(SubtitleFiles.downloadDir(a), it) }?.takeIf { it.exists() }
             if (file != null) a.loadExternalSubtitle(file, remember = false)
         }
+    }
+
+    // ------------------------------------------------------------ altyazı çevirisi
+
+    fun showTranslate() {
+        val cues = a.subtitles.externalCues
+        if (cues.isEmpty()) {
+            a.showMessage(
+                "Önce bir altyazı yükleyin",
+                "Çeviri, yüklü altyazı dosyası için çalışır. Altyazı menüsünden bir dosya ekleyin veya çevrimiçi arayın. " +
+                    "Videonun içine gömülü altyazılar çevrilemez."
+            )
+            return
+        }
+        val s = a.settings
+        val cfg = s.translateConfig()
+        if (cfg.provider != TrProvider.MYMEMORY && cfg.apiUrl.isBlank() ||
+            cfg.provider == TrProvider.OPENAI && cfg.model.isBlank()
+        ) {
+            PanelBuilder(a)
+                .setTitle("Çeviri ayarı gerekli")
+                .setMessage("Seçili sağlayıcı (${cfg.provider.label}) için adres${if (cfg.provider == TrProvider.OPENAI) " ve model" else ""} girilmemiş. " +
+                    "Ayarlar > Altyazı çevirisi bölümünden girebilir veya anahtarsız MyMemory'yi seçebilirsiniz.")
+                .setPositiveButton("Ayarlar") { _, _ -> a.openSettings("TRANSLATE") }
+                .setNegativeButton("İptal", null)
+                .show()
+            return
+        }
+        val langs = TrLangs.all
+        val labels = langs.map { it.tr }
+        a.showChoice("Şu dile çevir", labels, langs.indexOfFirst { it.code == cfg.target }) { i ->
+            s.trTarget = langs[i].code
+            confirmQuota(cues, s.translateConfig())
+        }
+    }
+
+    private fun confirmQuota(cues: List<SubCue>, cfg: TrConfig) {
+        val chars = cues.sumOf { it.text.length.toLong() }
+        if (cfg.provider == TrProvider.MYMEMORY && cfg.email.isBlank() && chars > 5000) {
+            PanelBuilder(a)
+                .setTitle("Günlük kota uyarısı")
+                .setMessage("Bu altyazı yaklaşık $chars karakter. Anahtarsız MyMemory günde yalnız 5.000 karaktere izin verir; " +
+                    "e-posta adresi girilirse 50.000'e çıkar. Yapay zekâ veya LibreTranslate adresi eklemek de bir seçenektir.")
+                .setPositiveButton("Yine de çevir") { _, _ -> runTranslate(cues, cfg) }
+                .setNeutralButton("Ayarlar") { _, _ -> a.openSettings("TRANSLATE") }
+                .setNegativeButton("İptal", null)
+                .show()
+            return
+        }
+        runTranslate(cues, cfg)
+    }
+
+    private fun runTranslate(cues: List<SubCue>, cfg: TrConfig) {
+        val cancel = java.util.concurrent.atomic.AtomicBoolean(false)
+        val dialog = PanelBuilder(a)
+            .setTitle("Altyazı çevriliyor")
+            .setMessage("Başlıyor…")
+            .setCancelable(false)
+            .setNegativeButton("İptal") { _, _ -> cancel.set(true) }
+            .show()
+        val uri = a.currentUri
+        Thread {
+            try {
+                val tr = SubtitleTranslator(cfg)
+                val out = tr.translateCues(cues, cancelled = { cancel.get() }) { done, total ->
+                    a.runOnUiThread { if (!cancel.get()) dialog.setMessage("$done / $total satır çevrildi") }
+                }
+                val base = uri?.let { SubtitleFiles.displayName(a, it).substringBeforeLast('.') } ?: "altyazi"
+                val file = File(SubtitleFiles.downloadDir(a), UriGuard.safeFileName(base, 70) + "." + cfg.target + ".srt")
+                file.writeText(SrtWriter.write(out), Charsets.UTF_8)
+                SubtitleFiles.pruneDownloads(a)
+                a.runOnUiThread {
+                    dialog.dismiss()
+                    a.loadExternalSubtitle(file)
+                    a.toast("Çeviri tamamlandı (${out.size} satır)")
+                }
+            } catch (e: TranslateCancelled) {
+                a.runOnUiThread { dialog.dismiss(); a.toast("Çeviri iptal edildi") }
+            } catch (e: Exception) {
+                a.runOnUiThread {
+                    dialog.dismiss()
+                    a.showMessage("Çeviri başarısız", e.message ?: "Bilinmeyen hata")
+                }
+            }
+        }.start()
     }
 
     // ------------------------------------------------------------ çevrimiçi altyazı

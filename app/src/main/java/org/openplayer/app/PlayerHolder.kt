@@ -119,7 +119,7 @@ object PlayerHolder {
             .readTimeout(30, TimeUnit.SECONDS)
             .followSslRedirects(false)
             .build()
-        val http = OkHttpDataSource.Factory(client).setUserAgent("OpenPlayer/1.0")
+        val http = OkHttpDataSource.Factory(client).setUserAgent(settings.httpUserAgent.ifBlank { "OpenPlayer/1.0" })
         val authedHttp = NetworkDataSourceFactory.withWebDavAuth(app, http)
         val dataSources = NetworkDataSourceFactory(app, DefaultDataSource.Factory(app, authedHttp))
         val mediaSources = DefaultMediaSourceFactory(app)

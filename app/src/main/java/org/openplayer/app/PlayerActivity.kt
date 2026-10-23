@@ -86,6 +86,7 @@ class PlayerActivity : AppCompatActivity() {
         const val EXTRA_URIS = "org.openplayer.app.URIS"
         const val EXTRA_TITLES = "org.openplayer.app.TITLES"
         const val EXTRA_INDEX = "org.openplayer.app.INDEX"
+        const val ACTION_PIP = "org.openplayer.app.PIP_ACTION"
     }
 
     val settings by lazy { AppSettings.get(this) }
@@ -264,6 +265,7 @@ class PlayerActivity : AppCompatActivity() {
             updatePlayButton()
             scheduleAutoHide()
             if (isPlaying) fadeIn()
+            updatePipParams()
         }
 
         override fun onPlaybackStateChanged(state: Int) {
@@ -376,6 +378,8 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ContextCompat.registerReceiver(this, pipReceiver, android.content.IntentFilter(ACTION_PIP), ContextCompat.RECEIVER_NOT_EXPORTED)
+        pipReceiverRegistered = true
         if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (settings.rememberBrightness && settings.savedBrightness > 0f) {
             window.attributes = window.attributes.apply { screenBrightness = settings.savedBrightness.coerceIn(0.01f, 1f) }
@@ -449,6 +453,10 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
+        if (pipReceiverRegistered) {
+            runCatching { unregisterReceiver(pipReceiver) }
+            pipReceiverRegistered = false
+        }
         PlayerHolder.removeRebuildListener(rebuildListener)
         if (::player.isInitialized) player.removeListener(playerListener)
         if (isFinishing) {
@@ -1883,10 +1891,44 @@ class PlayerActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- PiP, ekran görüntüsü, paylaşma
 
+    private var pipReceiverRegistered = false
+
+    /** PiP penceresindeki düğmeler (önceki/oynat/sonraki ya da ±10 sn). */
+    private val pipReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context, intent: Intent) {
+            if (!::player.isInitialized) return
+            val seek = settings.pipSeekButtons
+            when (intent.getIntExtra("pip_action", 0)) {
+                1 -> if (seek) seekRelative(-10_000) else previous()
+                2 -> if (player.isPlaying) player.pause() else player.play()
+                3 -> if (seek) seekRelative(10_000) else if (player.hasNextMediaItem()) player.seekToNextMediaItem()
+            }
+        }
+    }
+
+    private fun pipActions(): List<android.app.RemoteAction> {
+        fun action(code: Int, icon: Int, title: String): android.app.RemoteAction {
+            val pending = android.app.PendingIntent.getBroadcast(
+                this, code,
+                Intent(ACTION_PIP).setPackage(packageName).putExtra("pip_action", code),
+                android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            return android.app.RemoteAction(android.graphics.drawable.Icon.createWithResource(this, icon), title, title, pending)
+        }
+        val seek = settings.pipSeekButtons
+        val playing = player.isPlaying
+        return listOf(
+            action(1, if (seek) R.drawable.ic_replay10 else R.drawable.ic_prev, if (seek) "10 sn geri" else "Önceki"),
+            action(2, if (playing) R.drawable.ic_pause else R.drawable.ic_play, if (playing) "Duraklat" else "Oynat"),
+            action(3, if (seek) R.drawable.ic_forward10 else R.drawable.ic_next, if (seek) "10 sn ileri" else "Sonraki"),
+        )
+    }
+
     private fun pipParams(): PictureInPictureParams? {
         if (Build.VERSION.SDK_INT < 26) return null
         val size = player.videoSize
         val builder = PictureInPictureParams.Builder()
+        runCatching { builder.setActions(pipActions()) }
         if (size.width > 0 && size.height > 0) {
             val ratio = (size.width.toFloat() / size.height).coerceIn(0.42f, 2.38f)
             builder.setAspectRatio(Rational((ratio * 1000).toInt(), 1000))
@@ -1999,8 +2041,10 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    fun openSettings() {
-        startActivity(Intent(this, SettingsActivity::class.java))
+    fun openSettings(page: String? = null) {
+        val i = Intent(this, SettingsActivity::class.java)
+        if (page != null) i.putExtra(SettingsActivity.EXTRA_PAGE, page)
+        startActivity(i)
     }
 
     /** Dışarıdan (menülerden) gelen basit mutlak değer kontrolü. */
