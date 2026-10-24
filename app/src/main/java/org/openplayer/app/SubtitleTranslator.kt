@@ -147,6 +147,8 @@ class SubtitleTranslator(
     companion object {
         const val MYMEMORY_URL = "https://api.mymemory.translated.net/get"
         private const val BATCH_ITEMS = 25
+        private const val CHUNK_ITEMS = 50
+        private const val MAX_RETRIES = 8
         private const val BATCH_CHARS = 3500
         private const val MYMEMORY_MAX_BYTES = 450
 
@@ -182,24 +184,39 @@ class SubtitleTranslator(
         texts: List<String>,
         cancelled: () -> Boolean = { false },
         progress: (done: Int, total: Int) -> Unit = { _, _ -> },
+        cache: MutableMap<String, String>? = null,
+        checkpoint: () -> Unit = {},
     ): List<String> {
         val keys = LinkedHashSet<String>()
         for (t in texts) if (needsTranslation(t)) keys.add(t)
         val list = keys.toList()
-        val done = AtomicInteger(0)
+        val map = HashMap<String, String>()
+        // Önceki denemeden kalan çeviriler (yarıda kalmış çeviriyi devam ettirmek için).
+        if (cache != null) for (k in list) cache[k]?.let { map[k] = it }
+        val done = AtomicInteger(map.size)
         val tick = { n: Int ->
             val d = done.addAndGet(n)
-            progress(d, list.size)
+            progress(minOf(d, list.size), list.size)
         }
-        progress(0, list.size)
-        val translated: List<String> = when {
-            list.isEmpty() -> emptyList()
-            cfg.provider == TrProvider.MYMEMORY -> viaMyMemory(list, cancelled, tick)
-            cfg.provider == TrProvider.LIBRE -> viaLibre(list, cancelled, tick)
-            else -> viaOpenAi(list, cancelled, tick)
+        progress(map.size, list.size)
+        val pending = list.filter { it !in map }
+        // Parçalar halinde çevrilir; her parçadan sonra ara kayıt alınır, hata olursa kalan işlem sürdürülebilir.
+        for (chunk in pending.chunked(CHUNK_ITEMS)) {
+            if (cancelled()) throw TranslateCancelled()
+            val translated: List<String> = when (cfg.provider) {
+                TrProvider.MYMEMORY -> viaMyMemory(chunk, cancelled) { }
+                TrProvider.LIBRE -> viaLibre(chunk, cancelled) { }
+                else -> viaOpenAi(chunk, cancelled) { }
+            }
+            chunk.forEachIndexed { i, k ->
+                val v = translated.getOrNull(i)?.ifBlank { null } ?: k
+                map[k] = v
+                cache?.put(k, v)
+            }
+            done.set(map.size)
+            progress(minOf(map.size, list.size), list.size)
+            checkpoint()
         }
-        val map = HashMap<String, String>()
-        list.forEachIndexed { i, k -> map[k] = translated.getOrNull(i)?.ifBlank { null } ?: k }
         return texts.map { map[it] ?: it }
     }
 
@@ -207,9 +224,41 @@ class SubtitleTranslator(
         cues: List<SubCue>,
         cancelled: () -> Boolean = { false },
         progress: (done: Int, total: Int) -> Unit = { _, _ -> },
+        cache: MutableMap<String, String>? = null,
+        checkpoint: () -> Unit = {},
     ): List<SubCue> {
-        val out = translate(cues.map { it.text.toString().trim() }, cancelled, progress)
+        val out = translate(cues.map { it.text.toString().trim() }, cancelled, progress, cache, checkpoint)
         return cues.mapIndexed { i, c -> c.copy(text = out[i]) }
+    }
+
+    /** Son çevirinin ayrıntılı günlüğü (hata raporu için): istek, yanıt kodu, bekleme. */
+    val log: List<String> get() = synchronized(logLines) { logLines.toList() }
+    private val logLines = ArrayList<String>()
+    private fun addLog(s: String) {
+        synchronized(logLines) {
+            logLines.add(java.text.SimpleDateFormat("HH:mm:ss", Locale.ROOT).format(java.util.Date()) + " " + s)
+            if (logLines.size > 200) logLines.removeAt(0)
+        }
+    }
+
+    // İstekler arası aralık: yapay zekâ servislerinin dakikalık sınırına çarpmamak için; 429 alınırsa büyür.
+    private var gapMs = if (cfg.provider == TrProvider.OPENAI) 1200L else 0L
+    private var lastSendAt = 0L
+
+    private fun pace(cancelled: () -> Boolean) {
+        if (gapMs <= 0) return
+        val wait = synchronized(this) { lastSendAt + gapMs - System.currentTimeMillis() }
+        if (wait > 0) waitCancellable(wait, cancelled)
+        synchronized(this) { lastSendAt = System.currentTimeMillis() }
+    }
+
+    private fun waitCancellable(ms: Long, cancelled: () -> Boolean) {
+        var waited = 0L
+        while (waited < ms) {
+            if (cancelled()) throw TranslateCancelled()
+            sleep(250)
+            waited += 250
+        }
     }
 
     // ------------------------------------------------------------------ ortak HTTP
@@ -218,17 +267,28 @@ class SubtitleTranslator(
         var attempt = 0
         while (true) {
             if (cancelled()) throw TranslateCancelled()
+            pace(cancelled)
+            val started = System.currentTimeMillis()
             val r = http.send(method, url, headers, body)
-            if (r.code in 200..299) return r
+            addLog("${method} ${url.substringBefore('?').take(80)} -> HTTP ${r.code} (${System.currentTimeMillis() - started} ms)" +
+                if (r.code !in 200..299) " " + serverMessage(r.body).take(160) else "")
+            if (r.code in 200..299) {
+                if (gapMs > 1200L && cfg.provider == TrProvider.OPENAI) gapMs = maxOf(1200L, gapMs - 250L)
+                return r
+            }
+            if (r.code == 429 && isDailyQuota(r.body)) {
+                throw TranslateException(
+                    "Günlük ücretsiz kota doldu (HTTP 429).\nÇevrilen satırlar kaydedildi; kota yenilenince veya başka bir model/sağlayıcı seçince " +
+                        "\"Altyazıyı çevir\" dediğinde kaldığı yerden devam eder.\n" + serverMessage(r.body)
+                )
+            }
             val retryable = r.code == 429 || r.code in 500..599
-            if (retryable && attempt < 4) {
-                val waitSec = (r.retryAfterSec ?: (2 shl attempt)).coerceIn(1, 30)
-                var waited = 0L
-                while (waited < waitSec * 1000L) {
-                    if (cancelled()) throw TranslateCancelled()
-                    sleep(250)
-                    waited += 250
-                }
+            if (retryable && attempt < MAX_RETRIES) {
+                val hinted = r.retryAfterSec ?: retryDelayFromBody(r.body)
+                val waitSec = (hinted ?: (2 shl minOf(attempt, 5))).coerceIn(1, 120)
+                if (r.code == 429 && cfg.provider == TrProvider.OPENAI) gapMs = minOf(gapMs * 2, 15_000L)
+                addLog("bekleniyor: ${waitSec} sn (deneme ${attempt + 1}/$MAX_RETRIES)")
+                waitCancellable(waitSec * 1000L, cancelled)
                 attempt++
                 continue
             }
@@ -236,11 +296,23 @@ class SubtitleTranslator(
         }
     }
 
+    private fun isDailyQuota(body: String): Boolean {
+        val b = body.lowercase()
+        return "perday" in b || "per day" in b || "daily" in b || "requests_per_day" in b || "tokens per day" in b
+    }
+
+    /** Gemini "retryDelay": "34s" ve "Please retry in 34.5s" biçimlerini okur. */
+    private fun retryDelayFromBody(body: String): Int? {
+        val m = Regex("retryDelay\"?\\s*:\\s*\"(\\d+(?:\\.\\d+)?)s").find(body)
+            ?: Regex("retry in (\\d+(?:\\.\\d+)?)\\s*s", RegexOption.IGNORE_CASE).find(body)
+        return m?.groupValues?.get(1)?.toDoubleOrNull()?.let { Math.ceil(it).toInt() }
+    }
+
     private fun httpError(r: HttpResult): TranslateException {
         val server = serverMessage(r.body)
         val base = when (r.code) {
             401, 403 -> "Sunucu erişimi reddetti (HTTP ${r.code}). API anahtarını ve adresi kontrol edin."
-            404 -> "Adres bulunamadı (HTTP 404). Çeviri adresini kontrol edin."
+            404 -> "Adres veya model bulunamadı (HTTP 404). Adresi kontrol edin; model adı eskimiş olabilir, 'Model listesini getir' ile güncel bir model seçin."
             301, 302, 307, 308 -> "Adres başka yere yönlendiriyor${r.location?.let { ": $it" } ?: ""}. Doğru adresi girin."
             429 -> "İstek sınırı aşıldı (HTTP 429). Biraz bekleyip tekrar deneyin veya başka sağlayıcı seçin."
             else -> "Sunucu hatası (HTTP ${r.code})."
@@ -252,7 +324,7 @@ class SubtitleTranslator(
         val t = body.trim()
         if (t.isEmpty()) return ""
         val msg = runCatching {
-            val o = JSONObject(t)
+            val o = if (t.startsWith("[")) JSONArray(t).getJSONObject(0) else JSONObject(t)
             val e = o.opt("error")
             when {
                 e is JSONObject -> e.optString("message")

@@ -52,6 +52,14 @@ class FolderAdapter(
     var scalePercent: Int = 100
     var textScalePercent: Int = 100
 
+    /** Izgara görünümü: simge üstte, adı altta ortalı. */
+    var grid: Boolean = false
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     class VH(
         val root: LinearLayout, val name: TextView, val count: TextView, val badge: TextView, val icon: ImageView,
         val check: ImageView,
@@ -130,6 +138,27 @@ class FolderAdapter(
         (holder.icon.parent as View).layoutParams = (holder.icon.parent as View).layoutParams.apply {
             width = (holder.root.context.dp(64) * sc).toInt().coerceAtLeast(holder.root.context.dp(24))
             height = (holder.root.context.dp(52) * sc).toInt().coerceAtLeast(holder.root.context.dp(22))
+        }
+        val c = holder.root.context
+        val texts = holder.name.parent as LinearLayout
+        if (grid) {
+            holder.root.orientation = LinearLayout.VERTICAL
+            holder.root.gravity = Gravity.CENTER_HORIZONTAL
+            texts.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = c.dp(6) }
+            holder.name.gravity = Gravity.CENTER
+            holder.count.gravity = Gravity.CENTER
+            holder.name.maxLines = 2
+            (holder.icon.layoutParams as FrameLayout.LayoutParams).gravity = Gravity.CENTER
+        } else {
+            holder.root.orientation = LinearLayout.HORIZONTAL
+            holder.root.gravity = Gravity.CENTER_VERTICAL
+            texts.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                .apply { marginStart = c.dp(12) }
+            holder.name.gravity = Gravity.START
+            holder.count.gravity = Gravity.START
+            holder.name.maxLines = 1
+            (holder.icon.layoutParams as FrameLayout.LayoutParams).gravity = Gravity.START or Gravity.BOTTOM
         }
         holder.name.text = item.name
         holder.count.text = "${item.videoCount} video" + if (item.hidden) " · gizli" else ""

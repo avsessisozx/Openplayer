@@ -181,6 +181,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var subtitleView: SubtitleView
     private lateinit var nightOverlay: View
     private lateinit var controls: FrameLayout
+    private lateinit var controlsInner: FrameLayout
     private lateinit var titleView: TextView
     private lateinit var decoderLabel: TextView
     private lateinit var shortcutScroll: HorizontalScrollView
@@ -936,28 +937,9 @@ class PlayerActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             setPadding(dp(8), 0, dp(8), 0)
         }
-        shortcutScroll = HorizontalScrollView(this).apply {
+        shortcutScroll = RayScroll(this).apply {
             isHorizontalScrollBarEnabled = false
             addView(shortcutRow, FrameLayout.LayoutParams(-2, -2))
-            val flingDetector = android.view.GestureDetector(this@PlayerActivity, object : android.view.GestureDetector.SimpleOnGestureListener() {
-                override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent, vx: Float, vy: Float): Boolean {
-                    if (e1 == null) return false
-                    val dx = e2.x - e1.x
-                    if (kotlin.math.abs(dx) < dp(48) || kotlin.math.abs(dx) < kotlin.math.abs(e2.y - e1.y)) return false
-                    if (dx < 0 && !shortcutsExpanded) {
-                        shortcutsExpanded = true
-                    } else if (dx > 0 && shortcutsExpanded && scrollX == 0) {
-                        shortcutsExpanded = false
-                    } else return false
-                    refreshShortcuts()
-                    scheduleAutoHide()
-                    return true
-                }
-            })
-            setOnTouchListener { _, ev ->
-                flingDetector.onTouchEvent(ev)
-                false
-            }
         }
 
         elapsedView = label("0:00", 14f)
@@ -1058,11 +1040,15 @@ class PlayerActivity : AppCompatActivity() {
 
         controls = FrameLayout(this).apply {
             visibility = View.GONE
+            // Karartma gradyanları tam ekran; kenar boşluğu (çentik/sistem çubuğu) yalnız düğmelere uygulanır.
             addView(topScrim, FrameLayout.LayoutParams(-1, dp(220), Gravity.TOP))
             addView(bottomScrim, FrameLayout.LayoutParams(-1, dp(170), Gravity.BOTTOM))
-            addView(topBar, FrameLayout.LayoutParams(-1, dp(56), Gravity.TOP))
-            addView(shortcutScroll, FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(60) })
-            addView(bottomPanel, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM))
+            controlsInner = FrameLayout(this@PlayerActivity).apply {
+                addView(topBar, FrameLayout.LayoutParams(-1, dp(56), Gravity.TOP))
+                addView(shortcutScroll, FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(60) })
+                addView(bottomPanel, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM))
+            }
+            addView(controlsInner, FrameLayout.LayoutParams(-1, -1))
         }
 
         // Gösterge arka plansız: yalnızca gölgeli yazı, böylece görüntüyü kapatmaz.
@@ -1104,7 +1090,7 @@ class PlayerActivity : AppCompatActivity() {
         playerView.setOnTouchListener(GestureController(this))
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val i = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            controls.setPadding(i.left, i.top, i.right, i.bottom)
+            controlsInner.setPadding(i.left, i.top, i.right, i.bottom)
             (osdView.layoutParams as? FrameLayout.LayoutParams)?.let { lp ->
                 lp.topMargin = i.top
                 lp.rightMargin = i.right
@@ -1723,30 +1709,132 @@ class PlayerActivity : AppCompatActivity() {
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         shortcutRow.removeAllViews()
         val all = settings.shortcuts
-        // MX gibi: kapalıyken yalnızca ilk 5 simge görünür; "›" tüm listeyi açar.
-        val shown = if (shortcutsExpanded) all else all.take(5)
-        if (shortcutsExpanded) {
-            shortcutRow.addView(actionButton(
+        // Kapalıyken yalnızca ilk 5 simge görünür; kalanlar "ray" gibi parmakla çekilince veya ok ile açılır.
+        val head = all.take(5)
+        val rest = all.drop(5)
+        for (s in head) shortcutRow.addView(buildShortcut(s))
+        extraRow = null; extraInner = null; arrowView = null
+        if (rest.isNotEmpty()) {
+            val inner = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            for (s in rest) inner.addView(buildShortcut(s))
+            inner.addView(actionButton(
                 R.drawable.ic_edit, null, "Öğeleri özelleştir", false,
                 scale = settings.shortcutSizePercent / 100f,
                 bgOpacity = settings.shortcutOpacityPercent / 100f,
                 showLabel = false,
             ) { menus.showCustomizeShortcuts() })
-        }
-        for (s in shown) shortcutRow.addView(buildShortcut(s))
-        if (all.size > 5) {
-            shortcutRow.addView(iconView(R.drawable.ic_back, 48, 12).apply {
-                rotation = if (shortcutsExpanded) 0f else 180f
+            val frame = FrameLayout(this).apply {
+                clipChildren = true
+                addView(inner, FrameLayout.LayoutParams(-2, -2, Gravity.START or Gravity.CENTER_VERTICAL))
+            }
+            extraInner = inner
+            extraRow = frame
+            shortcutRow.addView(frame, LinearLayout.LayoutParams(0, -2))
+            val arrow = iconView(R.drawable.ic_back, 48, 12).apply {
                 setOnClickListener {
-                    shortcutsExpanded = !shortcutsExpanded
-                    refreshShortcuts()
+                    settleRay(if (rayFraction > 0.5f) 0f else 1f)
                     scheduleAutoHide()
                 }
-            })
+            }
+            arrowView = arrow
+            shortcutRow.addView(arrow)
+            applyRay(rayFraction)
         }
     }
 
-    private var shortcutsExpanded = false
+    // --- Kısayol rayı: parmakla çekince yumuşakça açılır/kapanır (0 = varsayılan 5 simge, 1 = tümü).
+    // Oynatıcıdan çıkınca sıfırlanır (Activity alanı).
+    private var rayFraction = 0f
+    private var rayAnim: android.animation.ValueAnimator? = null
+    private var extraRow: FrameLayout? = null
+    private var extraInner: LinearLayout? = null
+    private var arrowView: View? = null
+
+    private fun rayFull(): Int {
+        val inner = extraInner ?: return 0
+        inner.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        return inner.measuredWidth
+    }
+
+    private fun applyRay(f: Float) {
+        rayFraction = f.coerceIn(0f, 1f)
+        val row = extraRow ?: return
+        val lp = row.layoutParams
+        lp.width = (rayFull() * rayFraction).toInt()
+        row.layoutParams = lp
+        row.alpha = 0.25f + 0.75f * rayFraction
+        arrowView?.rotation = 180f * (1f - rayFraction)
+    }
+
+    private fun settleRay(target: Float) {
+        rayAnim?.cancel()
+        rayAnim = android.animation.ValueAnimator.ofFloat(rayFraction, target).apply {
+            duration = 220
+            interpolator = android.view.animation.DecelerateInterpolator()
+            addUpdateListener { applyRay(it.animatedValue as Float) }
+            start()
+        }
+    }
+
+    private inner class RayScroll(ctx: android.content.Context) : HorizontalScrollView(ctx) {
+        private val slop = android.view.ViewConfiguration.get(ctx).scaledTouchSlop
+        private var downX = 0f
+        private var downY = 0f
+        private var prevX = 0f
+        private var startF = 0f
+        private var lastDelta = 0f
+        private var ray = false
+
+        override fun onInterceptTouchEvent(ev: android.view.MotionEvent): Boolean {
+            when (ev.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    downX = ev.x; downY = ev.y; prevX = ev.x; lastDelta = 0f
+                    ray = false
+                    rayAnim?.cancel()
+                    return super.onInterceptTouchEvent(ev)
+                }
+                android.view.MotionEvent.ACTION_MOVE -> if (!ray) {
+                    val dx = ev.x - downX
+                    val dy = ev.y - downY
+                    if (kotlin.math.abs(dx) > slop && kotlin.math.abs(dx) > kotlin.math.abs(dy) && rayFull() > 0 &&
+                        ((dx < 0 && rayFraction < 1f) || (dx > 0 && rayFraction > 0f && scrollX == 0))
+                    ) {
+                        ray = true
+                        startF = rayFraction
+                        downX = ev.x
+                        prevX = ev.x
+                        parent?.requestDisallowInterceptTouchEvent(true)
+                        return true
+                    }
+                }
+            }
+            return if (ray) true else super.onInterceptTouchEvent(ev)
+        }
+
+        override fun onTouchEvent(ev: android.view.MotionEvent): Boolean {
+            if (!ray) return super.onTouchEvent(ev)
+            when (ev.actionMasked) {
+                android.view.MotionEvent.ACTION_MOVE -> {
+                    val full = rayFull().coerceAtLeast(1)
+                    applyRay(startF - (ev.x - downX) / full)
+                    lastDelta = ev.x - prevX
+                    prevX = ev.x
+                }
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                    ray = false
+                    val target = when {
+                        lastDelta < -2f -> 1f
+                        lastDelta > 2f -> 0f
+                        rayFraction > 0.5f -> 1f
+                        else -> 0f
+                    }
+                    settleRay(target)
+                    scheduleAutoHide()
+                }
+            }
+            return true
+        }
+    }
 
     private fun buildShortcut(s: Shortcut): View {
         var icon = s.icon

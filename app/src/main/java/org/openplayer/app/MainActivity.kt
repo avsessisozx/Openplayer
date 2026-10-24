@@ -87,6 +87,8 @@ class MainActivity : AppCompatActivity() {
                 currentFolder != null -> {
                     currentFolder = null
                     render()
+                    // Klasör listesine dönünce kaldığı konuma geri getir.
+                    folderListState?.let { st -> runCatching { list.layoutManager?.onRestoreInstanceState(st) } }
                 }
                 else -> {
                     isEnabled = false
@@ -163,7 +165,8 @@ class MainActivity : AppCompatActivity() {
         sortButton = iconView(R.drawable.ic_sort).apply { setOnClickListener { showSortMenu() } }
         viewButton = iconView(R.drawable.ic_grid).apply {
             setOnClickListener {
-                settings.gridView = !settings.gridView
+                if (inFolderList()) settings.folderGrid = !settings.folderGrid
+                else settings.gridView = !settings.gridView
                 render()
             }
         }
@@ -374,14 +377,22 @@ class MainActivity : AppCompatActivity() {
             else -> {
                 titleView.text = "Klasörler"
                 backButton.visibility = View.GONE
-                sortButton.visibility = View.GONE
-                viewButton.visibility = View.GONE
+                sortButton.visibility = View.VISIBLE
+                viewButton.visibility = View.VISIBLE
+                viewButton.setImageResource(if (settings.folderGrid) R.drawable.ic_view_list else R.drawable.ic_grid)
                 val folders = VideoRepository.folders(this, all, settings)
                 folderAdapter.scalePercent = settings.folderScale
                 folderAdapter.textScalePercent = settings.listTextScale
+                folderAdapter.grid = settings.folderGrid
                 folderAdapter.items = folders
-                if (list.layoutManager?.javaClass != LinearLayoutManager::class.java) {
+                val wantGrid = settings.folderGrid
+                val lmClass = list.layoutManager?.javaClass
+                if (wantGrid && lmClass != androidx.recyclerview.widget.GridLayoutManager::class.java) {
+                    list.layoutManager = androidx.recyclerview.widget.GridLayoutManager(this, folderSpan())
+                } else if (!wantGrid && lmClass != LinearLayoutManager::class.java) {
                     list.layoutManager = LinearLayoutManager(this)
+                } else if (wantGrid) {
+                    (list.layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanCount = folderSpan()
                 }
                 if (list.adapter !== folderAdapter) list.adapter = folderAdapter
                 if (folders.isEmpty()) showMessage("Video bulunamadı") else hideMessage()
@@ -489,7 +500,10 @@ class MainActivity : AppCompatActivity() {
         emptyView.visibility = View.GONE
     }
 
+    private var folderListState: android.os.Parcelable? = null
+
     private fun openFolder(folder: FolderItem) {
+        if (currentFolder == null) folderListState = list.layoutManager?.onSaveInstanceState()
         currentFolder = folder
         render()
         val target = if (settings.scrollToLast) lastPlayedIn(shown)?.let { u -> shown.indexOfFirst { it.uri.toString() == u } } ?: -1 else -1
@@ -540,7 +554,27 @@ class MainActivity : AppCompatActivity() {
     // ------------------------------------------------------------ menüler
 
     private fun showSortMenu() {
-        showListPanel(settings) { render() }
+        if (inFolderList()) showFolderOrder() else showListPanel(settings) { render() }
+    }
+
+    /** Ana ekranda klasör listesi mi gösteriliyor (klasör içi, arama ve tüm videolar değil)? */
+    private fun inFolderList() = currentFolder == null && !searching && settings.listMode == ListMode.FOLDERS
+
+    private fun folderSpan(): Int =
+        Math.round(resources.displayMetrics.widthPixels / dp(150).toFloat()).coerceIn(2, 5)
+
+    private fun showFolderOrder() {
+        val keys = listOf("name_asc", "name_desc", "new_desc", "new_asc", "count_desc", "count_asc", "size_desc", "size_asc")
+        val labels = listOf(
+            "Ada göre (A → Z)", "Ada göre (Z → A)",
+            "En yeni video önce", "En eski video önce",
+            "Çok videolu önce", "Az videolu önce",
+            "Büyük boyut önce", "Küçük boyut önce",
+        )
+        showChoice("Klasörleri sırala", labels, keys.indexOf(settings.folderOrder)) { i ->
+            settings.folderOrder = keys[i]
+            render()
+        }
     }
 
     private fun showRootMenu(anchor: View) {

@@ -1,3 +1,23 @@
+# 1.0.0-beta14
+
+Hata düzeltmeleri ve eksikler. Android 14 emülatöründe otomatik testten geçti.
+
+**Altyazı çevirisi**
+- Uzun altyazılar yarıda kesilmez: istekler arasında bekleme eklendi, sunucu "bekle" derse (HTTP 429) söylediği süre kadar beklenir. Hata olsa bile o ana kadar çevrilen satırlar saklanır; tekrar "Altyazıyı çevir" denince kaldığı yerden devam eder.
+- Günlük ücretsiz kota dolduğunda açık bir mesaj gösterilir. Google Gemini'nin hata biçimi de doğru okunur.
+- Google Gemini hazır ayarı güncel modele (`gemini-3.8-flash`) geçirildi; eski model adı artık "HTTP 404" veriyordu. 404 hatasında "Model listesini getir" önerilir.
+
+**Hata raporu**
+- Ayarlar → Hata bildirimi → **Hata raporunu kopyala**: sürüm, cihaz, ayarlar (parola ve anahtarlar hariç), son çeviri günlüğü, son çökme ve uygulama hataları tek metinde panoya kopyalanır. Çeviri hata penceresinde de aynı düğme vardır.
+
+**Listeler**
+- Bir klasöre, albüme, çalma listesine veya ağ klasörüne girip geri çıkınca liste artık kaldığı konumda açılır (başa dönmez).
+- Ana ekran klasör listesine **sıralama** (ad, en yeni video, video sayısı, boyut) ve **ızgara/liste görünümü** düğmeleri eklendi.
+
+**Oynatıcı**
+- Üstteki kısayol satırı: varsayılan olarak ilk 5 simge görünür; parmakla yana çekince yumuşakça kayarak tümü açılır, geri çekince kapanır (ok da çalışır). Oynatıcıdan çıkınca varsayılana döner.
+- Kontrol katmanının kenarındaki dikey şerit giderildi (karartma artık tam ekran).
+
 # 1.0.0-beta13
 
 MX Player'ın kütüphane, menü ve ayar ekranları yeniden karşılaştırıldı; eksik kalanlar kendi kodumuzla eklendi. Android 14 emülatöründe otomatik testten geçti; **altyazı çevirisi gerçek servislerle henüz denenmedi** — sorunları Issues'tan bildirin.

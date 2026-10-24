@@ -519,6 +519,32 @@ class PlayerMenus(private val a: PlayerActivity) {
         runTranslate(cues, cfg)
     }
 
+    /** Yarıda kalan çeviriyi sürdürmek için önbellek dosyası (sağlayıcı + model + dil çiftine özel). */
+    private fun cacheFile(cfg: TrConfig): File {
+        val dir = File(a.filesDir, "trcache").apply { mkdirs() }
+        val id = "${cfg.provider.id}|${cfg.model}|${cfg.source}|${cfg.target}".hashCode().toUInt().toString(16)
+        return File(dir, "tr_$id.json")
+    }
+
+    private fun loadCache(f: File): HashMap<String, String> {
+        val m = HashMap<String, String>()
+        runCatching {
+            if (f.exists() && f.length() < 8L * 1024 * 1024) {
+                val o = org.json.JSONObject(f.readText(Charsets.UTF_8))
+                for (k in o.keys()) m[k] = o.getString(k)
+            }
+        }
+        return m
+    }
+
+    private fun saveCache(f: File, m: Map<String, String>) {
+        runCatching {
+            val snapshot = HashMap(m)
+            if (snapshot.size > 40_000) { f.delete(); return }
+            f.writeText(org.json.JSONObject(snapshot as Map<*, *>).toString(), Charsets.UTF_8)
+        }
+    }
+
     private fun runTranslate(cues: List<SubCue>, cfg: TrConfig) {
         val cancel = java.util.concurrent.atomic.AtomicBoolean(false)
         val dialog = PanelBuilder(a)
@@ -529,26 +555,55 @@ class PlayerMenus(private val a: PlayerActivity) {
             .show()
         val uri = a.currentUri
         Thread {
+            val tr = SubtitleTranslator(cfg)
+            val cFile = cacheFile(cfg)
+            val cache = loadCache(cFile)
+            var lastDone = 0
+            var lastTotal = 0
+            val header = "sağlayıcı=${cfg.provider.id} model=${cfg.model} kaynak=${cfg.source} hedef=${cfg.target} " +
+                "adres=${runCatching { java.net.URI(cfg.apiUrl).host }.getOrNull() ?: cfg.apiUrl.take(40)} satır=${cues.size}"
             try {
-                val tr = SubtitleTranslator(cfg)
-                val out = tr.translateCues(cues, cancelled = { cancel.get() }) { done, total ->
-                    a.runOnUiThread { if (!cancel.get()) dialog.setMessage("$done / $total satır çevrildi") }
-                }
+                val out = tr.translateCues(
+                    cues,
+                    cancelled = { cancel.get() },
+                    progress = { done, total ->
+                        lastDone = done; lastTotal = total
+                        a.runOnUiThread { if (!cancel.get()) dialog.setMessage("$done / $total satır çevrildi") }
+                    },
+                    cache = cache,
+                    checkpoint = { saveCache(cFile, cache) },
+                )
                 val base = uri?.let { SubtitleFiles.displayName(a, it).substringBeforeLast('.') } ?: "altyazi"
                 val file = File(SubtitleFiles.downloadDir(a), UriGuard.safeFileName(base, 70) + "." + cfg.target + ".srt")
                 file.writeText(SrtWriter.write(out), Charsets.UTF_8)
                 SubtitleFiles.pruneDownloads(a)
+                BugReport.noteTranslate(a, "BAŞARILI $lastDone/$lastTotal\n$header\n" + tr.log.takeLast(40).joinToString("\n"))
                 a.runOnUiThread {
                     dialog.dismiss()
                     a.loadExternalSubtitle(file)
                     a.toast("Çeviri tamamlandı (${out.size} satır)")
                 }
             } catch (e: TranslateCancelled) {
+                saveCache(cFile, cache)
+                BugReport.noteTranslate(a, "İPTAL EDİLDİ $lastDone/$lastTotal\n$header\n" + tr.log.takeLast(40).joinToString("\n"))
                 a.runOnUiThread { dialog.dismiss(); a.toast("Çeviri iptal edildi") }
             } catch (e: Exception) {
+                saveCache(cFile, cache)
+                BugReport.noteTranslate(
+                    a,
+                    "BAŞARISIZ $lastDone/$lastTotal (${e.javaClass.simpleName}): ${e.message}\n$header\n" + tr.log.takeLast(60).joinToString("\n")
+                )
                 a.runOnUiThread {
                     dialog.dismiss()
-                    a.showMessage("Çeviri başarısız", e.message ?: "Bilinmeyen hata")
+                    val saved = if (lastTotal > 0) "\n\n$lastDone / $lastTotal satır çevrildi ve kaydedildi. Tekrar \"Altyazıyı çevir\" derseniz kaldığı yerden devam eder." else ""
+                    PanelBuilder(a)
+                        .setTitle("Çeviri başarısız")
+                        .setMessage((e.message ?: "Bilinmeyen hata") + saved)
+                        .setPositiveButton("Tamam", null)
+                        .setNeutralButton("Raporu kopyala") { _, _ ->
+                            BugReport.copyToClipboard(a) { n -> a.toast("Rapor panoya kopyalandı ($n karakter)") }
+                        }
+                        .show()
                 }
             }
         }.start()

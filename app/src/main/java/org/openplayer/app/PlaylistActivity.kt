@@ -46,6 +46,9 @@ class PlaylistActivity : AppCompatActivity() {
     private var manager = false
     private lateinit var titleView: TextView
     private lateinit var body: LinearLayout
+    private var scroller: ScrollView? = null
+    private var rootScrollY = 0
+    private var showingRoot = false
     private lateinit var moreButton: ImageView
     private var openId: String? = null
     private var videos: Map<String, VideoItem> = emptyMap()
@@ -120,6 +123,8 @@ class PlaylistActivity : AppCompatActivity() {
             if (openId != null && intent.getStringExtra(EXTRA_OPEN) == null) {
                 openId = null
                 render()
+                // Ana listeye dönünce kaldığı konuma getir.
+                scroller?.post { scroller?.scrollTo(0, rootScrollY) }
             } else finish()
         }
     }
@@ -169,7 +174,7 @@ class PlaylistActivity : AppCompatActivity() {
             fitsSystemWindows = true
             setBackgroundColor(UiColors.background)
             addView(top, LinearLayout.LayoutParams(-1, -2))
-            addView(ScrollView(this@PlaylistActivity).apply { addView(body) }, LinearLayout.LayoutParams(-1, 0, 1f))
+            addView(ScrollView(this@PlaylistActivity).also { scroller = it }.apply { addView(body) }, LinearLayout.LayoutParams(-1, 0, 1f))
         })
         val app = applicationContext
         Thread {
@@ -278,6 +283,8 @@ class PlaylistActivity : AppCompatActivity() {
     }
 
     private fun render() {
+        if (showingRoot) rootScrollY = scroller?.scrollY ?: 0
+        showingRoot = openId == null
         body.removeAllViews()
         val id = openId
         if (id == null) renderRoot() else renderDetail(id)

@@ -223,4 +223,60 @@ class SubtitleTranslatorTest {
         assertEquals(listOf("a", "b"), tr.parseStringArray("Sure! [\"a\",\"b\"] done"))
         assertEquals(null, tr.parseStringArray("no array"))
     }
+
+    @Test fun failure_midway_keeps_cache_and_resume_skips_done_lines() {
+        val lines = (1..120).map { "line number $it" }
+        var failFrom = 60
+        val fake = Fake { c ->
+            val arr = userArray(c)
+            val first = arr.getString(0).substringAfterLast(' ').toInt()
+            if (first >= failFrom) HttpResult(500, "{\"error\":{\"message\":\"boom\"}}")
+            else chatReply(JSONArray((0 until arr.length()).map { "T:" + arr.getString(it) }).toString())
+        }
+        val cache = HashMap<String, String>()
+        val tr = SubtitleTranslator(TrConfig(TrProvider.OPENAI, "tr", apiUrl = "https://x.test/v1", model = "m"), fake, noSleep)
+        try {
+            tr.translate(lines, cache = cache)
+            fail("hata bekleniyordu")
+        } catch (_: TranslateException) {
+        }
+        assertTrue("ilk parçalar kaydedilmeli", cache.size >= 50)
+        assertTrue(cache.containsKey("line number 1"))
+        failFrom = 10_000
+        val before = fake.calls.size
+        val out = SubtitleTranslator(TrConfig(TrProvider.OPENAI, "tr", apiUrl = "https://x.test/v1", model = "m"), fake, noSleep)
+            .translate(lines, cache = cache)
+        assertEquals(120, out.size)
+        assertTrue(out.all { it.startsWith("T:") })
+        val resumeCalls = fake.calls.drop(before)
+        assertTrue("çevrilenler yeniden istenmemeli", resumeCalls.none { userArray(it).getString(0) == "line number 1" })
+    }
+
+    @Test fun daily_quota_429_fails_fast_with_clear_message() {
+        val body = "[{\"error\":{\"code\":429,\"message\":\"Quota exceeded for metric generate_content_free_tier_requests per day\"," +
+            "\"details\":[{\"violations\":[{\"quotaId\":\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\"}]}]}}]"
+        val fake = Fake { HttpResult(429, body) }
+        val tr = SubtitleTranslator(TrConfig(TrProvider.OPENAI, "tr", apiUrl = "https://x.test/v1", model = "m"), fake, noSleep)
+        try {
+            tr.translate(listOf("hello"))
+            fail()
+        } catch (e: TranslateException) {
+            assertTrue(e.message!!, "Günlük" in e.message!!)
+        }
+        assertEquals(1, fake.calls.size)
+        assertTrue(tr.log.isNotEmpty())
+    }
+
+    @Test fun gemini_retry_delay_in_body_is_honoured() {
+        var n = 0
+        val sleeps = ArrayList<Long>()
+        val fake = Fake {
+            n++
+            if (n == 1) HttpResult(429, "[{\"error\":{\"message\":\"rate\",\"details\":[{\"retryDelay\":\"34s\"}]}}]")
+            else chatReply(JSONArray(listOf("tamam")).toString())
+        }
+        val tr = SubtitleTranslator(TrConfig(TrProvider.OPENAI, "tr", apiUrl = "https://x.test/v1", model = "m"), fake) { sleeps += it }
+        assertEquals(listOf("tamam"), tr.translate(listOf("ok")))
+        assertTrue(sleeps.sum() >= 34_000)
+    }
 }
