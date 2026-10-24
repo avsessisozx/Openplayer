@@ -422,6 +422,80 @@ def settings_page(title, scrolls=0):
     return go
 
 
+def write_prefs(extra):
+    """Ayar dosyasını yazar (uygulama kapalıyken). extra: {ad: (tür, değer)}"""
+    sh(f"am force-stop {PKG}")
+    items = {"music_mode": ("boolean", "true")}
+    items.update(extra)
+    lines = []
+    for k, (t, v) in items.items():
+        if t == "string":
+            lines.append(f'    <string name="{k}">{v}</string>')
+        else:
+            lines.append(f'    <{t} name="{k}" value="{v}" />')
+    open("/tmp/settings.xml", "w").write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n" + "\n".join(lines) + "\n</map>\n")
+    adb("push", "/tmp/settings.xml", "/data/local/tmp/settings.xml")
+    sh("chmod 644 /data/local/tmp/settings.xml")
+    sh(f"run-as {PKG} sh -c 'cp /data/local/tmp/settings.xml shared_prefs/settings.xml'")
+
+
+def rail_test():
+    write_prefs({"show_shortcuts": ("boolean", "true")})
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    time.sleep(2)
+    w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
+    def rail_count():
+        """Kısayol satırındaki (üst şerit altı) tıklanabilir simge sayısı; okunamazsa None."""
+        sh("input keyevent 127")  # duraklat: oynarken UI ağacı okunamıyor
+        time.sleep(1.0)
+        root = dump()
+        if root is None:
+            return None
+        return len([1 for _, c, _ in clickables(root) if h * 0.10 < c[1] < h * 0.34])
+
+    shot("Kısayol rayı: varsayılan")
+    n0 = rail_count()
+    y = int(h * 0.23)
+    sh(f"input swipe {int(w*0.40)} {y} {int(w*0.02)} {y} 350"); time.sleep(1.0)
+    shot("Kısayol rayı: çekilince açık")
+    n1 = rail_count()
+    sh(f"input swipe {int(w*0.02)} {y} {int(w*0.40)} {y} 350"); time.sleep(1.0)
+    shot("Kısayol rayı: geri çekilince kapalı")
+    n2 = rail_count()
+    if None in (n0, n1, n2):
+        steps.append(("Kısayol rayı: simge sayısı", "bilgi", f"okunamadı ({n0}/{n1}/{n2})"))
+    else:
+        good = n0 <= 5 and n1 > n0 and n2 == n0
+        steps.append(("Kısayol rayı: simge sayısı", "ok" if good else "SORUN",
+                      f"varsayılan {n0}, açık {n1}, kapanınca {n2} (beklenen: ≤5, artış, aynı)"))
+    # Satırın sağındaki boş alan sürüklemeye tepki vermemeli.
+    sh(f"input swipe {int(w*0.95)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.0)
+    n3 = rail_count()
+    if n3 is not None and n2 is not None:
+        steps.append(("Kısayol rayı: boş alan tepkisiz", "ok" if n3 == n2 else "SORUN", f"önce {n2}, sonra {n3}"))
+    check_crash("Kısayol rayı")
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+
+
+if os.environ.get("SMOKE_ONLY") == "ray":
+    # Yalnız kısayol satırı testi (~10 dk): commit mesajına [ray] yazılınca çalışır.
+    try:
+        rail_test()
+    except Exception as e:
+        import traceback
+        steps.append(("Kısayol rayı testi yarıda kaldı", "SORUN", traceback.format_exc().strip().splitlines()[-1][:300]))
+    logcat.terminate()
+    with open(f"{OUT}/steps.tsv", "w") as fh:
+        for st in steps:
+            fh.write("\t".join(st) + "\n")
+    with open(f"{OUT}/crashes.txt", "w") as fh:
+        for st, txt in crashes:
+            fh.write(f"===== ADIM: {st}\n{txt}\n\n")
+        fh.write("===== ÇÖKME TAMPONU\n" + adb("logcat", "-d", "-b", "crash"))
+    open(f"{OUT}/report.md", "w").write(f"# Kısayol rayı testi\nAdım: {len(steps)}  Çökme: {len(crashes)}\n")
+    sys.exit(0)
+
+
 if os.environ.get("SMOKE_ONLY") == "ayar":
     for page in ("Altyazı", "Liste ve dosyalar", "Tema ve görünüm", "Video ve çözücü"):
         crawl(f"Ayarlar › {page}", settings_page(page), limit=14, skip=("içe aktar", "Tüm dosyalara erişim"))
@@ -668,23 +742,6 @@ sh(f"pm grant {PKG} android.permission.READ_MEDIA_VIDEO")
 
 checkpoint("temel akışlar")
 # ---------------------------------------------------------------- beta11 özellik testleri
-def write_prefs(extra):
-    """Ayar dosyasını yazar (uygulama kapalıyken). extra: {ad: (tür, değer)}"""
-    sh(f"am force-stop {PKG}")
-    items = {"music_mode": ("boolean", "true")}
-    items.update(extra)
-    lines = []
-    for k, (t, v) in items.items():
-        if t == "string":
-            lines.append(f'    <string name="{k}">{v}</string>')
-        else:
-            lines.append(f'    <{t} name="{k}" value="{v}" />')
-    open("/tmp/settings.xml", "w").write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n" + "\n".join(lines) + "\n</map>\n")
-    adb("push", "/tmp/settings.xml", "/data/local/tmp/settings.xml")
-    sh("chmod 644 /data/local/tmp/settings.xml")
-    sh(f"run-as {PKG} sh -c 'cp /data/local/tmp/settings.xml shared_prefs/settings.xml'")
-
-
 def feat_log():
     return adb("logcat", "-d", "-s", "OPFEAT:*")
 
@@ -826,41 +883,8 @@ def feature_tests():
     check_crash("Altyazı çevirisi")
 
     # 5c) beta14: kısayol rayı, klasör ızgarası, kenar şeridi
-    write_prefs({"show_shortcuts": ("boolean", "true")})
-    play("/sdcard/Movies/Test/Yatay video.mp4")
-    time.sleep(2)
-    w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
-    def rail_count():
-        """Kısayol satırındaki (üst şerit altı) tıklanabilir simge sayısı; okunamazsa None."""
-        sh("input keyevent 127")  # duraklat: oynarken UI ağacı okunamıyor
-        time.sleep(1.0)
-        root = dump()
-        if root is None:
-            return None
-        return len([1 for _, c, _ in clickables(root) if h * 0.10 < c[1] < h * 0.34])
-
-    shot("Kısayol rayı: varsayılan")
-    n0 = rail_count()
-    y = int(h * 0.23)
-    sh(f"input swipe {int(w*0.40)} {y} {int(w*0.02)} {y} 350"); time.sleep(1.0)
-    shot("Kısayol rayı: çekilince açık")
-    n1 = rail_count()
-    sh(f"input swipe {int(w*0.02)} {y} {int(w*0.40)} {y} 350"); time.sleep(1.0)
-    shot("Kısayol rayı: geri çekilince kapalı")
-    n2 = rail_count()
-    if None in (n0, n1, n2):
-        steps.append(("Kısayol rayı: simge sayısı", "bilgi", f"okunamadı ({n0}/{n1}/{n2})"))
-    else:
-        good = n0 <= 5 and n1 > n0 and n2 == n0
-        steps.append(("Kısayol rayı: simge sayısı", "ok" if good else "SORUN",
-                      f"varsayılan {n0}, açık {n1}, kapanınca {n2} (beklenen: ≤5, artış, aynı)"))
-    # Satırın sağındaki boş alan sürüklemeye tepki vermemeli.
-    sh(f"input swipe {int(w*0.95)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.0)
-    n3 = rail_count()
-    if n3 is not None and n2 is not None:
-        steps.append(("Kısayol rayı: boş alan tepkisiz", "ok" if n3 == n2 else "SORUN", f"önce {n2}, sonra {n3}"))
-    check_crash("Kısayol rayı")
-    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    rail_test()
+    checkpoint("kısayol rayı")
     write_prefs({"folder_grid": ("boolean", "true"), "folder_order": ("string", "count_desc")})
     start_main(); time.sleep(2.5)
     shot("Klasör ızgara görünümü (çok videolu önce)")
