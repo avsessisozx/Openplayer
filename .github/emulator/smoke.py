@@ -456,10 +456,11 @@ def rail_test():
     shot("Kısayol rayı: varsayılan")
     n0 = rail_count()
     y = int(h * 0.23)
-    sh(f"input swipe {int(w*0.40)} {y} {int(w*0.02)} {y} 350"); time.sleep(1.0)
+    # Satır dar (içeriğe göre) olduğundan sürükleme simgelerin üstünden başlamalı.
+    sh(f"input swipe {int(w*0.28)} {y} {int(w*0.01)} {y} 350"); time.sleep(1.2)
     shot("Kısayol rayı: çekilince açık")
     n1 = rail_count()
-    sh(f"input swipe {int(w*0.02)} {y} {int(w*0.40)} {y} 350"); time.sleep(1.0)
+    sh(f"input swipe {int(w*0.20)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.2)
     shot("Kısayol rayı: geri çekilince kapalı")
     n2 = rail_count()
     if None in (n0, n1, n2):
