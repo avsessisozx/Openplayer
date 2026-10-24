@@ -1,3 +1,10 @@
+# 1.0.0-beta14
+
+Küçük düzeltme sürümü.
+
+- Google Gemini hazır ayarındaki model adı eskidi (Google `gemini-2.0-flash` modelini kapattı, "HTTP 404" veriyordu); `gemini-3.8-flash` olarak güncellendi.
+- 404 hatasında artık model adının eskimiş olabileceği ve "Model listesini getir" ile güncel modelin seçilebileceği söyleniyor.
+
 # 1.0.0-beta13
 
 MX Player'ın kütüphane, menü ve ayar ekranları yeniden karşılaştırıldı; eksik kalanlar kendi kodumuzla eklendi. Android 14 emülatöründe otomatik testten geçti; **altyazı çevirisi gerçek servislerle henüz denenmedi** — sorunları Issues'tan bildirin.

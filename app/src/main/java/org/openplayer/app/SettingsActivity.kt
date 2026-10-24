@@ -449,7 +449,7 @@ class SettingsActivity : AppCompatActivity() {
                 section("Hazır ayarlar (adres ve modeli doldurur)")
                 action("Groq", "Ücretsiz anahtar: console.groq.com") { preset("https://api.groq.com/openai/v1", "llama-3.3-70b-versatile") }
                 action("OpenRouter", "Ücretsiz modeller var: openrouter.ai") { preset("https://openrouter.ai/api/v1", "meta-llama/llama-3.3-70b-instruct:free") }
-                action("Google Gemini", "Ücretsiz anahtar: aistudio.google.com") { preset("https://generativelanguage.googleapis.com/v1beta/openai", "gemini-2.0-flash") }
+                action("Google Gemini", "Ücretsiz anahtar: aistudio.google.com") { preset("https://generativelanguage.googleapis.com/v1beta/openai", "gemini-3.8-flash") }
                 action("Ollama (aynı ağdaki bilgisayar)", "Adresteki IP'yi kendi bilgisayarınıza göre düzeltin") { preset("http://192.168.1.10:11434/v1", "llama3.1") }
                 section("Bağlantı")
                 text("Adres", s.trApiUrl.ifEmpty { "Girilmedi" }, "https://api.ornek.com/v1") { s.trApiUrl = it }

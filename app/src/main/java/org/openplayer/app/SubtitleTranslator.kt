@@ -240,7 +240,7 @@ class SubtitleTranslator(
         val server = serverMessage(r.body)
         val base = when (r.code) {
             401, 403 -> "Sunucu erişimi reddetti (HTTP ${r.code}). API anahtarını ve adresi kontrol edin."
-            404 -> "Adres bulunamadı (HTTP 404). Çeviri adresini kontrol edin."
+            404 -> "Adres veya model bulunamadı (HTTP 404). Adresi kontrol edin; model adı eskimiş olabilir, 'Model listesini getir' ile güncel bir model seçin."
             301, 302, 307, 308 -> "Adres başka yere yönlendiriyor${r.location?.let { ": $it" } ?: ""}. Doğru adresi girin."
             429 -> "İstek sınırı aşıldı (HTTP 429). Biraz bekleyip tekrar deneyin veya başka sağlayıcı seçin."
             else -> "Sunucu hatası (HTTP ${r.code})."
