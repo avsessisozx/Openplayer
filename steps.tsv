@@ -1,0 +1,205 @@
+Ana ekran (ilk açılış)	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran yazıları	bilgi	Pixel Launcher isn't responding | Close app | Wait
+Video aç: Yatay video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kontrolleri: Yatay video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video yatay kaydırma (sarma): Yatay video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Yatay video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Dikey video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kontrolleri: Dikey video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video yatay kaydırma (sarma): Dikey video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Dikey video.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Bolumlu.mkv	ok	bölüm + altyazı ön planda: com.google.android.apps.nexuslauncher
+Video kontrolleri: Bolumlu.mkv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video yatay kaydırma (sarma): Bolumlu.mkv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Bolumlu.mkv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: HEVC 10bit.mp4	ok	çözücü zinciri ön planda: com.google.android.apps.nexuslauncher
+Video kontrolleri: HEVC 10bit.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video yatay kaydırma (sarma): HEVC 10bit.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: HEVC 10bit.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Eski bicim.wmv	ok	VLC yedeği beklenir ön planda: com.google.android.apps.nexuslauncher
+Video kontrolleri: Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video yatay kaydırma (sarma): Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Eski bicim.wmv	ok	ön planda: com.google.android.apps.nexuslauncher
+Video aç: Bozuk dosya.mp4	ok	hata mesajı beklenir ön planda: com.google.android.apps.nexuslauncher
+Video kontrolleri: Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video yatay kaydırma (sarma): Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Video kapat: Bozuk dosya.mp4	ok	ön planda: com.google.android.apps.nexuslauncher
+Altyazı ekran görüntüleri: Bolumlu.mkv	bilgi	ekranda 'Merhaba…' ve 'İkinci satır' görünmeli
+Altyazı ekran görüntüleri: Yatay video.mp4	bilgi	ekranda 'Merhaba…' ve 'İkinci satır' görünmeli
+Bozuk dosya: hata mesajı	ok	Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir. (ön plan: com.google.android.apps.nexuslauncher) ön planda: com.google.android.apps.nexuslauncher
+Bozuk dosya sonucu	SORUN	Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir.
+Oynatırken ekran yatay	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatırken ekran dikey	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatırken ana ekrana dön (PiP olabilir)	ok	ön planda: com.google.android.apps.nexuslauncher
+Uygulamaya geri dön	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran: 7 tıklanabilir öğe	bilgi	ImageView | ImageView | ImageView | ImageView | Müzik | 6 | Son oynatılanı aç
+Ana ekran > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran > Müzik	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran > 6	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran > Son oynatılanı aç	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik sekmesi	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik: 21 tıklanabilir öğe	bilgi	ImageView | ImageView | ImageView | Listeler | .cue dosyası aç | Videolar | Kitaplık | Şarkılar | Albümler | Sanatçılar | Albüm sanatçıları | Şarkılar | Klasörler | Klasör hiyerarşisi | Albümler | Sanatçılar | Albüm sanatçıları | Tarzlar | Yıllar | Besteciler | Çalma listeleri
+Müzik > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Listeler	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > .cue dosyası aç	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Videolar	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Kitaplık	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Şarkılar	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Albümler	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Sanatçılar	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Albüm sanatçıları	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Şarkılar	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Klasörler	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Klasör hiyerarşisi	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Albümler	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Sanatçılar	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Albüm sanatçıları	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Tarzlar	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Yıllar	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Besteciler	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik > Çalma listeleri	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı: 13 tıklanabilir öğe	bilgi	ImageView | ImageView | Altyazı | DONANIM+ | ImageView | -0:11 | ImageView | ImageView | ImageView | ImageView | ImageView | ImageView | ImageView
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > Altyazı	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > DONANIM+	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > -0:11	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü: 18 tıklanabilir öğe	bilgi	Listeler | En boy oranı | Özel stil | Yer imi | Bilgi | Bölümler | Kes | Paylaş | Ağ akışı | Çocuk kilidi | Ses ayarları | Ses gecikmesi | Ses dosyası ekle | Uyku zamanlayıcısı | Altyazı senkronu | Ayarlar | Kısayollar | Kalan süreyi göster
+Oynatıcı ⋮ menüsü > Listeler	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > En boy oranı	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Özel stil	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Yer imi	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Bilgi	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Bölümler	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Kes	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Paylaş	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Ağ akışı	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Çocuk kilidi	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Ses ayarları	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Ses gecikmesi	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Ses dosyası ekle	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Uyku zamanlayıcısı	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Altyazı senkronu	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Ayarlar	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Kısayollar	ok	ön planda: com.google.android.apps.nexuslauncher
+Oynatıcı ⋮ menüsü > Kalan süreyi göster	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü: 7 tıklanabilir öğe	bilgi	ImageView | ImageView | ImageView | ImageView | Müzik | 6 | Son oynatılanı aç
+Ana ekran ⋮ menüsü > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > Müzik	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > 6	ok	ön planda: com.google.android.apps.nexuslauncher
+Ana ekran ⋮ menüsü > Son oynatılanı aç	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar: 11 tıklanabilir öğe	bilgi	ImageView | Oynatıcı | Hareketler | Video ve çözücü | Ses | Altyazı | Çevrimiçi altyazı | Altyazı çevirisi | Müzik çalar | Tema ve görünüm | Liste ve dosyalar
+Ayarlar > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Oynatıcı	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Hareketler	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Video ve çözücü	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Ses	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Altyazı	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Çevrimiçi altyazı	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Altyazı çevirisi	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Müzik çalar	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Tema ve görünüm	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar > Liste ve dosyalar	ok	ön planda: com.google.android.apps.nexuslauncher
+Dosya adresli videoyu paylaş	ok	file:// paylaşımı ön planda: com.google.android.apps.nexuslauncher
+Paylaş sonucu	ok	ön plan: com.google.android.apps.nexuslauncher
+Şarkı bulunamadı: Birinci Şarkı	bilgi	
+Müzik: şarkıya dokun	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik çalarken video aç	ok	ön planda: com.google.android.apps.nexuslauncher
+Videodan çık	ok	ön planda: com.google.android.apps.nexuslauncher
+Müziğe geri dön	ok	ön planda: com.google.android.apps.nexuslauncher
+Müzik: başka şarkı çal (videodan sonra)	ok	ön planda: com.google.android.apps.nexuslauncher
+Medya oturumu durumu	bilgi	state=PlaybackState {state=PLAYING(3), position=22, buffered position=5746, speed=1.0, updated=1509186, actions=7340027, custom actions=[], active item id=2, error=null}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=32864, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+      state=PlaybackState {state=ERROR(7), position=0, buffered position=0, speed=0.0, updated=32921, actions=0, custom actions=[], active item id=-1, error=Bluetooth audio disconnected}
+İzin kalıcı reddedildi, ana ekran 10 sn	ok	izin ekranı 1 kez açıldı ön planda: com.google.android.apps.nexuslauncher
+İzin isteği sayısı (10 sn)	ok	1
+Uzun bas: hızlı oynatma açıldı	ok	--------- beginning of main
+10-24 08:07:39.502 20958 20958 I OPFEAT  : fast on speed=2.0 prev=1.0
+10-24 08:07:42.084 20958 20958 I OPFEAT  : fast off speed=1.0
+Uzun bas: bırakınca normale döndü	ok	
+Uzun bas sonrası	ok	ön planda: com.google.android.apps.nexuslauncher
+Devam et sorusu göründü	ok	Kaldığı yerden devam edilsin mi? | Son konum: 0:09 | BAŞTAN BAŞLA | DEVAM ET
+Devam et seçildi	ok	ön planda: com.google.android.apps.nexuslauncher
+Köşede saat/pil/süre görünüyor	ok	--------- beginning of main
+10-24 08:08:22.912 21346 21346 I OPFEAT  : osd visible: 8:08 AM · %100 ⚡  0:00
+İleri/geri sarma düğmeleri var	ok	
+İleri sar düğmesi	ok	ön planda: com.google.android.apps.nexuslauncher
+Tek dokunuş = duraklat (ses efektleri açık)	ok	--------- beginning of main
+10-24 08:08:47.809 21547 21547 I OPFEAT  : reverb preset=3 id=0
+10-24 08:08:48.381 21547 21547 I OPFEAT  : reverb preset=3 id=1875 ön planda: com.google.android.apps.nexuslauncher
+Tek dokunuş = oynat	ok	ön planda: com.google.android.apps.nexuslauncher
+Geri: ilk basışta kapanmadı	ok	topResumedActivity=ActivityRecord{3eacea5 u0 org.openplayer.app/.PlayerActivity t111}
+Geri: ikinci basışta kapandı	ok	topResumedActivity=ActivityRecord{87f6a47 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7}
+Bitince listeye döndü	ok	topResumedActivity=ActivityRecord{87f6a47 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7}
+Bitince listeye dön	ok	ön planda: com.google.android.apps.nexuslauncher
+Çeviri: altyazı simgesi bulundu	ok	
+Çeviri: menüde 'Altyazıyı çevir' var	ok	Altyazı | ○ Altyazıyı kapat | ● Dosya: Yatay video.srt | ＋  Dosyadan ekle… | ＋  Çevrimiçi altyazı ara… | 🌐  Altyazıyı çevir… | ⏱  Senkronizasyon (gecikme, hız)… | KAPAT
+Çeviri: .tr.srt dosyası yazıldı	ok	Yatay video.tr.srt
+Çeviri: sahte sunucu istek aldı	ok	['/v1/chat/completions']
+Çeviri: dosyada çevrilmiş metin var	ok	1
+00:00:01,000 --> 00:00:04,000
+ÇEVİRİ: Merhaba, bu bir altyazı testidir. ğüşıöç
+
+2
+00:00:05,000 --> 00:00:09,000
+ÇEVİRİ
+Ayarlar › Oynatıcı: 19 tıklanabilir öğe	bilgi	ImageView | Kaldığı yerden devam et | Yalnız ilk videoda devam et | Switch | Varsayılan oynatma hızı | Uzun basınca hızlı oynat | Switch | Uzun basma hızı | Her video için ayarları hatırla | Switch | Bitince listeye dön | Switch | Hatalı videoyu atla | Switch | Çıkmak için geri tuşuna iki kez bas | Switch | Sessizlikleri atla | Switch | İntro atla süresi
+Ayarlar › Oynatıcı > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Kaldığı yerden devam et	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Yalnız ilk videoda devam et	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Varsayılan oynatma hızı	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Uzun basınca hızlı oynat	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Uzun basma hızı	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Her video için ayarları hatırla	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Bitince listeye dön	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt): 17 tıklanabilir öğe	bilgi	Kilitlenince ekran yönünü sabitle | Switch | Önceki / sonraki düğmeleri | Switch | İleri / geri sarma düğmeleri | Switch | Sarma düğmesi aralığı | Kalan süreyi göster | Switch | Kısayol satırı açık başlasın | Switch | Kısayol düğme boyutu | Kısayol düğme opaklığı | Üst/alt şerit karartması | Göstergelerin kaybolma süresi | Ekran yönü | Kontrollerin kapanma süresi
+Ayarlar › Oynatıcı (alt) > Kilitlenince ekran yönünü sabitle	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt) > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt) > Önceki / sonraki düğmeleri	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt) > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt) > İleri / geri sarma düğmeleri	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt) > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt) > Sarma düğmesi aralığı	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Oynatıcı (alt) > Kalan süreyi göster	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler: 12 tıklanabilir öğe	bilgi	ImageView | Sol şerit | Orta şerit | Sağ şerit | Bölgeleri sıfırla | Sararken canlı önizleme | Switch | Bırakınca tam konuma git | Switch | Yatay kaydırma ile sarma | Switch | Ekranı baştan sona kaydırınca sarma
+Ayarlar › Hareketler > ImageView	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Sol şerit	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Orta şerit	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Sağ şerit	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Bölgeleri sıfırla	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Sararken canlı önizleme	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Bırakınca tam konuma git	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Yatay kaydırma ile sarma	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler > Ekranı baştan sona kaydırınca sarma	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt): 17 tıklanabilir öğe	bilgi	Sol parlaklık, sağ ses, orta kapalı; sınırlar orta | Sararken canlı önizleme | Switch | Bırakınca tam konuma git | Switch | Yatay kaydırma ile sarma | Switch | Ekranı baştan sona kaydırınca sarma | Tek dokunma | Çift dokunma | Çift dokunma ile sarma süresi | Çimdikle yakınlaştırma ve kaydırma | Switch | Hızlı yakınlaştırma | Switch | Altyazı hareketleri | Switch
+Ayarlar › Hareketler (alt) > Sol parlaklık, sağ ses, orta kapalı; sınırlar orta	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt) > Sararken canlı önizleme	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt) > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt) > Bırakınca tam konuma git	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt) > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt) > Yatay kaydırma ile sarma	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt) > Switch	ok	ön planda: com.google.android.apps.nexuslauncher
+Ayarlar › Hareketler (alt) > Ekranı baştan sona kaydırınca sarma	ok	ön planda: com.google.android.apps.nexuslauncher
