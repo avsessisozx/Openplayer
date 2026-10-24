@@ -503,6 +503,17 @@ crawl("Ana ekran ⋮ menüsü", open_overflow(start_main), limit=12)
 crawl("Ayarlar", open_settings, limit=30)
 checkpoint("gezintiler")
 
+def find_scroll(*wanted):
+    """Kısa (yatay) ekranda kaydırmalı menülerde öğeyi bulana dek yukarı kaydırır."""
+    w, h = cur_size()
+    for _ in range(6):
+        e = find_text_any(dump(), *wanted)
+        if e:
+            return e
+        sh(f"input swipe {w//2} {int(h*0.8)} {w//2} {int(h*0.2)} 250")
+        time.sleep(0.8)
+    return None
+
 # --- Beta15: 360° menüleri ---
 def vr_menu_step(label, tail):
     play_controls("/sdcard/Movies/Test/Yatay video.mp4")
@@ -510,13 +521,13 @@ def vr_menu_step(label, tail):
     if not c:
         steps.append((f"360 {label}", "bilgi", "⋮ bulunamadı")); return
     tap(c); time.sleep(1.5)
-    r = find_text_any(dump(), "360 olarak oynat", "360° ayarları")
+    r = find_scroll("360 olarak oynat", "360° ayarları")
     if not r:
         steps.append((f"360 {label}", "SORUN", "360 satırı yok")); return
     tap(r); time.sleep(1.5)
     shot(f"360_menu_{label}")
     for t in tail:
-        e = find_text_any(dump(), t)
+        e = find_scroll(t)
         if not e:
             steps.append((f"360 {label}: {t}", "SORUN", "öğe bulunamadı")); return
         tap(e); time.sleep(2.5)
@@ -540,7 +551,7 @@ sh("input keyevent KEYCODE_BACK"); sh("input keyevent KEYCODE_BACK")
 # 360° ayar sayfasını gez
 def open_vr_settings():
     open_settings()
-    e = find_text_any(dump(), "360° / VR")
+    e = find_scroll("360° / VR")
     if e:
         tap(e); time.sleep(2)
 crawl("360° ayarları", open_vr_settings, limit=15)
@@ -550,7 +561,7 @@ start_main()
 c = top_right_icon(dump())
 if c:
     tap(c); time.sleep(1.5)
-    e = find_text_any(dump(), "360° fotoğraf aç")
+    e = find_scroll("360° fotoğraf aç")
     if e:
         tap(e); time.sleep(3)
         shot("360_foto_secici")
