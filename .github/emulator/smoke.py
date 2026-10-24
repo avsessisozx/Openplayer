@@ -510,7 +510,7 @@ def find_scroll(*wanted):
         e = find_text_any(dump(), *wanted)
         if e:
             return e
-        sh(f"input swipe {w//2} {int(h*0.8)} {w//2} {int(h*0.2)} 250")
+        sh(f"input swipe {int(w*0.85)} {int(h*0.8)} {int(w*0.85)} {int(h*0.2)} 250")
         time.sleep(0.8)
     return None
 
