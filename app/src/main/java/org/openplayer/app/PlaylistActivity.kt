@@ -25,6 +25,13 @@ class PlaylistActivity : AppCompatActivity() {
         const val SMART_ADDED = "smart:added"
         const val SMART_PLAYED = "smart:played"
         const val SMART_MOST = "smart:most"
+        const val SMART_VPLAYED = "smart:vplayed"
+        const val SMART_VADDED = "smart:vadded"
+        const val SMART_UNPLAYED = "smart:unplayed"
+        const val SMART_LARGE = "smart:large"
+
+        /** true ise video için "Medya Yöneticisi" görünümü açılır (depolama özeti + otomatik listeler). */
+        const val EXTRA_MANAGER = "org.openplayer.app.PL_MANAGER"
     }
 
     private class Entry(
@@ -36,6 +43,7 @@ class PlaylistActivity : AppCompatActivity() {
     )
 
     private lateinit var kind: String
+    private var manager = false
     private lateinit var titleView: TextView
     private lateinit var body: LinearLayout
     private lateinit var moreButton: ImageView
@@ -132,6 +140,7 @@ class PlaylistActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         kind = intent.getStringExtra(EXTRA_KIND) ?: PlaylistStore.VIDEO
+        manager = kind == PlaylistStore.VIDEO && intent.getBooleanExtra(EXTRA_MANAGER, false)
         openId = intent.getStringExtra(EXTRA_OPEN)
         ThemeManager.applyWindow(this)
         onBackPressedDispatcher.addCallback(this, back)
@@ -218,15 +227,43 @@ class PlaylistActivity : AppCompatActivity() {
             })
         }
 
-    private fun smartIds() = if (kind == PlaylistStore.MUSIC) listOf(SMART_ADDED, SMART_PLAYED, SMART_MOST) else emptyList()
+    private fun smartIds() = when {
+        kind == PlaylistStore.MUSIC -> listOf(SMART_ADDED, SMART_PLAYED, SMART_MOST)
+        manager -> listOf(SMART_VPLAYED, SMART_VADDED, SMART_UNPLAYED, SMART_LARGE)
+        else -> emptyList()
+    }
 
     private fun smartTitle(id: String) = when (id) {
-        SMART_ADDED -> "Son eklenenler"
+        SMART_ADDED, SMART_VADDED -> "Son eklenenler"
         SMART_PLAYED -> "Son çalınanlar"
+        SMART_VPLAYED -> "Son oynatılanlar"
+        SMART_UNPLAYED -> "Henüz oynatılmadı"
+        SMART_LARGE -> "Büyük dosyalar"
         else -> "En çok çalınanlar"
     }
 
+    private fun smartSub(id: String) = when (id) {
+        SMART_VPLAYED -> "En son izlediğiniz videolar"
+        SMART_VADDED -> "En yeni 100 video"
+        SMART_UNPLAYED -> "Hiç açılmamış videolar"
+        SMART_LARGE -> "Boyuta göre en büyük 50 video"
+        else -> "Otomatik liste"
+    }
+
+    private fun humanSize(bytes: Long): String = when {
+        bytes <= 0 -> "0 MB"
+        bytes < 1024L * 1024 * 1024 -> "%.0f MB".format(bytes / 1048576.0)
+        else -> "%.2f GB".format(bytes / 1073741824.0)
+    }
+
     private fun smartUris(id: String): List<String> = when (id) {
+        SMART_VPLAYED -> videos.values.filter { ResumeStore.lastPlayed(this, it.uri) > 0 }
+            .sortedByDescending { ResumeStore.lastPlayed(this, it.uri) }.take(100).map { it.uri.toString() }
+        SMART_VADDED -> videos.values.sortedByDescending { it.dateAddedSec }.take(100).map { it.uri.toString() }
+        SMART_UNPLAYED -> videos.values.filter {
+            !ResumeStore.isPlayed(this, it.uri.toString()) && ResumeStore.lastPlayed(this, it.uri) == 0L && ResumeStore.position(this, it.uri) == 0L
+        }.sortedByDescending { it.dateAddedSec }.take(200).map { it.uri.toString() }
+        SMART_LARGE -> videos.values.sortedByDescending { it.sizeBytes }.take(50).map { it.uri.toString() }
         SMART_ADDED -> tracks.values.sortedByDescending { it.dateAddedSec }.take(100).map { it.uri.toString() }
         SMART_PLAYED -> tracks.values.filter { MusicStats.last(this, it.id.toString()) > 0 }
             .sortedByDescending { MusicStats.last(this, it.id.toString()) }.take(100).map { it.uri.toString() }
@@ -247,8 +284,16 @@ class PlaylistActivity : AppCompatActivity() {
     }
 
     private fun renderRoot() {
-        titleView.text = if (kind == PlaylistStore.MUSIC) "Müzik listeleri" else "Oynatma listeleri"
+        titleView.text = when {
+            kind == PlaylistStore.MUSIC -> "Müzik listeleri"
+            manager -> "Medya Yöneticisi"
+            else -> "Oynatma listeleri"
+        }
         moreButton.visibility = View.GONE
+        if (manager) {
+            renderManagerRoot()
+            return
+        }
         body.addView(row(R.drawable.ic_favorite, "Favoriler", "${PlaylistStore.favorites(this, kind).size} öğe", { openId = FAV; render() }))
         for (s in smartIds()) body.addView(row(R.drawable.ic_timer, smartTitle(s), "Otomatik liste", { openId = s; render() }))
         body.addView(row(R.drawable.ic_cloud_download, "M3U / M3U8 / PLS içe aktar", "Dosya yollarını kütüphanedekilerle eşleştirir", {
@@ -266,8 +311,28 @@ class PlaylistActivity : AppCompatActivity() {
         }
     }
 
+    /** Depolama özeti ve otomatik video listeleri (MX Player'daki Medya Yöneticisi gibi). */
+    private fun renderManagerRoot() {
+        val fs = runCatching { android.os.StatFs(android.os.Environment.getExternalStorageDirectory().path) }.getOrNull()
+        if (fs != null) {
+            val total = fs.totalBytes
+            val used = total - fs.availableBytes
+            body.addView(row(R.drawable.ic_info, "Cihaz depolaması", "${humanSize(used)} / ${humanSize(total)} kullanılıyor", {}))
+        }
+        if (loaded) {
+            val size = videos.values.sumOf { it.sizeBytes }
+            body.addView(row(R.drawable.ic_view_list, "Videolar", "${videos.size} video • ${humanSize(size)}", {}))
+        } else {
+            body.addView(row(R.drawable.ic_view_list, "Videolar", "Yükleniyor…", {}))
+        }
+        for (s in smartIds()) body.addView(row(R.drawable.ic_timer, smartTitle(s), smartSub(s), { openId = s; render() }))
+    }
+
     private fun entriesOf(id: String): List<Entry> = urisOf(id).mapNotNull { u ->
-        if (kind == PlaylistStore.VIDEO) videos[u]?.let { Entry(u, it.title, it.bucketName + " • " + formatDuration(it.durationMs), it, null) }
+        if (kind == PlaylistStore.VIDEO) videos[u]?.let {
+            val size = if (id == SMART_LARGE) " • " + humanSize(it.sizeBytes) else ""
+            Entry(u, it.title, it.bucketName + " • " + formatDuration(it.durationMs) + size, it, null)
+        }
         else tracks[u]?.let { Entry(u, it.title, it.artist + " • " + it.album, null, it) }
     }
 

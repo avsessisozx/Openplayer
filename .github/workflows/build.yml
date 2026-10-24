@@ -33,6 +33,9 @@ jobs:
         with:
           gradle-version: 8.14.3
 
+      - name: Unit tests
+        run: gradle testDebugUnitTest --stacktrace
+
       # Dağıtılan APK, hata ayıklanabilir (debuggable) olmayan release derlemesidir.
       - name: Build release APK
         run: |

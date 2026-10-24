@@ -54,6 +54,22 @@ object SubtitleFiles {
         }.sortedBy { it.name.lowercase() }
     }
 
+    /**
+     * Silme için yalnız bu videoya ait altyazılar: "Film.srt" ve "Film.tr.srt" gibi. "Film 2.srt" başka videoya
+     * ait olabileceğinden sayılmaz. Erişim izni yoksa liste boş döner.
+     */
+    fun exactSidecarsForPath(videoPath: String): List<File> {
+        if (videoPath.isEmpty()) return emptyList()
+        val file = File(videoPath)
+        val base = file.nameWithoutExtension
+        val siblings = file.parentFile?.listFiles() ?: return emptyList()
+        return siblings.filter {
+            it.isFile && it.extension.lowercase() in SubtitleParser.extensions && it.extension.lowercase() != "txt" &&
+                (it.nameWithoutExtension.equals(base, ignoreCase = true) ||
+                    it.nameWithoutExtension.startsWith("$base.", ignoreCase = true))
+        }
+    }
+
     // ---- Her video için seçilmiş (indirilmiş veya eklenmiş) altyazı ----
 
     private fun prefs(c: Context) = c.getSharedPreferences("subtitle_links", Context.MODE_PRIVATE)

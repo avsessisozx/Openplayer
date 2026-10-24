@@ -551,7 +551,9 @@ class MainActivity : AppCompatActivity() {
         menu.menu.add(0, 1, 2, "Ağ akışı aç")
         menu.menu.add(0, 2, 3, if (settings.showHiddenFolders) "Gizli klasörleri sakla" else "Gizli klasörleri göster")
         menu.menu.add(0, 4, 4, "Ağ kaynakları (SMB / FTP / WebDAV)")
-        menu.menu.add(0, 3, 5, "Ayarlar")
+        menu.menu.add(0, 8, 5, "Medya yöneticisi")
+        menu.menu.add(0, 3, 6, "Ayarlar")
+        if (settings.exitButton) menu.menu.add(0, 9, 7, "Çıkış")
         menu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> showInput("Ağ akışı", "http://, https:// veya rtsp:// adresi") { url ->
@@ -575,6 +577,12 @@ class MainActivity : AppCompatActivity() {
                         .putExtra(PlaylistActivity.EXTRA_OPEN, PlaylistActivity.FAV)
                 )
                 4 -> startActivity(Intent(this, NetworkActivity::class.java))
+                8 -> startActivity(
+                    Intent(this, PlaylistActivity::class.java)
+                        .putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.VIDEO)
+                        .putExtra(PlaylistActivity.EXTRA_MANAGER, true)
+                )
+                9 -> finishAffinity()
             }
             true
         }
@@ -882,7 +890,9 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Silinsin mi?")
             .setMessage("$what ${if (trash) "çöp kutusuna taşınacak (30 gün içinde geri alınabilir)." else "kalıcı olarak silinecek."}")
             .setPositiveButton("Sil") { _, _ ->
+                val subs = if (!trash && settings.deleteSubtitlesToo) videos.flatMap { SubtitleFiles.exactSidecarsForPath(it.path) } else emptyList()
                 fileOps.delete(videos.map { it.uri }) {
+                    subs.forEach { runCatching { it.delete() } }
                     exitSelection()
                     refresh()
                 }
@@ -937,7 +947,11 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Silinsin mi?")
             .setMessage(video.title + "\n\n" + if (trash) "Çöp kutusuna taşınır, geri alınabilir." else "Kalıcı olarak silinir.")
             .setPositiveButton("Sil") { _, _ ->
-                fileOps.delete(listOf(video.uri)) { refresh() }
+                val subs = if (!trash && settings.deleteSubtitlesToo) SubtitleFiles.exactSidecarsForPath(video.path) else emptyList()
+                fileOps.delete(listOf(video.uri)) {
+                    subs.forEach { runCatching { it.delete() } }
+                    refresh()
+                }
             }
             .setNegativeButton("İptal", null)
             .show()

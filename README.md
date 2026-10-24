@@ -31,10 +31,12 @@ Android için **açık kaynak, reklamsız** bir video oynatıcı. Amaç: popüle
 - Elle gecikme/öne alma ayarı, otomatik karakter kodlaması (UTF-8 / Windows-1254 yedekli), boyut/renk/arka plan/kenar/konum/hizalama ayarları, kendi yazı tipiniz (.ttf/.otf)
 - Altyazı hareketleri: yatay kaydırma önceki/sonraki satır, dikey kaydırma konum, çimdik boyut
 - Çevrimiçi altyazı arama (OpenSubtitles.com). Ayarlar → Altyazı bölümüne [kendi API anahtarınızı](https://www.opensubtitles.com/consumers) girmeniz gerekir
+- **Altyazı çevirisi:** yüklü altyazı dosyası başka dile çevrilip yeni bir .srt olarak kaydedilir. Sağlayıcılar: MyMemory (hesapsız), LibreTranslate uyumlu adres, OpenAI uyumlu yapay zekâ adresi (Groq, OpenRouter, Gemini, Ollama gibi; kendi anahtarınızla). Ayarlar → Altyazı çevirisi
 
 **Dosyalar**
 - Yalnızca video içeren klasörleri listeler; küçük resim, süre, "yeni" ve "izlendi" göstergeleri, sıralama, ızgara/liste görünümü
 - Yeniden adlandırma, silme, paylaşma, bilgi, gizli klasörler, kaldığı yerden devam, yer imleri
+- **Medya yöneticisi:** depolama özeti; son oynatılan, son eklenen, hiç açılmamış ve büyük dosyalar listeleri
 - **Ağ kaynakları:** SMB, FTP, WebDAV sunucularında gezinme ve oynatma; HTTP/HTTPS/RTSP/HLS/DASH adresleri
 
 ## Bilinen eksikler

@@ -1,3 +1,26 @@
+# 1.0.0-beta13
+
+MX Player'ın kütüphane, menü ve ayar ekranları yeniden karşılaştırıldı; eksik kalanlar kendi kodumuzla eklendi. Android 14 emülatöründe otomatik testten geçti; **altyazı çevirisi gerçek servislerle henüz denenmedi** — sorunları Issues'tan bildirin.
+
+**Yeni uygulama ikonu**
+- Uygulamanın launcher ikonu yoktu; artık açık halkalı oynat simgesi var. Android 8+ uyarlanabilir ve Android 13+ temalı ikon desteği içerir.
+
+**Altyazı çevirisi**
+- Altyazı menüsü → **Altyazıyı çevir…** yüklü altyazıyı seçtiğiniz dile çevirir, yeni bir `.srt` olarak kaydeder ve açar. Zamanlamalar korunur; italik/renk gibi biçimler çevrilen dosyada korunmaz.
+- Üç sağlayıcı (Ayarlar → Altyazı çevirisi): **MyMemory** (hesapsız; günde 5.000 karakter, e-posta girilirse 50.000), **LibreTranslate uyumlu adres** ve **OpenAI uyumlu yapay zekâ adresi**. Yapay zekâ için Groq, OpenRouter, Google Gemini ve Ollama hazır ayarları vardır; anahtarı siz girersiniz (cihazda şifrelenir, ayar yedeğine yazılmaz).
+- Model listesini sağlayıcıdan getirme ve "Bağlantıyı dene" düğmesi. Uzun altyazılar toplu çevrilir, hız sınırında otomatik yeniden denenir, çeviri iptal edilebilir.
+
+**Medya yöneticisi**
+- Ana menü → **Medya yöneticisi:** cihaz depolaması ve video boyutu özeti; son oynatılanlar, son eklenenler, henüz oynatılmayanlar ve büyük dosyalar listeleri.
+
+**Diğer**
+- **PiP düğmeleri:** pencere içinde pencerede önceki / oynat-duraklat / sonraki (ya da ±10 sn) düğmeleri (Ayarlar → Oynatıcı).
+- **Silerken altyazıyı da sil:** kalıcı silmede videoyla aynı adlı altyazı dosyaları da silinir (çöp kutusunda silinmez).
+- **Özel User-Agent** ve ana menüde isteğe bağlı **Çıkış** düğmesi.
+- Çeviri mantığı için birim testleri eklendi.
+
+---
+
 # 1.0.0-beta12
 
 Beş yeni özellik. Android 14 emülatöründe otomatik testten geçti; **gerçek cihazda henüz kapsamlı denenmedi** — sorunları Issues'tan bildirin.

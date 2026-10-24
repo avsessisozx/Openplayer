@@ -11,7 +11,7 @@ object SettingsBackup {
     private const val FORMAT = "openplayer-settings-1"
     private const val MAX_BYTES = 256 * 1024
     private val files = listOf("settings", "gestures")
-    private val secret = setOf("os_key", "os_pass")
+    private val secret = setOf("os_key", "os_pass", "tr_key")
 
     fun export(c: Context): String {
         val root = JSONObject().put("format", FORMAT)

@@ -44,6 +44,9 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
 
     val hasExternal: Boolean get() = mode == Mode.EXTERNAL && external.isNotEmpty()
 
+    /** Çeviri için: yüklü harici altyazı satırları (gömülü veya kapalıyken boş). */
+    val externalCues: List<SubCue> get() = if (mode == Mode.EXTERNAL) external else emptyList()
+
     fun applyStyle() {
         val s = host.settings
         view.setStyle(

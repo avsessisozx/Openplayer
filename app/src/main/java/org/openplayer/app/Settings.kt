@@ -532,6 +532,59 @@ class AppSettings private constructor(context: Context) {
         get() = SecretBox.decrypt(prefs.getString("os_pass", "") ?: "")
         set(v) = prefs.edit().putString("os_pass", SecretBox.encrypt(v)).apply()
 
+    // --- Altyazı çevirisi ---
+    var trProvider: TrProvider
+        get() = TrProvider.byId(prefs.getString("tr_provider", "") ?: "")
+        set(v) = prefs.edit().putString("tr_provider", v.id).apply()
+
+    var trTarget: String
+        get() = prefs.getString("tr_target", "tr") ?: "tr"
+        set(v) = prefs.edit().putString("tr_target", v).apply()
+
+    /** "auto" ya da kaynak dil kodu. */
+    var trSource: String
+        get() = prefs.getString("tr_source", "en") ?: "en"
+        set(v) = prefs.edit().putString("tr_source", v).apply()
+
+    var trEmail: String
+        get() = prefs.getString("tr_email", "") ?: ""
+        set(v) = prefs.edit().putString("tr_email", v.trim()).apply()
+
+    var trApiUrl: String
+        get() = prefs.getString("tr_url", "") ?: ""
+        set(v) = prefs.edit().putString("tr_url", v.trim()).apply()
+
+    var trApiKey: String
+        get() = SecretBox.decrypt(prefs.getString("tr_key", "") ?: "")
+        set(v) = prefs.edit().putString("tr_key", SecretBox.encrypt(v.trim())).apply()
+
+    var trModel: String
+        get() = prefs.getString("tr_model", "") ?: ""
+        set(v) = prefs.edit().putString("tr_model", v.trim()).apply()
+
+    fun translateConfig(): TrConfig = TrConfig(trProvider, trTarget, trSource, trEmail, trApiUrl, trApiKey, trModel)
+
+    // --- Liste ve genel ---
+    /** Videoyu kalıcı silerken yanındaki altyazı dosyalarını da sil (çöp kutusunda silinmez). */
+    var deleteSubtitlesToo: Boolean
+        get() = prefs.getBoolean("delete_subs", true)
+        set(v) = prefs.edit().putBoolean("delete_subs", v).apply()
+
+    /** Boşsa varsayılan "OpenPlayer/1.0". */
+    var httpUserAgent: String
+        get() = prefs.getString("http_ua", "") ?: ""
+        set(v) = prefs.edit().putString("http_ua", v.trim().take(200)).apply()
+
+    /** Ana menüde "Çıkış" öğesi. */
+    var exitButton: Boolean
+        get() = prefs.getBoolean("exit_button", false)
+        set(v) = prefs.edit().putBoolean("exit_button", v).apply()
+
+    /** Pencere içinde pencere düğmeleri: false = önceki/sonraki, true = ±10 sn sar. */
+    var pipSeekButtons: Boolean
+        get() = prefs.getBoolean("pip_seek", false)
+        set(v) = prefs.edit().putBoolean("pip_seek", v).apply()
+
     // --- Ses ---
     /** Ses gecikmesi (ms). + sesi geciktirir, − öne alır. */
     var audioDelayMs: Long
@@ -692,9 +745,9 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("swipe_refresh", true)
         set(v) = prefs.edit().putBoolean("swipe_refresh", v).apply()
 
-    /** Tüm ayarları varsayılana döndürür; OpenSubtitles hesabı korunur. */
+    /** Tüm ayarları varsayılana döndürür; OpenSubtitles ve çeviri hesap bilgileri korunur. */
     fun resetAll(context: Context) {
-        val keep = listOf("os_key", "os_user", "os_pass").associateWith { prefs.getString(it, null) }
+        val keep = listOf("os_key", "os_user", "os_pass", "tr_provider", "tr_url", "tr_key", "tr_model", "tr_email").associateWith { prefs.getString(it, null) }
         val editor = prefs.edit().clear()
         for ((k, v) in keep) if (v != null) editor.putString(k, v)
         editor.apply()
