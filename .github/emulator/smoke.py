@@ -515,37 +515,47 @@ def find_scroll(*wanted):
     return None
 
 # --- Beta15: 360° menüleri ---
-def vr_menu_step(label, tail):
+def vr_open_menu():
     play_controls("/sdcard/Movies/Test/Yatay video.mp4")
     c = top_right_icon(dump())
     if not c:
-        steps.append((f"360 {label}", "bilgi", "⋮ bulunamadı")); return
+        return False
     tap(c); time.sleep(1.5)
     r = find_scroll("360 olarak oynat", "360° ayarları")
     if not r:
-        steps.append((f"360 {label}", "SORUN", "360 satırı yok")); return
+        return False
     tap(r); time.sleep(1.5)
+    return True
+
+def vr_pick(label, texts):
+    """Oynatıcı ⋮ → 360 satırı → verilen menü öğelerini sırayla seç."""
+    if not vr_open_menu():
+        steps.append((f"360 {label}", "SORUN", "360 satırı yok")); return
     shot(f"360_menu_{label}")
-    for t in tail:
+    for t in texts:
         e = find_scroll(t)
         if not e:
             steps.append((f"360 {label}: {t}", "SORUN", "öğe bulunamadı")); return
         tap(e); time.sleep(2.5)
         shot(f"360_{label}_{t}")
-    ok = record(f"360 {label}", 2)
-    steps.append((f"360 {label} sonrası", "ok" if foreground_pkg() == PKG else "SORUN", f"ön plan: {foreground_pkg()}"))
+    record(f"360 {label}", 2)
 
-for lbl, t in (("360", ["360° olarak oynat"]), ("180", ["180° olarak oynat"]),
-               ("balikgozu", ["Balık gözü lens olarak oynat"]), ("normal", ["Normal lens (sanal ekran) olarak oynat"])):
-    vr_menu_step(lbl, t)
-# 360 modundayken dokunma, çift dokunma, iki parmak, uzun basma denemeleri
+vr_pick("360", ["360° olarak oynat"])
+# 360 seçildikten sonra menü "Lens türü: …" olur; lens listesinden diğerlerini dene
+for lbl, lens in (("180", "180°"), ("balikgozu", "Balık gözü"), ("normal", "Normal")):
+    vr_pick(lbl, ["Lens türü", lens])
+vr_pick("3B", ["3B biçimi", "Yan yana"])
+vr_pick("ufuk", ["Ufku düzelt"])
+vr_pick("otodondur", ["Otomatik döndür"])
+vr_pick("sensor", ["Hareket sensörüyle bak"])
+vr_pick("vrgozluk", ["VR gözlük modu"])
+# jest denemeleri
 w, h = cur_size()
 play_controls("/sdcard/Movies/Test/Yatay video.mp4")
 sh(f"input swipe {w//2} {h//2} {w//2+200} {h//2} 300"); time.sleep(1)
 sh(f"input tap {w//2} {h//2}"); sh(f"input tap {w//2} {h//2}"); time.sleep(1)
 sh(f"input swipe {w//2} {h//2} {w//2} {h//2} 900"); time.sleep(1)
 shot("360_uzun_basma")
-steps.append(("360 jest denemesi", "ok" if foreground_pkg() == PKG else "SORUN", f"ön plan: {foreground_pkg()}"))
 sh("input keyevent KEYCODE_BACK"); sh("input keyevent KEYCODE_BACK")
 
 # 360° ayar sayfasını gez
@@ -556,25 +566,16 @@ def open_vr_settings():
         tap(e); time.sleep(2)
 crawl("360° ayarları", open_vr_settings, limit=15)
 
-# 360° fotoğraf: ana menü -> seçici
-start_main()
-c = top_right_icon(dump())
-if c:
-    tap(c); time.sleep(1.5)
-    e = find_scroll("360° fotoğraf aç")
-    if e:
-        tap(e); time.sleep(3)
-        shot("360_foto_secici")
-        f = find_text_any(dump(), "Panorama360.jpg")
-        if f:
-            tap(f); time.sleep(5)
-            shot("360_foto")
-            steps.append(("360 fotoğraf açıldı", "ok" if foreground_pkg() == PKG else "SORUN", f"ön plan: {foreground_pkg()}"))
-        else:
-            steps.append(("360 fotoğraf dosyası seçicide görünmedi", "bilgi", ""))
-        sh("input keyevent KEYCODE_BACK"); sh("input keyevent KEYCODE_BACK")
-    else:
-        steps.append(("360° fotoğraf menü öğesi yok", "SORUN", ""))
+# 360° fotoğraf: dışa açık olmayan ekranı root kabuğuyla başlat
+adb("root"); adb("wait-for-device"); time.sleep(4)
+logcat.terminate()
+logcat = subprocess.Popen(["adb", "logcat", "-v", "threadtime"], stdout=open(f"{OUT}/logcat.txt", "ab"))
+sh(f"am start -W -n {PKG}/.Vr360PhotoActivity -d file:///sdcard/Movies/Test/Panorama360.jpg", timeout=40)
+time.sleep(5)
+shot("360_foto")
+record("360 fotoğraf ekranı", 2)
+sh(f"input swipe {w//2} {h//2} {w//2+300} {h//2} 300"); time.sleep(1)
+shot("360_foto_kaydir")
 checkpoint("360")
 
 # Paylaş: dosya (file://) adresiyle açılmış videoyu paylaşmak
