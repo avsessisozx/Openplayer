@@ -324,6 +324,39 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("use_trash", true)
         set(v) = prefs.edit().putBoolean("use_trash", v).apply()
 
+    // --- 360° / VR
+    var vrTwoFingerRotate: Boolean
+        get() = prefs.getBoolean("vr_two_finger_rotate", true)
+        set(v) = prefs.edit().putBoolean("vr_two_finger_rotate", v).apply()
+
+    var vrHorizonLevel: Boolean
+        get() = prefs.getBoolean("vr_horizon_level", true)
+        set(v) = prefs.edit().putBoolean("vr_horizon_level", v).apply()
+
+    var vrLockRotation: Boolean
+        get() = prefs.getBoolean("vr_lock_rotation", true)
+        set(v) = prefs.edit().putBoolean("vr_lock_rotation", v).apply()
+
+    var vrAutoRotate: Boolean
+        get() = prefs.getBoolean("vr_auto_rotate", false)
+        set(v) = prefs.edit().putBoolean("vr_auto_rotate", v).apply()
+
+    var vrTapStopsAutoRotate: Boolean
+        get() = prefs.getBoolean("vr_tap_stop_auto", true)
+        set(v) = prefs.edit().putBoolean("vr_tap_stop_auto", v).apply()
+
+    var vrTapStopsSensor: Boolean
+        get() = prefs.getBoolean("vr_tap_stop_sensor", false)
+        set(v) = prefs.edit().putBoolean("vr_tap_stop_sensor", v).apply()
+
+    var vrHoldWheel: Boolean
+        get() = prefs.getBoolean("vr_hold_wheel", true)
+        set(v) = prefs.edit().putBoolean("vr_hold_wheel", v).apply()
+
+    var vrSensorAlt: Boolean
+        get() = prefs.getBoolean("vr_sensor_alt", false)
+        set(v) = prefs.edit().putBoolean("vr_sensor_alt", v).apply()
+
     var show360: Boolean
         get() = prefs.getBoolean("show_360", true)
         set(v) = prefs.edit().putBoolean("show_360", v).apply()

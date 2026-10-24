@@ -870,28 +870,55 @@ class PlayerMenus(private val a: PlayerActivity) {
         a.showChoice("Bölümler", labels, current) { a.player.seekTo(list[it].startMs) }
     }
 
-    /** 360° biçim seçimi ve bakış ayarları. */
+    /** 360° lens türü, 3B biçimi ve bakış ayarları. */
     fun showVrMenu() {
-        val modes = VrMode.choices
+        val cur = a.vr
         val labels = ArrayList<String>()
-        modes.forEach { labels += (if (a.vr == it) "✓ " else "") + it.label }
-        if (a.vr != VrMode.NONE) {
-            labels += if (a.vrSensorEnabled()) "Hareket sensörünü kapat" else "Hareket sensörüyle bak (deneysel)"
-            labels += if (a.vrCardboardEnabled()) "VR gözlük modunu kapat" else "VR gözlük modu (iki göz)"
-            labels += "Bakış yönünü sıfırla"
-            labels += "360° modundan çık"
+        val acts = ArrayList<() -> Unit>()
+        fun add(label: String, act: () -> Unit) { labels += label; acts += act }
+        val stereoNames = listOf("3B değil", "Üst-alt", "Yan yana")
+        if (cur == VrMode.NONE) {
+            add("360° olarak oynat") { pickVrLens(VrLens.SPHERE360, 0) }
+            add("180° olarak oynat") { pickVrLens(VrLens.SPHERE180, 0) }
+            add("Balık gözü lens olarak oynat") { pickVrLens(VrLens.FISHEYE, 0) }
+            add("Normal lens (sanal ekran) olarak oynat") { pickVrLens(VrLens.NORMAL, 0) }
+        } else {
+            add("Lens türü: ${cur.lens.label}…") { pickVrLens(null, cur.stereo) }
+            add("3B biçimi: ${stereoNames[cur.stereo]}…") { pickVrStereo(cur) }
+            add(if (a.vrSensorEnabled()) "Hareket sensörünü kapat" else "Hareket sensörüyle bak") { a.vrSetSensor(!a.vrSensorEnabled()) }
+            add(if (a.vrCardboardEnabled()) "VR gözlük modunu kapat" else "VR gözlük modu (iki göz)") { a.vrSetCardboard(!a.vrCardboardEnabled()) }
+            add(if (a.vrAutoRotating()) "Otomatik döndürmeyi kapat" else "Otomatik döndür (panorama)") { a.vrSetAutoRotate(!a.vrAutoRotating()) }
+            add("Ufku düzelt (eğimi sıfırla)") { a.vrLevelHorizon() }
+            add("Bakış yönünü sıfırla") { a.vrReset() }
+            add("360° ayarları…") { a.openSettings("VR360") }
+            add("360° modundan çık") { a.setVr(VrMode.NONE, manual = true) }
         }
         AlertDialog.Builder(a)
             .setTitle("360° oynatma")
-            .setItems(labels.toTypedArray()) { _, i ->
-                when {
-                    i < modes.size -> a.setVr(modes[i], manual = true)
-                    labels[i].startsWith("Hareket") -> a.vrSetSensor(!a.vrSensorEnabled())
-                    labels[i].startsWith("VR gözlük") -> a.vrSetCardboard(!a.vrCardboardEnabled())
-                    labels[i].startsWith("Bakış") -> a.vrReset()
-                    else -> a.setVr(VrMode.NONE, manual = true)
-                }
-            }
+            .setItems(labels.toTypedArray()) { _, i -> acts[i]() }
+            .show()
+    }
+
+    /** Lens türünü seçtirir ([fixed] verilirse sormadan o lensi uygular). */
+    private fun pickVrLens(fixed: VrLens?, stereo: Int) {
+        if (fixed != null) {
+            a.setVr(VrMode.of(fixed, stereo), manual = true)
+            return
+        }
+        val lenses = VrLens.entries
+        val labels = lenses.map { (if (a.vr.lens == it) "✓ " else "") + it.label }
+        AlertDialog.Builder(a)
+            .setTitle("Lens türü")
+            .setItems(labels.toTypedArray()) { _, i -> a.setVr(VrMode.of(lenses[i], stereo), manual = true) }
+            .show()
+    }
+
+    private fun pickVrStereo(cur: VrMode) {
+        val names = listOf("3B değil", "Üst-alt", "Yan yana")
+        val labels = names.mapIndexed { i, n -> (if (cur.stereo == i) "✓ " else "") + n }
+        AlertDialog.Builder(a)
+            .setTitle("3B biçimi")
+            .setItems(labels.toTypedArray()) { _, i -> a.setVr(VrMode.of(cur.lens, i), manual = true) }
             .show()
     }
 

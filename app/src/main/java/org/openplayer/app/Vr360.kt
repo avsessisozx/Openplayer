@@ -23,19 +23,40 @@ import javax.microedition.khronos.opengles.GL10
 import kotlin.math.cos
 import kotlin.math.sin
 
-/** 360° / VR180 / 3B video biçimleri. */
-enum class VrMode(val label: String, val halfSphere: Boolean, val stereo: Int) {
-    NONE("Kapalı", false, 0),
-    FULL("360° (tek görüntü)", false, 0),
-    FULL_TB("360° üst-alt 3B", false, 1),
-    FULL_SBS("360° yan yana 3B", false, 2),
-    HALF("180° (tek görüntü)", true, 0),
-    HALF_TB("180° üst-alt 3B", true, 1),
-    HALF_SBS("180° yan yana 3B", true, 2);
+/** Lens türü: görüntünün küreye / sanal ekrana nasıl yerleştirileceği. */
+enum class VrLens(val label: String) {
+    NORMAL("Normal lens (sanal ekran)"),
+    FISHEYE("Balık gözü lens"),
+    SPHERE360("360° tam küre"),
+    SPHERE180("180° yarım küre"),
+}
+
+/** 360° / VR180 / balık gözü / sanal ekran ve 3B video biçimleri (stereo: 0 = 3B değil, 1 = üst-alt, 2 = yan yana). */
+enum class VrMode(val label: String, val lens: VrLens, val stereo: Int) {
+    NONE("Kapalı", VrLens.SPHERE360, 0),
+    FULL("360° (tek görüntü)", VrLens.SPHERE360, 0),
+    FULL_TB("360° üst-alt 3B", VrLens.SPHERE360, 1),
+    FULL_SBS("360° yan yana 3B", VrLens.SPHERE360, 2),
+    HALF("180° (tek görüntü)", VrLens.SPHERE180, 0),
+    HALF_TB("180° üst-alt 3B", VrLens.SPHERE180, 1),
+    HALF_SBS("180° yan yana 3B", VrLens.SPHERE180, 2),
+    FISHEYE("Balık gözü (tek görüntü)", VrLens.FISHEYE, 0),
+    FISHEYE_TB("Balık gözü üst-alt 3B", VrLens.FISHEYE, 1),
+    FISHEYE_SBS("Balık gözü yan yana 3B", VrLens.FISHEYE, 2),
+    FLAT("Normal lens (tek görüntü)", VrLens.NORMAL, 0),
+    FLAT_TB("Normal lens üst-alt 3B", VrLens.NORMAL, 1),
+    FLAT_SBS("Normal lens yan yana 3B", VrLens.NORMAL, 2);
+
+    /** Yarım küre üzerine çizilir (180° ve balık gözü). */
+    val halfSphere: Boolean get() = lens == VrLens.SPHERE180 || lens == VrLens.FISHEYE
 
     companion object {
         /** Seçim menüsünde gösterilen sıra. */
-        val choices = listOf(FULL, FULL_TB, FULL_SBS, HALF, HALF_TB, HALF_SBS)
+        val choices = listOf(FULL, FULL_TB, FULL_SBS, HALF, HALF_TB, HALF_SBS, FISHEYE, FISHEYE_TB, FISHEYE_SBS, FLAT, FLAT_TB, FLAT_SBS)
+
+        /** Lens ve 3B biçiminden mod bulur. */
+        fun of(lens: VrLens, stereo: Int): VrMode =
+            entries.first { it != NONE && it.lens == lens && it.stereo == stereo }
     }
 }
 
@@ -79,7 +100,7 @@ object Vr360 {
             ?.let { runCatching { VrMode.valueOf(it) }.getOrNull() }
 
     fun isSpherical(context: Context, uri: String, name: String): Boolean =
-        saved(context, uri) != null || nameLooksSpherical(name)
+        (saved(context, uri)?.let { it.lens != VrLens.NORMAL } ?: false) || nameLooksSpherical(name)
 }
 
 /**
@@ -107,7 +128,29 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             requestRender()
         }
 
+    /** Görüntünün kendi ekseni etrafında eğimi (iki parmakla döndürme), derece. */
+    @Volatile var roll = 0f
+        set(value) {
+            field = value
+            requestRender()
+        }
+
+    /** Ufuk düzeltme: hareket sensöründe cihazın yana yatması görüntüye yansımaz. */
+    @Volatile var horizonLevel = true
+        set(value) {
+            field = value
+            requestRender()
+        }
+
+    /** Videonun / fotoğrafın en-boy oranı (balık gözü ve sanal ekran şekli için). */
+    @Volatile var videoAspect = 16f / 9f
+        set(value) {
+            field = value.coerceIn(0.2f, 6f)
+            requestRender()
+        }
+
     private var useSensor = false
+    private var sensorAlt = false
     private val sensors = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val sensorMatrix = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
     /** "Bakış yönünü sıfırla" anında yakalanan sensör yöneliminin tersi; sonraki kareler buna göre. */
@@ -132,12 +175,62 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         requestRender()
     }
 
+    /** Parmak ekrandayken otomatik dönüş durur. */
+    @Volatile var touching = false
+
+    @Volatile private var autoSpeed = 0f
+    private var lastAutoNs = 0L
+    private val autoTick = object : Runnable {
+        override fun run() {
+            if (autoSpeed == 0f || !isAttachedToWindow) {
+                lastAutoNs = 0L
+                return
+            }
+            val now = System.nanoTime()
+            if (lastAutoNs != 0L && !touching) yaw += autoSpeed * (now - lastAutoNs) / 1e9f
+            lastAutoNs = now
+            requestRender()
+            postOnAnimation(this)
+        }
+    }
+
+    val autoRotating: Boolean get() = autoSpeed != 0f
+
+    /** Panorama otomatik dönüşü (derece/sn). */
+    fun setAutoRotate(on: Boolean) {
+        autoSpeed = if (on) 8f else 0f
+        lastAutoNs = 0L
+        removeCallbacks(autoTick)
+        if (on) postOnAnimation(autoTick)
+    }
+
+    /** Bazı cihazlarda oyun dönüş vektörü yerine standart dönüş vektörü daha doğru çalışır (sensör türü 2). */
+    fun setSensorAlt(on: Boolean) {
+        if (sensorAlt == on) return
+        sensorAlt = on
+        if (sensorOn) {
+            sensors.unregisterListener(this)
+            sensorOn = false
+            updateSensor()
+        }
+    }
+
     fun zoomFov(factor: Float) {
         fov = (fov / factor).coerceIn(40f, 110f)
         requestRender()
     }
 
+    private var photo: android.graphics.Bitmap? = null
+
+    /** Videonun yerine tek bir fotoğrafı (ör. eş dikdörtgen 360° JPEG) gösterir. */
+    fun showBitmap(bmp: android.graphics.Bitmap) {
+        photo = bmp
+        videoAspect = bmp.width.toFloat() / bmp.height.coerceAtLeast(1)
+        queueEvent { renderer.drawPhoto() }
+    }
+
     fun resetLook() {
+        roll = 0f
         yaw = 0f
         pitch = 0f
         fov = 90f
@@ -159,8 +252,11 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         if (want == sensorOn) return
         sensorOn = want
         if (want) {
-            val s = sensors.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
-                ?: sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+            val s = if (sensorAlt) {
+                sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) ?: sensors.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
+            } else {
+                sensors.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR) ?: sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+            }
             if (s == null) {
                 useSensor = false
                 sensorOn = false
@@ -188,9 +284,11 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         updateSensor()
+        if (autoSpeed != 0f) postOnAnimation(autoTick)
     }
 
     override fun onDetachedFromWindow() {
+        removeCallbacks(autoTick)
         if (sensorOn) {
             sensors.unregisterListener(this)
             sensorOn = false
@@ -230,7 +328,7 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         private var aspect = 1f
         private var surfaceW = 0
         private var surfaceH = 0
-        private var meshHalf = false
+        private var meshKeyBuilt = ""
         private var vertices: FloatBuffer? = null
         private var indices: ShortBuffer? = null
         private var indexCount = 0
@@ -371,9 +469,10 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             st = tex
             val sf = Surface(tex)
             surface = sf
-            meshHalf = !mode.halfSphere
-            buildMesh(mode.halfSphere)
+            meshKeyBuilt = ""
+            buildMesh()
             post { onSurface(sf) }
+            if (photo != null) drawPhoto()
         }
 
         override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -413,8 +512,7 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             runCatching { tex.updateTexImage() }
             tex.getTransformMatrix(texMatrix)
 
-            val half = mode.halfSphere
-            if (half != meshHalf) buildMesh(half)
+            if (meshKey() != meshKeyBuilt) buildMesh()
 
             GLES20.glDisable(GLES20.GL_CULL_FACE)
             GLES20.glDisable(GLES20.GL_DEPTH_TEST)
@@ -471,6 +569,15 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
                 synchronized(sensorMatrix) { Matrix.multiplyMM(view, 0, recenterMat, 0, sensorMatrix, 0) }
                 // GL dünyası (Y yukarı) ← sensör dünyası (Z yukarı)
                 Matrix.rotateM(view, 0, -90f, 1f, 0f, 0f)
+                if (horizonLevel) {
+                    // Ufuk düzeltme: yalnız bakış yönünü al, cihazın yana yatmasını at (yukarı = +Y).
+                    val fx = -view[2]
+                    val fy = -view[6]
+                    val fz = -view[10]
+                    if (kotlin.math.abs(fy) < 0.995f) {
+                        Matrix.setLookAtM(view, 0, 0f, 0f, 0f, fx, fy, fz, 0f, 1f, 0f)
+                    }
+                }
                 // Parmakla eklenen kaydırma, sensörün üstüne uygulanır.
                 Matrix.setIdentityM(tmp, 0)
                 Matrix.rotateM(tmp, 0, pitch, 1f, 0f, 0f)
@@ -480,6 +587,13 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             } else {
                 Matrix.rotateM(view, 0, pitch, 1f, 0f, 0f)
                 Matrix.rotateM(view, 0, yaw, 0f, 1f, 0f)
+            }
+            val r = roll
+            if (r != 0f) {
+                // Görüntüyü kendi ekseni etrafında döndür (iki parmakla döndürme).
+                Matrix.setRotateM(tmp, 0, r, 0f, 0f, 1f)
+                val base = view.copyOf()
+                Matrix.multiplyMM(view, 0, tmp, 0, base, 0)
             }
         }
 
@@ -532,22 +646,58 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             GLES20.glDisableVertexAttribArray(dUv)
         }
 
-        /** Enlem/boylam ızgarasıyla küre (180° için yarım küre). Kamera kürenin içindedir. */
-        private fun buildMesh(half: Boolean) {
-            meshHalf = half
-            val lonSteps = 64
-            val latSteps = 32
+        /** Göz başına dokunun en-boy oranı (3B kırpma yarıya böler). */
+        private fun eyeVideoAspect(): Float {
+            val a = videoAspect
+            return when (mode.stereo) {
+                1 -> a * 2f
+                2 -> a / 2f
+                else -> a
+            }
+        }
+
+        private fun meshKey(): String = "${mode.lens}|${(eyeVideoAspect() * 100).toInt()}"
+
+        /** Lens türüne göre ağ: küre / yarım küre (360°, 180°), balık gözü UV'li yarım küre veya düz sanal ekran. */
+        private fun buildMesh() {
+            meshKeyBuilt = meshKey()
+            val lens = mode.lens
+            val flat = lens == VrLens.NORMAL
+            val lonSteps = if (flat) 1 else 64
+            val latSteps = if (flat) 1 else 32
+            val half = mode.halfSphere
             val lonSpan = if (half) Math.PI else 2 * Math.PI
+            val eyeAspect = eyeVideoAspect()
             val vb = ByteBuffer.allocateDirect((lonSteps + 1) * (latSteps + 1) * 5 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
             for (j in 0..latSteps) {
-                val lat = Math.PI / 2 - Math.PI * j / latSteps
                 for (i in 0..lonSteps) {
+                    if (flat) {
+                        // Kameranın önünde 1 birim uzakta, 1.6 birim genişliğinde sanal ekran.
+                        val w = 1.6f
+                        val h = w / eyeAspect
+                        val x = (i - 0.5f) * w
+                        val y = (0.5f - j) * h
+                        vb.put(x); vb.put(y); vb.put(-1f)
+                        vb.put(i.toFloat()); vb.put(1f - j.toFloat())
+                        continue
+                    }
+                    val lat = Math.PI / 2 - Math.PI * j / latSteps
                     val lon = -lonSpan / 2 + lonSpan * i / lonSteps
-                    vb.put((cos(lat) * sin(lon)).toFloat())
-                    vb.put(sin(lat).toFloat())
-                    vb.put((-cos(lat) * cos(lon)).toFloat())
-                    vb.put(i.toFloat() / lonSteps)
-                    vb.put(1f - j.toFloat() / latSteps)
+                    val x = (cos(lat) * sin(lon)).toFloat()
+                    val y = sin(lat).toFloat()
+                    val z = (-cos(lat) * cos(lon)).toFloat()
+                    vb.put(x); vb.put(y); vb.put(z)
+                    if (lens == VrLens.FISHEYE) {
+                        // Eşit uzaklıklı (equidistant) 180° balık gözü: görüntü dairesi yüksekliği doldurur.
+                        val theta = Math.acos((-z).toDouble().coerceIn(-1.0, 1.0))
+                        val r = theta / Math.PI
+                        val phi = Math.atan2(y.toDouble(), x.toDouble())
+                        vb.put((0.5 + r * cos(phi) / eyeAspect).toFloat())
+                        vb.put((0.5 + r * sin(phi)).toFloat())
+                    } else {
+                        vb.put(i.toFloat() / lonSteps)
+                        vb.put(1f - j.toFloat() / latSteps)
+                    }
                 }
             }
             val ib = ByteBuffer.allocateDirect(lonSteps * latSteps * 6 * 2).order(ByteOrder.nativeOrder()).asShortBuffer()
@@ -566,6 +716,20 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             vertices = vb
             indices = ib
             indexCount = lonSteps * latSteps * 6
+        }
+
+        /** Fotoğraf modu: bitmap'i SurfaceTexture'a çizer (video karesi gibi küreye uygulanır). */
+        fun drawPhoto() {
+            val b = photo ?: return
+            val tex = st ?: return
+            val sf = surface ?: return
+            runCatching {
+                tex.setDefaultBufferSize(b.width, b.height)
+                val c = sf.lockCanvas(null)
+                c.drawBitmap(b, 0f, 0f, null)
+                sf.unlockCanvasAndPost(c)
+            }
+            requestRender()
         }
     }
 }
