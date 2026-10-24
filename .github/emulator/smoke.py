@@ -507,7 +507,13 @@ def find_scroll(*wanted):
     """Kısa (yatay) ekranda kaydırmalı menülerde öğeyi bulana dek yukarı kaydırır."""
     w, h = cur_size()
     for _ in range(6):
-        e = find_text_any(dump(), *wanted)
+        root = dump()
+        e = find_text_any(root, *wanted)
+        if not e:
+            for t in wanted:
+                e = find_contains(root, t)
+                if e:
+                    break
         if e:
             return e
         sh(f"input swipe {int(w*0.85)} {int(h*0.8)} {int(w*0.85)} {int(h*0.2)} 250")
@@ -574,8 +580,11 @@ sh(f"am start -W -n {PKG}/.Vr360PhotoActivity -d file:///sdcard/Movies/Test/Pano
 time.sleep(5)
 shot("360_foto")
 record("360 fotoğraf ekranı", 2)
-sh(f"input swipe {w//2} {h//2} {w//2+300} {h//2} 300"); time.sleep(1)
+pw, ph = cur_size()
+sh(f"input swipe {pw//2} {ph//2} {pw//2+300} {ph//2} 300"); time.sleep(1)
 shot("360_foto_kaydir")
+sh(f"input tap {pw//2} {ph//2}"); time.sleep(1)
+shot("360_foto_cubuk")
 checkpoint("360")
 
 # Paylaş: dosya (file://) adresiyle açılmış videoyu paylaşmak
