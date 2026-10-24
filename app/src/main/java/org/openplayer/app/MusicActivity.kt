@@ -126,14 +126,17 @@ class MusicActivity : AppCompatActivity() {
                 searching -> closeSearch()
                 detail != null -> {
                     detail = null
+                    restoreScroll = true
                     render()
                 }
                 tab == Tab.TREE && treePath != null && treePath != treeRoot() -> {
                     treePath = treePath!!.substringBeforeLast('/')
+                    restoreScroll = true
                     render()
                 }
                 tab != Tab.HOME && settings.musicStartHome -> {
                     tab = Tab.HOME
+                    restoreScroll = true
                     render()
                 }
                 else -> finish()
@@ -474,6 +477,7 @@ class MusicActivity : AppCompatActivity() {
         titleView.visibility = View.VISIBLE
         (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
             .hideSoftInputFromWindow(searchField.windowToken, 0)
+        restoreScroll = true
         render()
     }
 
@@ -640,9 +644,22 @@ class MusicActivity : AppCompatActivity() {
         updateSelectionUi()
         val lm = list.layoutManager as LinearLayoutManager
         val pos = lm.findFirstVisibleItemPosition()
+        // Geri dönüşte (albümden, klasörden vb.) listeyi kaldığı konumda aç.
+        val newKey = "$tab|${detail?.title}|$treePath|$searching"
+        viewKey?.let { k -> lm.onSaveInstanceState()?.let { scrollMemory[k] = it } }
+        viewKey = newKey
         adapter.rows = rows
-        if (keepScroll && pos >= 0) lm.scrollToPosition(pos) else if (!keepScroll) list.scrollToPosition(0)
+        val saved = if (restoreScroll) scrollMemory[newKey] else null
+        restoreScroll = false
+        if (keepScroll && pos >= 0) lm.scrollToPosition(pos)
+        else if (!keepScroll) {
+            if (saved != null) runCatching { lm.onRestoreInstanceState(saved) } else list.scrollToPosition(0)
+        }
     }
+
+    private var restoreScroll = false
+    private var viewKey: String? = null
+    private val scrollMemory = HashMap<String, android.os.Parcelable>()
 
     /** Klasör ağacının kökü: cihaz depolamasının ortak üst yolu. */
     private fun treeRoot(): String {

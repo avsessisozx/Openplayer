@@ -110,6 +110,10 @@ class NetworkActivity : AppCompatActivity() {
     private var dir = "/"
     private var entries: List<NetEntry> = emptyList()
     private var requestId = 0
+    private lateinit var listView: RecyclerView
+    private val scrollMemory = HashMap<String, android.os.Parcelable>()
+    private var shownKey: String? = null
+    private fun memKey(s: NetServer) = "${s.id}|$dir"
 
     private val backCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() = goBack()
@@ -159,6 +163,7 @@ class NetworkActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@NetworkActivity)
             adapter = this@NetworkActivity.adapter
         }
+        listView = list
         statusView = TextView(this).apply {
             setTextColor(UiColors.textSecondary)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
@@ -207,6 +212,8 @@ class NetworkActivity : AppCompatActivity() {
     }
 
     private fun showServers() {
+        shownKey?.let { k -> listView.layoutManager?.onSaveInstanceState()?.let { scrollMemory[k] = it } }
+        shownKey = null
         titleView.text = "Ağ kaynakları"
         addButton.visibility = View.VISIBLE
         val servers = NetworkStore.all(this)
@@ -231,6 +238,9 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun load() {
         val s = server ?: return
+        // Ayrılırken bu klasörün kaydırma konumunu sakla; geri dönünce aynı yerde açılsın.
+        shownKey?.let { k -> listView.layoutManager?.onSaveInstanceState()?.let { scrollMemory[k] = it } }
+        shownKey = null
         titleView.text = (s.name.ifBlank { s.host }) + dir.let { if (it == "/") "" else it }
         addButton.visibility = View.GONE
         adapter.rows = emptyList()
@@ -253,6 +263,8 @@ class NetworkActivity : AppCompatActivity() {
 
     private fun showEntries(s: NetServer, list: List<NetEntry>) {
         entries = list
+        val key = memKey(s)
+        shownKey = key
         statusView.setOnClickListener(null)
         setStatus(if (list.isEmpty()) "Bu klasörde klasör veya video yok." else null)
         adapter.rows = list.map { e ->
@@ -265,6 +277,7 @@ class NetworkActivity : AppCompatActivity() {
                 Row(R.drawable.ic_play, e.name, humanSize(e.size), onClick = { play(s, e) })
             }
         }
+        scrollMemory[key]?.let { st -> runCatching { listView.layoutManager?.onRestoreInstanceState(st) } }
     }
 
     private fun play(s: NetServer, picked: NetEntry) {

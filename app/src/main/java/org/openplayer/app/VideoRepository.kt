@@ -97,18 +97,32 @@ object VideoRepository {
 
     fun folders(context: Context, videos: List<VideoItem>, settings: AppSettings): List<FolderItem> {
         val hidden = settings.hiddenFolders
-        return videos.groupBy { it.bucketId }
+        class Entry(val folder: FolderItem, val newest: Long, val size: Long)
+        val entries = videos.groupBy { it.bucketId }
             .map { (id, items) ->
-                FolderItem(
-                    bucketId = id,
-                    name = items.first().bucketName,
-                    videoCount = items.size,
-                    newCount = items.count { isNew(context, it, settings.newVideoDays) },
-                    hidden = id in hidden,
+                Entry(
+                    FolderItem(
+                        bucketId = id,
+                        name = items.first().bucketName,
+                        videoCount = items.size,
+                        newCount = items.count { isNew(context, it, settings.newVideoDays) },
+                        hidden = id in hidden,
+                    ),
+                    items.maxOf { it.dateAddedSec },
+                    items.sumOf { it.sizeBytes },
                 )
             }
-            .filter { settings.showHiddenFolders || !it.hidden }
-            .sortedBy { it.name.lowercase() }
+            .filter { settings.showHiddenFolders || !it.folder.hidden }
+        val byName = Comparator<Entry> { a, b -> a.folder.name.lowercase().compareTo(b.folder.name.lowercase()) }
+        val order = settings.folderOrder
+        val base: Comparator<Entry> = when (order.substringBeforeLast('_')) {
+            "new" -> compareBy<Entry> { it.newest }
+            "count" -> compareBy<Entry> { it.folder.videoCount }
+            "size" -> compareBy<Entry> { it.size }
+            else -> byName
+        }
+        val dirCmp = if (order.endsWith("_desc")) base.reversed() else base
+        return entries.sortedWith(dirCmp.then(byName)).map { it.folder }
     }
 
     private fun status(context: Context, v: VideoItem): Int = when {

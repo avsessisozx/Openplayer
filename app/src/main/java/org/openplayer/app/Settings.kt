@@ -337,6 +337,15 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getInt("grid_scale", 100)
         set(v) = prefs.edit().putInt("grid_scale", v.coerceIn(25, 500)).apply()
 
+    /** Ana ekran klasör sırası: name_asc, name_desc, new_desc, new_asc, count_desc, count_asc, size_desc, size_asc. */
+    var folderOrder: String
+        get() = prefs.getString("folder_order", "name_asc") ?: "name_asc"
+        set(v) = prefs.edit().putString("folder_order", v).apply()
+
+    var folderGrid: Boolean
+        get() = prefs.getBoolean("folder_grid", false)
+        set(v) = prefs.edit().putBoolean("folder_grid", v).apply()
+
     var folderScale: Int
         get() = prefs.getInt("folder_scale", 100)
         set(v) = prefs.edit().putInt("folder_scale", v.coerceIn(25, 500)).apply()

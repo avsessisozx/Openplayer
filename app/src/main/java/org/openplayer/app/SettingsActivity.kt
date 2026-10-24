@@ -196,6 +196,12 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton("Vazgeç", null)
                 .show()
         }
+        section("Hata bildirimi")
+        action("Hata raporunu kopyala", "Sürüm, cihaz, ayarlar (parola ve anahtarlar hariç), son çeviri ve uygulama hataları tek metinde panoya kopyalanır; Claude'a yapıştırın") {
+            BugReport.copyToClipboard(this) { n ->
+                android.widget.Toast.makeText(this, "Rapor panoya kopyalandı ($n karakter). Yapıştırabilirsiniz.", android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
         section("Hakkında")
         action("OpenPlayer ${versionName()}", "AGPLv3 lisanslı açık kaynak yazılım. Kaynak kodu için dokunun.") {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/avsessisozx/Openplayer")))
