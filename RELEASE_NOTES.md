@@ -1,3 +1,14 @@
+# 1.0.0-beta15
+
+360° oynatma, başka oynatıcılardaki eksikler tamamlandı. Android 14 emülatöründe otomatik testten geçti; gerçek cihazda görsel doğrulama sende.
+
+**360° / VR**
+- Lens türleri: normal, balık gözü, 360° tam küre, 180° yarım küre. 3B biçimi: yok, yan yana, üst-alt. (Oynatıcı ⋮ → 360 olarak oynat)
+- İki parmakla görüntüyü döndürme, "Ufku düzelt", otomatik panorama döndürme (dokununca durur), sensörü dokunarak durdurma, sensör türü 2, sensör açıkken otomatik döndürmeyi kilitleme.
+- Uzun basınca çıkan çember: sola/sağa sar, yukarı oynat, aşağı duraklat.
+- Ana menü → "360° fotoğraf aç…": 360° fotoğrafları gez.
+- Ayarlar → 360° / VR: bu davranışların tümü açılıp kapatılır.
+
 # 1.0.0-beta14
 
 Hata düzeltmeleri ve eksikler. Android 14 emülatöründe otomatik testten geçti.
