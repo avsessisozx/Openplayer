@@ -700,6 +700,25 @@ def feature_tests():
     sh("input keyevent KEYCODE_BACK"); time.sleep(1)
     check_crash("Altyazı çevirisi")
 
+    # 5c) beta14: kısayol rayı, klasör ızgarası, kenar şeridi
+    write_prefs({"show_shortcuts": ("boolean", "true")})
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    time.sleep(2)
+    w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
+    shot("Kısayol rayı: varsayılan")
+    y = int(h * 0.23)
+    sh(f"input swipe {int(w*0.75)} {y} {int(w*0.15)} {y} 350"); time.sleep(1.0)
+    shot("Kısayol rayı: çekilince açık")
+    sh(f"input swipe {int(w*0.15)} {y} {int(w*0.75)} {y} 350"); time.sleep(1.0)
+    shot("Kısayol rayı: geri çekilince kapalı")
+    check_crash("Kısayol rayı")
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    write_prefs({"folder_grid": ("boolean", "true"), "folder_order": ("string", "count_desc")})
+    start_main(); time.sleep(2.5)
+    shot("Klasör ızgara görünümü (çok videolu önce)")
+    check_crash("Klasör ızgarası")
+    write_prefs({})
+
     # 6) Ayar sayfaları: her sayfada her satıra dokun (üst ve kaydırılmış alt kısım)
     write_prefs({})
 
