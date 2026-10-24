@@ -135,6 +135,41 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
 
     private var ignoring = false
 
+    // 360° iki parmakla döndürme
+    private var twisting = false
+    private var lastTwist = 0f
+
+    private fun twistAngle(e: MotionEvent): Float =
+        Math.toDegrees(Math.atan2((e.getY(1) - e.getY(0)).toDouble(), (e.getX(1) - e.getX(0)).toDouble())).toFloat()
+
+    private fun vrTouch(e: MotionEvent) {
+        when (e.actionMasked) {
+            MotionEvent.ACTION_DOWN -> a.vrTouching(true)
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                a.vrTouching(false)
+                a.vrWheelEnd()
+                twisting = false
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> if (e.pointerCount == 2) {
+                lastTwist = twistAngle(e)
+                twisting = true
+            }
+            MotionEvent.ACTION_POINTER_UP -> twisting = false
+            MotionEvent.ACTION_MOVE -> {
+                if (a.vrWheelActive()) {
+                    a.vrWheelMove(e.x, e.y)
+                } else if (twisting && e.pointerCount == 2 && a.settings.vrTwoFingerRotate) {
+                    val ang = twistAngle(e)
+                    var d = ang - lastTwist
+                    if (d > 180f) d -= 360f
+                    if (d < -180f) d += 360f
+                    lastTwist = ang
+                    if (abs(d) < 45f) a.vrRollBy(-d)
+                }
+            }
+        }
+    }
+
     private val detector = GestureDetector(a, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
             mode = Mode.NONE
@@ -156,7 +191,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent, dx: Float, dy: Float): Boolean {
             if (e1 == null || scaling || e2.pointerCount > 1) return true
             if (a.vr != VrMode.NONE) {
-                a.vrLook(dx, dy)
+                if (!a.vrWheelActive()) a.vrLook(dx, dy)
                 return true
             }
             if (a.zoom > 1.02f) {
@@ -199,11 +234,29 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         }
 
         override fun onLongPress(e: MotionEvent) {
-            if (a.vr != VrMode.NONE || scaling) return
+            if (a.vr != VrMode.NONE) {
+                if (a.settings.vrHoldWheel && !scaling) a.vrWheelStart(e.x, e.y)
+                return
+            }
+            if (scaling) return
             if (a.startFastPlay()) mode = Mode.NONE
         }
 
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            if (a.vr != VrMode.NONE) {
+                if (a.vrAutoRotating() && a.settings.vrTapStopsAutoRotate) {
+                    a.vrSetAutoRotate(false)
+                    a.showHud("Otomatik döndürme durdu")
+                    a.hideHudSoon()
+                    return true
+                }
+                if (a.vrSensorEnabled() && a.settings.vrTapStopsSensor) {
+                    a.vrSetSensor(false)
+                    a.showHud("Hareket sensörü durdu")
+                    a.hideHudSoon()
+                    return true
+                }
+            }
             a.onScreenTap()
             return true
         }
@@ -299,6 +352,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) ignoring = false
             return true
         }
+        if (a.vr != VrMode.NONE) vrTouch(event)
         scaleDetector.onTouchEvent(event)
         val handled = detector.onTouchEvent(event)
 

@@ -300,6 +300,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         override fun onVideoSizeChanged(videoSize: VideoSize) {
+            vrUpdateAspect(videoSize)
             applyOrientation()
             applyTransform()
             updatePipParams()
@@ -605,6 +606,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     fun openItems(uris: List<Uri>, titles: List<String>?, index: Int) {
+        resetRay()
         if (settings.playbackEngine == PlaybackEngine.VLC) {
             VlcPlayerActivity.launch(this, uris, titles, index, if (settings.resumePlayback) ResumeStore.position(this, uris[index]) else 0L)
             finish()
@@ -1045,7 +1047,8 @@ class PlayerActivity : AppCompatActivity() {
             addView(bottomScrim, FrameLayout.LayoutParams(-1, dp(170), Gravity.BOTTOM))
             controlsInner = FrameLayout(this@PlayerActivity).apply {
                 addView(topBar, FrameLayout.LayoutParams(-1, dp(56), Gravity.TOP))
-                addView(shortcutScroll, FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(60) })
+                // Genişlik içeriğe göre: simgelerin sağındaki boş alan sürüklemeye/dokunuşa tepki vermez.
+                addView(shortcutScroll, FrameLayout.LayoutParams(-2, -2, Gravity.TOP or Gravity.START).apply { topMargin = dp(60) })
                 addView(bottomPanel, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM))
             }
             addView(controlsInner, FrameLayout.LayoutParams(-1, -1))
@@ -1525,6 +1528,10 @@ class PlayerActivity : AppCompatActivity() {
         vr = mode
         if (remember) currentUri?.let { Vr360.remember(this, it.toString(), mode) }
         if (mode == VrMode.NONE) {
+            if (vrOrientationLocked) {
+                vrOrientationLocked = false
+                applyOrientation()
+            }
             vrView?.let { v ->
                 v.onPause()
                 (v.parent as? ViewGroup)?.removeView(v)
@@ -1548,7 +1555,11 @@ class PlayerActivity : AppCompatActivity() {
                     }
                 }
                 v.setOnTouchListener(GestureController(this))
+                v.horizonLevel = settings.vrHorizonLevel
+                v.setSensorAlt(settings.vrSensorAlt)
+                v.setAutoRotate(settings.vrAutoRotate)
                 vrView = v
+                vrUpdateAspect(player.videoSize)
                 playerView.player = null
                 playerView.visibility = View.GONE
                 val parent = playerView.parent as ViewGroup
@@ -1575,9 +1586,99 @@ class PlayerActivity : AppCompatActivity() {
 
     fun vrSensorEnabled(): Boolean = vrView?.sensorEnabled == true
 
+    private var vrOrientationLocked = false
+
+    fun vrUpdateAspect(size: VideoSize) {
+        val v = vrView ?: return
+        if (size.width > 0 && size.height > 0) v.videoAspect = size.width * size.pixelWidthHeightRatio / size.height
+    }
+
     fun vrSetSensor(on: Boolean) {
         vrView?.setSensor(on)
-        if (on && vrView?.sensorEnabled != true) toast("Bu cihazda hareket sensörü yok")
+        val actual = vrView?.sensorEnabled == true
+        if (on && !actual) toast("Bu cihazda hareket sensörü yok")
+        // Sensör açıkken ekran kendiliğinden dönüp görüntüyü bozmasın.
+        if (actual && settings.vrLockRotation && !vrOrientationLocked) {
+            vrOrientationLocked = true
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+        } else if (!actual && vrOrientationLocked) {
+            vrOrientationLocked = false
+            applyOrientation()
+        }
+    }
+
+    /** Görüntüyü iki parmakla kendi ekseni etrafında döndürür (derece farkı). */
+    fun vrRollBy(deltaDeg: Float) {
+        val v = vrView ?: return
+        v.roll = (v.roll + deltaDeg) % 360f
+    }
+
+    /** Ufku düzelt: elle verilen eğimi sıfırlar. */
+    fun vrLevelHorizon() {
+        vrView?.roll = 0f
+        showHud("Ufuk düzeltildi")
+        hideHudSoon()
+    }
+
+    // --- 360° basılı tutunca çember (sar / oynat / duraklat)
+    private var vrWheel: VrWheelView? = null
+    private var wheelDir = VrWheelView.Dir.NONE
+    private val wheelSeeker = object : Runnable {
+        override fun run() {
+            when (wheelDir) {
+                VrWheelView.Dir.LEFT -> seekRelative(-5000L)
+                VrWheelView.Dir.RIGHT -> seekRelative(5000L)
+                else -> return
+            }
+            handler.postDelayed(this, 350)
+        }
+    }
+
+    fun vrWheelActive(): Boolean = vrWheel != null
+
+    fun vrWheelStart(x: Float, y: Float) {
+        if (vrWheel != null || vr == VrMode.NONE) return
+        val w = VrWheelView(this)
+        w.setCenter(x, y)
+        vrWheel = w
+        (playerView.parent as ViewGroup).addView(w, FrameLayout.LayoutParams(-1, -1))
+    }
+
+    fun vrWheelMove(x: Float, y: Float) {
+        val w = vrWheel ?: return
+        val d = w.move(x, y)
+        if (d == wheelDir) return
+        wheelDir = d
+        handler.removeCallbacks(wheelSeeker)
+        when (d) {
+            VrWheelView.Dir.LEFT, VrWheelView.Dir.RIGHT -> handler.post(wheelSeeker)
+            VrWheelView.Dir.UP -> player.play()
+            VrWheelView.Dir.DOWN -> player.pause()
+            else -> Unit
+        }
+    }
+
+    fun vrWheelEnd() {
+        val w = vrWheel ?: return
+        handler.removeCallbacks(wheelSeeker)
+        wheelDir = VrWheelView.Dir.NONE
+        (w.parent as? ViewGroup)?.removeView(w)
+        vrWheel = null
+    }
+
+    fun vrTouching(on: Boolean) {
+        vrView?.touching = on
+    }
+
+    fun vrAutoRotating(): Boolean = vrView?.autoRotating == true
+
+    fun vrSetAutoRotate(on: Boolean) {
+        vrView?.setAutoRotate(on)
+    }
+
+    fun vrSetHorizonLevel(on: Boolean) {
+        settings.vrHorizonLevel = on
+        vrView?.horizonLevel = on
     }
 
     fun vrReset() {
@@ -1592,7 +1693,7 @@ class PlayerActivity : AppCompatActivity() {
         v.cardboard = on
         if (on) {
             // Gözlük modu baş takibi ister: sensörü aç ve bakışı sıfırla.
-            v.setSensor(true)
+            vrSetSensor(true)
             v.resetLook()
             showHud("VR gözlük modu — telefonu gözlüğe yerleştirip yatay tutun")
             hideHudSoon()
@@ -1657,6 +1758,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun applyOrientation() {
+        if (vrOrientationLocked) return
         orientationOverride?.let {
             requestedOrientation = it
             return
@@ -1709,9 +1811,9 @@ class PlayerActivity : AppCompatActivity() {
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         shortcutRow.removeAllViews()
         val all = settings.shortcuts
-        // Kapalıyken yalnızca ilk 5 simge görünür; kalanlar "ray" gibi parmakla çekilince veya ok ile açılır.
-        val head = all.take(5)
-        val rest = all.drop(5)
+        // Varsayılan olarak yalnızca ilk 4 simge görünür; kalanlar parmakla çekilince veya ok ile açılır.
+        val head = all.take(SHORTCUT_DEFAULT_COUNT)
+        val rest = all.drop(SHORTCUT_DEFAULT_COUNT)
         for (s in head) shortcutRow.addView(buildShortcut(s))
         extraRow = null; extraInner = null; arrowView = null
         if (rest.isNotEmpty()) {
@@ -1744,6 +1846,7 @@ class PlayerActivity : AppCompatActivity() {
 
     // --- Kısayol rayı: parmakla çekince yumuşakça açılır/kapanır (0 = varsayılan 5 simge, 1 = tümü).
     // Oynatıcıdan çıkınca sıfırlanır (Activity alanı).
+    private val SHORTCUT_DEFAULT_COUNT = 4
     private var rayFraction = 0f
     private var rayAnim: android.animation.ValueAnimator? = null
     private var extraRow: FrameLayout? = null
@@ -1764,6 +1867,13 @@ class PlayerActivity : AppCompatActivity() {
         row.layoutParams = lp
         row.alpha = 0.25f + 0.75f * rayFraction
         arrowView?.rotation = 180f * (1f - rayFraction)
+    }
+
+    /** Satırı varsayılan (kapalı) hâle getirir; yeni videoya geçerken ve oynatıcıdan çıkarken kullanılır. */
+    private fun resetRay() {
+        rayAnim?.cancel()
+        applyRay(0f)
+        if (::shortcutScroll.isInitialized) shortcutScroll.scrollTo(0, 0)
     }
 
     private fun settleRay(target: Float) {

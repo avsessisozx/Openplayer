@@ -79,6 +79,11 @@ class MainActivity : AppCompatActivity() {
             if (granted) refresh() else showMessage("Videoları göstermek için izin gerekli.\nDokunarak tekrar dene.")
         }
 
+    private val openPhoto360 =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) startActivity(Intent(this, Vr360PhotoActivity::class.java).setData(uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+        }
+
     private val backCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             when {
@@ -586,6 +591,7 @@ class MainActivity : AppCompatActivity() {
         menu.menu.add(0, 2, 3, if (settings.showHiddenFolders) "Gizli klasörleri sakla" else "Gizli klasörleri göster")
         menu.menu.add(0, 4, 4, "Ağ kaynakları (SMB / FTP / WebDAV)")
         menu.menu.add(0, 8, 5, "Medya yöneticisi")
+        menu.menu.add(0, 10, 5, "360° fotoğraf aç…")
         menu.menu.add(0, 3, 6, "Ayarlar")
         if (settings.exitButton) menu.menu.add(0, 9, 7, "Çıkış")
         menu.setOnMenuItemClickListener { item ->
@@ -603,6 +609,7 @@ class MainActivity : AppCompatActivity() {
                     render()
                 }
                 3 -> startActivity(Intent(this, SettingsActivity::class.java))
+                10 -> openPhoto360.launch(arrayOf("image/*"))
                 7 -> startActivity(Intent(this, VaultActivity::class.java))
                 5 -> startActivity(Intent(this, PlaylistActivity::class.java).putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.VIDEO))
                 6 -> startActivity(

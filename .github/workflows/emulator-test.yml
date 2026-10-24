@@ -74,7 +74,7 @@ jobs:
           ram-size: 3072M
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
-          script: SMOKE_ONLY=${{ contains(github.event.head_commit.message, '[ayar]') && 'ayar' || '' }} SMOKE_QUICK=${{ contains(github.event.head_commit.message, '[hizli]') && '1' || '0' }} python3 .github/emulator/smoke.py app/build/outputs/apk/debug/app-debug.apk media out || echo "::warning::smoke.py hata ile bitti (ayrıntı out/ içinde)"
+          script: SMOKE_ONLY=${{ contains(github.event.head_commit.message, '[ayar]') && 'ayar' || (contains(github.event.head_commit.message, '[ray]') && 'ray' || '') }} SMOKE_QUICK=${{ contains(github.event.head_commit.message, '[hizli]') && '1' || '0' }} python3 .github/emulator/smoke.py app/build/outputs/apk/debug/app-debug.apk media out || echo "::warning::smoke.py hata ile bitti (ayrıntı out/ içinde)"
 
       - name: Collect reports
         if: always()

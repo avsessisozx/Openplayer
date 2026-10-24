@@ -5,7 +5,7 @@ Uygulamayı kurar, örnek medyayı yükler, ana ekranları açar, her ekrandaki 
 öğelere tek tek dokunur, ekran görüntüsü alır ve çökmeleri (FATAL EXCEPTION / ANR) kaydeder.
 Sonuçlar out/ klasörüne yazılır: screens/*.png, ui/*.xml, steps.tsv, crashes.txt, logcat.txt, report.md
 """
-import os, re, subprocess, sys, time, xml.etree.ElementTree as ET
+import os, re, struct, subprocess, sys, time, xml.etree.ElementTree as ET
 
 PKG = "org.openplayer.app"
 APK = sys.argv[1]
@@ -143,9 +143,36 @@ def tap(c):
 
 
 def foreground_pkg():
-    o = sh("dumpsys window | grep -E 'mCurrentFocus|mFocusedApp' | head -2")
-    m = re.search(r"([a-zA-Z0-9_.]+)/", o)
-    return m.group(1) if m else ""
+    # Önce etkinlik yöneticisinin "en üstte çalışan" etkinliği; olmazsa pencere odağı.
+    for cmd in ("dumpsys activity activities | grep -E 'topResumedActivity|ResumedActivity' | head -2",
+                "dumpsys window | grep -E 'mCurrentFocus|mFocusedApp' | head -2"):
+        o = sh(cmd)
+        m = re.search(r"\s([a-zA-Z0-9_.]+)/[a-zA-Z0-9_.$]+", o)
+        if m:
+            return m.group(1)
+    return ""
+
+
+def frame_stats():
+    """Ekranın orta bölgesinin parlaklığı: (ortalama 0..255, parlak piksel oranı). Okunamazsa None."""
+    raw = adb("exec-out", "screencap", binary=True, timeout=30)
+    if not raw or len(raw) < 16:
+        return None
+    w, h, fmt = struct.unpack("<III", raw[:12])
+    off = 16 if len(raw) - 16 >= w * h * 4 else 12
+    if len(raw) - off < w * h * 4:
+        return None
+    total = n = bright = 0
+    for gy in range(14):
+        y = int(h * (0.25 + 0.45 * gy / 13))
+        for gx in range(24):
+            x = int(w * (0.25 + 0.5 * gx / 23))
+            i = off + (y * w + x) * 4
+            lum = (raw[i] + raw[i + 1] + raw[i + 2]) / 3
+            total += lum; n += 1
+            if lum > 40:
+                bright += 1
+    return total / n, bright / n
 
 
 def check_crash(step):
@@ -395,6 +422,81 @@ def settings_page(title, scrolls=0):
     return go
 
 
+def write_prefs(extra):
+    """Ayar dosyasını yazar (uygulama kapalıyken). extra: {ad: (tür, değer)}"""
+    sh(f"am force-stop {PKG}")
+    items = {"music_mode": ("boolean", "true")}
+    items.update(extra)
+    lines = []
+    for k, (t, v) in items.items():
+        if t == "string":
+            lines.append(f'    <string name="{k}">{v}</string>')
+        else:
+            lines.append(f'    <{t} name="{k}" value="{v}" />')
+    open("/tmp/settings.xml", "w").write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n" + "\n".join(lines) + "\n</map>\n")
+    adb("push", "/tmp/settings.xml", "/data/local/tmp/settings.xml")
+    sh("chmod 644 /data/local/tmp/settings.xml")
+    sh(f"run-as {PKG} sh -c 'cp /data/local/tmp/settings.xml shared_prefs/settings.xml'")
+
+
+def rail_test():
+    write_prefs({"show_shortcuts": ("boolean", "true")})
+    play("/sdcard/Movies/Test/Yatay video.mp4")
+    time.sleep(2)
+    w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
+    def rail_count():
+        """Kısayol satırındaki (üst şerit altı) tıklanabilir simge sayısı; okunamazsa None."""
+        sh("input keyevent 127")  # duraklat: oynarken UI ağacı okunamıyor
+        time.sleep(1.0)
+        root = dump()
+        if root is None:
+            return None
+        return len([1 for _, c, _ in clickables(root) if h * 0.10 < c[1] < h * 0.34])
+
+    shot("Kısayol rayı: varsayılan")
+    n0 = rail_count()
+    y = int(h * 0.23)
+    # Satır dar (içeriğe göre) olduğundan sürükleme simgelerin üstünden başlamalı.
+    sh(f"input swipe {int(w*0.28)} {y} {int(w*0.01)} {y} 350"); time.sleep(1.2)
+    shot("Kısayol rayı: çekilince açık")
+    n1 = rail_count()
+    sh(f"input swipe {int(w*0.20)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.2)
+    shot("Kısayol rayı: geri çekilince kapalı")
+    n2 = rail_count()
+    if None in (n0, n1, n2):
+        steps.append(("Kısayol rayı: simge sayısı", "bilgi", f"okunamadı ({n0}/{n1}/{n2})"))
+    else:
+        good = n0 <= 5 and n1 > n0 and n2 == n0
+        steps.append(("Kısayol rayı: simge sayısı", "ok" if good else "SORUN",
+                      f"varsayılan {n0}, açık {n1}, kapanınca {n2} (beklenen: ≤5, artış, aynı)"))
+    # Satırın sağındaki boş alan sürüklemeye tepki vermemeli.
+    sh(f"input swipe {int(w*0.95)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.0)
+    n3 = rail_count()
+    if n3 is not None and n2 is not None:
+        steps.append(("Kısayol rayı: boş alan tepkisiz", "ok" if n3 == n2 else "SORUN", f"önce {n2}, sonra {n3}"))
+    check_crash("Kısayol rayı")
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+
+
+if os.environ.get("SMOKE_ONLY") == "ray":
+    # Yalnız kısayol satırı testi (~10 dk): commit mesajına [ray] yazılınca çalışır.
+    try:
+        rail_test()
+    except Exception as e:
+        import traceback
+        steps.append(("Kısayol rayı testi yarıda kaldı", "SORUN", traceback.format_exc().strip().splitlines()[-1][:300]))
+    logcat.terminate()
+    with open(f"{OUT}/steps.tsv", "w") as fh:
+        for st in steps:
+            fh.write("\t".join(st) + "\n")
+    with open(f"{OUT}/crashes.txt", "w") as fh:
+        for st, txt in crashes:
+            fh.write(f"===== ADIM: {st}\n{txt}\n\n")
+        fh.write("===== ÇÖKME TAMPONU\n" + adb("logcat", "-d", "-b", "crash"))
+    open(f"{OUT}/report.md", "w").write(f"# Kısayol rayı testi\nAdım: {len(steps)}  Çökme: {len(crashes)}\n")
+    sys.exit(0)
+
+
 if os.environ.get("SMOKE_ONLY") == "ayar":
     for page in ("Altyazı", "Liste ve dosyalar", "Tema ve görünüm", "Video ve çözücü"):
         crawl(f"Ayarlar › {page}", settings_page(page), limit=14, skip=("içe aktar", "Tüm dosyalara erişim"))
@@ -503,6 +605,104 @@ crawl("Ana ekran ⋮ menüsü", open_overflow(start_main), limit=12)
 crawl("Ayarlar", open_settings, limit=30)
 checkpoint("gezintiler")
 
+def find_scroll(*wanted):
+    """Kısa (yatay) ekranda kaydırmalı menülerde öğeyi bulana dek yukarı kaydırır."""
+    w, h = cur_size()
+    for _ in range(6):
+        root = dump()
+        e = find_text_any(root, *wanted)
+        if not e:
+            for t in wanted:
+                e = find_contains(root, t)
+                if e:
+                    break
+        if e:
+            return e
+        sh(f"input swipe {int(w*0.85)} {int(h*0.8)} {int(w*0.85)} {int(h*0.2)} 250")
+        time.sleep(0.8)
+    return None
+
+# --- Beta15: 360° menüleri ---
+def vr_open_menu():
+    play_controls("/sdcard/Movies/Test/Yatay video.mp4")
+    c = top_right_icon(dump())
+    if not c:
+        return False
+    tap(c); time.sleep(1.5)
+    r = find_scroll("360 olarak oynat", "360° ayarları")
+    if not r:
+        return False
+    tap(r); time.sleep(1.5)
+    return True
+
+def vr_pick(label, texts):
+    """Oynatıcı ⋮ → 360 satırı → verilen menü öğelerini sırayla seç."""
+    if not vr_open_menu():
+        steps.append((f"360 {label}", "SORUN", "360 satırı yok")); return
+    shot(f"360_menu_{label}")
+    for t in texts:
+        e = find_scroll(t)
+        if not e:
+            steps.append((f"360 {label}: {t}", "SORUN", "öğe bulunamadı")); return
+        tap(e); time.sleep(2.5)
+        shot(f"360_{label}_{t}")
+    record(f"360 {label}", 2)
+    st = frame_stats()
+    if st is None:
+        steps.append((f"360 {label}: görüntü", "bilgi", "ekran okunamadı"))
+    else:
+        mean, frac = st
+        note = f"parlaklık {mean:.0f}, parlak piksel %{frac*100:.0f}"
+        # Sensör/VR gözlük emülatörde düz yatan sanal telefona bağlı olabilir; bunlar yalnız bilgi.
+        soft = label in ("sensor", "vrgozluk")
+        ok = frac >= 0.15
+        steps.append((f"360 {label}: görüntü siyah değil", "ok" if ok else ("bilgi" if soft else "SORUN"), note))
+
+# Sanal telefonu dik tut (yerçekimi + manyetik alan): sensör modu anlamlı görüntü versin.
+adb("emu", "sensor", "set", "acceleration", "0:9.81:0")
+adb("emu", "sensor", "set", "magnetic-field", "0:25:-40")
+
+vr_pick("360", ["360° olarak oynat"])
+# 360 seçildikten sonra menü "Lens türü: …" olur; lens listesinden diğerlerini dene
+for lbl, lens in (("180", "180°"), ("balikgozu", "Balık gözü"), ("normal", "Normal")):
+    vr_pick(lbl, ["Lens türü", lens])
+vr_pick("3B", ["3B biçimi", "Yan yana"])
+vr_pick("ufuk", ["Ufku düzelt"])
+vr_pick("otodondur", ["Otomatik döndür"])
+vr_pick("sensor", ["Hareket sensörüyle bak"])
+vr_pick("vrgozluk", ["VR gözlük modu"])
+# jest denemeleri
+w, h = cur_size()
+play_controls("/sdcard/Movies/Test/Yatay video.mp4")
+sh(f"input swipe {w//2} {h//2} {w//2+200} {h//2} 300"); time.sleep(1)
+sh(f"input tap {w//2} {h//2}"); sh(f"input tap {w//2} {h//2}"); time.sleep(1)
+sh(f"input swipe {w//2} {h//2} {w//2} {h//2} 900"); time.sleep(1)
+shot("360_uzun_basma")
+sh("input keyevent KEYCODE_BACK"); sh("input keyevent KEYCODE_BACK")
+
+# 360° ayar sayfasını gez
+def open_vr_settings():
+    open_settings()
+    e = find_scroll("360° / VR")
+    if e:
+        tap(e); time.sleep(2)
+crawl("360° ayarları", open_vr_settings, limit=15)
+
+# 360° fotoğraf: dışa açık olmayan ekranı root kabuğuyla başlat
+adb("root"); adb("wait-for-device"); time.sleep(4)
+logcat.terminate()
+logcat = subprocess.Popen(["adb", "logcat", "-v", "threadtime"], stdout=open(f"{OUT}/logcat.txt", "ab"))
+sh(f"am start -W -n {PKG}/.Vr360PhotoActivity -d file:///sdcard/Movies/Test/Panorama360.jpg", timeout=40)
+time.sleep(5)
+shot("360_foto")
+record("360 fotoğraf ekranı", 2)
+pw, ph = cur_size()
+sh(f"input swipe {pw//2} {ph//2} {pw//2+300} {ph//2} 300"); time.sleep(1)
+shot("360_foto_kaydir")
+sh(f"input tap {pw//2} {ph//2}"); time.sleep(1)
+shot("360_foto_cubuk")
+checkpoint("360")
+
 # Paylaş: dosya (file://) adresiyle açılmış videoyu paylaşmak
 play_controls("/sdcard/Movies/Test/Yatay video.mp4")
 c = top_right_icon(dump())
@@ -543,23 +743,6 @@ sh(f"pm grant {PKG} android.permission.READ_MEDIA_VIDEO")
 
 checkpoint("temel akışlar")
 # ---------------------------------------------------------------- beta11 özellik testleri
-def write_prefs(extra):
-    """Ayar dosyasını yazar (uygulama kapalıyken). extra: {ad: (tür, değer)}"""
-    sh(f"am force-stop {PKG}")
-    items = {"music_mode": ("boolean", "true")}
-    items.update(extra)
-    lines = []
-    for k, (t, v) in items.items():
-        if t == "string":
-            lines.append(f'    <string name="{k}">{v}</string>')
-        else:
-            lines.append(f'    <{t} name="{k}" value="{v}" />')
-    open("/tmp/settings.xml", "w").write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n<map>\n" + "\n".join(lines) + "\n</map>\n")
-    adb("push", "/tmp/settings.xml", "/data/local/tmp/settings.xml")
-    sh("chmod 644 /data/local/tmp/settings.xml")
-    sh(f"run-as {PKG} sh -c 'cp /data/local/tmp/settings.xml shared_prefs/settings.xml'")
-
-
 def feat_log():
     return adb("logcat", "-d", "-s", "OPFEAT:*")
 
@@ -701,18 +884,8 @@ def feature_tests():
     check_crash("Altyazı çevirisi")
 
     # 5c) beta14: kısayol rayı, klasör ızgarası, kenar şeridi
-    write_prefs({"show_shortcuts": ("boolean", "true")})
-    play("/sdcard/Movies/Test/Yatay video.mp4")
-    time.sleep(2)
-    w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
-    shot("Kısayol rayı: varsayılan")
-    y = int(h * 0.23)
-    sh(f"input swipe {int(w*0.75)} {y} {int(w*0.15)} {y} 350"); time.sleep(1.0)
-    shot("Kısayol rayı: çekilince açık")
-    sh(f"input swipe {int(w*0.15)} {y} {int(w*0.75)} {y} 350"); time.sleep(1.0)
-    shot("Kısayol rayı: geri çekilince kapalı")
-    check_crash("Kısayol rayı")
-    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+    rail_test()
+    checkpoint("kısayol rayı")
     write_prefs({"folder_grid": ("boolean", "true"), "folder_order": ("string", "count_desc")})
     start_main(); time.sleep(2.5)
     shot("Klasör ızgara görünümü (çok videolu önce)")

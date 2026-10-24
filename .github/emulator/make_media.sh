@@ -54,6 +54,9 @@ ff -f lavfi -i testsrc2=size=1920x1080:rate=25:duration=24 -f lavfi -i sine=freq
 
 cp "$out/Movies/Bolumlu.srt" "$out/Movies/Yatay video.srt"
 
+# 360° fotoğraf denemesi (2:1 eşdikdörtgen)
+ff -f lavfi -i testsrc2=size=2048x1024:rate=1 -frames:v 1 "$out/Movies/Panorama360.jpg"
+
 # ExoPlayer'ın açamayacağı bir biçim (VLC yedek motoru testi)
 ff -f lavfi -i testsrc=size=640x360:rate=25:duration=10 -f lavfi -i sine=frequency=550:duration=10 \
    -c:v wmv2 -c:a wmav2 -shortest "$out/Movies/Eski bicim.wmv"

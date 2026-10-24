@@ -29,6 +29,7 @@ class SettingsActivity : AppCompatActivity() {
         SUBTITLE("Altyazı", "Görünüm, karakter kodlaması, diller", R.drawable.ic_subtitles),
         ONLINE("Çevrimiçi altyazı", "OpenSubtitles hesabı ve API anahtarı", R.drawable.ic_cloud_download),
         TRANSLATE("Altyazı çevirisi", "Altyazıyı yapay zekâ veya çeviri servisiyle başka dile çevirin", R.drawable.ic_subtitles),
+        VR360("360° / VR", "Bakış, sensör, döndürme, otomatik dönüş, basılı tutma çemberi", R.drawable.ic_public),
         MUSIC("Müzik çalar", "Videolardan ayrı müzik kütüphanesi ve çalar (isteğe bağlı)", R.drawable.ic_music_note),
         THEME("Tema ve görünüm", "Renk temaları, vurgu rengi, düğme biçimi, panel opaklığı", R.drawable.ic_tune),
         LIST("Liste ve dosyalar", "Yeni etiketi, gizli klasörler, dosya erişimi", R.drawable.ic_view_list),
@@ -164,6 +165,7 @@ class SettingsActivity : AppCompatActivity() {
             Page.SUBTITLE -> subtitlePage()
             Page.ONLINE -> onlinePage()
             Page.TRANSLATE -> translatePage()
+            Page.VR360 -> vrPage()
             Page.LIST -> listPage()
             Page.THEME -> themePage()
             Page.MUSIC -> musicPage()
@@ -210,6 +212,19 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun versionName(): String =
         runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull() ?: ""
+
+    private fun vrPage() {
+        section("Bakış")
+        toggle("Görüntüyü iki parmakla döndür", "İki parmağı çevirerek görüntüyü kendi ekseni etrafında eğer", s.vrTwoFingerRotate) { s.vrTwoFingerRotate = it }
+        toggle("Ufuk düzeltme", "Hareket sensöründe telefonu yana yatırsanız bile ufuk düz kalır", s.vrHorizonLevel) { s.vrHorizonLevel = it }
+        toggle("Sensör açıkken ekran döndürmeyi kilitle", "Hareket sensörüyle bakarken ekranın kendiliğinden dönmesini engeller", s.vrLockRotation) { s.vrLockRotation = it }
+        toggle("Sensör türü 2", "Hareket sensörüyle ilgili sorun yaşıyorsanız bunu deneyin", s.vrSensorAlt) { s.vrSensorAlt = it }
+        section("Dokunma")
+        toggle("Panorama otomatik dönsün", "360° videoda ekrana dokunulmadıkça yavaşça etrafı gösterir", s.vrAutoRotate) { s.vrAutoRotate = it }
+        toggle("Dokununca otomatik döndürmeyi durdur", null, s.vrTapStopsAutoRotate) { s.vrTapStopsAutoRotate = it }
+        toggle("Dokununca hareket sensörünü durdur", "Kapalıyken dokunmak kontrolleri gösterir", s.vrTapStopsSensor) { s.vrTapStopsSensor = it }
+        toggle("Basılı tutunca sarma çemberi", "Basılı tutup sola/sağa kaydırınca sarar, yukarı oynatır, aşağı duraklatır", s.vrHoldWheel) { s.vrHoldWheel = it }
+    }
 
     private fun playerPage() {
         section("Devam etme")

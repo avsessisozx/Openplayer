@@ -86,6 +86,8 @@ jobs:
           fi
           flag=""
           case "$TAG" in *-*) flag="--prerelease";; esac
+          # Sürüm notu: yalnızca en üstteki (yeni) sürümün bölümü
+          awk '/^# /{n++} n==1' RELEASE_NOTES.md > latest_notes.md
           gh release create "$TAG" OpenPlayer.apk OpenPlayer.apk.sha256 \
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-            --title "OpenPlayer $TAG" --notes-file RELEASE_NOTES.md $flag
+            --title "OpenPlayer $TAG" --notes-file latest_notes.md $flag
