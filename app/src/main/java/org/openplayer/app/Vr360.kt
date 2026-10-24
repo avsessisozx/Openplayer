@@ -152,11 +152,14 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
     private var useSensor = false
     private var sensorAlt = false
     private val sensors = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    /** Son sensör örneği: satır öncelikli dönüş matrisi (cihaz → dünya) ve ekran yönü (0..3). */
     private val sensorMatrix = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
-    /** "Bakış yönünü sıfırla" anında yakalanan sensör yöneliminin tersi; sonraki kareler buna göre. */
-    private val recenterMat = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
+    private var sensorRotation = 0
+    @Volatile private var hasSensorSample = false
+    /** "İleri" kabul edilen yatay açı (radyan); sensör açılınca/sıfırlanınca ilk geçerli örnekten alınır. */
+    private var yawZero = 0.0
+    @Volatile private var pendingRecenter = false
     private val tmpRot = FloatArray(16)
-    private val tmpRemap = FloatArray(16)
     private var sensorOn = false
 
     private val renderer = Renderer()
@@ -234,9 +237,24 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         yaw = 0f
         pitch = 0f
         fov = 90f
-        // Sensör açıksa o anki yönelimi yeni "ileri" kabul et.
-        synchronized(sensorMatrix) { Matrix.invertM(recenterMat, 0, sensorMatrix, 0) }
+        // Sensör açıksa o anki yatay yönü yeni "ileri" kabul et (örnek henüz yoksa ilk örnekte).
+        recenterSensor()
         requestRender()
+    }
+
+    /** Mevcut örnekten, yoksa bir sonraki geçerli örnekten yatay "ileri" yönünü alır. */
+    private fun recenterSensor() {
+        if (!hasSensorSample) {
+            pendingRecenter = true
+            return
+        }
+        val yaw = synchronized(sensorMatrix) { SensorView.forwardYaw(sensorMatrix, sensorRotation) }
+        if (yaw != null) {
+            yawZero = yaw
+            pendingRecenter = false
+        } else {
+            pendingRecenter = true // telefon düz yatıyor: yön belirsiz, dik tutulunca ayarla
+        }
     }
 
     fun setSensor(on: Boolean) {
@@ -252,6 +270,8 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         if (want == sensorOn) return
         sensorOn = want
         if (want) {
+            hasSensorSample = false
+            pendingRecenter = true
             val s = if (sensorAlt) {
                 sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) ?: sensors.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
             } else {
@@ -266,16 +286,15 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
 
     override fun onSensorChanged(event: SensorEvent) {
         SensorManager.getRotationMatrixFromVector(tmpRot, event.values)
-        // Yatay tutuş için eksenleri çevir (ekran döndürmesine göre).
+        // Bozuk/sıfır örnekleri yok say: görüntü kaybolmasın.
+        for (i in intArrayOf(0, 1, 2, 4, 5, 6, 8, 9, 10)) if (!tmpRot[i].isFinite()) return
         val rotation = (context as? android.app.Activity)?.windowManager?.defaultDisplay?.rotation ?: 0
-        val (ax, ay) = when (rotation) {
-            Surface.ROTATION_90 -> SensorManager.AXIS_Z to SensorManager.AXIS_MINUS_X
-            Surface.ROTATION_270 -> SensorManager.AXIS_MINUS_Z to SensorManager.AXIS_X
-            Surface.ROTATION_180 -> SensorManager.AXIS_MINUS_X to SensorManager.AXIS_MINUS_Z
-            else -> SensorManager.AXIS_X to SensorManager.AXIS_Z
+        synchronized(sensorMatrix) {
+            System.arraycopy(tmpRot, 0, sensorMatrix, 0, 16)
+            sensorRotation = rotation
         }
-        SensorManager.remapCoordinateSystem(tmpRot, ax, ay, tmpRemap)
-        synchronized(sensorMatrix) { System.arraycopy(tmpRemap, 0, sensorMatrix, 0, 16) }
+        hasSensorSample = true
+        if (pendingRecenter) recenterSensor()
         requestRender()
     }
 
@@ -565,10 +584,11 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         private fun computeView() {
             Matrix.setIdentityM(view, 0)
             if (sensorOn) {
-                // recenter * sensör: "sıfırla" anından bu yana göreli dönüş.
-                synchronized(sensorMatrix) { Matrix.multiplyMM(view, 0, recenterMat, 0, sensorMatrix, 0) }
-                // GL dünyası (Y yukarı) ← sensör dünyası (Z yukarı)
-                Matrix.rotateM(view, 0, -90f, 1f, 0f, 0f)
+                // Sensör örneği yoksa (henüz gelmediyse) dümdüz ileri bak; geldikten sonra baş takibi.
+                if (hasSensorSample) {
+                    val sv = synchronized(sensorMatrix) { SensorView.viewMatrix(sensorMatrix, sensorRotation, yawZero) }
+                    System.arraycopy(sv, 0, view, 0, 16)
+                }
                 if (horizonLevel) {
                     // Ufuk düzeltme: yalnız bakış yönünü al, cihazın yana yatmasını at (yukarı = +Y).
                     val fx = -view[2]

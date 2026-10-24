@@ -5,7 +5,7 @@ Uygulamayı kurar, örnek medyayı yükler, ana ekranları açar, her ekrandaki 
 öğelere tek tek dokunur, ekran görüntüsü alır ve çökmeleri (FATAL EXCEPTION / ANR) kaydeder.
 Sonuçlar out/ klasörüne yazılır: screens/*.png, ui/*.xml, steps.tsv, crashes.txt, logcat.txt, report.md
 """
-import os, re, subprocess, sys, time, xml.etree.ElementTree as ET
+import os, re, struct, subprocess, sys, time, xml.etree.ElementTree as ET
 
 PKG = "org.openplayer.app"
 APK = sys.argv[1]
@@ -143,9 +143,36 @@ def tap(c):
 
 
 def foreground_pkg():
-    o = sh("dumpsys window | grep -E 'mCurrentFocus|mFocusedApp' | head -2")
-    m = re.search(r"([a-zA-Z0-9_.]+)/", o)
-    return m.group(1) if m else ""
+    # Önce etkinlik yöneticisinin "en üstte çalışan" etkinliği; olmazsa pencere odağı.
+    for cmd in ("dumpsys activity activities | grep -E 'topResumedActivity|ResumedActivity' | head -2",
+                "dumpsys window | grep -E 'mCurrentFocus|mFocusedApp' | head -2"):
+        o = sh(cmd)
+        m = re.search(r"\s([a-zA-Z0-9_.]+)/[a-zA-Z0-9_.$]+", o)
+        if m:
+            return m.group(1)
+    return ""
+
+
+def frame_stats():
+    """Ekranın orta bölgesinin parlaklığı: (ortalama 0..255, parlak piksel oranı). Okunamazsa None."""
+    raw = adb("exec-out", "screencap", binary=True, timeout=30)
+    if not raw or len(raw) < 16:
+        return None
+    w, h, fmt = struct.unpack("<III", raw[:12])
+    off = 16 if len(raw) - 16 >= w * h * 4 else 12
+    if len(raw) - off < w * h * 4:
+        return None
+    total = n = bright = 0
+    for gy in range(14):
+        y = int(h * (0.25 + 0.45 * gy / 13))
+        for gx in range(24):
+            x = int(w * (0.25 + 0.5 * gx / 23))
+            i = off + (y * w + x) * 4
+            lum = (raw[i] + raw[i + 1] + raw[i + 2]) / 3
+            total += lum; n += 1
+            if lum > 40:
+                bright += 1
+    return total / n, bright / n
 
 
 def check_crash(step):
@@ -545,6 +572,20 @@ def vr_pick(label, texts):
         tap(e); time.sleep(2.5)
         shot(f"360_{label}_{t}")
     record(f"360 {label}", 2)
+    st = frame_stats()
+    if st is None:
+        steps.append((f"360 {label}: görüntü", "bilgi", "ekran okunamadı"))
+    else:
+        mean, frac = st
+        note = f"parlaklık {mean:.0f}, parlak piksel %{frac*100:.0f}"
+        # Sensör/VR gözlük emülatörde düz yatan sanal telefona bağlı olabilir; bunlar yalnız bilgi.
+        soft = label in ("sensor", "vrgozluk")
+        ok = frac >= 0.15
+        steps.append((f"360 {label}: görüntü siyah değil", "ok" if ok else ("bilgi" if soft else "SORUN"), note))
+
+# Sanal telefonu dik tut (yerçekimi + manyetik alan): sensör modu anlamlı görüntü versin.
+adb("emu", "sensor", "set", "acceleration", "0:9.81:0")
+adb("emu", "sensor", "set", "magnetic-field", "0:25:-40")
 
 vr_pick("360", ["360° olarak oynat"])
 # 360 seçildikten sonra menü "Lens türü: …" olur; lens listesinden diğerlerini dene
@@ -789,12 +830,35 @@ def feature_tests():
     play("/sdcard/Movies/Test/Yatay video.mp4")
     time.sleep(2)
     w, h = cur_size(); tap((w // 2, h // 2)); time.sleep(1.2)
+    def rail_count():
+        """Kısayol satırındaki (üst şerit altı) tıklanabilir simge sayısı; okunamazsa None."""
+        sh("input keyevent 127")  # duraklat: oynarken UI ağacı okunamıyor
+        time.sleep(1.0)
+        root = dump()
+        if root is None:
+            return None
+        return len([1 for _, c, _ in clickables(root) if h * 0.10 < c[1] < h * 0.34])
+
     shot("Kısayol rayı: varsayılan")
+    n0 = rail_count()
     y = int(h * 0.23)
-    sh(f"input swipe {int(w*0.75)} {y} {int(w*0.15)} {y} 350"); time.sleep(1.0)
+    sh(f"input swipe {int(w*0.40)} {y} {int(w*0.02)} {y} 350"); time.sleep(1.0)
     shot("Kısayol rayı: çekilince açık")
-    sh(f"input swipe {int(w*0.15)} {y} {int(w*0.75)} {y} 350"); time.sleep(1.0)
+    n1 = rail_count()
+    sh(f"input swipe {int(w*0.02)} {y} {int(w*0.40)} {y} 350"); time.sleep(1.0)
     shot("Kısayol rayı: geri çekilince kapalı")
+    n2 = rail_count()
+    if None in (n0, n1, n2):
+        steps.append(("Kısayol rayı: simge sayısı", "bilgi", f"okunamadı ({n0}/{n1}/{n2})"))
+    else:
+        good = n0 <= 5 and n1 > n0 and n2 == n0
+        steps.append(("Kısayol rayı: simge sayısı", "ok" if good else "SORUN",
+                      f"varsayılan {n0}, açık {n1}, kapanınca {n2} (beklenen: ≤5, artış, aynı)"))
+    # Satırın sağındaki boş alan sürüklemeye tepki vermemeli.
+    sh(f"input swipe {int(w*0.95)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.0)
+    n3 = rail_count()
+    if n3 is not None and n2 is not None:
+        steps.append(("Kısayol rayı: boş alan tepkisiz", "ok" if n3 == n2 else "SORUN", f"önce {n2}, sonra {n3}"))
     check_crash("Kısayol rayı")
     sh("input keyevent KEYCODE_BACK"); time.sleep(1)
     write_prefs({"folder_grid": ("boolean", "true"), "folder_order": ("string", "count_desc")})

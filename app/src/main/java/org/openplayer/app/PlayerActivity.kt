@@ -606,6 +606,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     fun openItems(uris: List<Uri>, titles: List<String>?, index: Int) {
+        resetRay()
         if (settings.playbackEngine == PlaybackEngine.VLC) {
             VlcPlayerActivity.launch(this, uris, titles, index, if (settings.resumePlayback) ResumeStore.position(this, uris[index]) else 0L)
             finish()
@@ -1046,7 +1047,8 @@ class PlayerActivity : AppCompatActivity() {
             addView(bottomScrim, FrameLayout.LayoutParams(-1, dp(170), Gravity.BOTTOM))
             controlsInner = FrameLayout(this@PlayerActivity).apply {
                 addView(topBar, FrameLayout.LayoutParams(-1, dp(56), Gravity.TOP))
-                addView(shortcutScroll, FrameLayout.LayoutParams(-1, -2, Gravity.TOP).apply { topMargin = dp(60) })
+                // Genişlik içeriğe göre: simgelerin sağındaki boş alan sürüklemeye/dokunuşa tepki vermez.
+                addView(shortcutScroll, FrameLayout.LayoutParams(-2, -2, Gravity.TOP or Gravity.START).apply { topMargin = dp(60) })
                 addView(bottomPanel, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM))
             }
             addView(controlsInner, FrameLayout.LayoutParams(-1, -1))
@@ -1809,9 +1811,9 @@ class PlayerActivity : AppCompatActivity() {
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         shortcutRow.removeAllViews()
         val all = settings.shortcuts
-        // Kapalıyken yalnızca ilk 5 simge görünür; kalanlar "ray" gibi parmakla çekilince veya ok ile açılır.
-        val head = all.take(5)
-        val rest = all.drop(5)
+        // Varsayılan olarak yalnızca ilk 4 simge görünür; kalanlar parmakla çekilince veya ok ile açılır.
+        val head = all.take(SHORTCUT_DEFAULT_COUNT)
+        val rest = all.drop(SHORTCUT_DEFAULT_COUNT)
         for (s in head) shortcutRow.addView(buildShortcut(s))
         extraRow = null; extraInner = null; arrowView = null
         if (rest.isNotEmpty()) {
@@ -1844,6 +1846,7 @@ class PlayerActivity : AppCompatActivity() {
 
     // --- Kısayol rayı: parmakla çekince yumuşakça açılır/kapanır (0 = varsayılan 5 simge, 1 = tümü).
     // Oynatıcıdan çıkınca sıfırlanır (Activity alanı).
+    private val SHORTCUT_DEFAULT_COUNT = 4
     private var rayFraction = 0f
     private var rayAnim: android.animation.ValueAnimator? = null
     private var extraRow: FrameLayout? = null
@@ -1864,6 +1867,13 @@ class PlayerActivity : AppCompatActivity() {
         row.layoutParams = lp
         row.alpha = 0.25f + 0.75f * rayFraction
         arrowView?.rotation = 180f * (1f - rayFraction)
+    }
+
+    /** Satırı varsayılan (kapalı) hâle getirir; yeni videoya geçerken ve oynatıcıdan çıkarken kullanılır. */
+    private fun resetRay() {
+        rayAnim?.cancel()
+        applyRay(0f)
+        if (::shortcutScroll.isInitialized) shortcutScroll.scrollTo(0, 0)
     }
 
     private fun settleRay(target: Float) {

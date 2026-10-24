@@ -8,6 +8,10 @@
 - Uzun basınca çıkan çember: sola/sağa sar, yukarı oynat, aşağı duraklat.
 - Ana menü → "360° fotoğraf aç…": 360° fotoğrafları gez.
 - Ayarlar → 360° / VR: bu davranışların tümü açılıp kapatılır.
+- **Düzeltme:** hareket sensörü ve VR gözlük modunda görüntü siyah kalabiliyordu (bakış yönü yanlış hesaplanıyordu). Baş takibi baştan yazıldı; "Bakış yönünü sıfırla" artık yalnızca yatay yönü sıfırlar, yukarı/aşağı eğimi korur.
+
+**Oynatıcı**
+- Kısayol satırı: varsayılan olarak ilk 4 simge görünür; satırı parmakla çekince kalan simgeler yumuşakça açılır, ters yöne çekince kapanır. Simgelerin sağındaki boş alan artık sürüklemeye tepki vermez. Yeni videoya geçince satır varsayılana döner. (Alt soldaki ayar düğmesi satırı tamamen gizleyip gösterir.)
 
 # 1.0.0-beta14
 
