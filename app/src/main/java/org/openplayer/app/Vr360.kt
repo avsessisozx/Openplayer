@@ -171,10 +171,14 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         preserveEGLContextOnPause = false
     }
 
+    /**
+     * [dxPx]/[dyPx] GestureDetector.onScroll değerleridir (önceki − şimdiki konum): parmak sağa gidince
+     * dx negatif olur. Görüntü parmağı izlesin (YouTube gibi): parmak sağa → sahne sağa kayar.
+     */
     fun look(dxPx: Float, dyPx: Float) {
         val k = fov / height.coerceAtLeast(1)
-        yaw -= dxPx * k
-        pitch = (pitch - dyPx * k).coerceIn(-89f, 89f)
+        yaw += dxPx * k
+        pitch = (pitch + dyPx * k).coerceIn(-89f, 89f)
         requestRender()
     }
 

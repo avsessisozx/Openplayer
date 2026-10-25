@@ -456,6 +456,12 @@ def rail_test():
             return None
         return len([1 for _, c, _ in clickables(root) if h * 0.10 < c[1] < h * 0.34])
 
+    def rail_count_nopause():
+        root = dump()
+        if root is None:
+            return None
+        return len([1 for _, c, _ in clickables(root) if h * 0.10 < c[1] < h * 0.34])
+
     shot("Kısayol rayı: varsayılan")
     n0 = rail_count()
     y = int(h * 0.23)
@@ -472,6 +478,17 @@ def rail_test():
         good = n0 <= 5 and n1 > n0 and n2 == n0
         steps.append(("Kısayol rayı: simge sayısı", "ok" if good else "SORUN",
                       f"varsayılan {n0}, açık {n1}, kapanınca {n2} (beklenen: ≤5, artış, aynı)"))
+    # beta17: yavaş, hafif çapraz parmak sürüklemesi (gerçek parmak gibi) – satır sürükleme sırasında da açılmalı.
+    x0 = int(w * 0.20)
+    sh(f"input motionevent DOWN {x0} {y}")
+    for i in range(1, 13):
+        sh(f"input motionevent MOVE {x0 - i * int(w * 0.02)} {y + (i % 3) * 4}"); time.sleep(0.05)
+    n_mid = rail_count_nopause()
+    sh(f"input motionevent UP {x0 - 12 * int(w * 0.02)} {y + 4}"); time.sleep(1.2)
+    n4 = rail_count()
+    steps.append(("Kısayol rayı: yavaş sürükleme", "ok" if (n_mid or 0) > n0 and (n4 or 0) >= (n_mid or 0) else "SORUN",
+                  f"varsayılan {n0}, sürüklerken {n_mid}, bırakınca {n4}"))
+    sh(f"input swipe {int(w*0.20)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.2)
     # Satırın sağındaki boş alan sürüklemeye tepki vermemeli.
     sh(f"input swipe {int(w*0.95)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.0)
     n3 = rail_count()
@@ -481,10 +498,47 @@ def rail_test():
     sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 
 
+def tree_test():
+    """beta17: klasör ağacı – Movies > Alt > Derin; üst klasörler alt klasörleri açar, geri çıkar."""
+    sh("mkdir -p /sdcard/Movies/Test/Alt/Derin")
+    sh('cp "/sdcard/Movies/Test/Yatay video.mp4" /sdcard/Movies/Test/Alt/ust.mp4; cp "/sdcard/Movies/Test/Yatay video.mp4" /sdcard/Movies/Test/Alt/Derin/derin.mp4')
+    sh("content call --uri content://media/ --method scan_volume --arg external_primary", timeout=60)
+    time.sleep(6)
+    start_main(); time.sleep(2)
+    r0 = dump(); t0 = texts(r0)
+    shot("Klasör ağacı: en üst")
+    c = find_text(r0, "Movies")
+    steps.append(("Klasör ağacı: üst düzeyde Movies", "ok" if c else "SORUN", " | ".join(t0[:25])))
+    if not c:
+        return
+    tap(c); time.sleep(1.5)
+    r1 = dump(); t1 = texts(r1)
+    shot("Klasör ağacı: Movies içi")
+    c1 = find_text(r1, "Test")
+    steps.append(("Klasör ağacı: Movies içinde Test", "ok" if c1 else "SORUN", " | ".join(t1[:25])))
+    if not c1:
+        return
+    tap(c1); time.sleep(1.5)
+    r1b = dump(); t1b = texts(r1b)
+    c2 = find_text(r1b, "Alt")
+    steps.append(("Klasör ağacı: Test içinde Alt", "ok" if c2 else "SORUN", " | ".join(t1b[:25])))
+    if not c2:
+        return
+    tap(c2); time.sleep(1.5)
+    r2 = dump(); t2 = texts(r2)
+    shot("Klasör ağacı: Alt içi")
+    steps.append(("Klasör ağacı: Alt içinde Derin", "ok" if "Derin" in t2 else "SORUN", " | ".join(t2[:25])))
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1.2)
+    t3 = texts(dump())
+    steps.append(("Klasör ağacı: geri → Test listesi", "ok" if "Alt" in t3 and "Derin" not in t3 else "SORUN", " | ".join(t3[:25])))
+    check_crash("Klasör ağacı")
+
+
 if os.environ.get("SMOKE_ONLY") == "ray":
     # Yalnız kısayol satırı testi (~10 dk): commit mesajına [ray] yazılınca çalışır.
     try:
         rail_test()
+        tree_test()
     except Exception as e:
         import traceback
         steps.append(("Kısayol rayı testi yarıda kaldı", "SORUN", traceback.format_exc().strip().splitlines()[-1][:300]))

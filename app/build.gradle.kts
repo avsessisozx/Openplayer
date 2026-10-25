@@ -11,8 +11,8 @@ android {
         applicationId = "org.openplayer.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 16
-        versionName = "1.0.0-beta16"
+        versionCode = 17
+        versionName = "1.0.0-beta17"
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
             // Yalnız emülatör testi için (-PemulatorAbi=true): x86_64 kütüphanelerini de pakete koy.

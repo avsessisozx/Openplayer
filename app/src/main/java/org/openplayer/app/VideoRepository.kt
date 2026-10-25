@@ -28,6 +28,10 @@ data class FolderItem(
     val videoCount: Int,
     val newCount: Int,
     val hidden: Boolean,
+    /** Ağaç görünümünde bu klasörün tam yolu (boşsa MediaStore klasörü). */
+    val path: String = "",
+    /** Alt klasörleri olan üst klasör: açılınca alt klasörleri listelenir; seçim işlemleri uygulanmaz. */
+    val group: Boolean = false,
 )
 
 object VideoRepository {
@@ -123,6 +127,97 @@ object VideoRepository {
         }
         val dirCmp = if (order.endsWith("_desc")) base.reversed() else base
         return entries.sortedWith(dirCmp.then(byName)).map { it.folder }
+    }
+
+    /**
+     * Ağaç görünümü (MX Player gibi): [dir] null ise en üst klasörler; değilse o klasörün alt klasörleri.
+     * Alt klasörü olmayan klasör normal klasördür (bucketId gerçek); alt klasörü olanlar [FolderItem.group] olur.
+     * Üst klasörün kendi videoları varsa listenin başına, klasörün kendi adıyla bir öğe eklenir.
+     */
+    fun treeFolders(context: Context, videos: List<VideoItem>, settings: AppSettings, dir: String?): List<FolderItem> {
+        val hidden = settings.hiddenFolders
+        val vis = if (settings.showHiddenFolders) videos else videos.filter { it.bucketId !in hidden }
+        fun dirOf(v: VideoItem) = v.path.substringBeforeLast('/', "")
+        // Depolama kökü: /storage/emulated/0 veya /storage/<kimlik>; yolu bilinmeyen videolar düz klasör olarak kalır.
+        fun rootOf(d: String): String {
+            val parts = d.split('/')
+            return when {
+                d.startsWith("/storage/emulated/") && parts.size >= 4 -> parts.take(4).joinToString("/")
+                d.startsWith("/storage/") && parts.size >= 3 -> parts.take(3).joinToString("/")
+                else -> ""
+            }
+        }
+        class Node(val key: String, val name: String, val items: MutableList<VideoItem> = ArrayList(), var group: Boolean = false)
+        val nodes = LinkedHashMap<String, Node>()
+        val result = ArrayList<FolderItem>()
+        val entries = ArrayList<Triple<FolderItem, Long, Long>>() // klasör, en yeni, toplam boyut
+        fun addNode(n: Node, folderPath: String) {
+            val first = n.items.first()
+            val bucket = if (n.group) folderPath.hashCode().toLong() or (1L shl 40) else first.bucketId
+            val item = FolderItem(
+                bucketId = bucket,
+                name = n.name,
+                videoCount = n.items.size,
+                newCount = n.items.count { isNew(context, it, settings.newVideoDays) },
+                hidden = !n.group && first.bucketId in hidden,
+                path = folderPath,
+                group = n.group,
+            )
+            entries.add(Triple(item, n.items.maxOf { it.dateAddedSec }, n.items.sumOf { it.sizeBytes }))
+        }
+        val cur = dir
+        val base = dir
+        val children = LinkedHashMap<String, Node>() // alt klasör yolu → düğüm
+        val own = ArrayList<VideoItem>()
+        for (v in vis) {
+            val d = dirOf(v)
+            if (d.isEmpty() || rootOf(d).isEmpty()) {
+                // Yolu bilinmeyen: düz klasör (yalnız en üst düzeyde)
+                if (cur == null) children.getOrPut("#" + v.bucketId) { Node("#" + v.bucketId, v.bucketName) }.items.add(v)
+                continue
+            }
+            val root = rootOf(d)
+            if (base == null) {
+                // En üst düzey: depolama kökünün altındaki ilk klasör (kökteki videolar kendi klasörü olarak görünür)
+                val rel = d.removePrefix(root).trimStart('/')
+                val seg = rel.substringBefore('/')
+                val key = if (rel.isEmpty()) root else "$root/$seg"
+                val n = children.getOrPut(key) { Node(key, if (rel.isEmpty()) v.bucketName else seg) }
+                n.items.add(v)
+                if (rel.contains('/')) n.group = true
+            } else {
+                if (d == base) { own.add(v); continue }
+                if (!d.startsWith("$base/")) continue
+                val rel = d.removePrefix("$base/")
+                val seg = rel.substringBefore('/')
+                val key = "$base/$seg"
+                val n = children.getOrPut(key) { Node(key, seg) }
+                n.items.add(v)
+                if (rel.contains('/')) n.group = true
+            }
+        }
+        // Kendi videoları olan ve alt klasörü de bulunan düğümler: alt klasör yoksa düz klasör olarak kalır.
+        if (own.isNotEmpty()) {
+            val n = Node(base ?: "", base!!.substringAfterLast('/'))
+            n.items.addAll(own)
+            addNode(n, base)
+        }
+        val ownCount = entries.size
+        for ((key, n) in children) addNode(n, if (key.startsWith("#")) "" else key)
+        // En üst düzeyde, alt klasörü olup kendi videosu da olan klasör: kendi videoları alt listede görünür.
+        val byName = Comparator<Triple<FolderItem, Long, Long>> { a, b -> a.first.name.lowercase().compareTo(b.first.name.lowercase()) }
+        val order = settings.folderOrder
+        val baseCmp: Comparator<Triple<FolderItem, Long, Long>> = when (order.substringBeforeLast('_')) {
+            "new" -> compareBy<Triple<FolderItem, Long, Long>> { it.second }
+            "count" -> compareBy<Triple<FolderItem, Long, Long>> { it.first.videoCount }
+            "size" -> compareBy<Triple<FolderItem, Long, Long>> { it.third }
+            else -> byName
+        }
+        val dirCmp = if (order.endsWith("_desc")) baseCmp.reversed() else baseCmp
+        val head = entries.take(ownCount)
+        val rest = entries.drop(ownCount).sortedWith(dirCmp.then(byName))
+        result.addAll((head + rest).map { it.first })
+        return result
     }
 
     private fun status(context: Context, v: VideoItem): Int = when {

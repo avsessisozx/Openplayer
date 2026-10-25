@@ -1,8 +1,8 @@
-# 1.0.0-beta16
+# 1.0.0-beta17
 
-Çok dilli destek. Uygulama artık İngilizce (varsayılan), Türkçe, İspanyolca, Fransızca, İtalyanca, Almanca, Portekizce (Brezilya), Çince (Basit), Japonca, Korece, Rusça ve Arapça. Birim testleri, derleme, lint ve hızlı emülatör testinden geçti; tam emülatör turu bu sürümde tamamlanamadı. Çeviriler makine çevirisidir, ana dili konuşanlarca gözden geçirilmemiştir.
+Düzeltmeler ve klasör ağacı. Birim testleri, derleme, lint ve emülatör testinden geçti; gerçek parmakla his sende.
 
-- Dil, telefonun/uygulamanın diline göre seçilir (Android 13+ cihazlarda Ayarlar → Uygulamalar → OpenPlayer → Dil'den ayrıca değiştirilebilir). Dil değişince uygulamayı kapatıp açın.
-- GitHub sayfası artık İngilizce; diğer diller `docs/` klasöründe ayrı sayfalar.
-- Hata raporu ve çeviri raporu metinleri de çevrildi.
+- **360° sürükleme:** Görüntü artık parmağı izliyor (parmak sağa → sahne sağa, yukarı/aşağı da aynı). Önceden ters çalışıyordu.
+- **Kısayol satırı:** Herhangi bir simgenin üstünden hafifçe sürükleyince satır, parmakla birlikte yumuşakça açılır; uzun basmaya gerek yok. Hafif çapraz sürüklemeler de tutuyor.
+- **Klasörler:** Düz liste yerine ağaç. Üst klasörler (örn. Movies) alt klasörleri içerir; içine girince alt klasörler ve o klasörün kendi videoları görünür, geri tuşu bir üst klasöre döner. Seçme/gizleme/yeniden adlandırma yalnız videoları doğrudan içeren klasörlerde çalışır.
 
