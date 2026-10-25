@@ -45,6 +45,11 @@ Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikl
   **Tam emülatör koşusu iki kez sonuçsuz öldü** (71 dk), bu yüzden çeviri uçtan uca testi, ayar sayfası
   gezintisi ve monkey beta15'te koşmadı; beta14'ten beri o alanlar değişmedi.
 
+## Çoklu dil görevi — ENGELLENDİ (2026-10-25)
+- Zamanlanmış çalıştırma başladı ama Telemet reposu bu oturumda erişilemez (yalnız avsessisozx/openplayer tanımlı; add_repo/list_repos araçları yok).
+- Telemet'in dil listesi ve README düzeni bilinmeden başlanmadı; dil listesini tahmin etmedim. Koda, README'ye, sürüme dokunulmadı.
+- Gerekli: oturuma Telemet erişimi verilmesi (veya dil listesinin elle bildirilmesi), sonra görev yeniden çalıştırılır.
+
 ## Yarım / sıradaki
 - Kullanıcının kararı: önce uygulama özellik açısından tam ve hatasız olacak
 - Çoklu dil (uygulama + GitHub sayfası, Türkçe korunarak) **en sona** bırakıldı
