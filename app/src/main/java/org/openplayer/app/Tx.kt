@@ -16,7 +16,12 @@ object Tx {
         app = context.applicationContext
     }
 
+    /** Yalnızca birim testleri için: metinleri bağlamsız çözer. */
+    @Volatile
+    var testResolver: ((Int, Array<out Any?>) -> String)? = null
+
     fun s(@StringRes id: Int, vararg args: Any?): String {
+        testResolver?.let { return it(id, args) }
         val c = app ?: return "#$id"
         return if (args.isEmpty()) c.getString(id) else c.getString(id, *args)
     }
