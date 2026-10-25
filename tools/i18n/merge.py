@@ -14,7 +14,8 @@ bad = []
 for k in en:
     if k not in parts: bad.append("eksik " + k); continue
     if ph(en[k]) != ph(parts[k]): bad.append("yer tutucu " + k)
-    if en[k].endswith(("\n", " ")) != parts[k].endswith(("\n", " ")): bad.append("bosluk " + k)
+    tail = ("\n",) if lang in ("zh", "ja", "ko") else ("\n", " ")
+    if en[k].endswith(tail) != parts[k].endswith(tail): bad.append("bosluk " + k)
 for k in parts:
     if k not in en: bad.append("fazla " + k)
 if bad:
