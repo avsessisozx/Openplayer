@@ -3,14 +3,14 @@
 > Claude'un çalışma notu. Yalnızca `durum` dalında durur; `main`'e, README'ye ve sürüm notlarına girmez.
 > Yeni sohbette önce bunu oku, repoyu baştan tarama. Her sürümden sonra güncelle.
 
-Son güncelleme: 2026-10-25 · Son sürüm: **v1.0.0-beta16** (2026-10-25, ön sürüm)
+Son güncelleme: 2026-10-25 · Son sürüm: **v1.0.0-beta17** (2026-10-25, ön sürüm)
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
 
 ## Teknik
 - Android, Kotlin, Gradle KTS · `org.openplayer.app` · minSdk 24
-- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta16`)
+- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta17`)
 - Oynatma motoru + libVLC yedek motoru (otomatik geçiş, "Yalnız VLC" seçeneği)
 - CI: `build.yml` → `main`'e push'ta yeni sürüm numarası otomatik yayınlanır; `v*` etiketi de yayınlar
 - `emulator-test.yml` → `claude/**` dallarında Android 14 emülatör testi; ara sonuçları dala yazar.
@@ -55,6 +55,13 @@ Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikl
   denenmedi (uzun metinli dillerde taşma olabilir); gerçek cihaz yok; çeviriler makine çevirisi, ana dili konuşan gözden geçirmedi;
   mantık anahtarı olarak saklanan/karşılaştırılan metinler ve sınıf yüklenirken dil yakalayan sabitler taranmadı.
 - Repo açıklaması ve konu etiketleri API ile yazılamadı (ortam izin vermiyor); kullanıcı elle girmeli.
+
+## beta17 (2026-10-25)
+- 360° sürükleme yönü düzeltildi (`Vr360.look`: GestureDetector dx işareti), kısayol satırı: eşik kayıpsız 1:1 izleme + hafif çapraz sürükleme, MX tarzı klasör ağacı (`VideoRepository.treeFolders`, `MainActivity.treeDir`).
+- **Doğrulandı:** birim testleri, derleme, lint, kısa emülatör [ray]: yavaş sürüklemede satır parmakla açılıyor (5→9→15), klasör ağacı Movies>Test>Alt>Derin gezinti + geri. Bir koşuda satır testi 0 okudu (kararsız UI dökümü), tekrarda geçti.
+- **Doğrulanmadı:** gerçek parmakla his, 360° yönü gerçek videoda (kod mantığı + işaret analizi), tam emülatör turu.
+- Ağaçta üst klasörlerde seçim/gizleme/yeniden adlandırma yok (yalnız videoyu doğrudan içeren klasörlerde).
+- Sıradaki: beta18 (uzun basma çarkı, altyazı kaydırarak geçiş, dokunarak senkron), beta19 (kare kare, pitch).
 
 ## Yarım / sıradaki
 - Kullanıcının kararı: önce uygulama özellik açısından tam ve hatasız olacak
