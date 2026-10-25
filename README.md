@@ -1,74 +1,101 @@
-# OpenPlayer
+<p align="center">
+  <img src="docs/icon.png" width="120" alt="OpenPlayer icon">
+</p>
 
-Android için **açık kaynak, reklamsız** bir video oynatıcı. Amaç: popüler kapalı kaynak oynatıcıların sunduğu kullanışlı özelliklerin
-(ekran hareketleri, altyazı yönetimi, çözücü seçimi, ağ kaynakları…) herkesin kullanımına açık, özgür bir karşılığını sunmak.
+<h1 align="center">OpenPlayer</h1>
 
-> Proje adı geçicidir. Hiçbir kapalı kaynak yazılımın kodu, adı, logosu veya tasarım varlığı kullanılmaz; her şey sıfırdan yazılmıştır.
+<p align="center">
+  <b>Free, open-source, ad-free video and music player for Android.</b><br>
+  Gesture controls, HW / HW+ / SW decoders, subtitle search and translation, 360° video, SMB / FTP / WebDAV network playback.
+</p>
 
-## İndirme
+<p align="center">
+  <a href="https://github.com/avsessisozx/Openplayer/releases/latest"><img src="https://img.shields.io/github/v/release/avsessisozx/Openplayer?include_prereleases&label=download" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 7.0+">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/avsessisozx/Openplayer" alt="AGPLv3 license"></a>
+  <img src="https://img.shields.io/github/downloads/avsessisozx/Openplayer/total?color=555" alt="Downloads">
+</p>
 
-[Sürümler sayfasından](../../releases) `OpenPlayer.apk` dosyasını indirip kurun (Android 7.0+). "Bilinmeyen kaynaklardan kurulum" izni gerekebilir.
+<p align="center">
+  <b>English</b> ·
+  <a href="docs/README.tr.md">Türkçe</a> ·
+  <a href="docs/README.es.md">Español</a> ·
+  <a href="docs/README.fr.md">Français</a> ·
+  <a href="docs/README.it.md">Italiano</a> ·
+  <a href="docs/README.de.md">Deutsch</a> ·
+  <a href="docs/README.pt-BR.md">Português</a> ·
+  <a href="docs/README.zh-CN.md">简体中文</a> ·
+  <a href="docs/README.ja.md">日本語</a> ·
+  <a href="docs/README.ko.md">한국어</a> ·
+  <a href="docs/README.ru.md">Русский</a> ·
+  <a href="docs/README.ar.md">العربية</a>
+</p>
 
-> **Durum: beta.** Kod GitHub Actions'ta derleniyor ancak gerçek cihazlarda henüz kapsamlı sınanmadı. Hataları [Issues](../../issues) bölümünden bildirin.
+---
 
-## Özellikler
+## What it is
 
-**Oynatma**
-- Üç çözücü modu: **HW** (MediaCodec), **HW+** (MediaCodec + FFmpeg uzantısı: AC3, E-AC3, DTS, TrueHD, FLAC, Opus…), **SW** (FFmpeg tercihli yazılım çözme). Çalışırken değiştirilebilir.
-- Hız (0.25x–4x, özel hız), **uzun basınca 2x hızlı oynatma**, A-B tekrar, tekrarla/karıştır, uyku zamanlayıcısı, gece modu
-- Ekolayzır, %200'e kadar ses artırma, bas/genişletme, ters stereo/mono, yankı, ses gecikmesi, videoya ayrı ses dosyası ekleme
-- Kaldığı yerden devam (evet/hayır/sor), köşede saat-pil-süre, ±N sn sarma düğmeleri
-- Ayna ve dikey çevirme, en-boy oranı seçimi (özgün boyut, 1:1 … 2.39:1), çimdikle yakınlaştırma ve kaydırma, ekran döndürme kipleri, ekran görüntüsü
-- Arka planda oynatma (bildirim ve medya tuşlarıyla), Picture-in-Picture, ekran kilidi ve çocuk kilidi (4 köşeye sırayla dokunma)
-- Klavye, fare tekerleği ve Bluetooth/kablolu medya tuşları
+OpenPlayer is an open-source Android video player with no ads and no tracking. It aims to offer, as free software, the useful features of popular closed-source players: screen gestures, subtitle management, decoder choice, network sources and more. Everything is written from scratch; no code, name, logo or design asset of any closed-source player is used.
 
-**Ekran hareketleri**
-- Ekran sol/orta/sağ şeritlere ayrılır, sınırlar sürüklenerek ayarlanır. Her şeridin dikey kaydırması seçilir: parlaklık, ses, hız, sarma, altyazı konumu/boyutu, yakınlaştırma
-- Yatay kaydırma ile sarma, çift dokunma ile oynat/duraklat ya da ileri/geri atlama
+The app is available in 12 languages (English, Türkçe, Español, Français, Italiano, Deutsch, Português, 简体中文, 日本語, 한국어, Русский, العربية). Translations are machine-made and have not been reviewed by native speakers; corrections are welcome.
 
-**Altyazı**
-- Okunan biçimler: SRT, WebVTT, SSA/ASS (renk, kalın/italik/altı çizili, konum), SAMI, MicroDVD, MPL2, TMPlayer; gömülü altyazı parçaları
-- Elle gecikme/öne alma ayarı, otomatik karakter kodlaması (UTF-8 / Windows-1254 yedekli), boyut/renk/arka plan/kenar/konum/hizalama ayarları, kendi yazı tipiniz (.ttf/.otf)
-- Altyazı hareketleri: yatay kaydırma önceki/sonraki satır, dikey kaydırma konum, çimdik boyut
-- Çevrimiçi altyazı arama (OpenSubtitles.com). Ayarlar → Altyazı bölümüne [kendi API anahtarınızı](https://www.opensubtitles.com/consumers) girmeniz gerekir
-- **Altyazı çevirisi:** yüklü altyazı dosyası başka dile çevrilip yeni bir .srt olarak kaydedilir. Sağlayıcılar: MyMemory (hesapsız), LibreTranslate uyumlu adres, OpenAI uyumlu yapay zekâ adresi (Groq, OpenRouter, Gemini, Ollama gibi; kendi anahtarınızla). Ayarlar → Altyazı çevirisi
+## Download
 
-**Dosyalar**
-- Yalnızca video içeren klasörleri listeler; küçük resim, süre, "yeni" ve "izlendi" göstergeleri, sıralama, ızgara/liste görünümü
-- Yeniden adlandırma, silme, paylaşma, bilgi, gizli klasörler, kaldığı yerden devam, yer imleri
-- **Medya yöneticisi:** depolama özeti; son oynatılan, son eklenen, hiç açılmamış ve büyük dosyalar listeleri
-- **Ağ kaynakları:** SMB, FTP, WebDAV sunucularında gezinme ve oynatma; HTTP/HTTPS/RTSP/HLS/DASH adresleri
+Get `OpenPlayer.apk` from the [Releases page](../../releases) and install it (Android 7.0+). You may need to allow installing from unknown sources.
 
-## Bilinen eksikler
+> **Status: beta.** Built and tested on CI and an emulator, but not yet extensively tested on real devices. Report problems in [Issues](../../issues).
 
-- **Tam ASS/SSA işleme (libass):** Stil, renk ve konum desteklenir; ancak animasyonlar, gelişmiş efektler, çizim komutları ve gömülü yazı tipleri yoktur.
-- Resim tabanlı altyazılar (VobSub, PGS) ve Teletext çizilmez.
-- Ağdaki videolar için yan dosya altyazısı otomatik bulunmaz; oynatıcıdan elle eklenebilir.
-- Chromecast, video kenar taraması (deinterlace) ve özel çözücü eklentileri yok.
-- SMB paylaşım listesi çıkarılamaz; paylaşım adı elle girilir.
+## Features
 
-## Derleme
+**Playback**
+- Three decoder modes: **HW** (MediaCodec), **HW+** (MediaCodec + FFmpeg extension: AC3, E-AC3, DTS, TrueHD, FLAC, Opus…), **SW** (software decoding, FFmpeg first). Switchable during playback. A libVLC engine is the fallback for formats ExoPlayer cannot open.
+- Speed (0.25x–4x, custom), **long-press for 2x**, A-B repeat, repeat / shuffle, sleep timer, night mode
+- Equalizer, volume boost up to 200%, bass / stereo widening, reverse stereo / mono, reverb, audio delay, add an external audio file
+- Resume where you left off, clock / battery / time in the corner, ±N s seek buttons
+- Mirror and vertical flip, aspect ratio (original, 1:1 … 2.39:1), pinch-zoom and pan, rotation modes, screenshots
+- Background playback (notification and media keys), Picture-in-Picture, screen lock and child lock
+- 360° / VR video and photos, with motion sensor, VR headset mode and several lens / 3D formats
+- Keyboard, mouse wheel and Bluetooth / wired media keys
 
-Android Studio olmadan: depoya gönderilen her değişiklik **GitHub Actions** ile derlenir, APK "Actions" sekmesinden indirilir.
-Yerelde: JDK 17 ve Android SDK ile `gradle assembleDebug` (Gradle 8.14+).
+**Screen gestures**
+- The screen is split into left / middle / right strips with adjustable borders. Each strip's vertical swipe can control brightness, volume, speed, seeking, subtitle position / size or zoom
+- Horizontal swipe to seek; double tap to play / pause or skip forward / back
 
-Yeni sürüm yayınlamak için: Actions → "Build APK" → "Run workflow" → sürüm etiketini yazın (örn. `v1.0.0`).
+**Subtitles**
+- Formats: SRT, WebVTT, SSA/ASS (colors, bold / italic / underline, position), SAMI, MicroDVD, MPL2, TMPlayer; embedded subtitle tracks
+- Manual delay / speed adjustment, automatic character encoding detection, size / color / background / edge / position / alignment, your own font (.ttf/.otf)
+- Subtitle gestures: horizontal swipe for previous / next line, vertical swipe for position, pinch for size
+- Online subtitle search (OpenSubtitles.com). You need to enter [your own API key](https://www.opensubtitles.com/consumers) under Settings → Subtitles
+- **Subtitle translation:** translate a loaded subtitle file into another language and save it as a new .srt. Providers: MyMemory (no account), LibreTranslate-compatible address, OpenAI-compatible AI address (Groq, OpenRouter, Gemini, Ollama… with your own key)
 
-## Gizlilik ve güvenlik notları
+**Files**
+- Lists only folders that contain videos; thumbnails, duration, "new" and "watched" markers, sorting, grid / list views
+- Rename, delete, share, info, hidden folders, private (locked) folder, bookmarks
+- **Media manager:** storage summary; recently played, recently added, never opened and large-file lists
+- **Network sources:** browse and play from SMB, FTP and WebDAV servers; HTTP / HTTPS / RTSP / HLS / DASH addresses
+- **Music player** (optional): library by songs, albums, artists and folders, now-playing screen, queue, equalizer, tag editing
 
-- Uygulama reklam, izleme veya çözümleme (analytics) içermez. Ağa yalnızca sizin açtığınız adreslere, altyazı aramaya ve yapılandırdığınız sunuculara bağlanır.
-- Ağ sunucusu ve OpenSubtitles parolaları, uygulamanın özel alanında **şifrelenmeden** saklanır.
-- `app/openplayer-test.jks` herkese açık bir **test imzasıdır**; sürümlerin birbirinin üstüne güncellenebilmesi için kullanılır. Mağaza yayını için kendi anahtarınızı kullanın.
+## Known limitations
 
-## Lisans
+- No full ASS/SSA rendering (libass): styles, colors and position work, but animations, advanced effects, drawing commands and embedded fonts do not.
+- Image-based subtitles (VobSub, PGS) and Teletext are not drawn.
+- Sidecar subtitles are not found automatically for network videos; add them manually from the player.
+- No Chromecast, no deinterlacing, no decoder plugins.
+- SMB share lists cannot be enumerated; type the share name.
 
-GNU AGPLv3. Herkes kullanabilir ve değiştirebilir; değiştirilmiş sürümler (ağ üzerinden hizmet olarak sunulsa bile) aynı lisansla, kaynak kodu açık dağıtılmalıdır. Ayrıntılar için `LICENSE`.
+## Building
 
-Bu proje [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg uzantısı, GPLv3),
-[smbj](https://github.com/hierynomus/smbj) (Apache-2.0), [Apache Commons Net](https://commons.apache.org/proper/commons-net/) (Apache-2.0),
-[OkHttp](https://square.github.io/okhttp/) (Apache-2.0), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0) ve yedek oynatma motoru olarak
-[libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1) kullanır.
+No Android Studio needed: every push is built by **GitHub Actions** and the APK can be downloaded from the Actions tab. Locally: JDK 17, Android SDK and `gradle assembleDebug` (Gradle 8.14+).
 
+## Privacy and security
 
-## Güvenlik
-Ayrıntılar ve açık bildirimi için [SECURITY.md](SECURITY.md) dosyasına bakın.
+- No ads, tracking or analytics. The app only connects to addresses you open, subtitle search and the servers you configure.
+- Network-server and OpenSubtitles passwords are stored **unencrypted** in the app's private storage.
+- `app/openplayer-test.jks` is a public **test signing key**, used so that releases can update over each other. Use your own key for store releases.
+- See [SECURITY.md](SECURITY.md) for details and how to report a vulnerability.
+
+## License
+
+GNU AGPLv3. Anyone may use and modify it; modified versions (even offered as a network service) must be distributed under the same license with source code. See `LICENSE`.
+
+OpenPlayer uses [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg extension, GPLv3), [smbj](https://github.com/hierynomus/smbj) (Apache-2.0), [Apache Commons Net](https://commons.apache.org/proper/commons-net/) (Apache-2.0), [OkHttp](https://square.github.io/okhttp/) (Apache-2.0), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0) and, as the fallback engine, [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1).
