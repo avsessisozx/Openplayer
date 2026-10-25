@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Faire correspondre une ligne de sous-titres…</string>
     <string name="playermenu_sync_title">Touchez la ligne prononcée en ce moment</string>
     <string name="playermenu_sync_done">Décalage des sous-titres réglé : %1$s%2$s s</string>
+    <string name="playermenu_framepitch">Image par image et hauteur</string>
+    <string name="playermenu_frame">Image par image (la vidéo se met en pause)</string>
+    <string name="playermenu_pitch">Hauteur : %1$s demi-tons</string>
 </resources>

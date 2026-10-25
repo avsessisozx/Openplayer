@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Bir altyazı satırıyla eşleştir…',
 'playermenu_sync_title': 'Şu an söylenen satıra dokunun',
 'playermenu_sync_done': 'Altyazı gecikmesi ayarlandı: %1$s%2$s sn',
+'playermenu_framepitch': 'Kare kare ve perde',
+'playermenu_frame': 'Kare kare (video duraklar)',
+'playermenu_pitch': 'Perde: %1$s yarım ton',
 }

@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'مطابقة سطر من الترجمة…',
 'playermenu_sync_title': 'انقر على السطر الذي يُقال الآن',
 'playermenu_sync_done': 'تم ضبط تأخير الترجمة: %1$s%2$s ث',
+'playermenu_framepitch': 'الإطار بإطار ودرجة الصوت',
+'playermenu_frame': 'إطارًا بإطار (يتوقف الفيديو مؤقتًا)',
+'playermenu_pitch': 'درجة الصوت: %1$s نصف نغمة',
 }

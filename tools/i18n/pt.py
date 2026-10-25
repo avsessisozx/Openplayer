@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Alinhar a uma linha da legenda…',
 'playermenu_sync_title': 'Toque na linha que está sendo dita agora',
 'playermenu_sync_done': 'Atraso da legenda definido: %1$s%2$s s',
+'playermenu_framepitch': 'Quadro a quadro e tom',
+'playermenu_frame': 'Quadro a quadro (o vídeo pausa)',
+'playermenu_pitch': 'Tom: %1$s semitons',
 }

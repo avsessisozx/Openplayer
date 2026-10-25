@@ -300,6 +300,44 @@ class PlayerMenus(private val a: PlayerActivity) {
             .show()
     }
 
+    /** Kare kare ilerleme ve ses perdesi paneli. */
+    fun showFrameAndPitch() {
+        val prevSeek = a.player.seekParameters
+        val pitchLabel = a.label("", 16f)
+        fun refreshPitch() {
+            val st = a.pitchSemitones
+            pitchLabel.text = Tx.s(R.string.playermenu_pitch, (if (st > 0) "+" else "") + st)
+        }
+        refreshPitch()
+        fun btn(text: String, action: () -> Unit) = Button(a).apply {
+            this.text = text
+            textSize = 18f
+            setOnClickListener { action() }
+        }
+        val frameRow = LinearLayout(a).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(btn("◀|") { a.stepFrame(false) }, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(btn("|▶") { a.stepFrame(true) }, LinearLayout.LayoutParams(0, -2, 1f))
+        }
+        val pitchRow = LinearLayout(a).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(btn("−1") { a.setPitchSemitones((a.pitchSemitones - 1).coerceAtLeast(-12)); refreshPitch() }, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(btn("0") { a.setPitchSemitones(0); refreshPitch() }, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(btn("+1") { a.setPitchSemitones((a.pitchSemitones + 1).coerceAtMost(12)); refreshPitch() }, LinearLayout.LayoutParams(0, -2, 1f))
+        }
+        val root = a.vertical {
+            addView(a.label(Tx.s(R.string.playermenu_frame), 16f))
+            addView(frameRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+            addView(pitchLabel, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(20) })
+            addView(pitchRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
+        }
+        PanelBuilder(a)
+            .setTitle(Tx.s(R.string.playermenu_framepitch))
+            .setView(root)
+            .setPositiveButton(Tx.s(R.string.mediainfo_022)) { _, _ -> a.player.setSeekParameters(prevSeek) }
+            .show()
+    }
+
     /** Dokunarak senkron: konuşulan satırı seç; gecikme = şimdiki video zamanı − satırın dosyadaki zamanı. */
     fun showSyncPick() {
         val cues = a.subtitles.externalCues
@@ -981,6 +1019,7 @@ class PlayerMenus(private val a: PlayerActivity) {
                 item(R.drawable.ic_music_note, Tx.s(R.string.playermenu_125)) { a.pickExternalAudio() },
                 item(R.drawable.ic_timer, Tx.s(R.string.nowplaying_004)) { showSleepTimer() },
                 item(R.drawable.ic_timer, Tx.s(R.string.playermenu_022)) { showSubtitleSync() },
+                item(R.drawable.ic_next, Tx.s(R.string.playermenu_framepitch)) { showFrameAndPitch() },
                 item(R.drawable.ic_settings, Tx.s(R.string.mainactivi_032)) { a.openSettings() },
             )
             items.forEach { addView(it) }

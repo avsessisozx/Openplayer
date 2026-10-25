@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Match a subtitle line…',
 'playermenu_sync_title': 'Tap the line that is being said right now',
 'playermenu_sync_done': 'Subtitle delay set: %1$s%2$s s',
+'playermenu_framepitch': 'Frame step and pitch',
+'playermenu_frame': 'Frame by frame (video pauses)',
+'playermenu_pitch': 'Pitch: %1$s semitones',
 }

@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Сопоставить строку субтитров…</string>
     <string name="playermenu_sync_title">Нажмите на строку, которую произносят сейчас</string>
     <string name="playermenu_sync_done">Задержка субтитров установлена: %1$s%2$s с</string>
+    <string name="playermenu_framepitch">Покадрово и тон</string>
+    <string name="playermenu_frame">Покадрово (видео ставится на паузу)</string>
+    <string name="playermenu_pitch">Тон: %1$s полутонов</string>
 </resources>

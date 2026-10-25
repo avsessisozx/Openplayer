@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Untertitelzeile zuordnen…',
 'playermenu_sync_title': 'Tippe auf die Zeile, die gerade gesprochen wird',
 'playermenu_sync_done': 'Untertitelverzögerung eingestellt: %1$s%2$s s',
+'playermenu_framepitch': 'Einzelbild und Tonhöhe',
+'playermenu_frame': 'Bild für Bild (Video pausiert)',
+'playermenu_pitch': 'Tonhöhe: %1$s Halbtöne',
 }

@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Hacer coincidir una línea de subtítulos…',
 'playermenu_sync_title': 'Toca la línea que se dice ahora mismo',
 'playermenu_sync_done': 'Retardo de subtítulos ajustado: %1$s%2$s s',
+'playermenu_framepitch': 'Fotograma a fotograma y tono',
+'playermenu_frame': 'Fotograma a fotograma (el vídeo se pausa)',
+'playermenu_pitch': 'Tono: %1$s semitonos',
 }

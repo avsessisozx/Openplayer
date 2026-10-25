@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Сопоставить строку субтитров…',
 'playermenu_sync_title': 'Нажмите на строку, которую произносят сейчас',
 'playermenu_sync_done': 'Задержка субтитров установлена: %1$s%2$s с',
+'playermenu_framepitch': 'Покадрово и тон',
+'playermenu_frame': 'Покадрово (видео ставится на паузу)',
+'playermenu_pitch': 'Тон: %1$s полутонов',
 }

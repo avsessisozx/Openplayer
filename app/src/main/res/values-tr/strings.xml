@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Bir altyazı satırıyla eşleştir…</string>
     <string name="playermenu_sync_title">Şu an söylenen satıra dokunun</string>
     <string name="playermenu_sync_done">Altyazı gecikmesi ayarlandı: %1$s%2$s sn</string>
+    <string name="playermenu_framepitch">Kare kare ve perde</string>
+    <string name="playermenu_frame">Kare kare (video duraklar)</string>
+    <string name="playermenu_pitch">Perde: %1$s yarım ton</string>
 </resources>
