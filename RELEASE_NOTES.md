@@ -1,8 +1,9 @@
-# 1.0.0-beta17
+# 1.0.0-beta18
 
-Düzeltmeler ve klasör ağacı. Birim testleri, derleme, lint ve emülatör testinden geçti; gerçek parmakla his sende.
+Altyazı özellikleri ve yenilenen çember. Birim testleri, derleme, lint ve emülatör testinden geçti; gerçek parmakla his sende.
 
-- **360° sürükleme:** Görüntü artık parmağı izliyor (parmak sağa → sahne sağa, yukarı/aşağı da aynı). Önceden ters çalışıyordu.
-- **Kısayol satırı:** Herhangi bir simgenin üstünden hafifçe sürükleyince satır, parmakla birlikte yumuşakça açılır; uzun basmaya gerek yok. Hafif çapraz sürüklemeler de tutuyor.
-- **Klasörler:** Düz liste yerine ağaç. Üst klasörler (örn. Movies) alt klasörleri içerir; içine girince alt klasörler ve o klasörün kendi videoları görünür, geri tuşu bir üst klasöre döner. Seçme/gizleme/yeniden adlandırma yalnız videoları doğrudan içeren klasörlerde çalışır.
+- **Altyazıyı kaydırarak geçiş:** Altyazı metninin üstünde sola kaydırınca sonraki, sağa kaydırınca önceki altyazı satırına atlar (yalnız metin tabanlı harici altyazılar). Gesture alanı artık altyazının bulunduğu yeri de kapsıyor.
+- **Dokunarak senkron:** Altyazı menüsü → "Bir altyazı satırıyla eşleştir…": şu an söylenen satıra dokunun, gecikme otomatik ayarlanır (video zamanı − satırın dosyadaki zamanı). Sonra +/- ile ince ayar yapılabilir.
+- **Çember (360°'de uzun basış):** Yeniden tasarlandı: açılış animasyonu, etkin yönün renkli dilimi, vurgulanan simge, gölgeli düğme.
+- Birkaç kalmış metin ve "sn" birimi çevrilebilir hâle getirildi.
 
