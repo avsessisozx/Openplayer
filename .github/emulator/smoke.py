@@ -391,6 +391,9 @@ sh("settings put system screen_off_timeout 1800000; svc power stayon true; input
 # "Tam ekran görüntüleniyor" bilgi balonu testleri örtmesin
 sh("settings put secure immersive_mode_confirmations confirmed")
 print(adb("install", "-r", "-g", APK, timeout=300), flush=True)
+# Testler Türkçe metinleri arar: uygulama dilini açıkça Türkçe yap (emülatör varsayılanı İngilizce).
+SMOKE_LOCALE = os.environ.get("SMOKE_LOCALE", "tr-TR")
+print("uygulama dili:", SMOKE_LOCALE, sh(f"cmd locale set-app-locales {PKG} --locales {SMOKE_LOCALE}"), flush=True)
 sh(f"appops set {PKG} MANAGE_EXTERNAL_STORAGE allow")
 # Müzik sekmesini açık başlat (varsayılanda kapalı): hata ayıklanabilir derlemede run-as ile ayar dosyası yazılır.
 open("/tmp/settings.xml", "w").write(
