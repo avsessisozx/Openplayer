@@ -500,8 +500,8 @@ def rail_test():
 
 def tree_test():
     """beta17: klasör ağacı – Movies > Alt > Derin; üst klasörler alt klasörleri açar, geri çıkar."""
-    sh("mkdir -p /sdcard/Movies/Alt/Derin")
-    sh('cp "/sdcard/Movies/Yatay video.mp4" /sdcard/Movies/Alt/ust.mp4; cp "/sdcard/Movies/Yatay video.mp4" /sdcard/Movies/Alt/Derin/derin.mp4')
+    sh("mkdir -p /sdcard/Movies/Test/Alt/Derin")
+    sh('cp "/sdcard/Movies/Test/Yatay video.mp4" /sdcard/Movies/Test/Alt/ust.mp4; cp "/sdcard/Movies/Test/Yatay video.mp4" /sdcard/Movies/Test/Alt/Derin/derin.mp4')
     sh("content call --uri content://media/ --method scan_volume --arg external_primary", timeout=60)
     time.sleep(6)
     start_main(); time.sleep(2)
@@ -514,8 +514,14 @@ def tree_test():
     tap(c); time.sleep(1.5)
     r1 = dump(); t1 = texts(r1)
     shot("Klasör ağacı: Movies içi")
-    c2 = find_text(r1, "Alt")
-    steps.append(("Klasör ağacı: Movies içinde Alt", "ok" if c2 else "SORUN", " | ".join(t1[:25])))
+    c1 = find_text(r1, "Test")
+    steps.append(("Klasör ağacı: Movies içinde Test", "ok" if c1 else "SORUN", " | ".join(t1[:25])))
+    if not c1:
+        return
+    tap(c1); time.sleep(1.5)
+    r1b = dump(); t1b = texts(r1b)
+    c2 = find_text(r1b, "Alt")
+    steps.append(("Klasör ağacı: Test içinde Alt", "ok" if c2 else "SORUN", " | ".join(t1b[:25])))
     if not c2:
         return
     tap(c2); time.sleep(1.5)
@@ -524,7 +530,7 @@ def tree_test():
     steps.append(("Klasör ağacı: Alt içinde Derin", "ok" if "Derin" in t2 else "SORUN", " | ".join(t2[:25])))
     sh("input keyevent KEYCODE_BACK"); time.sleep(1.2)
     t3 = texts(dump())
-    steps.append(("Klasör ağacı: geri → Movies listesi", "ok" if "Alt" in t3 and "Derin" not in t3 else "SORUN", " | ".join(t3[:25])))
+    steps.append(("Klasör ağacı: geri → Test listesi", "ok" if "Alt" in t3 and "Derin" not in t3 else "SORUN", " | ".join(t3[:25])))
     check_crash("Klasör ağacı")
 
 
