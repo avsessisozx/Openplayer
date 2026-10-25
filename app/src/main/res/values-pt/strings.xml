@@ -1081,4 +1081,12 @@
     <string name="playermenu_ad">Nome: %1$s</string>
     <string name="playermenu_boyut_mb">Tamanho: %1$s MB</string>
     <string name="mediaops_cut_failed">Não foi possível cortar: %1$s</string>
+    <string name="playermenu_unsup"> (não compatível)</string>
+    <string name="playermenu_added">● Adicionada: %1$s</string>
+    <string name="playermenu_addfile">＋  Adicionar de um arquivo…</string>
+    <string name="playermenu_style">Aa  Estilo e tamanho…</string>
+    <string name="playermenu_bm_add">＋ Adicionar marcador aqui (%1$s)</string>
+    <string name="playermenu_sync_pick">Alinhar a uma linha da legenda…</string>
+    <string name="playermenu_sync_title">Toque na linha que está sendo dita agora</string>
+    <string name="playermenu_sync_done">Atraso da legenda definido: %1$s%2$s s</string>
 </resources>

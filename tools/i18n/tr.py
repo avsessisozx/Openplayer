@@ -1079,4 +1079,12 @@ S = {
 "playermenu_ad": "Ad: %1$s",
 "playermenu_boyut_mb": "Boyut: %1$s MB",
 "mediaops_cut_failed": "Kesilemedi: %1$s",
+'playermenu_unsup': ' (desteklenmiyor)',
+'playermenu_added': '● Eklenen: %1$s',
+'playermenu_addfile': '＋  Dosyadan ekle…',
+'playermenu_style': 'Aa  Stil ve boyut…',
+'playermenu_bm_add': '＋ Bu konuma yer imi ekle (%1$s)',
+'playermenu_sync_pick': 'Bir altyazı satırıyla eşleştir…',
+'playermenu_sync_title': 'Şu an söylenen satıra dokunun',
+'playermenu_sync_done': 'Altyazı gecikmesi ayarlandı: %1$s%2$s sn',
 }

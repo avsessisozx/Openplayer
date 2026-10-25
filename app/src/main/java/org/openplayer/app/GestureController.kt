@@ -178,7 +178,9 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             startSubSize = a.settings.subtitleSizeSp
             lastFraction = 0f
             inSubtitleArea = a.settings.subtitleGestures && a.subtitles.mode != SubtitleController.Mode.OFF &&
-                    e.y > height * 0.72f
+                    (e.y > height * 0.72f ||
+                        (e.y > height * (1f - a.settings.subtitleBottomFraction - 0.16f) &&
+                            e.y < height * (1f - a.settings.subtitleBottomFraction + 0.04f)))
             startPos = a.player.currentPosition
             startVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
             val b = a.window.attributes.screenBrightness
@@ -269,12 +271,12 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                     when {
                         e.x < width * 0.33f -> {
                             a.seekRelative(-sec * 1000L)
-                            a.showHud("-$sec sn")
+                            a.showHud("-$sec s")
                             a.hideHudSoon()
                         }
                         e.x > width * 0.67f -> {
                             a.seekRelative(sec * 1000L)
-                            a.showHud("+$sec sn")
+                            a.showHud("+$sec s")
                             a.hideHudSoon()
                         }
                         else -> a.togglePlay()
@@ -368,7 +370,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                     verticalSeeking = false
                     a.scrubEnd(seekTarget)
                 }
-                Mode.SUB_H -> if (abs(subSwipe) > a.dp(60)) a.jumpSubtitle(subSwipe > 0)
+                Mode.SUB_H -> if (abs(subSwipe) > a.dp(60)) a.jumpSubtitle(subSwipe < 0)
                 else -> Unit
             }
             mode = Mode.NONE

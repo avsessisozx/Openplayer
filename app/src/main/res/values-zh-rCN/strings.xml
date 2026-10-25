@@ -1081,4 +1081,12 @@
     <string name="playermenu_ad">名称：%1$s</string>
     <string name="playermenu_boyut_mb">大小：%1$s MB</string>
     <string name="mediaops_cut_failed">无法剪辑：%1$s</string>
+    <string name="playermenu_unsup">（不支持）</string>
+    <string name="playermenu_added">● 已添加：%1$s</string>
+    <string name="playermenu_addfile">＋  从文件添加…</string>
+    <string name="playermenu_style">Aa  样式和大小…</string>
+    <string name="playermenu_bm_add">＋ 在此处添加书签（%1$s）</string>
+    <string name="playermenu_sync_pick">匹配字幕行…</string>
+    <string name="playermenu_sync_title">点按此刻正在说的那一行</string>
+    <string name="playermenu_sync_done">字幕延迟已设置：%1$s%2$s 秒</string>
 </resources>

@@ -415,7 +415,7 @@ class NowPlayingActivity : AppCompatActivity() {
         val end = MusicController.sleepEndsAtMs
         val sleepText = when {
             MusicController.sleepAtEnd -> Tx.s(R.string.nowplaying_005)
-            end > System.currentTimeMillis() -> "${((end - System.currentTimeMillis()) / 60_000L).toInt() + 1} dk"
+            end > System.currentTimeMillis() -> "${((end - System.currentTimeMillis()) / 60_000L).toInt() + 1} min"
             else -> ""
         }
         sleepLabel.text = sleepText

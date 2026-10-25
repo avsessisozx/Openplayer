@@ -1081,4 +1081,12 @@
     <string name="playermenu_ad">Nom : %1$s</string>
     <string name="playermenu_boyut_mb">Taille : %1$s Mo</string>
     <string name="mediaops_cut_failed">Découpe impossible : %1$s</string>
+    <string name="playermenu_unsup"> (non pris en charge)</string>
+    <string name="playermenu_added">● Ajouté : %1$s</string>
+    <string name="playermenu_addfile">＋  Ajouter depuis un fichier…</string>
+    <string name="playermenu_style">Aa  Style et taille…</string>
+    <string name="playermenu_bm_add">＋ Ajouter un signet ici (%1$s)</string>
+    <string name="playermenu_sync_pick">Faire correspondre une ligne de sous-titres…</string>
+    <string name="playermenu_sync_title">Touchez la ligne prononcée en ce moment</string>
+    <string name="playermenu_sync_done">Décalage des sous-titres réglé : %1$s%2$s s</string>
 </resources>

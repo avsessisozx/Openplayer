@@ -1081,4 +1081,12 @@
     <string name="playermenu_ad">الاسم: %1$s</string>
     <string name="playermenu_boyut_mb">الحجم: %1$s ميغابايت</string>
     <string name="mediaops_cut_failed">تعذّر القص: %1$s</string>
+    <string name="playermenu_unsup"> (غير مدعوم)</string>
+    <string name="playermenu_added">● تمت الإضافة: %1$s</string>
+    <string name="playermenu_addfile">＋  إضافة من ملف…</string>
+    <string name="playermenu_style">Aa  النمط والحجم…</string>
+    <string name="playermenu_bm_add">＋ إضافة علامة مرجعية هنا (%1$s)</string>
+    <string name="playermenu_sync_pick">مطابقة سطر من الترجمة…</string>
+    <string name="playermenu_sync_title">انقر على السطر الذي يُقال الآن</string>
+    <string name="playermenu_sync_done">تم ضبط تأخير الترجمة: %1$s%2$s ث</string>
 </resources>

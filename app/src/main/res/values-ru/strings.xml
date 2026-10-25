@@ -1081,4 +1081,12 @@
     <string name="playermenu_ad">Имя: %1$s</string>
     <string name="playermenu_boyut_mb">Размер: %1$s МБ</string>
     <string name="mediaops_cut_failed">Не удалось обрезать: %1$s</string>
+    <string name="playermenu_unsup"> (не поддерживается)</string>
+    <string name="playermenu_added">● Добавлено: %1$s</string>
+    <string name="playermenu_addfile">＋  Добавить из файла…</string>
+    <string name="playermenu_style">Aa  Стиль и размер…</string>
+    <string name="playermenu_bm_add">＋ Добавить закладку здесь (%1$s)</string>
+    <string name="playermenu_sync_pick">Сопоставить строку субтитров…</string>
+    <string name="playermenu_sync_title">Нажмите на строку, которую произносят сейчас</string>
+    <string name="playermenu_sync_done">Задержка субтитров установлена: %1$s%2$s с</string>
 </resources>

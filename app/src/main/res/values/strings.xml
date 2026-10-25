@@ -1081,4 +1081,12 @@
     <string name="playermenu_ad">Name: %1$s</string>
     <string name="playermenu_boyut_mb">Size: %1$s MB</string>
     <string name="mediaops_cut_failed">Could not cut: %1$s</string>
+    <string name="playermenu_unsup"> (not supported)</string>
+    <string name="playermenu_added">● Added: %1$s</string>
+    <string name="playermenu_addfile">＋  Add from file…</string>
+    <string name="playermenu_style">Aa  Style and size…</string>
+    <string name="playermenu_bm_add">＋ Add a bookmark here (%1$s)</string>
+    <string name="playermenu_sync_pick">Match a subtitle line…</string>
+    <string name="playermenu_sync_title">Tap the line that is being said right now</string>
+    <string name="playermenu_sync_done">Subtitle delay set: %1$s%2$s s</string>
 </resources>

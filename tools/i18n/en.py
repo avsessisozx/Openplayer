@@ -1079,4 +1079,12 @@ S = {
 "playermenu_ad": "Name: %1$s",
 "playermenu_boyut_mb": "Size: %1$s MB",
 "mediaops_cut_failed": "Could not cut: %1$s",
+'playermenu_unsup': ' (not supported)',
+'playermenu_added': '● Added: %1$s',
+'playermenu_addfile': '＋  Add from file…',
+'playermenu_style': 'Aa  Style and size…',
+'playermenu_bm_add': '＋ Add a bookmark here (%1$s)',
+'playermenu_sync_pick': 'Match a subtitle line…',
+'playermenu_sync_title': 'Tap the line that is being said right now',
+'playermenu_sync_done': 'Subtitle delay set: %1$s%2$s s',
 }
