@@ -31,7 +31,9 @@ jobs:
           gradle-version: 8.14.3
 
       - name: Unit tests
-        run: gradle testDebugUnitTest --stacktrace
+        run: |
+          set -o pipefail
+          gradle testDebugUnitTest --stacktrace 2>&1 | tee unit.log
 
       - name: Build debug APK (x86_64 dahil)
         run: |
@@ -82,6 +84,8 @@ jobs:
           mkdir -p out/lint
           cp app/build/reports/lint-results-debug.* out/lint/ 2>/dev/null || true
           cp build.log out/ 2>/dev/null || true
+          grep -E "^e: |error:|FAILED|AssertionError|BUILD " unit.log > out/unit-errors.txt 2>/dev/null || true
+          cp unit.log out/ 2>/dev/null || true
           cat out/report.md 2>/dev/null >> "$GITHUB_STEP_SUMMARY" || true
 
       - uses: actions/upload-artifact@v4
