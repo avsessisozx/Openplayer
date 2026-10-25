@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">مطابقة سطر من الترجمة…</string>
     <string name="playermenu_sync_title">انقر على السطر الذي يُقال الآن</string>
     <string name="playermenu_sync_done">تم ضبط تأخير الترجمة: %1$s%2$s ث</string>
+    <string name="playermenu_framepitch">الإطار بإطار ودرجة الصوت</string>
+    <string name="playermenu_frame">إطارًا بإطار (يتوقف الفيديو مؤقتًا)</string>
+    <string name="playermenu_pitch">درجة الصوت: %1$s نصف نغمة</string>
 </resources>

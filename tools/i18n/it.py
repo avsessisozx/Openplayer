@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Abbina una riga dei sottotitoli…',
 'playermenu_sync_title': 'Tocca la riga che viene pronunciata adesso',
 'playermenu_sync_done': 'Ritardo dei sottotitoli impostato: %1$s%2$s s',
+'playermenu_framepitch': 'Fotogramma e intonazione',
+'playermenu_frame': 'Fotogramma per fotogramma (il video va in pausa)',
+'playermenu_pitch': 'Intonazione: %1$s semitoni',
 }

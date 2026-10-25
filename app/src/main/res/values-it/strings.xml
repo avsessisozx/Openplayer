@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Abbina una riga dei sottotitoli…</string>
     <string name="playermenu_sync_title">Tocca la riga che viene pronunciata adesso</string>
     <string name="playermenu_sync_done">Ritardo dei sottotitoli impostato: %1$s%2$s s</string>
+    <string name="playermenu_framepitch">Fotogramma e intonazione</string>
+    <string name="playermenu_frame">Fotogramma per fotogramma (il video va in pausa)</string>
+    <string name="playermenu_pitch">Intonazione: %1$s semitoni</string>
 </resources>

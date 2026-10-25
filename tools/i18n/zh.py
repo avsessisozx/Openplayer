@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': '匹配字幕行…',
 'playermenu_sync_title': '点按此刻正在说的那一行',
 'playermenu_sync_done': '字幕延迟已设置：%1$s%2$s 秒',
+'playermenu_framepitch': '逐帧与音调',
+'playermenu_frame': '逐帧（视频将暂停）',
+'playermenu_pitch': '音调：%1$s 个半音',
 }

@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': '자막 줄에 맞추기…',
 'playermenu_sync_title': '지금 말하는 줄을 탭하세요',
 'playermenu_sync_done': '자막 지연이 설정됨: %1$s%2$s초',
+'playermenu_framepitch': '프레임 단위 이동 및 음높이',
+'playermenu_frame': '프레임 단위 (동영상이 일시정지됨)',
+'playermenu_pitch': '음높이: %1$s 반음',
 }

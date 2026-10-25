@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Untertitelzeile zuordnen…</string>
     <string name="playermenu_sync_title">Tippe auf die Zeile, die gerade gesprochen wird</string>
     <string name="playermenu_sync_done">Untertitelverzögerung eingestellt: %1$s%2$s s</string>
+    <string name="playermenu_framepitch">Einzelbild und Tonhöhe</string>
+    <string name="playermenu_frame">Bild für Bild (Video pausiert)</string>
+    <string name="playermenu_pitch">Tonhöhe: %1$s Halbtöne</string>
 </resources>

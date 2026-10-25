@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Hacer coincidir una línea de subtítulos…</string>
     <string name="playermenu_sync_title">Toca la línea que se dice ahora mismo</string>
     <string name="playermenu_sync_done">Retardo de subtítulos ajustado: %1$s%2$s s</string>
+    <string name="playermenu_framepitch">Fotograma a fotograma y tono</string>
+    <string name="playermenu_frame">Fotograma a fotograma (el vídeo se pausa)</string>
+    <string name="playermenu_pitch">Tono: %1$s semitonos</string>
 </resources>

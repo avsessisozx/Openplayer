@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Alinhar a uma linha da legenda…</string>
     <string name="playermenu_sync_title">Toque na linha que está sendo dita agora</string>
     <string name="playermenu_sync_done">Atraso da legenda definido: %1$s%2$s s</string>
+    <string name="playermenu_framepitch">Quadro a quadro e tom</string>
+    <string name="playermenu_frame">Quadro a quadro (o vídeo pausa)</string>
+    <string name="playermenu_pitch">Tom: %1$s semitons</string>
 </resources>

@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': '字幕の行に合わせる…',
 'playermenu_sync_title': '今話されている行をタップ',
 'playermenu_sync_done': '字幕の遅延を設定しました：%1$s%2$s 秒',
+'playermenu_framepitch': 'コマ送りとピッチ',
+'playermenu_frame': 'コマ送り（動画は一時停止します）',
+'playermenu_pitch': 'ピッチ：%1$s 半音',
 }

@@ -627,6 +627,36 @@ def wheel_test():
     sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 
 
+def frame_pitch_test():
+    """beta19: ⋮ → Kare kare ve perde: kare ilerletme düğmeleri çalışır, perde etiketi güncellenir."""
+    play_controls("/sdcard/Movies/Test/Yatay video.mp4")
+    c = top_right_icon(dump())
+    if not c:
+        steps.append(("Kare/perde: ⋮ düğmesi", "SORUN", "")); return
+    tap(c); time.sleep(1.5)
+    e = find_scroll("Kare kare ve perde")
+    if not e:
+        steps.append(("Kare/perde: menü öğesi", "SORUN", "bulunamadı")); return
+    tap(e); time.sleep(1.5)
+    r = dump(); t = texts(r)
+    shot("Kare kare ve perde paneli")
+    ok = any("Kare kare" in x for x in t)
+    steps.append(("Kare/perde: panel açıldı", "ok" if ok else "SORUN", " | ".join(t[:12])))
+    fwd = find_text(r, "|▶"); back = find_text(r, "◀|"); up = find_text(r, "+1")
+    if fwd:
+        for _ in range(5):
+            tap(fwd); time.sleep(0.3)
+    if back:
+        tap(back); time.sleep(0.3)
+    if up:
+        tap(up); time.sleep(0.5)
+    t2 = texts(dump())
+    shot("Kare kare ve perde: sonra")
+    steps.append(("Kare/perde: perde +1", "ok" if any("+1" in x and "yarım ton" in x for x in t2) else "SORUN", " | ".join(t2[:14])))
+    check_crash("Kare/perde")
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+
+
 if os.environ.get("SMOKE_ONLY") == "ray":
     # Yalnız kısayol satırı testi (~10 dk): commit mesajına [ray] yazılınca çalışır.
     try:
@@ -634,6 +664,7 @@ if os.environ.get("SMOKE_ONLY") == "ray":
         tree_test()
         sub_sync_test()
         wheel_test()
+        frame_pitch_test()
     except Exception as e:
         import traceback
         steps.append(("Kısayol rayı testi yarıda kaldı", "SORUN", traceback.format_exc().strip().splitlines()[-1][:300]))

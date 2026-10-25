@@ -1089,4 +1089,7 @@
     <string name="playermenu_sync_pick">Match a subtitle line…</string>
     <string name="playermenu_sync_title">Tap the line that is being said right now</string>
     <string name="playermenu_sync_done">Subtitle delay set: %1$s%2$s s</string>
+    <string name="playermenu_framepitch">Frame step and pitch</string>
+    <string name="playermenu_frame">Frame by frame (video pauses)</string>
+    <string name="playermenu_pitch">Pitch: %1$s semitones</string>
 </resources>

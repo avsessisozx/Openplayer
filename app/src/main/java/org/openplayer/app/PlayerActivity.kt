@@ -1789,6 +1789,28 @@ class PlayerActivity : AppCompatActivity() {
         subtitles.applyStyle()
     }
 
+    /** Kare kare ilerleme/geri: duraklatır ve bir kare süresi kadar tam konuma atlar. */
+    fun stepFrame(forward: Boolean) {
+        if (player.playbackState == Player.STATE_IDLE) return
+        player.pause()
+        val fps = player.videoFormat?.frameRate?.takeIf { it > 1f } ?: 30f
+        val step = (1000f / fps).roundToInt().coerceAtLeast(1)
+        val dur = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
+        val target = (player.currentPosition + if (forward) step else -step).coerceIn(0L, dur)
+        player.setSeekParameters(SeekParameters.EXACT)
+        player.seekTo(target)
+    }
+
+    /** Ses perdesini yarım ton cinsinden ayarlar (hız değişmez). */
+    fun setPitchSemitones(st: Int) {
+        val ratio = Math.pow(2.0, st / 12.0).toFloat()
+        player.playbackParameters = player.playbackParameters.withPitch(ratio)
+        pitchSemitones = st
+    }
+
+    var pitchSemitones = 0
+        private set
+
     fun jumpSubtitle(next: Boolean) {
         val pos = player.currentPosition
         val target = if (next) subtitles.nextCueMs(pos) else subtitles.previousCueMs(pos)

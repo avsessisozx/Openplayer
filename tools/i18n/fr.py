@@ -1087,4 +1087,7 @@ S = {
 'playermenu_sync_pick': 'Faire correspondre une ligne de sous-titres…',
 'playermenu_sync_title': 'Touchez la ligne prononcée en ce moment',
 'playermenu_sync_done': 'Décalage des sous-titres réglé : %1$s%2$s s',
+'playermenu_framepitch': 'Image par image et hauteur',
+'playermenu_frame': 'Image par image (la vidéo se met en pause)',
+'playermenu_pitch': 'Hauteur : %1$s demi-tons',
 }
