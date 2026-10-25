@@ -498,6 +498,37 @@ def rail_test():
     sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 
 
+def find_scroll(*wanted):
+    """Kısa (yatay) ekranda kaydırmalı menülerde öğeyi bulana dek yukarı kaydırır."""
+    w, h = cur_size()
+    for _ in range(6):
+        root = dump()
+        e = find_text_any(root, *wanted)
+        if not e:
+            for t in wanted:
+                e = find_contains(root, t)
+                if e:
+                    break
+        if e:
+            return e
+        sh(f"input swipe {int(w*0.85)} {int(h*0.8)} {int(w*0.85)} {int(h*0.2)} 250")
+        time.sleep(0.8)
+    return None
+
+# --- Beta15: 360° menüleri ---
+def vr_open_menu():
+    play_controls("/sdcard/Movies/Test/Yatay video.mp4")
+    c = top_right_icon(dump())
+    if not c:
+        return False
+    tap(c); time.sleep(1.5)
+    r = find_scroll("360 olarak oynat", "360° ayarları")
+    if not r:
+        return False
+    tap(r); time.sleep(1.5)
+    return True
+
+
 def tree_test():
     """beta17: klasör ağacı – Movies > Alt > Derin; üst klasörler alt klasörleri açar, geri çıkar."""
     sh("mkdir -p /sdcard/Movies/Test/Alt/Derin")
@@ -534,11 +565,70 @@ def tree_test():
     check_crash("Klasör ağacı")
 
 
+def sub_sync_test():
+    """beta18: altyazı menüsünde 'satırla eşleştir' listesi açılıyor, seçince gecikme ayarlanıyor; altyazı kaydırma çökmüyor."""
+    play_controls("/sdcard/Movies/Test/Yatay video.mp4")
+    w, h = cur_size()
+    root = dump()
+    c = find_text(root, "Altyazı")
+    if not c:
+        steps.append(("Altyazı eşleştirme: menü düğmesi", "SORUN", " | ".join(texts(root)[:20]))); return
+    tap(c); time.sleep(1.5)
+    shot("Altyazı menüsü")
+    e = find_scroll("Bir altyazı satırıyla eşleştir…")
+    if not e:
+        steps.append(("Altyazı eşleştirme: menü öğesi", "bilgi", "harici altyazı yüklü değil olabilir")); return
+    tap(e); time.sleep(1.5)
+    r = dump(); t = texts(r)
+    shot("Altyazı eşleştirme listesi")
+    ok = "Şu an söylenen satıra dokunun" in t
+    steps.append(("Altyazı eşleştirme: liste açıldı", "ok" if ok else "SORUN", " | ".join(t[:14])))
+    if ok:
+        rows = [x for x in t if re.match(r"^\d+:\d\d", x)]
+        steps.append(("Altyazı eşleştirme: satır sayısı", "ok" if rows else "SORUN", str(len(rows))))
+        row = find_contains(r, rows[0]) if rows else None
+        if row:
+            tap(row); time.sleep(1.5)
+            steps.append(("Altyazı eşleştirme: seçim sonrası liste kapandı", "ok" if "Şu an söylenen satıra dokunun" not in texts(dump()) else "SORUN", ""))
+    # Altyazı metni üstünde sola/sağa kaydır: çökmemeli
+    y = int(h * 0.85)
+    sh(f"input swipe {int(w*0.75)} {y} {int(w*0.25)} {y} 300"); time.sleep(1)
+    sh(f"input swipe {int(w*0.25)} {y} {int(w*0.75)} {y} 300"); time.sleep(1)
+    check_crash("Altyazı eşleştirme / kaydırma")
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+
+
+def wheel_test():
+    """beta18: 360° modunda uzun basınca çıkan çember (yeni görünüm) çökmeden çizilir."""
+    if not vr_open_menu():
+        steps.append(("Çember: 360 menüsü", "SORUN", "360 satırı yok")); return
+    e = find_scroll("360° olarak oynat")
+    if e:
+        tap(e); time.sleep(2.5)
+    w, h = cur_size()
+    x, y = w // 2, h // 2
+    sh(f"input motionevent DOWN {x} {y}"); time.sleep(1.4)
+    shot("Çember: açıldı")
+    for i in range(1, 8):
+        sh(f"input motionevent MOVE {x + i * int(w * 0.012)} {y}"); time.sleep(0.08)
+    time.sleep(0.4)
+    shot("Çember: sağa (ileri sar)")
+    for i in range(1, 8):
+        sh(f"input motionevent MOVE {x + 7 * int(w * 0.012) - i * int(w * 0.012)} {y - i * int(h * 0.012)}"); time.sleep(0.08)
+    time.sleep(0.4)
+    shot("Çember: yukarı (oynat)")
+    sh(f"input motionevent UP {x} {y - 7 * int(h * 0.012)}"); time.sleep(1)
+    steps.append(("Çember: çökmeden çizildi", "ok" if not check_crash("Çember") else "SORUN", ""))
+    sh("input keyevent KEYCODE_BACK"); time.sleep(1)
+
+
 if os.environ.get("SMOKE_ONLY") == "ray":
     # Yalnız kısayol satırı testi (~10 dk): commit mesajına [ray] yazılınca çalışır.
     try:
         rail_test()
         tree_test()
+        sub_sync_test()
+        wheel_test()
     except Exception as e:
         import traceback
         steps.append(("Kısayol rayı testi yarıda kaldı", "SORUN", traceback.format_exc().strip().splitlines()[-1][:300]))
@@ -661,36 +751,6 @@ crawl("Oynatıcı ⋮ menüsü", open_overflow(lambda: play_controls("/sdcard/Mo
 crawl("Ana ekran ⋮ menüsü", open_overflow(start_main), limit=12)
 crawl("Ayarlar", open_settings, limit=30)
 checkpoint("gezintiler")
-
-def find_scroll(*wanted):
-    """Kısa (yatay) ekranda kaydırmalı menülerde öğeyi bulana dek yukarı kaydırır."""
-    w, h = cur_size()
-    for _ in range(6):
-        root = dump()
-        e = find_text_any(root, *wanted)
-        if not e:
-            for t in wanted:
-                e = find_contains(root, t)
-                if e:
-                    break
-        if e:
-            return e
-        sh(f"input swipe {int(w*0.85)} {int(h*0.8)} {int(w*0.85)} {int(h*0.2)} 250")
-        time.sleep(0.8)
-    return None
-
-# --- Beta15: 360° menüleri ---
-def vr_open_menu():
-    play_controls("/sdcard/Movies/Test/Yatay video.mp4")
-    c = top_right_icon(dump())
-    if not c:
-        return False
-    tap(c); time.sleep(1.5)
-    r = find_scroll("360 olarak oynat", "360° ayarları")
-    if not r:
-        return False
-    tap(r); time.sleep(1.5)
-    return True
 
 def vr_pick(label, texts):
     """Oynatıcı ⋮ → 360 satırı → verilen menü öğelerini sırayla seç."""

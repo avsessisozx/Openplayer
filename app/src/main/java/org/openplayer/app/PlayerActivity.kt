@@ -1158,7 +1158,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun stepSeek(direction: Int) {
         val sec = settings.seekButtonSec
         seekRelative(direction * sec * 1000L)
-        showHud(if (direction > 0) "+$sec sn" else "-$sec sn")
+        showHud(if (direction > 0) "+$sec s" else "-$sec s")
         hideHudSoon()
         scheduleAutoHide()
     }
@@ -2003,7 +2003,7 @@ class PlayerActivity : AppCompatActivity() {
             Shortcut.SKIP_INTRO -> {
                 val target = player.currentPosition + settings.skipIntroSec * 1000L
                 player.seekTo(if (player.duration > 0) minOf(target, player.duration - 1000L) else target)
-                toast("+${settings.skipIntroSec} sn")
+                toast("+${settings.skipIntroSec} s")
             }
             Shortcut.BACKGROUND -> {
                 settings.backgroundPlay = !settings.backgroundPlay

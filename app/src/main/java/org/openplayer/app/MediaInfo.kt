@@ -38,8 +38,8 @@ object MediaInfo {
 
     private fun bitrate(bps: Long): String = when {
         bps <= 0 -> UNKNOWN
-        bps >= 1_000_000 -> "%.1f Mbit/sn".format(bps / 1_000_000.0)
-        else -> "%.0f kbit/sn".format(bps / 1000.0)
+        bps >= 1_000_000 -> "%.1f Mbit/s".format(bps / 1_000_000.0)
+        else -> "%.0f kbit/s".format(bps / 1000.0)
     }
 
     private fun ratio(w: Int, h: Int): String {

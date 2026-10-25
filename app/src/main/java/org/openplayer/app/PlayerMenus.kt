@@ -57,7 +57,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             return
         }
         val labels = groups.mapIndexed { i, g ->
-            trackLabel(g.getTrackFormat(0), i) + if (!g.isSupported) " (desteklenmiyor)" else ""
+            trackLabel(g.getTrackFormat(0), i) + if (!g.isSupported) Tx.s(R.string.playermenu_unsup) else ""
         }
         val selected = groups.indexOfFirst { it.isSelected }.coerceAtLeast(0)
         PanelBuilder(a)
@@ -283,19 +283,49 @@ class PlayerMenus(private val a: PlayerActivity) {
             entries += ((if (selected) "● " else "○ ") + Tx.s(R.string.playermenu_129) + f.name) to { a.loadExternalSubtitle(f) }
         }
         if (sub.mode == SubtitleController.Mode.EXTERNAL && a.sidecars.none { it.name == sub.externalName } && sub.externalName != null) {
-            entries += "● Eklenen: ${sub.externalName}" to {}
+            entries += Tx.s(R.string.playermenu_added, sub.externalName ?: "") to {}
         }
-        entries += "＋  Dosyadan ekle…" to { a.pickSubtitleFile() }
+        entries += Tx.s(R.string.playermenu_addfile) to { a.pickSubtitleFile() }
         entries += Tx.s(R.string.playermenu_015) to { showOnlineSearch() }
         entries += Tx.s(R.string.playermenu_016) to { showTranslate() }
         entries += Tx.s(R.string.playermenu_017) to { showSubtitleSync() }
-        entries += "Aa  Stil ve boyut…" to { showSubtitleStyle() }
+        if (sub.mode == SubtitleController.Mode.EXTERNAL) entries += Tx.s(R.string.playermenu_sync_pick) to { showSyncPick() }
+        entries += Tx.s(R.string.playermenu_style) to { showSubtitleStyle() }
         entries += Tx.s(R.string.playermenu_018) to { showCharsetMenu() }
 
         PanelBuilder(a)
             .setTitle(Tx.s(R.string.mediainfo_014))
             .setItems(entries.map { it.first }.toTypedArray()) { _, which -> entries[which].second() }
             .setNegativeButton(Tx.s(R.string.nowplaying_009), null)
+            .show()
+    }
+
+    /** Dokunarak senkron: konuşulan satırı seç; gecikme = şimdiki video zamanı − satırın dosyadaki zamanı. */
+    fun showSyncPick() {
+        val cues = a.subtitles.externalCues
+        if (cues.isEmpty()) {
+            a.toast(Tx.s(R.string.playeracti_035))
+            return
+        }
+        a.player.pause()
+        val pos = a.player.currentPosition
+        val sp = a.subtitles.speed
+        val t0 = ((pos - a.subtitles.delayMs) * sp).toLong()
+        val near = cues.filter { abs(it.startMs - t0) <= 90_000L }.ifEmpty { cues.take(60) }.take(80)
+        fun mmss(ms: Long): String {
+            val t = (ms / 1000).coerceAtLeast(0)
+            return if (t >= 3600) "%d:%02d:%02d".format(t / 3600, t % 3600 / 60, t % 60) else "%d:%02d".format(t / 60, t % 60)
+        }
+        val labels = near.map { c -> mmss(c.startMs) + "   " + c.text.toString().replace("\n", " ").trim().take(70) }
+        PanelBuilder(a)
+            .setTitle(Tx.s(R.string.playermenu_sync_title))
+            .setItems(labels.toTypedArray()) { _, i ->
+                val d = pos - (near[i].startMs / sp).toLong()
+                a.subtitles.delayMs = d
+                a.toast(Tx.s(R.string.playermenu_sync_done, if (d >= 0) "+" else "", "%.1f".format(d / 1000f)))
+                a.player.play()
+            }
+            .setNegativeButton(Tx.s(R.string.playermenu_081)) { _, _ -> a.player.play() }
             .show()
     }
 
@@ -311,7 +341,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         refresh()
         val row = LinearLayout(a).apply {
             orientation = LinearLayout.HORIZONTAL
-            for ((t, ms) in listOf("-1 sn" to -1000L, "-0.1" to -100L, "+0.1" to 100L, "+1 sn" to 1000L)) {
+            for ((t, ms) in listOf("-1 s" to -1000L, "-0.1" to -100L, "+0.1" to 100L, "+1 s" to 1000L)) {
                 addView(Button(a).apply {
                     text = t
                     setOnClickListener {
@@ -794,7 +824,7 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showBookmarks() {
         val uri = a.currentUri ?: return
         val marks = ResumeStore.bookmarks(a, uri)
-        val labels = listOf("＋ Bu konuma yer imi ekle (${timeLabel(a.player.currentPosition)})") + marks.map { timeLabel(it) }
+        val labels = listOf(Tx.s(R.string.playermenu_bm_add, timeLabel(a.player.currentPosition))) + marks.map { timeLabel(it) }
         val dialog = PanelBuilder(a)
             .setTitle(Tx.s(R.string.playermenu_094))
             .setItems(labels.toTypedArray()) { _, which ->

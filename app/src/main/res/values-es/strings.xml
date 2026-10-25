@@ -1081,4 +1081,12 @@
     <string name="playermenu_ad">Nombre: %1$s</string>
     <string name="playermenu_boyut_mb">Tamaño: %1$s MB</string>
     <string name="mediaops_cut_failed">No se pudo cortar: %1$s</string>
+    <string name="playermenu_unsup"> (no compatible)</string>
+    <string name="playermenu_added">● Añadido: %1$s</string>
+    <string name="playermenu_addfile">＋  Añadir desde archivo…</string>
+    <string name="playermenu_style">Aa  Estilo y tamaño…</string>
+    <string name="playermenu_bm_add">＋ Añadir marcador aquí (%1$s)</string>
+    <string name="playermenu_sync_pick">Hacer coincidir una línea de subtítulos…</string>
+    <string name="playermenu_sync_title">Toca la línea que se dice ahora mismo</string>
+    <string name="playermenu_sync_done">Retardo de subtítulos ajustado: %1$s%2$s s</string>
 </resources>
