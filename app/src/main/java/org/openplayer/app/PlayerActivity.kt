@@ -1906,13 +1906,15 @@ class PlayerActivity : AppCompatActivity() {
                 android.view.MotionEvent.ACTION_MOVE -> if (!ray) {
                     val dx = ev.x - downX
                     val dy = ev.y - downY
-                    if (kotlin.math.abs(dx) > slop && kotlin.math.abs(dx) > kotlin.math.abs(dy) && rayFull() > 0 &&
+                    if (kotlin.math.abs(dx) > slop && kotlin.math.abs(dx) > kotlin.math.abs(dy) * 0.6f && rayFull() > 0 &&
                         ((dx < 0 && rayFraction < 1f) || (dx > 0 && rayFraction > 0f && scrollX == 0))
                     ) {
                         ray = true
                         startF = rayFraction
-                        downX = ev.x
+                        // Parmağı birebir izle: eşik (slop) kadar mesafe kayıp sayılır, ilk karede sıçrama olmaz.
+                        downX = downX + (if (dx < 0) -slop else slop).toFloat()
                         prevX = ev.x
+                        applyRay(startF - (ev.x - downX) / rayFull().coerceAtLeast(1))
                         parent?.requestDisallowInterceptTouchEvent(true)
                         return true
                     }

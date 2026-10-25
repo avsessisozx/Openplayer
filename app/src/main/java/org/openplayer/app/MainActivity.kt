@@ -66,6 +66,8 @@ class MainActivity : AppCompatActivity() {
 
     private var all: List<VideoItem> = emptyList()
     private var currentFolder: FolderItem? = null
+    /** Klasör ağacında içinde bulunulan klasörün yolu; null = en üst düzey. */
+    private var treeDir: String? = null
     private var searching = false
     private var shown: List<VideoItem> = emptyList()
 
@@ -94,6 +96,10 @@ class MainActivity : AppCompatActivity() {
                     render()
                     // Klasör listesine dönünce kaldığı konuma geri getir.
                     folderListState?.let { st -> runCatching { list.layoutManager?.onRestoreInstanceState(st) } }
+                }
+                treeDir != null -> {
+                    treeDir = treeParent(treeDir!!)
+                    render()
                 }
                 else -> {
                     isEnabled = false
@@ -381,11 +387,12 @@ class MainActivity : AppCompatActivity() {
             }
             else -> {
                 titleView.text = Tx.s(R.string.mainactivi_015)
-                backButton.visibility = View.GONE
+                backButton.visibility = if (treeDir != null) View.VISIBLE else View.GONE
+                if (treeDir != null) titleView.text = treeDir!!.substringAfterLast('/')
                 sortButton.visibility = View.VISIBLE
                 viewButton.visibility = View.VISIBLE
                 viewButton.setImageResource(if (settings.folderGrid) R.drawable.ic_view_list else R.drawable.ic_grid)
-                val folders = VideoRepository.folders(this, all, settings)
+                val folders = VideoRepository.treeFolders(this, all, settings, treeDir)
                 folderAdapter.scalePercent = settings.folderScale
                 folderAdapter.textScalePercent = settings.listTextScale
                 folderAdapter.grid = settings.folderGrid
@@ -640,7 +647,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onFolderClick(f: FolderItem) {
-        if (selectionOn) toggleFolder(f) else openFolder(f)
+        when {
+            f.group -> if (!selectionOn) {
+                folderListState = list.layoutManager?.onSaveInstanceState()
+                treeDir = f.path
+                render()
+                list.scrollToPosition(0)
+            }
+            selectionOn -> toggleFolder(f)
+            else -> openFolder(f)
+        }
+    }
+
+    /** Ağaçta bir üst klasör; en üst düzeye (depolama köküne) varınca null. */
+    private fun treeParent(dir: String): String? {
+        val up = dir.substringBeforeLast('/', "")
+        val parts = up.split('/')
+        val isRoot = up.isEmpty() ||
+            (up.startsWith("/storage/emulated/") && parts.size <= 4) || (up.startsWith("/storage/") && parts.size <= 3)
+        return if (isRoot) null else up
     }
 
     private fun startVideoSelection(v: VideoItem) {
@@ -650,6 +675,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startFolderSelection(f: FolderItem) {
+        if (f.group) return
         selectionOn = true
         if (!selFolders.add(f.bucketId)) selFolders.remove(f.bucketId)
         updateSelectionUi()
@@ -700,7 +726,7 @@ class MainActivity : AppCompatActivity() {
             ?.substringBeforeLast('/')?.let { java.io.File(it) }
 
     private fun selectAll() {
-        if (folderMode()) folderAdapter.items.forEach { selFolders.add(it.bucketId) }
+        if (folderMode()) folderAdapter.items.filter { !it.group }.forEach { selFolders.add(it.bucketId) }
         else shown.forEach { selVideos.add(it.id) }
         selectionOn = true
         updateSelectionUi()
@@ -708,7 +734,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun invertSelection() {
         if (folderMode()) {
-            val now = folderAdapter.items.map { it.bucketId }.filter { it !in selFolders }
+            val now = folderAdapter.items.filter { !it.group }.map { it.bucketId }.filter { it !in selFolders }
             selFolders.clear(); selFolders.addAll(now)
         } else {
             val now = shown.map { it.id }.filter { it !in selVideos }
