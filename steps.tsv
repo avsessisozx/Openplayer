@@ -1,0 +1,8 @@
+Kısayol rayı: simge sayısı	SORUN	varsayılan 0, açık 0, kapanınca 0 (beklenen: ≤5, artış, aynı)
+Kısayol rayı: yavaş sürükleme	SORUN	varsayılan 0, sürüklerken 0, bırakınca 0
+Kısayol rayı: boş alan tepkisiz	ok	önce 0, sonra 0
+Klasör ağacı: üst düzeyde Movies	ok	Klasörler | Videolar | Müzik | 8 | Movies | 8 video | Son oynatılanı aç
+Klasör ağacı: Movies içinde Test	ok	Movies | Videolar | Müzik | 8 | Test | 8 video | Son oynatılanı aç
+Klasör ağacı: Test içinde Alt	ok	Test | Videolar | Müzik | 6 | Test | 6 video | 2 | Alt | 2 video | Son oynatılanı aç
+Klasör ağacı: Alt içinde Derin	ok	Alt | Videolar | Müzik | 1 | Alt | 1 video | 1 | Derin | 1 video | Son oynatılanı aç
+Klasör ağacı: geri → Test listesi	ok	Test | Videolar | Müzik | 6 | Test | 6 video | 2 | Alt | 2 video | Son oynatılanı aç
