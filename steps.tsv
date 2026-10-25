@@ -1,0 +1,5 @@
+Kısayol rayı: simge sayısı	ok	varsayılan 5, açık 15, kapanınca 5 (beklenen: ≤5, artış, aynı)
+Kısayol rayı: yavaş sürükleme	ok	varsayılan 5, sürüklerken 9, bırakınca 15
+Kısayol rayı: boş alan tepkisiz	ok	önce 5, sonra 5
+Klasör ağacı: üst düzeyde Movies	ok	Klasörler | Videolar | Müzik | 6 | Movies | 6 video | Son oynatılanı aç
+Klasör ağacı: Movies içinde Alt	SORUN	Movies | Videolar | Müzik | 6 | Test | 6 video | Son oynatılanı aç
