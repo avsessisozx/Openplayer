@@ -1,0 +1,46 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioDelay.kt:36:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioEq.kt:110:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:6:8 'class Virtualizer : AudioEffect' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:17:23 'class Virtualizer : AudioEffect' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:80:20 'constructor(p0: Int, p1: Int): Virtualizer' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:81:19 'fun setStrength(p0: Short): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/AudioFx.kt:102:19 'fun setStrength(p0: Short): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/PlayerActivity.kt:579:17 Condition is always 'true'.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/PlayerMenus.kt:39:83 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/ThemeManager.kt:95:25 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/ThemeManager.kt:96:25 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/Vr360.kt:295:75 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1792958470896.json
+
+BUILD SUCCESSFUL in 1m 5s
+22 actionable tasks: 22 executed
