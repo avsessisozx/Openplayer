@@ -15,39 +15,39 @@ data class AppTheme(
 )
 
 enum class ButtonShape(val label: String) {
-    CIRCLE("Daire"),
-    ROUNDED("Yuvarlak kare"),
-    SQUARE("Kare"),
+    CIRCLE(Tx.s(R.string.thememanag_007)),
+    ROUNDED(Tx.s(R.string.thememanag_008)),
+    SQUARE(Tx.s(R.string.thememanag_009)),
 }
 
 /** Seçili temayı tutar; arayüz renkleri [UiColors] üzerinden buradan okunur. */
 object ThemeManager {
 
     val presets = listOf(
-        AppTheme("dark", "Koyu", 0xFF000000.toInt(), 0xFF1E242B.toInt(), 0xFF2F8CFF.toInt()),
+        AppTheme("dark", Tx.s(R.string.thememanag_010), 0xFF000000.toInt(), 0xFF1E242B.toInt(), 0xFF2F8CFF.toInt()),
         AppTheme("amoled", "AMOLED", 0xFF000000.toInt(), 0xFF0B0B0B.toInt(), 0xFF00E5FF.toInt()),
-        AppTheme("ocean", "Okyanus", 0xFF06141F.toInt(), 0xFF0E2A3D.toInt(), 0xFF29B6F6.toInt()),
-        AppTheme("sunset", "Gün batımı", 0xFF1A0E10.toInt(), 0xFF2E1A1E.toInt(), 0xFFFF7043.toInt()),
-        AppTheme("forest", "Orman", 0xFF0A140E.toInt(), 0xFF16281C.toInt(), 0xFF66BB6A.toInt()),
-        AppTheme("purple", "Mor", 0xFF120A1C.toInt(), 0xFF241638.toInt(), 0xFFAB47BC.toInt()),
-        AppTheme("rose", "Gül", 0xFF1A0A12.toInt(), 0xFF30152A.toInt(), 0xFFEC407A.toInt()),
-        AppTheme("gold", "Altın", 0xFF14110A.toInt(), 0xFF2A2412.toInt(), 0xFFFFC107.toInt()),
-        AppTheme("mono", "Gri", 0xFF0D0D0D.toInt(), 0xFF222222.toInt(), 0xFFB0BEC5.toInt()),
+        AppTheme("ocean", Tx.s(R.string.thememanag_011), 0xFF06141F.toInt(), 0xFF0E2A3D.toInt(), 0xFF29B6F6.toInt()),
+        AppTheme("sunset", Tx.s(R.string.thememanag_001), 0xFF1A0E10.toInt(), 0xFF2E1A1E.toInt(), 0xFFFF7043.toInt()),
+        AppTheme("forest", Tx.s(R.string.thememanag_012), 0xFF0A140E.toInt(), 0xFF16281C.toInt(), 0xFF66BB6A.toInt()),
+        AppTheme("purple", Tx.s(R.string.thememanag_013), 0xFF120A1C.toInt(), 0xFF241638.toInt(), 0xFFAB47BC.toInt()),
+        AppTheme("rose", Tx.s(R.string.thememanag_002), 0xFF1A0A12.toInt(), 0xFF30152A.toInt(), 0xFFEC407A.toInt()),
+        AppTheme("gold", Tx.s(R.string.thememanag_003), 0xFF14110A.toInt(), 0xFF2A2412.toInt(), 0xFFFFC107.toInt()),
+        AppTheme("mono", Tx.s(R.string.thememanag_014), 0xFF0D0D0D.toInt(), 0xFF222222.toInt(), 0xFFB0BEC5.toInt()),
     )
 
     val accentChoices = listOf(
-        "Temanın rengi" to 0,
-        "Mavi" to 0xFF2F8CFF.toInt(),
-        "Turkuaz" to 0xFF00BCD4.toInt(),
-        "Yeşil" to 0xFF4CAF50.toInt(),
-        "Sarı-yeşil" to 0xFFC0CA33.toInt(),
-        "Sarı" to 0xFFFFC107.toInt(),
-        "Turuncu" to 0xFFFF7043.toInt(),
-        "Kırmızı" to 0xFFF44336.toInt(),
-        "Pembe" to 0xFFEC407A.toInt(),
-        "Mor" to 0xFFAB47BC.toInt(),
-        "İndigo" to 0xFF5C6BC0.toInt(),
-        "Beyaz" to 0xFFFFFFFF.toInt(),
+        Tx.s(R.string.thememanag_004) to 0,
+        Tx.s(R.string.settingsac_284) to 0xFF2F8CFF.toInt(),
+        Tx.s(R.string.thememanag_015) to 0xFF00BCD4.toInt(),
+        Tx.s(R.string.playermenu_024) to 0xFF4CAF50.toInt(),
+        Tx.s(R.string.thememanag_005) to 0xFFC0CA33.toInt(),
+        Tx.s(R.string.playermenu_025) to 0xFFFFC107.toInt(),
+        Tx.s(R.string.settingsac_281) to 0xFFFF7043.toInt(),
+        Tx.s(R.string.settingsac_161) to 0xFFF44336.toInt(),
+        Tx.s(R.string.settingsac_280) to 0xFFEC407A.toInt(),
+        Tx.s(R.string.thememanag_013) to 0xFFAB47BC.toInt(),
+        Tx.s(R.string.thememanag_006) to 0xFF5C6BC0.toInt(),
+        Tx.s(R.string.playermenu_130) to 0xFFFFFFFF.toInt(),
     )
 
     private var app: Context? = null
@@ -120,7 +120,7 @@ object ThemeManager {
         val o = JSONObject(json)
         AppTheme(
             id = "custom",
-            name = o.optString("name", "Özel").take(24).ifBlank { "Özel" },
+            name = o.optString("name", Tx.s(R.string.settingsac_156)).take(24).ifBlank { Tx.s(R.string.settingsac_156) },
             background = color(o, "background") ?: return null,
             surface = color(o, "surface") ?: return null,
             accent = color(o, "accent") ?: return null,

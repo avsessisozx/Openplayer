@@ -102,7 +102,7 @@ object CueSheet {
             else (audio.durationMs - start).coerceAtLeast(0L)
             audio.copy(
                 id = -(audio.id.coerceAtLeast(1) * 1000 + ct.number), // sentetik, benzersiz
-                title = ct.title.ifBlank { "Parça ${ct.number}" },
+                title = ct.title.ifBlank { Tx.s(R.string.cuesheet_001, ct.number) },
                 artist = ct.performer.ifBlank { cue.performer.ifBlank { audio.artist } },
                 album = cue.album.ifBlank { audio.album },
                 trackNo = ct.number,

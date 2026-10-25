@@ -4,109 +4,109 @@ import android.content.Context
 import android.content.SharedPreferences
 
 enum class DecoderMode(val label: String, val short: String) {
-    HW("Donanım (HW)", "DONANIM"),
-    HW_PLUS("Donanım+ (HW+)", "DONANIM+"),
-    SW("Yazılım (SW)", "YAZILIM"),
+    HW(Tx.s(R.string.settings_001), "DONANIM"),
+    HW_PLUS(Tx.s(R.string.settings_002), "DONANIM+"),
+    SW(Tx.s(R.string.settings_003), "YAZILIM"),
 }
 
 enum class SortOrder(val label: String) {
     NAME_ASC("Ad (A-Z)"),
     NAME_DESC("Ad (Z-A)"),
-    DATE_DESC("Tarih (yeniden eskiye)"),
-    DATE_ASC("Tarih (eskiden yeniye)"),
-    SIZE_DESC("Boyut (büyükten küçüğe)"),
-    SIZE_ASC("Boyut (küçükten büyüğe)"),
-    DURATION_DESC("Süre (uzundan kısaya)"),
-    DURATION_ASC("Süre (kısadan uzuna)"),
+    DATE_DESC(Tx.s(R.string.settings_030)),
+    DATE_ASC(Tx.s(R.string.settings_031)),
+    SIZE_DESC(Tx.s(R.string.settings_004)),
+    SIZE_ASC(Tx.s(R.string.settings_005)),
+    DURATION_DESC(Tx.s(R.string.musicrepos_001)),
+    DURATION_ASC(Tx.s(R.string.settings_006)),
 }
 
 enum class ListMode(val label: String) {
-    FOLDERS("Klasörler"),
-    FILES("Dosyalar"),
+    FOLDERS(Tx.s(R.string.mainactivi_015)),
+    FILES(Tx.s(R.string.settings_032)),
 }
 
 enum class SortKey(val label: String) {
-    TITLE("Başlık"),
-    DATE("Tarih"),
-    LAST_PLAYED("Oynama zamanı"),
-    STATUS("Durum"),
-    DURATION("Uzunluk"),
-    SIZE("Boyut"),
-    RESOLUTION("Çözünürlük"),
-    PATH("Adres"),
-    EXTENSION("Dosya türü"),
+    TITLE(Tx.s(R.string.mediainfo_007)),
+    DATE(Tx.s(R.string.listpanel_023)),
+    LAST_PLAYED(Tx.s(R.string.listpanel_010)),
+    STATUS(Tx.s(R.string.settings_033)),
+    DURATION(Tx.s(R.string.listpanel_020)),
+    SIZE(Tx.s(R.string.listpanel_022)),
+    RESOLUTION(Tx.s(R.string.listpanel_011)),
+    PATH(Tx.s(R.string.listpanel_021)),
+    EXTENSION(Tx.s(R.string.settings_007)),
 }
 
 enum class DoubleTapAction(val label: String) {
-    PLAY_PAUSE("Oynat / duraklat"),
-    SEEK("Kenarlarda sarma, ortada oynat/duraklat"),
-    NONE("Hiçbir şey"),
+    PLAY_PAUSE(Tx.s(R.string.settings_034)),
+    SEEK(Tx.s(R.string.settings_035)),
+    NONE(Tx.s(R.string.gesturecon_001)),
 }
 
 enum class PlaybackEngine(val label: String) {
-    AUTO("Otomatik: ExoPlayer, açamazsa VLC motoru"),
-    EXO("Yalnız ExoPlayer"),
-    VLC("Yalnız VLC motoru"),
+    AUTO(Tx.s(R.string.settings_008)),
+    EXO(Tx.s(R.string.settings_009)),
+    VLC(Tx.s(R.string.settings_010)),
 }
 
 enum class OrientationMode(val label: String) {
-    AUTO("Videoya göre otomatik"),
-    SENSOR("Sensör (serbest)"),
-    LANDSCAPE("Yatay"),
-    PORTRAIT("Dikey"),
+    AUTO(Tx.s(R.string.settings_011)),
+    SENSOR(Tx.s(R.string.settings_012)),
+    LANDSCAPE(Tx.s(R.string.playeracti_063)),
+    PORTRAIT(Tx.s(R.string.playeracti_064)),
 }
 
 enum class ResumeMode(val label: String) {
-    YES("Evet, kaldığı yerden devam et"),
-    NO("Hayır, baştan başlat"),
-    ASK("Her seferinde sor"),
+    YES(Tx.s(R.string.settings_013)),
+    NO(Tx.s(R.string.settings_014)),
+    ASK(Tx.s(R.string.settings_036)),
 }
 
 /** Ekrana tek dokunuşun işlevi. */
 enum class TapAction(val label: String) {
-    TOGGLE_UI("Arayüzü göster / gizle"),
-    SHOW_THEN_PAUSE("Arayüzü göster; açıkken oynat / duraklat"),
-    BOTH("Arayüzü göster ve oynat / duraklat"),
-    PLAY_PAUSE("Yalnız oynat / duraklat"),
+    TOGGLE_UI(Tx.s(R.string.settings_015)),
+    SHOW_THEN_PAUSE(Tx.s(R.string.settings_016)),
+    BOTH(Tx.s(R.string.settings_017)),
+    PLAY_PAUSE(Tx.s(R.string.settings_018)),
 }
 
 /** Kontroller gizliyken köşede sürekli görünen bilgi. */
 enum class OsdInfo(val label: String) {
-    NONE("Kapalı"),
-    CLOCK("Saat ve pil"),
-    ELAPSED("Geçen süre"),
-    BOTH("Saat, pil ve geçen süre"),
+    NONE(Tx.s(R.string.audiofx_004)),
+    CLOCK(Tx.s(R.string.settings_037)),
+    ELAPSED(Tx.s(R.string.settings_019)),
+    BOTH(Tx.s(R.string.settings_020)),
 }
 
 enum class StereoMode(val label: String) {
     STEREO("Stereo"),
-    MONO("Mono (iki kanal birleşik)"),
-    REVERSE("Ters stereo (sol ↔ sağ)"),
+    MONO(Tx.s(R.string.settings_021)),
+    REVERSE(Tx.s(R.string.settings_022)),
 }
 
 enum class UiMode(val label: String, val scale: Float) {
-    AUTO("Otomatik (ekrana göre)", 1f),
-    PHONE("Telefon", 1f),
-    BIG_PHONE("Büyük telefon", 1.12f),
+    AUTO(Tx.s(R.string.settings_023), 1f),
+    PHONE(Tx.s(R.string.settings_038), 1f),
+    BIG_PHONE(Tx.s(R.string.settings_024), 1.12f),
     TABLET("Tablet", 1.25f),
-    WIDE("Geniş ekran (PC, TV, emülatör)", 1.4f),
+    WIDE(Tx.s(R.string.settings_025), 1.4f),
 }
 
 enum class Shortcut(val id: String, val label: String, val icon: Int, val glyph: String? = null) {
-    ROTATE("rotate", "Ekran döndürme", R.drawable.ic_screen_rotation),
-    BACKGROUND("background", "Arka planda oynat", R.drawable.ic_headphones),
-    MUTE("mute", "Sesi kapat", R.drawable.ic_volume_off),
-    EQUALIZER("equalizer", "Ekolayzır", R.drawable.ic_tune),
+    ROTATE("rotate", Tx.s(R.string.settings_026), R.drawable.ic_screen_rotation),
+    BACKGROUND("background", Tx.s(R.string.settings_039), R.drawable.ic_headphones),
+    MUTE("mute", Tx.s(R.string.settings_040), R.drawable.ic_volume_off),
+    EQUALIZER("equalizer", Tx.s(R.string.musiccontr_002), R.drawable.ic_tune),
     AB_REPEAT("ab", "A-B tekrar", 0, "A-B"),
-    SPEED("speed", "Oynatma hızı", 0, "1X"),
-    REPEAT("repeat", "Tekrarla", R.drawable.ic_repeat),
-    SHUFFLE("shuffle", "Karıştır", R.drawable.ic_shuffle),
-    SLEEP("sleep", "Uyku zamanlayıcısı", R.drawable.ic_timer),
-    NIGHT("night", "Gece modu", R.drawable.ic_night),
-    SCREENSHOT("screenshot", "Ekran görüntüsü", R.drawable.ic_camera),
-    MIRROR("mirror", "Ayna modu", R.drawable.ic_flip),
-    VFLIP("vflip", "Dikey çevirme", R.drawable.ic_flip),
-    SKIP_INTRO("skipintro", "İntro atla", 0, "»");
+    SPEED("speed", Tx.s(R.string.gesturecon_003), 0, "1X"),
+    REPEAT("repeat", Tx.s(R.string.settings_041), R.drawable.ic_repeat),
+    SHUFFLE("shuffle", Tx.s(R.string.musicactiv_020), R.drawable.ic_shuffle),
+    SLEEP("sleep", Tx.s(R.string.nowplaying_004), R.drawable.ic_timer),
+    NIGHT("night", Tx.s(R.string.settings_042), R.drawable.ic_night),
+    SCREENSHOT("screenshot", Tx.s(R.string.settings_027), R.drawable.ic_camera),
+    MIRROR("mirror", Tx.s(R.string.settings_043), R.drawable.ic_flip),
+    VFLIP("vflip", Tx.s(R.string.settings_028), R.drawable.ic_flip),
+    SKIP_INTRO("skipintro", Tx.s(R.string.settings_029), 0, "»");
 
     companion object {
         fun byId(id: String) = entries.firstOrNull { it.id == id }

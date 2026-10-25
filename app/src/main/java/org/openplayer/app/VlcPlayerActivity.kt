@@ -97,7 +97,7 @@ class VlcPlayerActivity : AppCompatActivity() {
             contentResolver.openInputStream(uri)?.use { input -> f.outputStream().use { input.copyTo(it) } }
             vlc?.addSlave(IMedia.Slave.Type.Subtitle, Uri.fromFile(f), true)
         }.getOrNull() != null
-        toast(if (ok) "Altyazı eklendi" else "Altyazı yüklenemedi")
+        toast(if (ok) Tx.s(R.string.vlcplayera_002) else Tx.s(R.string.vlcplayera_001))
     }
 
     override fun attachBaseContext(newBase: Context) {
@@ -261,7 +261,7 @@ class VlcPlayerActivity : AppCompatActivity() {
     private fun start() {
         val lib = runCatching { LibVLC(this, arrayListOf("--no-drop-late-frames", "--no-skip-frames")) }.getOrNull()
         if (lib == null) {
-            fail("VLC motoru başlatılamadı.")
+            fail(Tx.s(R.string.vlcplayera_003))
             return
         }
         libVlc = lib
@@ -274,11 +274,11 @@ class VlcPlayerActivity : AppCompatActivity() {
                     MediaPlayer.Event.TimeChanged -> if (e.timeChanged > 0) progressed = true
                     MediaPlayer.Event.EndReached -> when {
                         // Hiç ilerlemeden "bitti" geldiyse dosya açılamamıştır: sessizce kapatmak yerine söyle.
-                        !progressed && (vlc?.length ?: 0L) <= 0L -> fail("Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir.")
+                        !progressed && (vlc?.length ?: 0L) <= 0L -> fail(Tx.s(R.string.vlcplayera_004))
                         index < uris.size - 1 -> step(1)
                         else -> finish()
                     }
-                    MediaPlayer.Event.EncounteredError -> fail("Bu dosya VLC motoruyla da açılamadı.")
+                    MediaPlayer.Event.EncounteredError -> fail(Tx.s(R.string.vlcplayera_005))
                     MediaPlayer.Event.Playing, MediaPlayer.Event.Paused, MediaPlayer.Event.Stopped -> updatePlayIcon()
                 }
             }
@@ -306,7 +306,7 @@ class VlcPlayerActivity : AppCompatActivity() {
             } else Media(lib, uri)
         }.getOrNull()
         if (media == null) {
-            fail("Dosya açılamadı.")
+            fail(Tx.s(R.string.vlcplayera_006))
             return
         }
         media.setHWDecoderEnabled(true, false)
@@ -364,21 +364,21 @@ class VlcPlayerActivity : AppCompatActivity() {
         val mp = vlc ?: return
         val tracks = mp.audioTracks ?: emptyArray()
         if (tracks.isEmpty()) {
-            toast("Ses parçası bilgisi yok")
+            toast(Tx.s(R.string.vlcplayera_007))
             return
         }
         val cur = tracks.indexOfFirst { it.id == mp.audioTrack }
-        showChoice("Ses parçası", tracks.map { it.name }, cur) { mp.audioTrack = tracks[it].id }
+        showChoice(Tx.s(R.string.playermenu_002), tracks.map { it.name }, cur) { mp.audioTrack = tracks[it].id }
     }
 
     private fun chooseSubtitle() {
         val mp = vlc ?: return
         val tracks = mp.spuTracks ?: emptyArray()
         val labels = ArrayList<String>()
-        labels += "Kapalı"
+        labels += Tx.s(R.string.audiofx_004)
         tracks.forEach { labels += it.name }
-        labels += "Dosyadan altyazı yükle…"
-        showChoice("Altyazı", labels, -1) { i ->
+        labels += Tx.s(R.string.vlcplayera_008)
+        showChoice(Tx.s(R.string.mediainfo_014), labels, -1) { i ->
             when {
                 i == 0 -> mp.spuTrack = -1
                 i == labels.size - 1 -> pickSubtitle.launch(arrayOf("*/*"))
@@ -390,7 +390,7 @@ class VlcPlayerActivity : AppCompatActivity() {
     private fun chooseSpeed() {
         val speeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
         val sel = speeds.indices.minByOrNull { kotlin.math.abs(speeds[it] - speed) } ?: 2
-        showChoice("Oynatma hızı", speeds.map { "${it}x" }, sel) {
+        showChoice(Tx.s(R.string.gesturecon_003), speeds.map { "${it}x" }, sel) {
             speed = speeds[it]
             vlc?.rate = speed
         }

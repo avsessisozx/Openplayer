@@ -70,10 +70,10 @@ object VideoRepository {
                     result += VideoItem(
                         id = id,
                         uri = ContentUris.withAppendedId(collection, id),
-                        title = c.getString(nameCol) ?: "Video",
+                        title = c.getString(nameCol) ?: Tx.s(R.string.mediainfo_013),
                         durationMs = c.getLong(durCol),
                         bucketId = c.getLong(bucketIdCol),
-                        bucketName = c.getString(bucketNameCol) ?: "Diğer",
+                        bucketName = c.getString(bucketNameCol) ?: Tx.s(R.string.videorepos_001),
                         sizeBytes = c.getLong(sizeCol),
                         dateAddedSec = c.getLong(dateCol),
                         widthPx = c.getInt(wCol),

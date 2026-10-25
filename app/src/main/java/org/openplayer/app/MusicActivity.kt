@@ -33,9 +33,9 @@ import androidx.recyclerview.widget.RecyclerView
 class MusicActivity : AppCompatActivity() {
 
     private enum class Tab(val title: String) {
-        HOME("Kitaplık"), SONGS("Şarkılar"), ALBUMS("Albümler"), ARTISTS("Sanatçılar"),
-        ALBUM_ARTISTS("Albüm sanatçıları"), GENRES("Tarzlar"), YEARS("Yıllar"), COMPOSERS("Besteciler"),
-        FOLDERS("Klasörler"), TREE("Klasör hiyerarşisi")
+        HOME(Tx.s(R.string.musicactiv_004)), SONGS(Tx.s(R.string.musicactiv_003)), ALBUMS(Tx.s(R.string.musicactiv_002)), ARTISTS(Tx.s(R.string.musicactiv_001)),
+        ALBUM_ARTISTS(Tx.s(R.string.musicactiv_006)), GENRES(Tx.s(R.string.musicactiv_070)), YEARS(Tx.s(R.string.musicactiv_005)), COMPOSERS(Tx.s(R.string.musicactiv_069)),
+        FOLDERS(Tx.s(R.string.mainactivi_015)), TREE(Tx.s(R.string.musicactiv_007))
     }
 
     private class Row(
@@ -81,7 +81,7 @@ class MusicActivity : AppCompatActivity() {
         pendingTrack = null
         if (uri != null && tr != null) {
             val ok = MusicTagStore.setCover(this, tr.id, uri)
-            Toast.makeText(this, if (ok) "Kapak değiştirildi" else "Görsel okunamadı", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, if (ok) Tx.s(R.string.musicactiv_009) else Tx.s(R.string.musicactiv_008), Toast.LENGTH_SHORT).show()
             load()
         }
     }
@@ -91,7 +91,7 @@ class MusicActivity : AppCompatActivity() {
         pendingTrack = null
         if (uri != null && tr != null) {
             val ok = Lyrics.importFile(this, tr.id, uri)
-            Toast.makeText(this, if (ok) "Söz dosyası eklendi" else "Dosya okunamadı veya çok büyük", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, if (ok) Tx.s(R.string.musicactiv_011) else Tx.s(R.string.musicactiv_010), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -113,7 +113,7 @@ class MusicActivity : AppCompatActivity() {
 
     private val requestPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) load() else showEmpty("Müzikleri göstermek için izin gerekli.\nDokunarak tekrar dene.")
+            if (granted) load() else showEmpty(Tx.s(R.string.musicactiv_012))
         }
 
     private val requestNotifications =
@@ -209,9 +209,9 @@ class MusicActivity : AppCompatActivity() {
 
     private fun buildUi(): View {
         backButton = iconView(R.drawable.ic_back).apply { setOnClickListener { backCallback.handleOnBackPressed() } }
-        titleView = text(22f, bold = true).apply { text = "Müzik" }
+        titleView = text(22f, bold = true).apply { text = Tx.s(R.string.mainactivi_008) }
         searchField = EditText(this).apply {
-            hint = "Ara"
+            hint = Tx.s(R.string.mainactivi_002)
             setHintTextColor(UiColors.textSecondary)
             setTextColor(Color.WHITE)
             setSingleLine()
@@ -240,14 +240,14 @@ class MusicActivity : AppCompatActivity() {
             addView(searchButton)
             addView(sortButton)
             addView(iconView(R.drawable.ic_playlist_add).apply {
-                contentDescription = "Listeler"
+                contentDescription = Tx.s(R.string.musicactiv_013)
                 setOnClickListener {
                     startActivity(Intent(this@MusicActivity, PlaylistActivity::class.java)
                         .putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.MUSIC))
                 }
             })
             addView(iconView(R.drawable.ic_album).apply {
-                contentDescription = ".cue dosyası aç"
+                contentDescription = Tx.s(R.string.musicactiv_014)
                 setOnClickListener { pickCue.launch(arrayOf("*/*")) }
             })
         }
@@ -275,11 +275,11 @@ class MusicActivity : AppCompatActivity() {
                     setOnClickListener { onClick() }
                 }, LinearLayout.LayoutParams(0, dp(52), 1f))
             }
-            act(R.drawable.ic_check, "Hepsini seç") { selectAll() }
-            act(R.drawable.ic_playlist_add, "Listeye ekle") { addSelectionToPlaylist() }
-            act(R.drawable.ic_edit, "Etiketleri düzenle") { editTags(selectedTracks()) }
-            act(R.drawable.ic_share, "Paylaş") { shareTracks(selectedTracks()) }
-            act(R.drawable.ic_delete, "Sil") { deleteTracks(selectedTracks()) }
+            act(R.drawable.ic_check, Tx.s(R.string.mainactivi_003)) { selectAll() }
+            act(R.drawable.ic_playlist_add, Tx.s(R.string.mainactivi_073)) { addSelectionToPlaylist() }
+            act(R.drawable.ic_edit, Tx.s(R.string.musicactiv_015)) { editTags(selectedTracks()) }
+            act(R.drawable.ic_share, Tx.s(R.string.mainactivi_045)) { shareTracks(selectedTracks()) }
+            act(R.drawable.ic_delete, Tx.s(R.string.mainactivi_007)) { deleteTracks(selectedTracks()) }
         }
 
         tabRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -352,7 +352,7 @@ class MusicActivity : AppCompatActivity() {
     private fun buildTabs() {
         tabRow.removeAllViews()
         // "Videolar" sekmesi ilk sırada: müzik modundan videoya dönüş.
-        tabRow.addView(tabView("Videolar", false) { finish() }, LinearLayout.LayoutParams(-2, -1))
+        tabRow.addView(tabView(Tx.s(R.string.mainactivi_009), false) { finish() }, LinearLayout.LayoutParams(-2, -1))
         var selectedView: View? = null
         for (t in Tab.entries) {
             val v = tabView(t.title, t == tab && detail == null) {
@@ -365,7 +365,7 @@ class MusicActivity : AppCompatActivity() {
             if (t == tab) selectedView = v
             tabRow.addView(v, LinearLayout.LayoutParams(-2, -1))
         }
-        tabRow.addView(tabView("Listeler", false) {
+        tabRow.addView(tabView(Tx.s(R.string.musicactiv_013), false) {
             startActivity(Intent(this, PlaylistActivity::class.java).putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.MUSIC))
         }, LinearLayout.LayoutParams(-2, -1))
         selectedView?.let { v -> tabScroll.post { tabScroll.smoothScrollTo((v.left - dp(40)).coerceAtLeast(0), 0) } }
@@ -483,7 +483,7 @@ class MusicActivity : AppCompatActivity() {
 
     private fun showSortMenu() {
         val all = MusicSort.entries
-        showChoice("Şarkıları sırala", all.map { it.label }, all.indexOf(settings.musicSort)) {
+        showChoice(Tx.s(R.string.musicactiv_016), all.map { it.label }, all.indexOf(settings.musicSort)) {
             settings.musicSort = all[it]
             render()
         }
@@ -541,9 +541,9 @@ class MusicActivity : AppCompatActivity() {
 
         when {
             searching -> {
-                titleView.text = "Ara"
+                titleView.text = Tx.s(R.string.mainactivi_002)
                 if (query.isEmpty()) {
-                    showEmpty("Aramak için yazın")
+                    showEmpty(Tx.s(R.string.mainactivi_012))
                     return
                 }
                 val q = query.lowercase()
@@ -554,16 +554,16 @@ class MusicActivity : AppCompatActivity() {
             }
             d != null -> {
                 titleView.text = d.title
-                rows += Row("Hepsini çal", "${d.tracks.size} şarkı", null, icon = R.drawable.ic_play) {
+                rows += Row(Tx.s(R.string.musicactiv_018), Tx.s(R.string.musicactiv_017, d.tracks.size), null, icon = R.drawable.ic_play) {
                     MusicController.play(this, d.tracks, 0, shuffle = false); afterPlay()
                 }
-                rows += Row("Karıştır", "Rastgele sırayla çal", null, icon = R.drawable.ic_shuffle) {
+                rows += Row(Tx.s(R.string.musicactiv_020), Tx.s(R.string.musicactiv_019), null, icon = R.drawable.ic_shuffle) {
                     MusicController.play(this, d.tracks, (d.tracks.indices).random(), shuffle = true); afterPlay()
                 }
                 songRows(d.tracks)
             }
             tab == Tab.HOME -> {
-                titleView.text = "Kitaplık"
+                titleView.text = Tx.s(R.string.musicactiv_004)
                 fun entry(t: Tab, icon: Int, color: Int, count: String) {
                     rows += Row(t.title, count, null, icon = icon, iconBg = color) {
                         tab = t
@@ -571,24 +571,24 @@ class MusicActivity : AppCompatActivity() {
                         render()
                     }
                 }
-                entry(Tab.SONGS, R.drawable.ic_music_note, 0xFF6F86D6.toInt(), "${all.size} şarkı")
-                entry(Tab.FOLDERS, R.drawable.ic_folder, 0xFF3B82F6.toInt(), "${MusicRepository.folders(all).size} klasör")
-                entry(Tab.TREE, R.drawable.ic_move, 0xFF5B6EE1.toInt(), "Klasör ağacında gez")
-                entry(Tab.ALBUMS, R.drawable.ic_album, 0xFF6050C0.toInt(), "${MusicRepository.albums(all).size} albüm")
-                entry(Tab.ARTISTS, R.drawable.ic_mic, 0xFF5A5599.toInt(), "${MusicRepository.artists(all).size} sanatçı")
-                entry(Tab.ALBUM_ARTISTS, R.drawable.ic_mic, 0xFF6A5FA8.toInt(), "${MusicRepository.albumArtists(all).size} albüm sanatçısı")
+                entry(Tab.SONGS, R.drawable.ic_music_note, 0xFF6F86D6.toInt(), Tx.s(R.string.musicactiv_017, all.size))
+                entry(Tab.FOLDERS, R.drawable.ic_folder, 0xFF3B82F6.toInt(), Tx.s(R.string.musicactiv_021, MusicRepository.folders(all).size))
+                entry(Tab.TREE, R.drawable.ic_move, 0xFF5B6EE1.toInt(), Tx.s(R.string.musicactiv_022))
+                entry(Tab.ALBUMS, R.drawable.ic_album, 0xFF6050C0.toInt(), Tx.s(R.string.musicactiv_023, MusicRepository.albums(all).size))
+                entry(Tab.ARTISTS, R.drawable.ic_mic, 0xFF5A5599.toInt(), Tx.s(R.string.musicactiv_024, MusicRepository.artists(all).size))
+                entry(Tab.ALBUM_ARTISTS, R.drawable.ic_mic, 0xFF6A5FA8.toInt(), Tx.s(R.string.musicactiv_025, MusicRepository.albumArtists(all).size))
                 entry(Tab.GENRES, R.drawable.ic_headphones, 0xFF7A4A8C.toInt(), "${MusicRepository.genres(all).size} tarz")
-                entry(Tab.YEARS, R.drawable.ic_calendar, 0xFF3F8FA0.toInt(), "${MusicRepository.years(all).size} yıl")
+                entry(Tab.YEARS, R.drawable.ic_calendar, 0xFF3F8FA0.toInt(), Tx.s(R.string.musicactiv_026, MusicRepository.years(all).size))
                 entry(Tab.COMPOSERS, R.drawable.ic_person, 0xFF2F7D4F.toInt(), "${MusicRepository.composers(all).size} besteci")
-                rows += Row("Çalma listeleri", "Favoriler ve listeleriniz", null, icon = R.drawable.ic_list, iconBg = 0xFF8A4B3F.toInt()) {
+                rows += Row(Tx.s(R.string.musicactiv_027), Tx.s(R.string.musicactiv_071), null, icon = R.drawable.ic_list, iconBg = 0xFF8A4B3F.toInt()) {
                     startActivity(Intent(this, PlaylistActivity::class.java).putExtra(PlaylistActivity.EXTRA_KIND, PlaylistStore.MUSIC))
                 }
             }
             tab == Tab.SONGS -> {
-                titleView.text = "Müzik"
+                titleView.text = Tx.s(R.string.mainactivi_008)
                 val sorted = MusicRepository.sort(all, settings.musicSort)
                 if (sorted.isNotEmpty()) {
-                    rows += Row("Tümünü karıştır", "${sorted.size} şarkı", null, icon = R.drawable.ic_shuffle) {
+                    rows += Row(Tx.s(R.string.musicactiv_028), Tx.s(R.string.musicactiv_017, sorted.size), null, icon = R.drawable.ic_shuffle) {
                         MusicController.play(this, sorted, sorted.indices.random(), shuffle = true); afterPlay()
                     }
                 }
@@ -597,12 +597,12 @@ class MusicActivity : AppCompatActivity() {
             tab == Tab.TREE -> {
                 val root = treeRoot()
                 val cur = treePath ?: root
-                titleView.text = cur.substringAfterLast('/').ifEmpty { "Klasör hiyerarşisi" }
+                titleView.text = cur.substringAfterLast('/').ifEmpty { Tx.s(R.string.musicactiv_007) }
                 val prefix = cur.trimEnd('/') + "/"
                 val under = all.filter { it.folderPath.startsWith(prefix) || it.folderPath == cur }
                 val dirs = under.filter { it.folderPath != cur }.groupBy { it.folderPath.removePrefix(prefix).substringBefore('/') }
                 for ((name, list) in dirs.entries.sortedWith(compareBy(NaturalOrder) { it.key })) {
-                    rows += Row(name, "${list.size} şarkı", null, icon = R.drawable.ic_folder) {
+                    rows += Row(name, Tx.s(R.string.musicactiv_017, list.size), null, icon = R.drawable.ic_folder) {
                         treePath = prefix + name
                         render()
                     }
@@ -610,7 +610,7 @@ class MusicActivity : AppCompatActivity() {
                 songRows(MusicRepository.sort(under.filter { it.folderPath == cur }, settings.musicSort))
             }
             else -> {
-                titleView.text = "Müzik"
+                titleView.text = Tx.s(R.string.mainactivi_008)
                 val groups = when (tab) {
                     Tab.ALBUMS -> MusicRepository.albums(all)
                     Tab.ARTISTS -> MusicRepository.artists(all)
@@ -637,7 +637,7 @@ class MusicActivity : AppCompatActivity() {
         }
 
         if (rows.isEmpty()) {
-            showEmpty(if (hasPermission()) "Müzik bulunamadı.\nCihazdaki ses dosyaları burada görünür." else "Müzikleri göstermek için izin gerekli.\nDokunarak tekrar dene.")
+            showEmpty(if (hasPermission()) Tx.s(R.string.musicactiv_029) else Tx.s(R.string.musicactiv_012))
             return
         }
         emptyView.visibility = View.GONE
@@ -698,7 +698,7 @@ class MusicActivity : AppCompatActivity() {
         topBarView.visibility = if (selectionOn) View.GONE else View.VISIBLE
         selBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
         actionBar.visibility = if (selectionOn) View.VISIBLE else View.GONE
-        selTitle.text = "${selected.size} / ${shownTracks.size} Seçildi"
+        selTitle.text = Tx.s(R.string.mainactivi_036, selected.size, shownTracks.size)
         adapter.refreshSelection()
     }
 
@@ -717,10 +717,10 @@ class MusicActivity : AppCompatActivity() {
             showTrackInfo(ts[0])
             return
         }
-        showSummaryInfo("Seçili şarkılar", listOf(
-            "Şarkı sayısı" to ts.size.toString(),
-            "Toplam boyut" to android.text.format.Formatter.formatFileSize(this, ts.sumOf { it.sizeBytes }),
-            "Toplam süre" to formatDuration(ts.sumOf { it.durationMs }),
+        showSummaryInfo(Tx.s(R.string.musicactiv_030), listOf(
+            Tx.s(R.string.musicactiv_031) to ts.size.toString(),
+            Tx.s(R.string.mainactivi_075) to android.text.format.Formatter.formatFileSize(this, ts.sumOf { it.sizeBytes }),
+            Tx.s(R.string.mainactivi_038) to formatDuration(ts.sumOf { it.durationMs }),
         ))
     }
 
@@ -744,29 +744,29 @@ class MusicActivity : AppCompatActivity() {
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(ts.map { it.uri }))
         }
         send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivity(Intent.createChooser(send, "Paylaş"))
+        startActivity(Intent.createChooser(send, Tx.s(R.string.mainactivi_045)))
     }
 
     private fun deleteTracks(ts: List<MusicTrack>) {
         if (ts.isEmpty()) return
         val trash = Build.VERSION.SDK_INT >= 30 && settings.useTrash
         PanelBuilder(this)
-            .setTitle("Silinsin mi?")
-            .setMessage("${ts.size} şarkı ${if (trash) "çöp kutusuna taşınacak (geri alınabilir)." else "kalıcı olarak silinecek."}")
-            .setPositiveButton("Sil") { _, _ ->
+            .setTitle(Tx.s(R.string.mainactivi_079))
+            .setMessage(Tx.s(R.string.musicactiv_032, ts.size, if (trash) Tx.s(R.string.musicactiv_073) else Tx.s(R.string.musicactiv_072)))
+            .setPositiveButton(Tx.s(R.string.mainactivi_007)) { _, _ ->
                 fileOps.delete(ts.map { it.uri }) {
                     exitSelection()
                     load()
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
     }
 
     private fun renameTrack(t: MusicTrack) {
         val full = t.path.substringAfterLast('/').ifEmpty { t.title }
         val ext = full.substringAfterLast('.', "")
-        showInput("Dosyayı yeniden adlandır", "Yeni ad", full.removeSuffix(if (ext.isEmpty()) "" else ".$ext")) { base ->
+        showInput(Tx.s(R.string.musicactiv_033), Tx.s(R.string.mainactivi_078), full.removeSuffix(if (ext.isEmpty()) "" else ".$ext")) { base ->
             val clean = base.trim()
             if (clean.isEmpty()) return@showInput
             fileOps.rename(listOf(t.uri), listOf(if (ext.isEmpty()) clean else "$clean.$ext")) { load() }
@@ -785,17 +785,17 @@ class MusicActivity : AppCompatActivity() {
             setSingleLine()
             if (number) inputType = android.text.InputType.TYPE_CLASS_NUMBER
         }
-        val fTitle = field("Şarkı adı", if (single) t0.title else "")
-        val fArtist = field(if (single) "Sanatçı" else "Sanatçı (boş = değiştirme)", if (single) t0.artist else "")
-        val fAlbum = field(if (single) "Albüm" else "Albüm (boş = değiştirme)", if (single) t0.album else "")
-        val fAlbumArtist = field(if (single) "Albüm sanatçısı" else "Albüm sanatçısı (boş = değiştirme)", if (single) t0.albumArtist else "")
-        val fGenre = field(if (single) "Tür" else "Tür (boş = değiştirme)", if (single) t0.genre else "")
-        val fYear = field(if (single) "Yıl" else "Yıl (boş = değiştirme)", if (single && t0.year > 0) t0.year.toString() else "", true)
-        val fTrack = field("Parça no", if (single && t0.trackNo > 0) t0.trackNo.toString() else "", true)
+        val fTitle = field(Tx.s(R.string.musicactiv_034), if (single) t0.title else "")
+        val fArtist = field(if (single) Tx.s(R.string.mediainfo_008) else Tx.s(R.string.musicactiv_035), if (single) t0.artist else "")
+        val fAlbum = field(if (single) Tx.s(R.string.mediainfo_009) else Tx.s(R.string.musicactiv_036), if (single) t0.album else "")
+        val fAlbumArtist = field(if (single) Tx.s(R.string.musicactiv_038) else Tx.s(R.string.musicactiv_037), if (single) t0.albumArtist else "")
+        val fGenre = field(if (single) Tx.s(R.string.mediainfo_010) else Tx.s(R.string.musicactiv_039), if (single) t0.genre else "")
+        val fYear = field(if (single) Tx.s(R.string.mediainfo_011) else Tx.s(R.string.musicactiv_040), if (single && t0.year > 0) t0.year.toString() else "", true)
+        val fTrack = field(Tx.s(R.string.musicactiv_041), if (single && t0.trackNo > 0) t0.trackNo.toString() else "", true)
         val box = vertical {
             addView(label(
-                if (single) "Değişiklikler uygulamada saklanır; dosyanın kendisi değişmez."
-                else "${tracks.size} şarkı için ortak alanlar. Boş bıraktığın alan değişmez.",
+                if (single) Tx.s(R.string.musicactiv_042)
+                else Tx.s(R.string.musicactiv_043, tracks.size),
                 12f, UiColors.textSecondary
             ))
             if (single) addView(fTitle)
@@ -807,29 +807,29 @@ class MusicActivity : AppCompatActivity() {
             if (single) addView(fTrack)
             if (single) {
                 addView(android.widget.Button(this@MusicActivity).apply {
-                    text = "Kapağı değiştir…"
+                    text = Tx.s(R.string.musicactiv_044)
                     setOnClickListener {
                         pendingTrack = t0
                         pickCover.launch(arrayOf("image/*"))
                     }
                 }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
                 addView(android.widget.Button(this@MusicActivity).apply {
-                    text = "Söz dosyası ekle (.lrc / .txt)…"
+                    text = Tx.s(R.string.musicactiv_045)
                     setOnClickListener {
                         pendingTrack = t0
                         pickLyrics.launch(arrayOf("*/*"))
                     }
                 }, LinearLayout.LayoutParams(-1, -2))
                 addView(android.widget.Button(this@MusicActivity).apply {
-                    text = "Etiketleri dosyaya yaz (MP3)"
+                    text = Tx.s(R.string.musicactiv_046)
                     setOnClickListener { writeTagsToFile(t0, fTitle, fArtist, fAlbum, fAlbumArtist, fGenre, fYear, fTrack) }
                 }, LinearLayout.LayoutParams(-1, -2))
             }
         }
         PanelBuilder(this)
-            .setTitle(if (single) "Etiketleri düzenle" else "${tracks.size} şarkıyı düzenle")
+            .setTitle(if (single) Tx.s(R.string.musicactiv_015) else Tx.s(R.string.musicactiv_047, tracks.size))
             .setView(android.widget.ScrollView(this).apply { addView(box) })
-            .setPositiveButton("Kaydet") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.musicactiv_048)) { _, _ ->
                 for (t in tracks) {
                     val cur = MusicTagStore.get(this, t.id)
                     fun pick(v: EditText, old: String?): String? = v.text.toString().trim().ifEmpty { null } ?: old
@@ -850,7 +850,7 @@ class MusicActivity : AppCompatActivity() {
                 exitSelection()
                 load()
             }
-            .setNeutralButton("Orijinale döndür") { _, _ ->
+            .setNeutralButton(Tx.s(R.string.musicactiv_049)) { _, _ ->
                 tracks.forEach {
                     MusicTagStore.reset(this, it.id)
                     Lyrics.removeUserFile(this, it.id)
@@ -858,7 +858,7 @@ class MusicActivity : AppCompatActivity() {
                 exitSelection()
                 load()
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
     }
 
@@ -869,7 +869,7 @@ class MusicActivity : AppCompatActivity() {
         fAlbumArtist: EditText, fGenre: EditText, fYear: EditText, fTrack: EditText,
     ) {
         if (!TagWriter.isSupported(t.path)) {
-            Toast.makeText(this, "Dosyaya yazma şimdilik yalnızca MP3 içindir", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, Tx.s(R.string.musicactiv_050), Toast.LENGTH_SHORT).show()
             return
         }
         val fields = TagWriter.Fields(
@@ -882,7 +882,7 @@ class MusicActivity : AppCompatActivity() {
             trackNo = fTrack.text.toString().trim().toIntOrNull(),
         )
         val path = t.path
-        Toast.makeText(this, "Dosyaya yazılıyor…", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, Tx.s(R.string.musicactiv_051), Toast.LENGTH_SHORT).show()
         loader.execute {
             val res = TagWriter.write(path, fields)
             if (res.isSuccess) {
@@ -893,8 +893,8 @@ class MusicActivity : AppCompatActivity() {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 Toast.makeText(
                     this,
-                    if (res.isSuccess) "Etiketler dosyaya yazıldı"
-                    else "Yazılamadı: ${res.exceptionOrNull()?.message ?: "hata"}",
+                    if (res.isSuccess) Tx.s(R.string.musicactiv_052)
+                    else Tx.s(R.string.musicactiv_053, res.exceptionOrNull()?.message ?: "hata"),
                     Toast.LENGTH_LONG,
                 ).show()
                 load()
@@ -904,7 +904,7 @@ class MusicActivity : AppCompatActivity() {
 
     /** Bir .cue dosyasını çözümler, ses dosyasını kütüphanede bulur ve parçalarını çalar. */
     private fun openCue(uri: android.net.Uri) {
-        Toast.makeText(this, "Çözümleniyor…", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, Tx.s(R.string.musicactiv_054), Toast.LENGTH_SHORT).show()
         loader.execute {
             val bytes = runCatching { contentResolver.openInputStream(uri)?.use { it.readBytes() } }.getOrNull()
             val cue = bytes?.let { CueSheet.parse(CueSheet.decode(it)) }
@@ -913,9 +913,9 @@ class MusicActivity : AppCompatActivity() {
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 when {
-                    bytes == null -> Toast.makeText(this, "Dosya okunamadı", Toast.LENGTH_SHORT).show()
-                    cue == null -> Toast.makeText(this, ".cue çözümlenemedi", Toast.LENGTH_SHORT).show()
-                    audio == null -> Toast.makeText(this, "Ses dosyası kütüphanede bulunamadı: ${cue.file}", Toast.LENGTH_LONG).show()
+                    bytes == null -> Toast.makeText(this, Tx.s(R.string.musicactiv_055), Toast.LENGTH_SHORT).show()
+                    cue == null -> Toast.makeText(this, Tx.s(R.string.musicactiv_056), Toast.LENGTH_SHORT).show()
+                    audio == null -> Toast.makeText(this, Tx.s(R.string.musicactiv_057, cue.file), Toast.LENGTH_LONG).show()
                     else -> {
                         MusicController.play(this, tracks, 0)
                         startActivity(Intent(this, NowPlayingActivity::class.java))
@@ -931,46 +931,46 @@ class MusicActivity : AppCompatActivity() {
         val u = t.uri.toString()
         val fav = PlaylistStore.isFavorite(this, PlaylistStore.MUSIC, u)
         val e = ArrayList<SheetEntry>()
-        e += SheetEntry(R.drawable.ic_play, "Çal") {
+        e += SheetEntry(R.drawable.ic_play, Tx.s(R.string.musicactiv_058)) {
             val i = shownTracks.indexOfFirst { it.id == t.id }
             if (i >= 0) MusicController.play(this, shownTracks, i) else MusicController.play(this, listOf(t), 0)
             updateMini()
         }
-        e += SheetEntry(R.drawable.ic_next, "Sıradakine ekle") {
+        e += SheetEntry(R.drawable.ic_next, Tx.s(R.string.musicactiv_059)) {
             MusicController.enqueue(this, t, next = true)
-            Toast.makeText(this, "Sıradakine eklendi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, Tx.s(R.string.musicactiv_060), Toast.LENGTH_SHORT).show()
             updateMini()
         }
-        e += SheetEntry(R.drawable.ic_view_list, "Kuyruğun sonuna ekle") {
+        e += SheetEntry(R.drawable.ic_view_list, Tx.s(R.string.musicactiv_061)) {
             MusicController.enqueue(this, t, next = false)
-            Toast.makeText(this, "Kuyruğa eklendi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, Tx.s(R.string.musicactiv_062), Toast.LENGTH_SHORT).show()
             updateMini()
         }
         e += SheetEntry(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border,
-            if (fav) "Favorilerden çıkar" else "Favorilere ekle") {
+            if (fav) Tx.s(R.string.mainactivi_042) else Tx.s(R.string.mainactivi_077)) {
             PlaylistStore.toggleFavorite(this, PlaylistStore.MUSIC, u)
         }
-        e += SheetEntry(R.drawable.ic_playlist_add, "Oynatma listesine ekle") {
+        e += SheetEntry(R.drawable.ic_playlist_add, Tx.s(R.string.mainactivi_067)) {
             showAddToPlaylist(PlaylistStore.MUSIC, listOf(u))
         }
-        e += SheetEntry(R.drawable.ic_cloud_download, "Albüm kapağını internetten bul") { fetchCover(t) }
-        e += SheetEntry(R.drawable.ic_edit, "Etiketleri düzenle") { editTags(listOf(t)) }
-        e += SheetEntry(R.drawable.ic_share, "Paylaş") { shareTracks(listOf(t)) }
-        e += SheetEntry(R.drawable.ic_edit, "Dosyayı yeniden adlandır") { renameTrack(t) }
-        e += SheetEntry(R.drawable.ic_info, "Özellikler") { showTrackInfo(t) }
-        e += SheetEntry(R.drawable.ic_delete, "Sil", danger = true) { deleteTracks(listOf(t)) }
+        e += SheetEntry(R.drawable.ic_cloud_download, Tx.s(R.string.musicactiv_063)) { fetchCover(t) }
+        e += SheetEntry(R.drawable.ic_edit, Tx.s(R.string.musicactiv_015)) { editTags(listOf(t)) }
+        e += SheetEntry(R.drawable.ic_share, Tx.s(R.string.mainactivi_045)) { shareTracks(listOf(t)) }
+        e += SheetEntry(R.drawable.ic_edit, Tx.s(R.string.musicactiv_033)) { renameTrack(t) }
+        e += SheetEntry(R.drawable.ic_info, Tx.s(R.string.mainactivi_069)) { showTrackInfo(t) }
+        e += SheetEntry(R.drawable.ic_delete, Tx.s(R.string.mainactivi_007), danger = true) { deleteTracks(listOf(t)) }
         showSheet(t.title, e)
     }
 
     /** Albüm kapağını iTunes Search'ten indirir ve albümdeki tüm şarkılara uygular (onayla). */
     private fun fetchCover(t: MusicTrack) {
         PanelBuilder(this)
-            .setTitle("Kapak internetten aransın mı?")
-            .setMessage("Sanatçı ve albüm adı (\"${t.artist} — ${t.album}\") Apple'ın herkese açık iTunes Search servisine gönderilir. Bulunan kapak bu albümdeki şarkılara uygulanır.")
-            .setPositiveButton("Ara") { _, _ ->
+            .setTitle(Tx.s(R.string.musicactiv_064))
+            .setMessage(Tx.s(R.string.musicactiv_065, t.artist, t.album))
+            .setPositiveButton(Tx.s(R.string.mainactivi_002)) { _, _ ->
                 val app = applicationContext
                 val same = all.filter { it.albumId == t.albumId && it.album == t.album }
-                Toast.makeText(this, "Aranıyor…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, Tx.s(R.string.musicactiv_066), Toast.LENGTH_SHORT).show()
                 loader.execute {
                     val bytes = CoverFetcher.fetch(t.artist, t.album)
                     var ok = false
@@ -983,12 +983,12 @@ class MusicActivity : AppCompatActivity() {
                         tmp.delete()
                     }
                     runOnUiThread {
-                        Toast.makeText(this, if (ok) "Kapak uygulandı" else "Kapak bulunamadı veya indirilemedi", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, if (ok) Tx.s(R.string.musicactiv_068) else Tx.s(R.string.musicactiv_067), Toast.LENGTH_LONG).show()
                         if (ok) load()
                     }
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
     }
 

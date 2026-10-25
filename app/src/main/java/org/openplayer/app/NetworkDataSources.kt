@@ -102,7 +102,7 @@ class SmbDataSource(private val context: Context) : BaseDataSource(true) {
         currentUri = uri
         transferInitializing(dataSpec)
         val segments = uri.pathSegments
-        if (segments.isEmpty()) throw IOException("SMB adresinde paylaşım adı yok")
+        if (segments.isEmpty()) throw IOException(Tx.s(R.string.networkdat_001))
         val server = NetworkStore.find(context, uri)
             ?: NetServer(protocol = NetProtocol.SMB, name = "", host = uri.host.orEmpty())
         val port = if (uri.port > 0) uri.port else 445
@@ -122,13 +122,13 @@ class SmbDataSource(private val context: Context) : BaseDataSource(true) {
             )
         } catch (e: Exception) {
             closeQuietly()
-            throw IOException("SMB bağlantı hatası: ${e.message}", e)
+            throw IOException(Tx.s(R.string.networkdat_002, e.message), e)
         }
         val size = file!!.fileInformation.standardInformation.endOfFile
         filePosition = dataSpec.position
         if (filePosition > size) {
             closeQuietly()
-            throw IOException("SMB: istenen konum dosya boyutunu aşıyor")
+            throw IOException(Tx.s(R.string.networkdat_003))
         }
         bytesRemaining = if (dataSpec.length != C.LENGTH_UNSET.toLong()) dataSpec.length else size - filePosition
         cacheStart = 0
@@ -146,7 +146,7 @@ class SmbDataSource(private val context: Context) : BaseDataSource(true) {
             val n = try {
                 file!!.read(cache, filePosition, 0, want)
             } catch (e: Exception) {
-                throw IOException("SMB okuma hatası: ${e.message}", e)
+                throw IOException(Tx.s(R.string.networkdat_004, e.message), e)
             }
             if (n <= 0) return C.RESULT_END_OF_INPUT
             cacheStart = 0
@@ -207,7 +207,7 @@ class FtpDataSource(private val context: Context) : BaseDataSource(true) {
             val size = client.getSize(path)?.trim()?.toLongOrNull()
             if (dataSpec.position > 0) client.restartOffset = dataSpec.position
             stream = client.retrieveFileStream(path)
-                ?: throw IOException("FTP dosyası açılamadı: ${client.replyString.orEmpty().trim()}")
+                ?: throw IOException(Tx.s(R.string.networkdat_005, client.replyString.orEmpty().trim()))
             bytesRemaining = when {
                 dataSpec.length != C.LENGTH_UNSET.toLong() -> dataSpec.length
                 size != null -> (size - dataSpec.position).coerceAtLeast(0)
@@ -215,7 +215,7 @@ class FtpDataSource(private val context: Context) : BaseDataSource(true) {
             }
         } catch (e: Exception) {
             closeQuietly()
-            throw if (e is IOException) e else IOException("FTP hatası: ${e.message}", e)
+            throw if (e is IOException) e else IOException(Tx.s(R.string.networkdat_006, e.message), e)
         }
         opened = true
         transferStarted(dataSpec)

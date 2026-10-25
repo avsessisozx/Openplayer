@@ -51,21 +51,21 @@ private fun Context.chipRows(chips: List<Chip>, perRow: Int): LinearLayout =
 private fun directionLabels(k: SortKey): Pair<String, String> = when (k) {
     SortKey.DATE, SortKey.LAST_PLAYED -> "En eski" to "En yeni"
     SortKey.TITLE, SortKey.PATH, SortKey.EXTENSION -> "A → Z" to "Z → A"
-    SortKey.DURATION -> "En kısa" to "En uzun"
-    SortKey.SIZE -> "En küçük" to "En büyük"
-    SortKey.RESOLUTION -> "En düşük" to "En yüksek"
-    SortKey.STATUS -> "Yeni önce" to "İzlenen önce"
+    SortKey.DURATION -> Tx.s(R.string.listpanel_001) to "En uzun"
+    SortKey.SIZE -> Tx.s(R.string.listpanel_003) to Tx.s(R.string.listpanel_002)
+    SortKey.RESOLUTION -> Tx.s(R.string.listpanel_005) to Tx.s(R.string.listpanel_004)
+    SortKey.STATUS -> Tx.s(R.string.listpanel_007) to Tx.s(R.string.listpanel_006)
 }
 
 private val fieldLabels = listOf(
-    "thumb" to "Küçük resim",
-    "duration" to "Uzunluk",
-    "ext" to "Dosya uzantısı",
-    "played" to "Oynama zamanı",
-    "resolution" to "Çözünürlük",
-    "path" to "Adres",
-    "size" to "Boyut",
-    "date" to "Tarih",
+    "thumb" to Tx.s(R.string.listpanel_008),
+    "duration" to Tx.s(R.string.listpanel_020),
+    "ext" to Tx.s(R.string.listpanel_009),
+    "played" to Tx.s(R.string.listpanel_010),
+    "resolution" to Tx.s(R.string.listpanel_011),
+    "path" to Tx.s(R.string.listpanel_021),
+    "size" to Tx.s(R.string.listpanel_022),
+    "date" to Tx.s(R.string.listpanel_023),
 )
 
 fun Context.showListPanel(s: AppSettings, onDone: () -> Unit) {
@@ -93,8 +93,8 @@ fun Context.showListPanel(s: AppSettings, onDone: () -> Unit) {
 
     val modeChips = ListMode.entries.map { m -> chip(m.label, { mode == m }) { mode = m } }
     val layoutChips = listOf(
-        chip("Liste", { !grid }) { grid = false },
-        chip("Izgara", { grid }) { grid = true },
+        chip(Tx.s(R.string.listpanel_012), { !grid }) { grid = false },
+        chip(Tx.s(R.string.listpanel_024), { grid }) { grid = true },
     )
     val keyChips = SortKey.entries.map { k -> chip(k.label, { key == k }) { key = k } }
     val dirLow = chip("", { asc }) { asc = true }
@@ -133,23 +133,23 @@ fun Context.showListPanel(s: AppSettings, onDone: () -> Unit) {
     }
 
     val root = vertical(16) {
-        addView(title("Görünüm modu"))
+        addView(title(Tx.s(R.string.listpanel_013)))
         addView(chipRows(modeChips, 2))
-        addView(title("Düzen"))
+        addView(title(Tx.s(R.string.listpanel_014)))
         addView(chipRows(layoutChips, 2))
-        addView(title("Sırala"))
+        addView(title(Tx.s(R.string.listpanel_015)))
         addView(chipRows(keyChips, 3))
         addView(chipRows(listOf(dirLow, dirHigh), 2))
-        addView(title("Alanlar"))
+        addView(title(Tx.s(R.string.listpanel_025)))
         addView(fieldGrid)
-        addView(title("Gelişmiş"))
-        addView(toggle("Küçük resimde süreyi göster", durBadge) { durBadge = it })
-        addView(toggle("Gizli klasörleri göster", showHidden) { showHidden = it })
+        addView(title(Tx.s(R.string.listpanel_016)))
+        addView(toggle(Tx.s(R.string.listpanel_017), durBadge) { durBadge = it })
+        addView(toggle(Tx.s(R.string.listpanel_018), showHidden) { showHidden = it })
     }
     PanelBuilder(this)
         .setView(ScrollView(this).apply { addView(root) })
-        .setNegativeButton("İptal", null)
-        .setPositiveButton("Bitti") { _, _ ->
+        .setNegativeButton(Tx.s(R.string.fileops_004), null)
+        .setPositiveButton(Tx.s(R.string.listpanel_019)) { _, _ ->
             s.listMode = mode
             s.sortKey = key
             s.sortAscending = asc

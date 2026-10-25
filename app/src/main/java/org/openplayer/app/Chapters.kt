@@ -175,7 +175,7 @@ object Chapters {
             }
             pos = e.dataStart + e.size
         }
-        if (timeNs >= 0) out += Chapter(timeNs / 1_000_000L, title.ifEmpty { "Bölüm ${out.size + 1}" })
+        if (timeNs >= 0) out += Chapter(timeNs / 1_000_000L, title.ifEmpty { Tx.s(R.string.chapters_001, out.size + 1) })
         out += nested
     }
 
@@ -237,7 +237,7 @@ object Chapters {
             if (p + len > data.size) break
             val title = String(data, p, len, Charsets.UTF_8)
             p += len
-            out += Chapter(t / 10_000L, title.ifEmpty { "Bölüm ${i + 1}" })
+            out += Chapter(t / 10_000L, title.ifEmpty { Tx.s(R.string.chapters_001, i + 1) })
         }
         return out
     }

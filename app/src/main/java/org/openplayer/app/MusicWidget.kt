@@ -47,7 +47,7 @@ class MusicWidget : AppWidgetProvider() {
             worker.execute {
                 val views = RemoteViews(app.packageName, R.layout.widget_music)
                 views.setTextViewText(R.id.widget_title, if (music) item?.mediaMetadata?.title ?: "" else "OpenPlayer")
-                views.setTextViewText(R.id.widget_artist, if (music) item?.mediaMetadata?.artist ?: "" else "Çalan şarkı yok")
+                views.setTextViewText(R.id.widget_artist, if (music) item?.mediaMetadata?.artist ?: "" else Tx.s(R.string.musicwidge_001))
                 views.setImageViewResource(R.id.widget_play, if (playing) R.drawable.ic_pause else R.drawable.ic_play)
                 var bmp: android.graphics.Bitmap? = null
                 if (music && Build.VERSION.SDK_INT >= 29) {

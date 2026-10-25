@@ -30,8 +30,8 @@ object TagWriter {
      */
     fun write(path: String, f: Fields): Result<Unit> = runCatching {
         val src = File(path)
-        require(src.isFile) { "Dosya bulunamadı" }
-        require(isSupported(path)) { "Yalnızca MP3 destekleniyor" }
+        require(src.isFile) { Tx.s(R.string.tagwriter_001) }
+        require(isSupported(path)) { Tx.s(R.string.tagwriter_002) }
 
         val audioStart = existingTagSize(src)
         val tag = buildTag(f)
@@ -51,7 +51,7 @@ object TagWriter {
                 }
             }
             // Özgün dosyanın yerine koy.
-            if (!replace(tmp, src)) throw java.io.IOException("Dosya değiştirilemedi")
+            if (!replace(tmp, src)) throw java.io.IOException(Tx.s(R.string.tagwriter_003))
         } finally {
             if (tmp.exists()) tmp.delete()
         }

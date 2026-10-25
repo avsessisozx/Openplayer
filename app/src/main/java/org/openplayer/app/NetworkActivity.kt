@@ -214,7 +214,7 @@ class NetworkActivity : AppCompatActivity() {
     private fun showServers() {
         shownKey?.let { k -> listView.layoutManager?.onSaveInstanceState()?.let { scrollMemory[k] = it } }
         shownKey = null
-        titleView.text = "Ağ kaynakları"
+        titleView.text = Tx.s(R.string.networkact_001)
         addButton.visibility = View.VISIBLE
         val servers = NetworkStore.all(this)
         adapter.rows = servers.map { s ->
@@ -227,7 +227,7 @@ class NetworkActivity : AppCompatActivity() {
             )
         }
         statusView.setOnClickListener(null)
-        setStatus(if (servers.isEmpty()) "Henüz sunucu yok.\nSağ üstteki + ile SMB, FTP veya WebDAV sunucusu ekleyin." else null)
+        setStatus(if (servers.isEmpty()) Tx.s(R.string.networkact_002) else null)
     }
 
     private fun openServer(s: NetServer) {
@@ -245,7 +245,7 @@ class NetworkActivity : AppCompatActivity() {
         addButton.visibility = View.GONE
         adapter.rows = emptyList()
         statusView.setOnClickListener(null)
-        setStatus("Yükleniyor…")
+        setStatus(Tx.s(R.string.networkact_003))
         val id = ++requestId
         val wanted = dir
         Thread {
@@ -254,7 +254,7 @@ class NetworkActivity : AppCompatActivity() {
                 if (id != requestId || isFinishing) return@runOnUiThread
                 result.onSuccess { showEntries(s, it) }
                 result.onFailure { e ->
-                    setStatus("Bağlanılamadı:\n${e.message ?: e.javaClass.simpleName}\n\nYeniden denemek için dokunun.")
+                    setStatus(Tx.s(R.string.networkact_004, e.message ?: e.javaClass.simpleName))
                     statusView.setOnClickListener { load() }
                 }
             }
@@ -266,7 +266,7 @@ class NetworkActivity : AppCompatActivity() {
         val key = memKey(s)
         shownKey = key
         statusView.setOnClickListener(null)
-        setStatus(if (list.isEmpty()) "Bu klasörde klasör veya video yok." else null)
+        setStatus(if (list.isEmpty()) Tx.s(R.string.networkact_005) else null)
         adapter.rows = list.map { e ->
             if (e.isDir) {
                 Row(R.drawable.ic_folder, e.name, null, onClick = {
@@ -301,16 +301,16 @@ class NetworkActivity : AppCompatActivity() {
     // ------------------------------------------------------------------ sunucu ekleme / düzenleme
 
     private fun serverMenu(s: NetServer) {
-        showChoice(s.name.ifBlank { s.host }, listOf("Düzenle", "Sil"), -1) { which ->
+        showChoice(s.name.ifBlank { s.host }, listOf(Tx.s(R.string.networkact_006), Tx.s(R.string.mainactivi_007)), -1) { which ->
             when (which) {
                 0 -> showServerDialog(s)
                 1 -> PanelBuilder(this)
                     .setMessage("“${s.name.ifBlank { s.host }}” silinsin mi?")
-                    .setPositiveButton("Sil") { _, _ ->
+                    .setPositiveButton(Tx.s(R.string.mainactivi_007)) { _, _ ->
                         NetworkStore.delete(this, s.id)
                         showServers()
                     }
-                    .setNegativeButton("İptal", null)
+                    .setNegativeButton(Tx.s(R.string.fileops_004), null)
                     .show()
             }
         }
@@ -333,12 +333,12 @@ class NetworkActivity : AppCompatActivity() {
             adapter = ArrayAdapter(this@NetworkActivity, android.R.layout.simple_spinner_dropdown_item, protocols.map { it.label })
             setSelection(existing?.protocol?.ordinal ?: 0)
         }
-        val name = field("Ad (isteğe bağlı)", existing?.name.orEmpty())
-        val host = field("Sunucu adresi (örn. 192.168.1.10)", existing?.host.orEmpty())
-        val port = field("Port (boş = varsayılan)", existing?.port?.takeIf { it > 0 }?.toString().orEmpty(), number = true)
+        val name = field(Tx.s(R.string.networkact_007), existing?.name.orEmpty())
+        val host = field(Tx.s(R.string.networkact_008), existing?.host.orEmpty())
+        val port = field(Tx.s(R.string.networkact_009), existing?.port?.takeIf { it > 0 }?.toString().orEmpty(), number = true)
         val path = field(protocols[spinner.selectedItemPosition].pathHint, existing?.path.orEmpty())
-        val user = field("Kullanıcı adı (boş = anonim / misafir)", existing?.user.orEmpty())
-        val pass = field("Parola", existing?.pass.orEmpty(), password = true)
+        val user = field(Tx.s(R.string.networkact_010), existing?.user.orEmpty())
+        val pass = field(Tx.s(R.string.networkact_016), existing?.pass.orEmpty(), password = true)
         val secure = CheckBox(this).apply {
             text = "HTTPS kullan"
             isChecked = existing?.secure ?: false
@@ -361,10 +361,10 @@ class NetworkActivity : AppCompatActivity() {
             addView(secure)
         }
         val dialog = PanelBuilder(this)
-            .setTitle(if (existing == null) "Sunucu ekle" else "Sunucuyu düzenle")
+            .setTitle(if (existing == null) Tx.s(R.string.networkact_012) else Tx.s(R.string.networkact_011))
             .setView(ScrollView(this).apply { addView(form) })
-            .setPositiveButton("Kaydet", null)
-            .setNegativeButton("İptal", null)
+            .setPositiveButton(Tx.s(R.string.musicactiv_048), null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .create()
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
@@ -373,9 +373,9 @@ class NetworkActivity : AppCompatActivity() {
                 val pathText = path.text.toString().trim()
                 val portNumber = port.text.toString().trim().toIntOrNull() ?: 0
                 val error = when {
-                    hostText.isEmpty() -> "Sunucu adresi gerekli"
-                    protocol == NetProtocol.SMB && pathText.trim('/').isEmpty() -> "SMB için paylaşım adı gerekli"
-                    portNumber !in 0..65535 -> "Port 0-65535 arasında olmalı"
+                    hostText.isEmpty() -> Tx.s(R.string.networkact_017)
+                    protocol == NetProtocol.SMB && pathText.trim('/').isEmpty() -> Tx.s(R.string.networkact_013)
+                    portNumber !in 0..65535 -> Tx.s(R.string.networkact_014)
                     else -> null
                 }
                 if (error != null) {
@@ -386,7 +386,7 @@ class NetworkActivity : AppCompatActivity() {
                 if (insecure && pass.text.isNotEmpty()) {
                     Toast.makeText(
                         this,
-                        "Uyarı: bu protokol parolayı şifrelemeden gönderir; yalnızca güvendiğiniz ağda kullanın (WebDAV için https önerilir).",
+                        Tx.s(R.string.networkact_015),
                         Toast.LENGTH_LONG
                     ).show()
                 }

@@ -11,14 +11,14 @@ import kotlin.math.roundToInt
 
 /** Dikey kaydırmada bir bölgeye atanabilecek işlevler. */
 enum class GestureAction(val label: String) {
-    NONE("Hiçbir şey"),
-    BRIGHTNESS("Parlaklık"),
-    VOLUME("Ses"),
-    SPEED("Oynatma hızı"),
-    SEEK("Sarma (ileri/geri)"),
-    SUB_POSITION("Altyazı konumu"),
-    SUB_SIZE("Altyazı boyutu"),
-    ZOOM("Yakınlaştırma"),
+    NONE(Tx.s(R.string.gesturecon_001)),
+    BRIGHTNESS(Tx.s(R.string.gesturecon_002)),
+    VOLUME(Tx.s(R.string.gesturecon_015)),
+    SPEED(Tx.s(R.string.gesturecon_003)),
+    SEEK(Tx.s(R.string.gesturecon_016)),
+    SUB_POSITION(Tx.s(R.string.gesturecon_004)),
+    SUB_SIZE(Tx.s(R.string.gesturecon_005)),
+    ZOOM(Tx.s(R.string.gesturecon_006)),
 }
 
 /**
@@ -31,9 +31,9 @@ class GesturePrefs(context: Context) {
     companion object {
         val zones = listOf("left", "mid", "right")
         fun zoneLabel(zone: String) = when (zone) {
-            "left" -> "Sol"
-            "mid" -> "Orta"
-            else -> "Sağ"
+            "left" -> Tx.s(R.string.gesturecon_017)
+            "mid" -> Tx.s(R.string.gesturecon_018)
+            else -> Tx.s(R.string.gesturecon_007)
         }
     }
 
@@ -222,11 +222,11 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                 Mode.VERTICAL -> applyVertical(-totalY / height)
                 Mode.SUB_H -> {
                     subSwipe = totalX
-                    a.showHud(if (totalX > 0) "Sonraki altyazı ▶" else "◀ Önceki altyazı")
+                    a.showHud(if (totalX > 0) Tx.s(R.string.gesturecon_009) else Tx.s(R.string.gesturecon_008))
                 }
                 Mode.SUB_V -> {
                     a.setSubtitleBottom(startSubBottom - totalY / height)
-                    a.showHud("Altyazı konumu")
+                    a.showHud(Tx.s(R.string.gesturecon_004))
                 }
                 Mode.NONE -> Unit
             }
@@ -246,13 +246,13 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             if (a.vr != VrMode.NONE) {
                 if (a.vrAutoRotating() && a.settings.vrTapStopsAutoRotate) {
                     a.vrSetAutoRotate(false)
-                    a.showHud("Otomatik döndürme durdu")
+                    a.showHud(Tx.s(R.string.gesturecon_010))
                     a.hideHudSoon()
                     return true
                 }
                 if (a.vrSensorEnabled() && a.settings.vrTapStopsSensor) {
                     a.vrSetSensor(false)
-                    a.showHud("Hareket sensörü durdu")
+                    a.showHud(Tx.s(R.string.gesturecon_011))
                     a.hideHudSoon()
                     return true
                 }
@@ -292,18 +292,18 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                 val value = (startBrightness + fraction).coerceIn(0.01f, 1f)
                 a.window.attributes = a.window.attributes.apply { screenBrightness = value }
                 brightnessSet = value
-                a.showHud("Parlaklık ${(value * 100).roundToInt()}%")
+                a.showHud(Tx.s(R.string.gesturecon_012, (value * 100).roundToInt()))
             }
             GestureAction.VOLUME -> {
                 val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
                 val value = (startVolume + fraction * max).roundToInt().coerceIn(0, max)
                 audio.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0)
-                a.showHud("Ses ${(value * 100f / max).roundToInt()}%")
+                a.showHud(Tx.s(R.string.gesturecon_019, (value * 100f / max).roundToInt()))
             }
             GestureAction.SPEED -> {
                 val value = (((startSpeed + fraction * 2f) * 20).roundToInt() / 20f).coerceIn(0.25f, 4f)
                 a.setSpeed(value)
-                a.showHud("Hız ${"%.2f".format(value)}x")
+                a.showHud(Tx.s(R.string.gesturecon_013, "%.2f".format(value)))
             }
             GestureAction.SEEK -> {
                 val delta = (fraction * a.settings.swipeSeekSec * 1000f).toLong()
@@ -316,12 +316,12 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             }
             GestureAction.SUB_POSITION -> {
                 a.setSubtitleBottom(startSubBottom + fraction)
-                a.showHud("Altyazı konumu")
+                a.showHud(Tx.s(R.string.gesturecon_004))
             }
             GestureAction.SUB_SIZE -> {
                 a.settings.subtitleSizeSp = (startSubSize * (1f + fraction * 2f)).coerceIn(10f, 48f)
                 a.subtitles.applyStyle()
-                a.showHud("Altyazı boyutu ${a.settings.subtitleSizeSp.roundToInt()}")
+                a.showHud(Tx.s(R.string.gesturecon_014, a.settings.subtitleSizeSp.roundToInt()))
             }
             GestureAction.ZOOM -> {
                 a.zoomBy(1f + (fraction - lastFraction) * 2f)

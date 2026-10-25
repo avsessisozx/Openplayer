@@ -58,12 +58,12 @@ class Vr360PhotoActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             setBackgroundColor(0x99000000.toInt())
             setPadding(dp(8), dp(8), dp(8), dp(8))
-            addView(chip("Lens") { pickLens() })
+            addView(chip(Tx.s(R.string.vr360photo_008)) { pickLens() })
             addView(chip("3B") { pickStereo() })
-            addView(chip("Sensör") { toggleSensor() })
-            addView(chip("VR gözlük") { toggleCardboard() })
-            addView(chip("Ufku düzelt") { view.roll = 0f; toast("Ufuk düzeltildi") })
-            addView(chip("Kapat") { finish() })
+            addView(chip(Tx.s(R.string.vr360photo_001)) { toggleSensor() })
+            addView(chip(Tx.s(R.string.vr360photo_002)) { toggleCardboard() })
+            addView(chip(Tx.s(R.string.vr360photo_003)) { view.roll = 0f; toast(Tx.s(R.string.playeracti_033)) })
+            addView(chip(Tx.s(R.string.nowplaying_009)) { finish() })
         }
         val root = FrameLayout(this).apply {
             setBackgroundColor(Color.BLACK)
@@ -75,7 +75,7 @@ class Vr360PhotoActivity : AppCompatActivity() {
 
         val uri = intent.data
         if (uri == null) {
-            toast("Fotoğraf açılamadı")
+            toast(Tx.s(R.string.vr360photo_004))
             finish()
             return
         }
@@ -83,14 +83,14 @@ class Vr360PhotoActivity : AppCompatActivity() {
             val bmp = decode(uri)
             runOnUiThread {
                 if (bmp == null) {
-                    toast("Fotoğraf okunamadı")
+                    toast(Tx.s(R.string.vr360photo_005))
                     finish()
                 } else {
                     val ratio = bmp.width.toFloat() / bmp.height
                     mode = if (ratio >= 1.8f) VrMode.FULL else VrMode.FLAT
                     view.mode = mode
                     view.showBitmap(bmp)
-                    toast(if (mode == VrMode.FULL) "360° fotoğraf — kaydırarak etrafa bakın" else "Normal fotoğraf — Lens menüsünden 180° veya balık gözü seçebilirsiniz")
+                    toast(if (mode == VrMode.FULL) Tx.s(R.string.vr360photo_007) else Tx.s(R.string.vr360photo_006))
                 }
             }
         }.start()
@@ -125,7 +125,7 @@ class Vr360PhotoActivity : AppCompatActivity() {
     private fun pickLens() {
         val lenses = VrLens.entries
         AlertDialog.Builder(this)
-            .setTitle("Lens türü")
+            .setTitle(Tx.s(R.string.playermenu_120))
             .setItems(lenses.map { (if (mode.lens == it) "✓ " else "") + it.label }.toTypedArray()) { _, i ->
                 mode = VrMode.of(lenses[i], mode.stereo)
                 view.mode = mode
@@ -134,9 +134,9 @@ class Vr360PhotoActivity : AppCompatActivity() {
     }
 
     private fun pickStereo() {
-        val names = listOf("3B değil", "Üst-alt", "Yan yana")
+        val names = listOf(Tx.s(R.string.playermenu_106), Tx.s(R.string.playermenu_105), Tx.s(R.string.playermenu_144))
         AlertDialog.Builder(this)
-            .setTitle("3B biçimi")
+            .setTitle(Tx.s(R.string.playermenu_121))
             .setItems(names.mapIndexed { i, n -> (if (mode.stereo == i) "✓ " else "") + n }.toTypedArray()) { _, i ->
                 mode = VrMode.of(mode.lens, i)
                 view.mode = mode

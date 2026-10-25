@@ -81,7 +81,7 @@ object MediaInfo {
         "text/vtt" -> "WebVTT"
         "application/x-subrip" -> "SubRip (SRT)"
         "text/x-ssa" -> "SSA / ASS"
-        "application/dvbsubs", "application/pgs", "application/vobsub" -> "Resim altyazı"
+        "application/dvbsubs", "application/pgs", "application/vobsub" -> Tx.s(R.string.mediainfo_001)
         else -> mime
     }
 
@@ -133,45 +133,45 @@ object MediaInfo {
         val path = SubtitleFiles.pathOf(context, uri)
         val name = path?.substringAfterLast('/') ?: title
         val file = ArrayList<Pair<String, String>>()
-        file += "Dosya" to name
-        if (path != null) file += "Konum" to path.substringBeforeLast('/', "/")
+        file += Tx.s(R.string.mediainfo_025) to name
+        if (path != null) file += Tx.s(R.string.mainactivi_076) to path.substringBeforeLast('/', "/")
         val realSize = if (sizeBytes > 0) sizeBytes else path?.let { File(it).length() } ?: 0L
-        file += "Boyut" to size(realSize)
-        file += "Tarih" to fmtDate(dateMs)
-        sections += InfoSection("Dosya", file)
+        file += Tx.s(R.string.listpanel_022) to size(realSize)
+        file += Tx.s(R.string.listpanel_023) to fmtDate(dateMs)
+        sections += InfoSection(Tx.s(R.string.mediainfo_025), file)
 
         val mr = MediaMetadataRetriever()
         val media = ArrayList<Pair<String, String>>()
         try {
             mr.setDataSource(context, uri)
             val mime = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE)
-            media += "Biçim" to (mime ?: UNKNOWN)
+            media += Tx.s(R.string.mediainfo_002) to (mime ?: UNKNOWN)
             val w = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
             val h = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
             if (w > 0) {
-                media += "Çözünürlük" to "$w x $h"
-                media += "Görüntü oranı" to ratio(w, h)
+                media += Tx.s(R.string.listpanel_011) to "$w x $h"
+                media += Tx.s(R.string.mediainfo_003) to ratio(w, h)
             }
             val rot = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
-            if (rot != 0) media += "Döndürme" to "$rot°"
+            if (rot != 0) media += Tx.s(R.string.mediainfo_004) to "$rot°"
             val dur = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
-            if (dur > 0) media += "Uzunluk" to formatDuration(dur)
+            if (dur > 0) media += Tx.s(R.string.listpanel_020) to formatDuration(dur)
             val br = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toLongOrNull() ?: 0L
-            if (br > 0) media += "Toplam bit hızı" to bitrate(br)
+            if (br > 0) media += Tx.s(R.string.mediainfo_005) to bitrate(br)
             mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)?.let {
-                if (it.isNotBlank()) media += "Çekim kare hızı" to it
+                if (it.isNotBlank()) media += Tx.s(R.string.mediainfo_006) to it
             }
-            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)?.takeIf { it.isNotBlank() }?.let { media += "Başlık" to it }
-            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.takeIf { it.isNotBlank() }?.let { media += "Sanatçı" to it }
-            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)?.takeIf { it.isNotBlank() }?.let { media += "Albüm" to it }
-            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)?.takeIf { it.isNotBlank() }?.let { media += "Tür" to it }
-            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)?.takeIf { it.isNotBlank() }?.let { media += "Yıl" to it }
-            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS)?.takeIf { it.isNotBlank() }?.let { media += "Akış sayısı" to it }
+            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)?.takeIf { it.isNotBlank() }?.let { media += Tx.s(R.string.mediainfo_007) to it }
+            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.takeIf { it.isNotBlank() }?.let { media += Tx.s(R.string.mediainfo_008) to it }
+            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)?.takeIf { it.isNotBlank() }?.let { media += Tx.s(R.string.mediainfo_009) to it }
+            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)?.takeIf { it.isNotBlank() }?.let { media += Tx.s(R.string.mediainfo_010) to it }
+            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)?.takeIf { it.isNotBlank() }?.let { media += Tx.s(R.string.mediainfo_011) to it }
+            mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS)?.takeIf { it.isNotBlank() }?.let { media += Tx.s(R.string.mediainfo_012) to it }
         } catch (_: Exception) {
         } finally {
             runCatching { mr.release() }
         }
-        if (media.isNotEmpty()) sections += InfoSection("Medya", media)
+        if (media.isNotEmpty()) sections += InfoSection(Tx.s(R.string.mediainfo_026), media)
 
         val ex = MediaExtractor()
         try {
@@ -181,22 +181,22 @@ object MediaInfo {
                 val mime = f.getString(MediaFormat.KEY_MIME)
                 val rows = ArrayList<Pair<String, String>>()
                 val kind = when {
-                    mime?.startsWith("video/") == true -> "Video"
-                    mime?.startsWith("audio/") == true -> "Ses"
-                    mime?.startsWith("text/") == true || mime?.startsWith("application/") == true -> "Altyazı"
-                    else -> "Akış"
+                    mime?.startsWith("video/") == true -> Tx.s(R.string.mediainfo_013)
+                    mime?.startsWith("audio/") == true -> Tx.s(R.string.gesturecon_015)
+                    mime?.startsWith("text/") == true || mime?.startsWith("application/") == true -> Tx.s(R.string.mediainfo_014)
+                    else -> Tx.s(R.string.mediainfo_015)
                 }
                 rows += "Codec" to codecName(mime)
                 if (Build.VERSION.SDK_INT >= 23 && f.containsKey(MediaFormat.KEY_PROFILE)) {
-                    profileName(mime, f.getInteger(MediaFormat.KEY_PROFILE))?.let { rows += "Profil" to it }
+                    profileName(mime, f.getInteger(MediaFormat.KEY_PROFILE))?.let { rows += Tx.s(R.string.mediainfo_027) to it }
                 }
-                if (f.containsKey("language")) f.getString("language")?.takeIf { it.isNotBlank() && it != "und" }?.let { rows += "Dil" to it }
-                if (kind == "Video") {
-                    if (f.containsKey(MediaFormat.KEY_WIDTH)) rows += "Çözünürlük" to "${f.getInteger(MediaFormat.KEY_WIDTH)} x ${f.getInteger(MediaFormat.KEY_HEIGHT)}"
+                if (f.containsKey("language")) f.getString("language")?.takeIf { it.isNotBlank() && it != "und" }?.let { rows += Tx.s(R.string.mediainfo_028) to it }
+                if (kind == Tx.s(R.string.mediainfo_013)) {
+                    if (f.containsKey(MediaFormat.KEY_WIDTH)) rows += Tx.s(R.string.listpanel_011) to "${f.getInteger(MediaFormat.KEY_WIDTH)} x ${f.getInteger(MediaFormat.KEY_HEIGHT)}"
                     if (f.containsKey(MediaFormat.KEY_FRAME_RATE)) {
                         val fr = runCatching { f.getInteger(MediaFormat.KEY_FRAME_RATE).toFloat() }
                             .getOrElse { runCatching { f.getFloat(MediaFormat.KEY_FRAME_RATE) }.getOrDefault(0f) }
-                        if (fr > 0) rows += "Kare hızı" to "%.3f".format(fr).trimEnd('0').trimEnd('.')
+                        if (fr > 0) rows += Tx.s(R.string.mediainfo_016) to "%.3f".format(fr).trimEnd('0').trimEnd('.')
                     }
                     if (Build.VERSION.SDK_INT >= 24 && f.containsKey(MediaFormat.KEY_COLOR_TRANSFER)) {
                         when (f.getInteger(MediaFormat.KEY_COLOR_TRANSFER)) {
@@ -206,17 +206,17 @@ object MediaInfo {
                     }
                     if (Build.VERSION.SDK_INT >= 24 && f.containsKey(MediaFormat.KEY_COLOR_STANDARD) &&
                         f.getInteger(MediaFormat.KEY_COLOR_STANDARD) == MediaFormat.COLOR_STANDARD_BT2020
-                    ) rows += "Renk uzayı" to "BT.2020"
+                    ) rows += Tx.s(R.string.mediainfo_017) to "BT.2020"
                 }
-                if (kind == "Ses") {
-                    if (f.containsKey(MediaFormat.KEY_SAMPLE_RATE)) rows += "Örnekleme hızı" to "${f.getInteger(MediaFormat.KEY_SAMPLE_RATE)} Hz"
-                    if (f.containsKey(MediaFormat.KEY_CHANNEL_COUNT)) rows += "Kanallar" to channels(f.getInteger(MediaFormat.KEY_CHANNEL_COUNT))
+                if (kind == Tx.s(R.string.gesturecon_015)) {
+                    if (f.containsKey(MediaFormat.KEY_SAMPLE_RATE)) rows += Tx.s(R.string.mediainfo_018) to "${f.getInteger(MediaFormat.KEY_SAMPLE_RATE)} Hz"
+                    if (f.containsKey(MediaFormat.KEY_CHANNEL_COUNT)) rows += Tx.s(R.string.mediainfo_029) to channels(f.getInteger(MediaFormat.KEY_CHANNEL_COUNT))
                 }
                 if (f.containsKey(MediaFormat.KEY_BIT_RATE)) {
                     val b = f.getInteger(MediaFormat.KEY_BIT_RATE).toLong()
-                    if (b > 0) rows += "Bit hızı" to bitrate(b)
+                    if (b > 0) rows += Tx.s(R.string.mediainfo_019) to bitrate(b)
                 }
-                sections += InfoSection("Yayın akışı #${i + 1} · $kind", rows)
+                sections += InfoSection(Tx.s(R.string.mediainfo_020, i + 1, kind), rows)
             }
         } catch (_: Exception) {
         } finally {
@@ -289,13 +289,13 @@ private const val Color_WHITE = 0xFFFFFFFF.toInt()
 private fun Context.copyText(text: String) {
     val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     cm.setPrimaryClip(ClipData.newPlainText("OpenPlayer", text))
-    android.widget.Toast.makeText(this, "Kopyalandı", android.widget.Toast.LENGTH_SHORT).show()
+    android.widget.Toast.makeText(this, Tx.s(R.string.mediainfo_021), android.widget.Toast.LENGTH_SHORT).show()
 }
 
 /** Bilgi paneli: arka planda okur, sonra gösterir. Kopyala, paylaş ve (isteğe bağlı) SHA-256 düğmeleri vardır. */
 fun android.app.Activity.showMediaInfo(title: String, uri: Uri, sizeBytes: Long, dateMs: Long) {
     val app = applicationContext
-    val loading = android.widget.Toast.makeText(this, "Bilgi okunuyor…", android.widget.Toast.LENGTH_SHORT)
+    val loading = android.widget.Toast.makeText(this, Tx.s(R.string.mediainfo_030), android.widget.Toast.LENGTH_SHORT)
     loading.show()
     Thread {
         val sections = MediaInfo.read(app, uri, title, sizeBytes, dateMs)
@@ -305,18 +305,18 @@ fun android.app.Activity.showMediaInfo(title: String, uri: Uri, sizeBytes: Long,
             PanelBuilder(this)
                 .setTitle(title)
                 .setView(body)
-                .setPositiveButton("Tamam", null)
-                .setNeutralButton("Kopyala") { _, _ -> copyText(MediaInfo.toText(title, sections)) }
+                .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+                .setNeutralButton(Tx.s(R.string.mainactivi_005)) { _, _ -> copyText(MediaInfo.toText(title, sections)) }
                 .setNegativeButton("SHA-256") { _, _ ->
-                    android.widget.Toast.makeText(this, "Özet hesaplanıyor…", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(this, Tx.s(R.string.mediainfo_023), android.widget.Toast.LENGTH_SHORT).show()
                     Thread {
                         val h = MediaInfo.sha256(app, uri)
                         runOnUiThread {
                             if (!isFinishing && !isDestroyed) {
                                 PanelBuilder(this).setTitle("SHA-256")
-                                    .setMessage(h ?: "Hesaplanamadı")
-                                    .setPositiveButton("Tamam", null)
-                                    .setNeutralButton("Kopyala") { _, _ -> h?.let { copyText(it) } }
+                                    .setMessage(h ?: Tx.s(R.string.mediainfo_024))
+                                    .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+                                    .setNeutralButton(Tx.s(R.string.mainactivi_005)) { _, _ -> h?.let { copyText(it) } }
                                     .show()
                             }
                         }
@@ -332,7 +332,7 @@ fun android.app.Activity.showSummaryInfo(title: String, lines: List<Pair<String,
     PanelBuilder(this)
         .setTitle(title)
         .setView(ScrollView(this).apply { addView(infoView(listOf(InfoSection(null, lines)))) })
-        .setPositiveButton("Tamam", null)
-        .setNeutralButton("Kopyala") { _, _ -> copyText(lines.joinToString("\n") { "${it.first}: ${it.second}" }) }
+        .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+        .setNeutralButton(Tx.s(R.string.mainactivi_005)) { _, _ -> copyText(lines.joinToString("\n") { "${it.first}: ${it.second}" }) }
         .show()
 }

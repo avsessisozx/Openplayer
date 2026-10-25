@@ -47,12 +47,12 @@ object MediaOps {
         context: Context, src: Uri, title: String, startUs: Long, endUs: Long,
         progress: (Int) -> Unit, cancelled: () -> Boolean,
     ): Result {
-        if (Build.VERSION.SDK_INT < 29) return Result(false, "Kesme için Android 10 veya üstü gerekir.")
-        if (endUs <= startUs) return Result(false, "Bitiş, başlangıçtan sonra olmalı.")
+        if (Build.VERSION.SDK_INT < 29) return Result(false, Tx.s(R.string.mediaops_001))
+        if (endUs <= startUs) return Result(false, Tx.s(R.string.mediaops_002))
         val out = newItem(
             context, MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
             baseName(title) + " (kesit).mp4", "video/mp4", "Movies/OpenPlayer"
-        ) ?: return Result(false, "Çıktı dosyası oluşturulamadı.")
+        ) ?: return Result(false, Tx.s(R.string.mediaops_003))
         val ex = MediaExtractor()
         var muxer: MediaMuxer? = null
         var pfd: android.os.ParcelFileDescriptor? = null
@@ -66,7 +66,7 @@ object MediaOps {
                 rotation = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
                 mr.release()
             }
-            pfd = context.contentResolver.openFileDescriptor(out, "rw") ?: return Result(false, "Çıktı dosyası açılamadı.")
+            pfd = context.contentResolver.openFileDescriptor(out, "rw") ?: return Result(false, Tx.s(R.string.mediaops_004))
             val mx = MediaMuxer(pfd.fileDescriptor, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
             muxer = mx
             if (rotation != 0) mx.setOrientationHint(rotation)
@@ -79,7 +79,7 @@ object MediaOps {
                 map[i] = dst
                 ex.selectTrack(i)
             }
-            if (map.isEmpty()) return Result(false, "Bu dosyanın akışları MP4'e kayıpsız aktarılamıyor.")
+            if (map.isEmpty()) return Result(false, Tx.s(R.string.mediaops_005))
             ex.seekTo(startUs, MediaExtractor.SEEK_TO_PREVIOUS_SYNC)
             mx.start()
             started = true
@@ -89,7 +89,7 @@ object MediaOps {
             var lastPct = -1
             while (true) {
                 if (cancelled()) {
-                    return Result(false, "İptal edildi.")
+                    return Result(false, Tx.s(R.string.mediaops_006))
                 }
                 val t = ex.sampleTime
                 if (t < 0 || t > endUs) break
@@ -119,10 +119,10 @@ object MediaOps {
             pfd.close()
             pfd = null
             finish(context, out)
-            return Result(true, "Kaydedildi: Movies/OpenPlayer")
+            return Result(true, Tx.s(R.string.mediaops_026))
         } catch (e: Exception) {
             discard(context, out)
-            return Result(false, "Kesilemedi: ${e.message ?: "bilinmeyen hata"}")
+            return Result(false, Tx.s(R.string.mediaops_cut_failed, e.message ?: Tx.s(R.string.playermenu_067)))
         } finally {
             runCatching { if (started) muxer?.stop() }
             runCatching { muxer?.release() }
@@ -162,7 +162,7 @@ object MediaOps {
         context: Context, src: Uri, title: String, trackIndex: Int,
         progress: (Int) -> Unit, cancelled: () -> Boolean,
     ): Result {
-        if (Build.VERSION.SDK_INT < 29) return Result(false, "Bu özellik için Android 10 veya üstü gerekir.")
+        if (Build.VERSION.SDK_INT < 29) return Result(false, Tx.s(R.string.mediaops_007))
         val ex = MediaExtractor()
         var out: Uri? = null
         var pfd: android.os.ParcelFileDescriptor? = null
@@ -171,18 +171,18 @@ object MediaOps {
         try {
             ex.setDataSource(context, src, null)
             val f = ex.getTrackFormat(trackIndex)
-            val mime = f.getString(MediaFormat.KEY_MIME) ?: return Result(false, "Ses biçimi okunamadı.")
+            val mime = f.getString(MediaFormat.KEY_MIME) ?: return Result(false, Tx.s(R.string.mediaops_008))
             val (ext, fileMime) = when (mime) {
                 "audio/mp4a-latm" -> "m4a" to "audio/mp4"
                 "audio/mpeg" -> "mp3" to "audio/mpeg"
                 "audio/opus" -> "ogg" to "audio/ogg"
-                else -> return Result(false, "Bu ses biçimi ($mime) yeniden kodlamadan çıkarılamıyor.")
+                else -> return Result(false, Tx.s(R.string.mediaops_009, mime))
             }
             out = newItem(
                 context, MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
                 baseName(title) + ".$ext", fileMime, "Music/OpenPlayer"
-            ) ?: return Result(false, "Çıktı dosyası oluşturulamadı.")
-            pfd = context.contentResolver.openFileDescriptor(out, "rw") ?: return Result(false, "Çıktı dosyası açılamadı.")
+            ) ?: return Result(false, Tx.s(R.string.mediaops_003))
+            pfd = context.contentResolver.openFileDescriptor(out, "rw") ?: return Result(false, Tx.s(R.string.mediaops_004))
             ex.selectTrack(trackIndex)
             val dur = if (f.containsKey(MediaFormat.KEY_DURATION)) f.getLong(MediaFormat.KEY_DURATION) else 0L
             val buf = ByteBuffer.allocate(2 * 1024 * 1024)
@@ -193,7 +193,7 @@ object MediaOps {
                 java.io.FileOutputStream(pfd.fileDescriptor).use { os ->
                     val tmp = ByteArray(2 * 1024 * 1024)
                     while (true) {
-                        if (cancelled()) return Result(false, "İptal edildi.")
+                        if (cancelled()) return Result(false, Tx.s(R.string.mediaops_006))
                         buf.clear()
                         val size = ex.readSampleData(buf, 0)
                         if (size < 0) break
@@ -217,7 +217,7 @@ object MediaOps {
                 started = true
                 var base = -1L
                 while (true) {
-                    if (cancelled()) return Result(false, "İptal edildi.")
+                    if (cancelled()) return Result(false, Tx.s(R.string.mediaops_006))
                     buf.clear()
                     val size = ex.readSampleData(buf, 0)
                     if (size < 0) break
@@ -235,10 +235,10 @@ object MediaOps {
                 started = false
             }
             finish(context, out)
-            return Result(true, "Kaydedildi: Music/OpenPlayer")
+            return Result(true, Tx.s(R.string.mediaops_027))
         } catch (e: Exception) {
             out?.let { discard(context, it) }
-            return Result(false, "Çıkarılamadı: ${e.message ?: "bilinmeyen hata"}")
+            return Result(false, Tx.s(R.string.mediaops_010, e.message ?: "bilinmeyen hata"))
         } finally {
             runCatching { if (started) muxer?.stop() }
             runCatching { muxer?.release() }
@@ -270,7 +270,7 @@ private fun android.app.Activity.runWithProgress(
     val pctText = label("0%")
     val box = vertical { addView(pctText); addView(bar) }
     val dialog = PanelBuilder(this).setTitle(title).setView(box).setCancelable(false)
-        .setNegativeButton("İptal") { _, _ -> cancel.set(true) }.create()
+        .setNegativeButton(Tx.s(R.string.fileops_004)) { _, _ -> cancel.set(true) }.create()
     dialog.show()
     Thread {
         val r = work({ p -> runOnUiThread { bar.progress = p; pctText.text = "$p%" } }, { cancel.get() })
@@ -285,7 +285,7 @@ private fun android.app.Activity.runWithProgress(
 /** Kes penceresi: başlangıç ve bitiş zamanı. [currentPos] verilirse "şimdi" düğmeleri çıkar. */
 fun android.app.Activity.showTrimDialog(uri: Uri, title: String, durationMs: Long, currentPos: (() -> Long)? = null, onDone: () -> Unit = {}) {
     if (Build.VERSION.SDK_INT < 29) {
-        showMessage("Kes", "Bu özellik Android 10 ve üstünde çalışır.")
+        showMessage(Tx.s(R.string.mainactivi_047), Tx.s(R.string.mediaops_011))
         return
     }
     fun field(hint: String, initial: String) = android.widget.EditText(this).apply {
@@ -294,49 +294,49 @@ fun android.app.Activity.showTrimDialog(uri: Uri, title: String, durationMs: Lon
         setSingleLine()
     }
     fun fmt(ms: Long) = formatDuration(ms)
-    val start = field("Başlangıç (örn. 1:30)", "0:00")
-    val end = field("Bitiş (örn. 12:45)", if (durationMs > 0) fmt(durationMs) else "")
+    val start = field(Tx.s(R.string.mediaops_012), "0:00")
+    val end = field(Tx.s(R.string.mediaops_013), if (durationMs > 0) fmt(durationMs) else "")
     val box = vertical {
-        addView(label("Toplam süre: ${if (durationMs > 0) fmt(durationMs) else "bilinmiyor"}", 13f, UiColors.textSecondary))
-        addView(label("Başlangıç", 13f, UiColors.textSecondary))
+        addView(label(Tx.s(R.string.mediaops_014, if (durationMs > 0) fmt(durationMs) else "bilinmiyor"), 13f, UiColors.textSecondary))
+        addView(label(Tx.s(R.string.mediaops_015), 13f, UiColors.textSecondary))
         addView(start)
         if (currentPos != null) addView(android.widget.Button(this@showTrimDialog).apply {
-            text = "Başlangıç = şimdiki an"
+            text = Tx.s(R.string.mediaops_016)
             setOnClickListener { start.setText(fmt(currentPos())) }
         })
-        addView(label("Bitiş", 13f, UiColors.textSecondary))
+        addView(label(Tx.s(R.string.mediaops_017), 13f, UiColors.textSecondary))
         addView(end)
         if (currentPos != null) addView(android.widget.Button(this@showTrimDialog).apply {
-            text = "Bitiş = şimdiki an"
+            text = Tx.s(R.string.mediaops_018)
             setOnClickListener { end.setText(fmt(currentPos())) }
         })
         addView(label(
-            "Kayıpsız kesilir (yeniden kodlama yok). Başlangıç, en yakın önceki anahtar kareye oturur; birkaç saniye erken başlayabilir. Sonuç Movies/OpenPlayer klasörüne kaydedilir.",
+            Tx.s(R.string.mediaops_019),
             12f, UiColors.textSecondary
         ), android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
     }
     PanelBuilder(this)
-        .setTitle("Kes")
+        .setTitle(Tx.s(R.string.mainactivi_047))
         .setView(android.widget.ScrollView(this).apply { addView(box) })
-        .setPositiveButton("Kes") { _, _ ->
+        .setPositiveButton(Tx.s(R.string.mainactivi_047)) { _, _ ->
             val s = parseTime(start.text.toString())
             val e = parseTime(end.text.toString()) ?: durationMs
             if (s == null || e <= s || (durationMs > 0 && s >= durationMs)) {
-                android.widget.Toast.makeText(this, "Zamanlar geçersiz", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, Tx.s(R.string.mediaops_020), android.widget.Toast.LENGTH_SHORT).show()
             } else {
                 val app = applicationContext
-                runWithProgress("Kesiliyor",
+                runWithProgress(Tx.s(R.string.mediaops_028),
                     { p, c -> MediaOps.cut(app, uri, title, s * 1000, e * 1000, p, c) }) { onDone() }
             }
         }
-        .setNegativeButton("İptal", null)
+        .setNegativeButton(Tx.s(R.string.fileops_004), null)
         .show()
 }
 
 /** Videodan sesi çıkarır; birden fazla ses akışı varsa seçtirir. */
 fun android.app.Activity.showExtractAudio(uri: Uri, title: String, onDone: () -> Unit = {}) {
     if (Build.VERSION.SDK_INT < 29) {
-        showMessage("Sesi çıkar", "Bu özellik Android 10 ve üstünde çalışır.")
+        showMessage(Tx.s(R.string.mediaops_021), Tx.s(R.string.mediaops_011))
         return
     }
     val app = applicationContext
@@ -346,14 +346,14 @@ fun android.app.Activity.showExtractAudio(uri: Uri, title: String, onDone: () ->
             if (isFinishing || isDestroyed) return@runOnUiThread
             val ok = tracks.filter { it.supported }
             when {
-                tracks.isEmpty() -> android.widget.Toast.makeText(this, "Videoda ses akışı yok", android.widget.Toast.LENGTH_SHORT).show()
+                tracks.isEmpty() -> android.widget.Toast.makeText(this, Tx.s(R.string.mediaops_022), android.widget.Toast.LENGTH_SHORT).show()
                 ok.isEmpty() -> showMessage(
-                    "Sesi çıkar",
-                    "Bu videonun ses biçimleri yeniden kodlamadan çıkarılamıyor:\n" + tracks.joinToString("\n") { it.label } +
+                    Tx.s(R.string.mediaops_021),
+                    Tx.s(R.string.mediaops_023) + tracks.joinToString("\n") { it.label } +
                         "\n\nDesteklenenler: AAC (m4a), MP3, Opus (ogg)."
                 )
                 ok.size == 1 -> doExtract(uri, title, ok[0].index, onDone)
-                else -> showChoice("Hangi ses akışı?", ok.map { it.label }, -1) { doExtract(uri, title, ok[it].index, onDone) }
+                else -> showChoice(Tx.s(R.string.mediaops_024), ok.map { it.label }, -1) { doExtract(uri, title, ok[it].index, onDone) }
             }
         }
     }.start()
@@ -361,5 +361,5 @@ fun android.app.Activity.showExtractAudio(uri: Uri, title: String, onDone: () ->
 
 private fun android.app.Activity.doExtract(uri: Uri, title: String, index: Int, onDone: () -> Unit) {
     val app = applicationContext
-    runWithProgress("Ses çıkarılıyor", { p, c -> MediaOps.extractAudio(app, uri, title, index, p, c) }) { onDone() }
+    runWithProgress(Tx.s(R.string.mediaops_025), { p, c -> MediaOps.extractAudio(app, uri, title, index, p, c) }) { onDone() }
 }

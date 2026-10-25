@@ -69,7 +69,7 @@ object NetworkBrowser {
 
     private fun listSmb(server: NetServer, dir: String): List<NetEntry> {
         val segments = dir.trim('/').split('/').filter { it.isNotEmpty() }
-        if (segments.isEmpty()) throw IOException("SMB için paylaşım adı gerekli")
+        if (segments.isEmpty()) throw IOException(Tx.s(R.string.networkact_013))
         val shareName = segments[0]
         val sub = segments.drop(1).joinToString("\\")
         return SMBClient().use { client ->
@@ -98,10 +98,10 @@ object NetworkBrowser {
         try {
             ftp.connect(server.host, server.effectivePort)
             ftp.soTimeout = 30_000
-            if (!FTPReply.isPositiveCompletion(ftp.replyCode)) throw IOException("FTP sunucusu bağlantıyı reddetti")
+            if (!FTPReply.isPositiveCompletion(ftp.replyCode)) throw IOException(Tx.s(R.string.networkbro_001))
             val user = server.user.ifEmpty { "anonymous" }
             val pass = if (server.user.isEmpty()) "anonymous@" else server.pass
-            if (!ftp.login(user, pass)) throw IOException("FTP girişi başarısız (kullanıcı adı veya parola hatalı)")
+            if (!ftp.login(user, pass)) throw IOException(Tx.s(R.string.networkbro_002))
             ftp.enterLocalPassiveMode()
             ftp.setFileType(FTP.BINARY_FILE_TYPE)
             return ftp
@@ -139,8 +139,8 @@ object NetworkBrowser {
             .header("Depth", "1")
         if (server.user.isNotEmpty()) builder.header("Authorization", Credentials.basic(server.user, server.pass))
         http.newCall(builder.build()).execute().use { resp ->
-            if (resp.code == 401) throw IOException("WebDAV: kullanıcı adı veya parola hatalı")
-            if (resp.code != 207 && !resp.isSuccessful) throw IOException("WebDAV hatası ${resp.code}")
+            if (resp.code == 401) throw IOException(Tx.s(R.string.networkbro_003))
+            if (resp.code != 207 && !resp.isSuccessful) throw IOException(Tx.s(R.string.networkbro_004, resp.code))
             val body = resp.body?.byteStream() ?: return emptyList()
             return parseDav(body, dir)
         }

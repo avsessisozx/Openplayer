@@ -270,15 +270,15 @@ object MusicController {
         val f = fx
         val st = AppSettings.get(a)
         val root = a.vertical {}
-        val boostLabel = a.label("Ses artırma: %${st.volumeBoostPercent}")
+        val boostLabel = a.label(Tx.s(R.string.musiccontr_001, st.volumeBoostPercent))
         root.addView(boostLabel)
         root.addView(a.seekBar(100, 200, st.volumeBoostPercent) { v ->
             if (f != null) f.setBoostPercent(v) else st.volumeBoostPercent = v
-            boostLabel.text = "Ses artırma: %$v"
+            boostLabel.text = Tx.s(R.string.musiccontr_001, v)
         })
         if (f != null && f.available && f.bandCount > 0) {
             val sw = androidx.appcompat.widget.SwitchCompat(a).apply {
-                text = "Ekolayzır"
+                text = Tx.s(R.string.musiccontr_002)
                 setTextColor(android.graphics.Color.WHITE)
                 isChecked = st.eqEnabled
                 setOnCheckedChangeListener { _, on -> f.setEnabled(on) }
@@ -286,13 +286,13 @@ object MusicController {
             root.addView(sw, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
             val presets = f.presetNames
             if (presets.isNotEmpty()) {
-                root.addView(a.label("Hazır ayarlar", 14f, UiColors.accent).apply {
+                root.addView(a.label(Tx.s(R.string.musiccontr_003), 14f, UiColors.accent).apply {
                     setPadding(0, a.dp(8), 0, a.dp(8))
                     setOnClickListener {
-                        a.showChoice("Ekolayzır ayarı", presets, -1) { i ->
+                        a.showChoice(Tx.s(R.string.musiccontr_004), presets, -1) { i ->
                             f.usePreset(i)
                             sw.isChecked = true
-                            android.widget.Toast.makeText(a, "Ayar uygulandı; çubuklar bir sonraki açılışta güncellenir", android.widget.Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(a, Tx.s(R.string.musiccontr_005), android.widget.Toast.LENGTH_SHORT).show()
                         }
                     }
                 })
@@ -303,35 +303,35 @@ object MusicController {
                 root.addView(a.label(if (freq >= 1000) "${freq / 1000} kHz" else "$freq Hz", 12f))
                 root.addView(a.seekBar(min, max, f.level(band)) { v -> f.setLevel(band, v) })
             }
-            val bassLabel = a.label("Bas güçlendirme: ${st.bassStrength / 10}%", 14f)
+            val bassLabel = a.label(Tx.s(R.string.musiccontr_006, st.bassStrength / 10), 14f)
             root.addView(bassLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
             root.addView(a.seekBar(0, 1000, st.bassStrength) { v ->
                 f.setBass(v)
-                bassLabel.text = "Bas güçlendirme: ${v / 10}%"
+                bassLabel.text = Tx.s(R.string.musiccontr_006, v / 10)
             })
-            val virtLabel = a.label("Stereo genişletme: ${st.virtualizerStrength / 10}%", 14f)
+            val virtLabel = a.label(Tx.s(R.string.musiccontr_007, st.virtualizerStrength / 10), 14f)
             root.addView(virtLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
             root.addView(a.seekBar(0, 1000, st.virtualizerStrength) { v ->
                 f.setVirtualizer(v)
-                virtLabel.text = "Stereo genişletme: ${v / 10}%"
+                virtLabel.text = Tx.s(R.string.musiccontr_007, v / 10)
             })
-            root.addView(a.label("Bas ve genişletme, cihazın ses efekti desteğine bağlıdır; bazı telefonlarda etkisi az olabilir.", 11f, UiColors.textSecondary))
+            root.addView(a.label(Tx.s(R.string.musiccontr_008), 11f, UiColors.textSecondary))
         } else {
             root.addView(
-                a.label("Ekolayzır için önce bir şarkı çalın.", 13f, UiColors.textSecondary),
+                a.label(Tx.s(R.string.musiccontr_009), 13f, UiColors.textSecondary),
                 android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) }
             )
         }
 
-        val balLabel = a.label("Denge: ${balanceText(st.audioBalance)}", 14f)
+        val balLabel = a.label(Tx.s(R.string.musiccontr_010, balanceText(st.audioBalance)), 14f)
         root.addView(balLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(16) })
         root.addView(a.seekBar(-100, 100, st.audioBalance) { v ->
             st.audioBalance = v
             AudioBalance.update(st)
-            balLabel.text = "Denge: ${balanceText(v)}"
+            balLabel.text = Tx.s(R.string.musiccontr_010, balanceText(v))
         })
         root.addView(androidx.appcompat.widget.SwitchCompat(a).apply {
-            text = "Mono karıştırma"
+            text = Tx.s(R.string.musiccontr_011)
             setTextColor(android.graphics.Color.WHITE)
             isChecked = st.monoMix
             setOnCheckedChangeListener { _, on ->
@@ -340,31 +340,31 @@ object MusicController {
             }
         }, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
 
-        val rgNames = listOf("Kapalı", "Parça", "Albüm")
-        root.addView(a.label("ReplayGain: ${rgNames[st.replayGainMode]} (yalnızca ses kısar)", 14f, UiColors.accent).apply {
+        val rgNames = listOf(Tx.s(R.string.audiofx_004), Tx.s(R.string.musiccontr_012), Tx.s(R.string.mediainfo_009))
+        root.addView(a.label(Tx.s(R.string.musiccontr_013, rgNames[st.replayGainMode]), 14f, UiColors.accent).apply {
             setPadding(0, a.dp(14), 0, a.dp(6))
             setOnClickListener {
                 a.showChoice("ReplayGain", rgNames, st.replayGainMode) { i ->
                     st.replayGainMode = i
                     refreshAudioSettings()
-                    text = "ReplayGain: ${rgNames[i]} (yalnızca ses kısar)"
+                    text = Tx.s(R.string.musiccontr_013, rgNames[i])
                 }
             }
         })
-        val cfLabel = a.label(if (st.crossfadeSec == 0) "Geçişte yumuşatma: kapalı" else "Geçişte yumuşatma: ${st.crossfadeSec} sn", 14f)
+        val cfLabel = a.label(if (st.crossfadeSec == 0) Tx.s(R.string.musiccontr_015) else Tx.s(R.string.musiccontr_014, st.crossfadeSec), 14f)
         root.addView(cfLabel, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
         root.addView(a.seekBar(0, 12, st.crossfadeSec) { v ->
             st.crossfadeSec = v
             refreshAudioSettings()
-            cfLabel.text = if (v == 0) "Geçişte yumuşatma: kapalı" else "Geçişte yumuşatma: $v sn"
+            cfLabel.text = if (v == 0) Tx.s(R.string.musiccontr_015) else Tx.s(R.string.musiccontr_014, v)
         })
-        root.addView(a.label("Yumuşatma, şarkı sonunda sesi kısıp sonrakinin başında açar; şarkıları üst üste bindirmez.", 11f, UiColors.textSecondary))
+        root.addView(a.label(Tx.s(R.string.musiccontr_016), 11f, UiColors.textSecondary))
 
         PanelBuilder(a)
-            .setTitle("Ses ayarları")
+            .setTitle(Tx.s(R.string.musiccontr_017))
             .setView(android.widget.ScrollView(a).apply { addView(root) })
-            .setPositiveButton("Tamam", null)
-            .setNeutralButton("Sıfırla") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+            .setNeutralButton(Tx.s(R.string.musiccontr_018)) { _, _ ->
                 f?.reset()
                 f?.setBoostPercent(100)
                 st.audioBalance = 0
@@ -377,6 +377,6 @@ object MusicController {
     private fun balanceText(v: Int) = when {
         v == 0 -> "orta"
         v < 0 -> "sol %${-v}"
-        else -> "sağ %$v"
+        else -> Tx.s(R.string.musiccontr_019, v)
     }
 }

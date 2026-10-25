@@ -46,9 +46,9 @@ class FileOps(private val a: AppCompatActivity) {
     fun requireAllFiles(): Boolean {
         if (hasAllFilesAccess()) return true
         PanelBuilder(a)
-            .setTitle("Dosya erişimi gerekli")
-            .setMessage("Bu işlem için \"Tüm dosyalara erişim\" izni gerekiyor (Android 11 ve üstü). Ayara gidip OpenPlayer için açın, sonra tekrar deneyin.")
-            .setPositiveButton("Ayarı aç") { _, _ ->
+            .setTitle(Tx.s(R.string.fileops_001))
+            .setMessage(Tx.s(R.string.fileops_002))
+            .setPositiveButton(Tx.s(R.string.fileops_003)) { _, _ ->
                 if (Build.VERSION.SDK_INT >= 30) {
                     val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:${a.packageName}"))
                     runCatching { a.startActivity(intent) }.onFailure {
@@ -56,7 +56,7 @@ class FileOps(private val a: AppCompatActivity) {
                     }
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
         return false
     }
@@ -99,7 +99,7 @@ class FileOps(private val a: AppCompatActivity) {
                     launch(e.userAction.actionIntent.intentSender) { deleteLegacy(uris, next, onDone) }
                     return
                 }
-                toast("Silinemedi")
+                toast(Tx.s(R.string.fileops_005))
                 return
             }
         }
@@ -115,7 +115,7 @@ class FileOps(private val a: AppCompatActivity) {
         if (uris.isEmpty() || uris.size != newNames.size) return
         val names = newNames.map { sanitize(it) }
         if (names.any { it.isEmpty() }) {
-            toast("Ad boş olamaz")
+            toast(Tx.s(R.string.fileops_006))
             return
         }
         val apply = {
@@ -129,7 +129,7 @@ class FileOps(private val a: AppCompatActivity) {
                     failed++
                 }
             }
-            if (failed > 0) toast("$failed dosya yeniden adlandırılamadı")
+            if (failed > 0) toast(Tx.s(R.string.fileops_007, failed))
             onDone()
         }
         if (Build.VERSION.SDK_INT >= 30) {
@@ -140,7 +140,7 @@ class FileOps(private val a: AppCompatActivity) {
         try {
             apply()
         } catch (e: SecurityException) {
-            toast("Bu dosya için izin alınamadı")
+            toast(Tx.s(R.string.fileops_008))
         }
     }
 
@@ -156,7 +156,7 @@ class FileOps(private val a: AppCompatActivity) {
         val subs = (dir.listFiles { f -> f.isDirectory && !f.name.startsWith(".") } ?: emptyArray())
             .sortedBy { it.name.lowercase() }
         val labels = ArrayList<String>()
-        if (dir.absolutePath != root.absolutePath) labels += "⬆  Üst klasör"
+        if (dir.absolutePath != root.absolutePath) labels += Tx.s(R.string.fileops_009)
         subs.forEach { labels += "📁  ${it.name}" }
         val offset = if (dir.absolutePath != root.absolutePath) 1 else 0
         PanelBuilder(a)
@@ -165,20 +165,20 @@ class FileOps(private val a: AppCompatActivity) {
                 if (offset == 1 && which == 0) showFolder(title, dir.parentFile ?: root, root, onPick)
                 else showFolder(title, subs[which - offset], root, onPick)
             }
-            .setPositiveButton("Buraya seç") { _, _ -> onPick(dir) }
-            .setNeutralButton("Yeni klasör") { _, _ ->
-                a.showInput("Yeni klasör", "Klasör adı") { n ->
+            .setPositiveButton(Tx.s(R.string.fileops_010)) { _, _ -> onPick(dir) }
+            .setNeutralButton(Tx.s(R.string.fileops_011)) { _, _ ->
+                a.showInput(Tx.s(R.string.fileops_011), Tx.s(R.string.fileops_012)) { n ->
                     val clean = sanitize(n)
                     if (clean.isNotEmpty()) {
                         val f = File(dir, clean)
                         if (f.exists() || f.mkdirs()) showFolder(title, f, root, onPick) else {
-                            toast("Klasör oluşturulamadı")
+                            toast(Tx.s(R.string.fileops_013))
                             showFolder(title, dir, root, onPick)
                         }
                     }
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
     }
 
@@ -208,10 +208,10 @@ class FileOps(private val a: AppCompatActivity) {
         val label = a.label("0 / ${items.size}")
         val box = a.vertical { addView(label); addView(bar) }
         val dialog = PanelBuilder(a)
-            .setTitle(if (move) "Taşınıyor" else "Kopyalanıyor")
+            .setTitle(if (move) Tx.s(R.string.fileops_015) else Tx.s(R.string.fileops_014))
             .setView(box)
             .setCancelable(false)
-            .setNegativeButton("İptal") { _, _ -> cancelled.set(true) }
+            .setNegativeButton(Tx.s(R.string.fileops_004)) { _, _ -> cancelled.set(true) }
             .create()
         dialog.show()
         val app = a.applicationContext
@@ -236,7 +236,7 @@ class FileOps(private val a: AppCompatActivity) {
                         copying = true
                         app.contentResolver.openInputStream(it.uri)?.use { input ->
                             dst.outputStream().use { out -> input.copyTo(out, 1 shl 16) }
-                        } ?: throw java.io.IOException("açılamadı")
+                        } ?: throw java.io.IOException(Tx.s(R.string.fileops_016))
                         copying = false
                         if (move) {
                             if (src != null) src.delete()
@@ -259,7 +259,7 @@ class FileOps(private val a: AppCompatActivity) {
             a.runOnUiThread {
                 dialog.dismiss()
                 scan(newPaths + oldPaths) {
-                    toast(if (fail == 0) "$ok dosya ${if (move) "taşındı" else "kopyalandı"}" else "$ok başarılı, $fail başarısız")
+                    toast(if (fail == 0) "$ok dosya ${if (move) "taşındı" else "kopyalandı"}" else Tx.s(R.string.fileops_017, ok, fail))
                     onDone()
                 }
             }
@@ -274,11 +274,11 @@ class FileOps(private val a: AppCompatActivity) {
         if (clean.isEmpty()) return
         val target = File(dir.parentFile, clean)
         if (target.exists()) {
-            toast("Bu adda bir klasör zaten var")
+            toast(Tx.s(R.string.fileops_018))
             return
         }
         if (!dir.renameTo(target)) {
-            toast("Klasör yeniden adlandırılamadı")
+            toast(Tx.s(R.string.fileops_019))
             return
         }
         val moved = videoPaths.map { p -> target.absolutePath + p.removePrefix(dir.absolutePath) }

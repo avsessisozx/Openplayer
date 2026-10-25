@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     private val requestPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) refresh() else showMessage("Videoları göstermek için izin gerekli.\nDokunarak tekrar dene.")
+            if (granted) refresh() else showMessage(Tx.s(R.string.mainactivi_001))
         }
 
     private val openPhoto360 =
@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             ellipsize = android.text.TextUtils.TruncateAt.END
         }
         searchField = EditText(this).apply {
-            hint = "Ara"
+            hint = Tx.s(R.string.mainactivi_002)
             setHintTextColor(UiColors.textSecondary)
             setTextColor(Color.WHITE)
             setSingleLine()
@@ -235,18 +235,18 @@ class MainActivity : AppCompatActivity() {
                     setOnClickListener { onClick() }
                 }, LinearLayout.LayoutParams(0, dp(52), 1f))
             }
-            act(R.drawable.ic_check, "Hepsini seç") { selectAll() }
-            act(R.drawable.ic_move, "Taşı") { transferSelection(move = true) }
-            act(R.drawable.ic_copy, "Kopyala") { transferSelection(move = false) }
-            act(R.drawable.ic_playlist_add, "Listeye ekle") { addSelectionToPlaylist() }
-            act(R.drawable.ic_edit, "Yeniden adlandır") { renameSelection() }
-            act(R.drawable.ic_delete, "Sil") { deleteSelection() }
+            act(R.drawable.ic_check, Tx.s(R.string.mainactivi_003)) { selectAll() }
+            act(R.drawable.ic_move, Tx.s(R.string.mainactivi_004)) { transferSelection(move = true) }
+            act(R.drawable.ic_copy, Tx.s(R.string.mainactivi_005)) { transferSelection(move = false) }
+            act(R.drawable.ic_playlist_add, Tx.s(R.string.mainactivi_073)) { addSelectionToPlaylist() }
+            act(R.drawable.ic_edit, Tx.s(R.string.mainactivi_006)) { renameSelection() }
+            act(R.drawable.ic_delete, Tx.s(R.string.mainactivi_007)) { deleteSelection() }
         }
 
         modeTabs = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             visibility = View.GONE
-            for ((title, selected) in listOf("Videolar" to true, "Müzik" to false)) {
+            for ((title, selected) in listOf(Tx.s(R.string.mainactivi_009) to true, Tx.s(R.string.mainactivi_008) to false)) {
                 addView(TextView(context).apply {
                     text = title
                     gravity = Gravity.CENTER
@@ -301,7 +301,7 @@ class MainActivity : AppCompatActivity() {
                 setColor(UiColors.accent)
             }
             elevation = dp(6).toFloat()
-            contentDescription = "Son oynatılanı aç"
+            contentDescription = Tx.s(R.string.mainactivi_010)
             setOnClickListener { resumeLast() }
         }
 
@@ -362,7 +362,7 @@ class MainActivity : AppCompatActivity() {
                 backButton.visibility = View.GONE
                 shown = if (query.isEmpty()) emptyList()
                 else VideoRepository.sort(this, visibleVideos().filter { it.title.contains(query, ignoreCase = true) }, settings)
-                showVideos(shown, if (query.isEmpty()) "Aramak için yazın" else "Sonuç bulunamadı")
+                showVideos(shown, if (query.isEmpty()) Tx.s(R.string.mainactivi_012) else Tx.s(R.string.mainactivi_011))
             }
             currentFolder != null -> {
                 val folder = currentFolder!!
@@ -370,17 +370,17 @@ class MainActivity : AppCompatActivity() {
                 backButton.visibility = View.VISIBLE
                 shown = VideoRepository.sort(this, all.filter { it.bucketId == folder.bucketId }, settings)
                 applyHighlight(if (settings.markLastInFolder) lastPlayedIn(shown) else null)
-                showVideos(shown, "Bu klasörde video yok")
+                showVideos(shown, Tx.s(R.string.mainactivi_013))
             }
             settings.listMode == ListMode.FILES -> {
-                titleView.text = "Videolar"
+                titleView.text = Tx.s(R.string.mainactivi_009)
                 applyHighlight(null)
                 backButton.visibility = View.GONE
                 shown = VideoRepository.sort(this, visibleVideos(), settings)
-                showVideos(shown, "Video bulunamadı")
+                showVideos(shown, Tx.s(R.string.mainactivi_014))
             }
             else -> {
-                titleView.text = "Klasörler"
+                titleView.text = Tx.s(R.string.mainactivi_015)
                 backButton.visibility = View.GONE
                 sortButton.visibility = View.VISIBLE
                 viewButton.visibility = View.VISIBLE
@@ -400,7 +400,7 @@ class MainActivity : AppCompatActivity() {
                     (list.layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanCount = folderSpan()
                 }
                 if (list.adapter !== folderAdapter) list.adapter = folderAdapter
-                if (folders.isEmpty()) showMessage("Video bulunamadı") else hideMessage()
+                if (folders.isEmpty()) showMessage(Tx.s(R.string.mainactivi_014)) else hideMessage()
             }
         }
     }
@@ -571,12 +571,12 @@ class MainActivity : AppCompatActivity() {
     private fun showFolderOrder() {
         val keys = listOf("name_asc", "name_desc", "new_desc", "new_asc", "count_desc", "count_asc", "size_desc", "size_asc")
         val labels = listOf(
-            "Ada göre (A → Z)", "Ada göre (Z → A)",
-            "En yeni video önce", "En eski video önce",
-            "Çok videolu önce", "Az videolu önce",
-            "Büyük boyut önce", "Küçük boyut önce",
+            Tx.s(R.string.mainactivi_017), Tx.s(R.string.mainactivi_016),
+            Tx.s(R.string.mainactivi_019), Tx.s(R.string.mainactivi_018),
+            Tx.s(R.string.mainactivi_021), Tx.s(R.string.mainactivi_020),
+            Tx.s(R.string.mainactivi_023), Tx.s(R.string.mainactivi_022),
         )
-        showChoice("Klasörleri sırala", labels, keys.indexOf(settings.folderOrder)) { i ->
+        showChoice(Tx.s(R.string.mainactivi_024), labels, keys.indexOf(settings.folderOrder)) { i ->
             settings.folderOrder = keys[i]
             render()
         }
@@ -584,22 +584,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun showRootMenu(anchor: View) {
         val menu = PopupMenu(this, anchor)
-        menu.menu.add(0, 5, 0, "Oynatma listeleri")
-        menu.menu.add(0, 6, 1, "Favoriler")
-        menu.menu.add(0, 7, 2, "Özel klasör")
-        menu.menu.add(0, 1, 2, "Ağ akışı aç")
-        menu.menu.add(0, 2, 3, if (settings.showHiddenFolders) "Gizli klasörleri sakla" else "Gizli klasörleri göster")
-        menu.menu.add(0, 4, 4, "Ağ kaynakları (SMB / FTP / WebDAV)")
-        menu.menu.add(0, 8, 5, "Medya yöneticisi")
-        menu.menu.add(0, 10, 5, "360° fotoğraf aç…")
-        menu.menu.add(0, 3, 6, "Ayarlar")
-        if (settings.exitButton) menu.menu.add(0, 9, 7, "Çıkış")
+        menu.menu.add(0, 5, 0, Tx.s(R.string.mainactivi_074))
+        menu.menu.add(0, 6, 1, Tx.s(R.string.mainactivi_025))
+        menu.menu.add(0, 7, 2, Tx.s(R.string.mainactivi_026))
+        menu.menu.add(0, 1, 2, Tx.s(R.string.mainactivi_027))
+        menu.menu.add(0, 2, 3, if (settings.showHiddenFolders) Tx.s(R.string.mainactivi_028) else Tx.s(R.string.listpanel_018))
+        menu.menu.add(0, 4, 4, Tx.s(R.string.mainactivi_029))
+        menu.menu.add(0, 8, 5, Tx.s(R.string.mainactivi_030))
+        menu.menu.add(0, 10, 5, Tx.s(R.string.mainactivi_031))
+        menu.menu.add(0, 3, 6, Tx.s(R.string.mainactivi_032))
+        if (settings.exitButton) menu.menu.add(0, 9, 7, Tx.s(R.string.mainactivi_033))
         menu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                1 -> showInput("Ağ akışı", "http://, https:// veya rtsp:// adresi") { url ->
+                1 -> showInput(Tx.s(R.string.mainactivi_034), "http://, https:// veya rtsp:// adresi") { url ->
                     val uri = Uri.parse(url.trim())
                     if (uri.scheme.isNullOrEmpty()) {
-                        Toast.makeText(this, "Geçerli bir adres girin", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, Tx.s(R.string.mainactivi_035), Toast.LENGTH_SHORT).show()
                     } else {
                         startActivity(Intent(this, PlayerActivity::class.java).setData(uri))
                     }
@@ -682,7 +682,7 @@ class MainActivity : AppCompatActivity() {
         fabView.visibility = if (selectionOn || !settings.showFab) View.GONE else View.VISIBLE
         if (::modeTabs.isInitialized) modeTabs.visibility = if (settings.musicMode && !selectionOn) View.VISIBLE else View.GONE
         val total = if (folders) folderAdapter.items.size else shown.size
-        selTitle.text = "$count / $total Seçildi"
+        selTitle.text = Tx.s(R.string.mainactivi_036, count, total)
         folderAdapter.selected = selFolders.toSet()
         for (ad in listOf(listAdapter, gridAdapter)) {
             ad.selecting = selectionOn
@@ -740,9 +740,9 @@ class MainActivity : AppCompatActivity() {
         val size = videos.sumOf { it.sizeBytes }
         val dur = videos.sumOf { it.durationMs }
         return listOf(
-            "Video sayısı" to videos.size.toString(),
-            "Toplam boyut" to android.text.format.Formatter.formatFileSize(this, size),
-            "Toplam süre" to formatDuration(dur),
+            Tx.s(R.string.mainactivi_037) to videos.size.toString(),
+            Tx.s(R.string.mainactivi_075) to android.text.format.Formatter.formatFileSize(this, size),
+            Tx.s(R.string.mainactivi_038) to formatDuration(dur),
         )
     }
 
@@ -757,11 +757,11 @@ class MainActivity : AppCompatActivity() {
         val lines = ArrayList<Pair<String, String>>()
         if (folderMode()) {
             val names = folderAdapter.items.filter { it.bucketId in selFolders }.map { it.name }
-            lines += (if (names.size == 1) "Klasör" else "Klasörler") to names.joinToString(", ")
-            if (selFolders.size == 1) folderDir(selFolders.first())?.let { lines += "Konum" to it.absolutePath }
+            lines += (if (names.size == 1) Tx.s(R.string.mainactivi_039) else Tx.s(R.string.mainactivi_015)) to names.joinToString(", ")
+            if (selFolders.size == 1) folderDir(selFolders.first())?.let { lines += Tx.s(R.string.mainactivi_076) to it.absolutePath }
         }
         lines += summaryLines(videos)
-        showSummaryInfo(if (folderMode()) "Klasör bilgisi" else "Seçili videolar", lines)
+        showSummaryInfo(if (folderMode()) Tx.s(R.string.mainactivi_041) else Tx.s(R.string.mainactivi_040), lines)
     }
 
     private fun selectionMenu() {
@@ -771,26 +771,26 @@ class MainActivity : AppCompatActivity() {
             val uris = videos.map { it.uri.toString() }
             val allFav = uris.all { PlaylistStore.isFavorite(this, PlaylistStore.VIDEO, it) }
             entries += SheetEntry(if (allFav) R.drawable.ic_favorite_border else R.drawable.ic_favorite,
-                if (allFav) "Favorilerden çıkar" else "Favorilere ekle") {
+                if (allFav) Tx.s(R.string.mainactivi_042) else Tx.s(R.string.mainactivi_077)) {
                 PlaylistStore.setFavorites(this, PlaylistStore.VIDEO, uris, !allFav)
-                Toast.makeText(this, if (allFav) "Favorilerden çıkarıldı" else "Favorilere eklendi", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, if (allFav) Tx.s(R.string.mainactivi_044) else Tx.s(R.string.mainactivi_043), Toast.LENGTH_SHORT).show()
                 exitSelection()
             }
-            entries += SheetEntry(R.drawable.ic_share, "Paylaş") { shareMany(videos) }
-            entries += SheetEntry(R.drawable.ic_lock, "Özel klasöre kilitle") {
+            entries += SheetEntry(R.drawable.ic_share, Tx.s(R.string.mainactivi_045)) { shareMany(videos) }
+            entries += SheetEntry(R.drawable.ic_lock, Tx.s(R.string.mainactivi_046)) {
                 lockToVault(fileOps, videos) { exitSelection(); refresh() }
             }
             if (videos.size == 1) {
                 val v = videos[0]
-                entries += SheetEntry(R.drawable.ic_cut, "Kes") { showTrimDialog(v.uri, v.title, v.durationMs) { refresh() } }
-                entries += SheetEntry(R.drawable.ic_headphones, "Sesi çıkar (m4a/mp3)") { showExtractAudio(v.uri, v.title) }
+                entries += SheetEntry(R.drawable.ic_cut, Tx.s(R.string.mainactivi_047)) { showTrimDialog(v.uri, v.title, v.durationMs) { refresh() } }
+                entries += SheetEntry(R.drawable.ic_headphones, Tx.s(R.string.mainactivi_048)) { showExtractAudio(v.uri, v.title) }
             }
         }
-        entries += SheetEntry(R.drawable.ic_swap, "Seçimi ters çevir") { invertSelection() }
-        entries += SheetEntry(R.drawable.ic_list, "Aralığı seç") { selectRange() }
+        entries += SheetEntry(R.drawable.ic_swap, Tx.s(R.string.mainactivi_049)) { invertSelection() }
+        entries += SheetEntry(R.drawable.ic_list, Tx.s(R.string.mainactivi_050)) { selectRange() }
         if (folderMode()) {
             val hide = folderAdapter.items.filter { it.bucketId in selFolders }.any { !it.hidden }
-            entries += SheetEntry(R.drawable.ic_folder, if (hide) "Klasörleri gizle" else "Klasörleri göster") {
+            entries += SheetEntry(R.drawable.ic_folder, if (hide) Tx.s(R.string.mainactivi_052) else Tx.s(R.string.mainactivi_051)) {
                 val set = settings.hiddenFolders.toMutableSet()
                 if (hide) set.addAll(selFolders) else set.removeAll(selFolders)
                 settings.hiddenFolders = set
@@ -798,7 +798,7 @@ class MainActivity : AppCompatActivity() {
                 render()
             }
         }
-        showSheet("Seçim", entries)
+        showSheet(Tx.s(R.string.mainactivi_053), entries)
     }
 
     private fun transferSelection(move: Boolean) {
@@ -806,7 +806,7 @@ class MainActivity : AppCompatActivity() {
         if (videos.isEmpty()) return
         if (!fileOps.requireAllFiles()) return
         val start = videos.firstOrNull()?.path?.takeIf { it.isNotEmpty() }?.let { java.io.File(it).parentFile }
-        fileOps.pickFolder(if (move) "Taşınacak klasör" else "Kopyalanacak klasör", start) { dest ->
+        fileOps.pickFolder(if (move) Tx.s(R.string.mainactivi_055) else Tx.s(R.string.mainactivi_054), start) { dest ->
             val items = videos.map { TransferItem(it.uri, it.path.takeIf { p -> p.isNotEmpty() }, it.title) }
             fileOps.transfer(items, dest, move) {
                 exitSelection()
@@ -824,16 +824,16 @@ class MainActivity : AppCompatActivity() {
     private fun renameSelection() {
         if (folderMode()) {
             if (selFolders.size != 1) {
-                Toast.makeText(this, "Bir seferde tek klasör yeniden adlandırılabilir", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, Tx.s(R.string.mainactivi_056), Toast.LENGTH_SHORT).show()
                 return
             }
             val id = selFolders.first()
             val dir = folderDir(id)
             if (dir == null) {
-                Toast.makeText(this, "Klasör konumu bulunamadı", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, Tx.s(R.string.mainactivi_057), Toast.LENGTH_SHORT).show()
                 return
             }
-            showInput("Klasörü yeniden adlandır", "Yeni ad", dir.name) { n ->
+            showInput(Tx.s(R.string.mainactivi_058), Tx.s(R.string.mainactivi_078), dir.name) { n ->
                 val paths = all.filter { it.bucketId == id }.map { it.path }.filter { it.isNotEmpty() }
                 fileOps.renameFolder(dir, n, paths) {
                     exitSelection()
@@ -852,7 +852,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun renameOne(video: VideoItem) {
         val ext = video.title.substringAfterLast('.', "")
-        showInput("Yeniden adlandır", "Yeni ad", video.title.removeSuffix(if (ext.isEmpty()) "" else ".$ext")) { base ->
+        showInput(Tx.s(R.string.mainactivi_006), Tx.s(R.string.mainactivi_078), video.title.removeSuffix(if (ext.isEmpty()) "" else ".$ext")) { base ->
             val clean = base.trim()
             if (clean.isEmpty()) return@showInput
             val newName = if (ext.isEmpty()) clean else "$clean.$ext"
@@ -869,9 +869,9 @@ class MainActivity : AppCompatActivity() {
             this.hint = hint
             setSingleLine()
         }
-        val pattern = field("Düzen", "{name}")
-        val find = field("Bul (isteğe bağlı)")
-        val repl = field("Şununla değiştir")
+        val pattern = field(Tx.s(R.string.listpanel_014), "{name}")
+        val find = field(Tx.s(R.string.mainactivi_059))
+        val repl = field(Tx.s(R.string.mainactivi_060))
         val preview = label("", 12f, UiColors.textSecondary)
         fun compute(i: Int, v: VideoItem): String {
             val ext = v.title.substringAfterLast('.', "")
@@ -886,7 +886,7 @@ class MainActivity : AppCompatActivity() {
             return if (ext.isEmpty()) s else "$s.$ext"
         }
         fun updatePreview() {
-            preview.text = "Örnek: " + compute(0, videos[0])
+            preview.text = Tx.s(R.string.mainactivi_061) + compute(0, videos[0])
         }
         val watcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) = Unit
@@ -898,19 +898,19 @@ class MainActivity : AppCompatActivity() {
         repl.addTextChangedListener(watcher)
         updatePreview()
         val box = vertical {
-            addView(label("{name} = eski ad, {n} = sıra (1,2,3), {nn} = 01,02, {nnn} = 001", 12f, UiColors.textSecondary))
+            addView(label(Tx.s(R.string.mainactivi_062), 12f, UiColors.textSecondary))
             addView(pattern)
             addView(find)
             addView(repl)
             addView(preview, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
         }
         PanelBuilder(this)
-            .setTitle("Toplu yeniden adlandır (${videos.size})")
+            .setTitle(Tx.s(R.string.mainactivi_063, videos.size))
             .setView(android.widget.ScrollView(this).apply { addView(box) })
-            .setPositiveButton("Uygula") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.mainactivi_064)) { _, _ ->
                 val names = videos.mapIndexed { i, v -> compute(i, v) }
                 if (names.toSet().size != names.size) {
-                    Toast.makeText(this, "Bazı adlar aynı çıkıyor; {n} ekleyin", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, Tx.s(R.string.mainactivi_065), Toast.LENGTH_LONG).show()
                 } else {
                     fileOps.rename(videos.map { it.uri }, names) {
                         exitSelection()
@@ -918,7 +918,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
     }
 
@@ -926,11 +926,11 @@ class MainActivity : AppCompatActivity() {
         val videos = targetVideos()
         if (videos.isEmpty()) return
         val trash = Build.VERSION.SDK_INT >= 30 && settings.useTrash
-        val what = if (folderMode()) "${selFolders.size} klasördeki ${videos.size} video" else "${videos.size} video"
+        val what = if (folderMode()) Tx.s(R.string.mainactivi_066, selFolders.size, videos.size) else "${videos.size} video"
         PanelBuilder(this)
-            .setTitle("Silinsin mi?")
+            .setTitle(Tx.s(R.string.mainactivi_079))
             .setMessage("$what ${if (trash) "çöp kutusuna taşınacak (30 gün içinde geri alınabilir)." else "kalıcı olarak silinecek."}")
-            .setPositiveButton("Sil") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.mainactivi_007)) { _, _ ->
                 val subs = if (!trash && settings.deleteSubtitlesToo) videos.flatMap { SubtitleFiles.exactSidecarsForPath(it.path) } else emptyList()
                 fileOps.delete(videos.map { it.uri }) {
                     subs.forEach { runCatching { it.delete() } }
@@ -938,7 +938,7 @@ class MainActivity : AppCompatActivity() {
                     refresh()
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
     }
 
@@ -949,15 +949,15 @@ class MainActivity : AppCompatActivity() {
         val fav = PlaylistStore.isFavorite(this, PlaylistStore.VIDEO, u)
         val entries = ArrayList<SheetEntry>()
         entries += SheetEntry(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border,
-            if (fav) "Favorilerden çıkar" else "Favorilere ekle") {
+            if (fav) Tx.s(R.string.mainactivi_042) else Tx.s(R.string.mainactivi_077)) {
             PlaylistStore.toggleFavorite(this, PlaylistStore.VIDEO, u)
         }
-        entries += SheetEntry(R.drawable.ic_playlist_add, "Oynatma listesine ekle") {
+        entries += SheetEntry(R.drawable.ic_playlist_add, Tx.s(R.string.mainactivi_067)) {
             showAddToPlaylist(PlaylistStore.VIDEO, listOf(u))
         }
-        entries += SheetEntry(R.drawable.ic_share, "Paylaş") { shareMany(listOf(video)) }
-        entries += SheetEntry(R.drawable.ic_edit, "Yeniden adlandır") { renameOne(video) }
-        entries += SheetEntry(R.drawable.ic_subtitles, "Altyazı ara") {
+        entries += SheetEntry(R.drawable.ic_share, Tx.s(R.string.mainactivi_045)) { shareMany(listOf(video)) }
+        entries += SheetEntry(R.drawable.ic_edit, Tx.s(R.string.mainactivi_006)) { renameOne(video) }
+        entries += SheetEntry(R.drawable.ic_subtitles, Tx.s(R.string.mainactivi_068)) {
             startActivity(
                 Intent(this, PlayerActivity::class.java)
                     .putParcelableArrayListExtra(PlayerActivity.EXTRA_URIS, arrayListOf(video.uri))
@@ -966,35 +966,35 @@ class MainActivity : AppCompatActivity() {
                     .putExtra("org.openplayer.app.OPEN_SUBTITLE_SEARCH", true)
             )
         }
-        entries += SheetEntry(R.drawable.ic_cut, "Kes") {
+        entries += SheetEntry(R.drawable.ic_cut, Tx.s(R.string.mainactivi_047)) {
             showTrimDialog(video.uri, video.title, video.durationMs) { refresh() }
         }
-        entries += SheetEntry(R.drawable.ic_headphones, "Sesi çıkar (m4a/mp3)") {
+        entries += SheetEntry(R.drawable.ic_headphones, Tx.s(R.string.mainactivi_048)) {
             showExtractAudio(video.uri, video.title)
         }
-        entries += SheetEntry(R.drawable.ic_lock, "Özel klasöre kilitle") {
+        entries += SheetEntry(R.drawable.ic_lock, Tx.s(R.string.mainactivi_046)) {
             lockToVault(fileOps, listOf(video)) { refresh() }
         }
-        entries += SheetEntry(R.drawable.ic_info, "Özellikler") {
+        entries += SheetEntry(R.drawable.ic_info, Tx.s(R.string.mainactivi_069)) {
             showMediaInfo(video.title, video.uri, video.sizeBytes, video.dateAddedSec * 1000L)
         }
-        entries += SheetEntry(R.drawable.ic_delete, "Sil", danger = true) { deleteSingle(video) }
+        entries += SheetEntry(R.drawable.ic_delete, Tx.s(R.string.mainactivi_007), danger = true) { deleteSingle(video) }
         showSheet(video.title, entries)
     }
 
     private fun deleteSingle(video: VideoItem) {
         val trash = Build.VERSION.SDK_INT >= 30 && settings.useTrash
         PanelBuilder(this)
-            .setTitle("Silinsin mi?")
-            .setMessage(video.title + "\n\n" + if (trash) "Çöp kutusuna taşınır, geri alınabilir." else "Kalıcı olarak silinir.")
-            .setPositiveButton("Sil") { _, _ ->
+            .setTitle(Tx.s(R.string.mainactivi_079))
+            .setMessage(video.title + "\n\n" + if (trash) Tx.s(R.string.mainactivi_071) else Tx.s(R.string.mainactivi_070))
+            .setPositiveButton(Tx.s(R.string.mainactivi_007)) { _, _ ->
                 val subs = if (!trash && settings.deleteSubtitlesToo) SubtitleFiles.exactSidecarsForPath(video.path) else emptyList()
                 fileOps.delete(listOf(video.uri)) {
                     subs.forEach { runCatching { it.delete() } }
                     refresh()
                 }
             }
-            .setNegativeButton("İptal", null)
+            .setNegativeButton(Tx.s(R.string.fileops_004), null)
             .show()
     }
 
@@ -1007,7 +1007,7 @@ class MainActivity : AppCompatActivity() {
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(videos.map { it.uri }))
         }
         send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivity(Intent.createChooser(send, "Paylaş"))
+        startActivity(Intent.createChooser(send, Tx.s(R.string.mainactivi_045)))
     }
 
     // ------------------------------------------------------------ oynatma
@@ -1020,7 +1020,7 @@ class MainActivity : AppCompatActivity() {
         val last = ResumeStore.lastUri(this)
         val video = all.firstOrNull { it.uri.toString() == last }
         if (video == null) {
-            Toast.makeText(this, "Henüz oynatılmış video yok", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, Tx.s(R.string.mainactivi_072), Toast.LENGTH_SHORT).show()
             return
         }
         val siblings = if (settings.listMode == ListMode.FILES && currentFolder == null) shown

@@ -293,7 +293,7 @@ class VideoAdapter(
             ellipsize = TextUtils.TruncateAt.END
         }
         val tag = TextView(c).apply {
-            text = "YENİ"
+            text = Tx.s(R.string.adapters_001)
             setTextColor(Color.WHITE)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
             setTypeface(typeface, android.graphics.Typeface.BOLD)
@@ -401,7 +401,7 @@ class VideoAdapter(
         holder.meta.text = metaLine
         holder.meta.visibility = if (metaLine.isEmpty()) View.GONE else View.VISIBLE
         val is360 = Vr360.isSpherical(ctx, uriText, item.title)
-        holder.tag.text = if (is360) "360°" else "YENİ"
+        holder.tag.text = if (is360) "360°" else Tx.s(R.string.adapters_001)
         holder.tag.visibility = if (is360 || VideoRepository.isNew(ctx, item, newDays)) View.VISIBLE else View.GONE
 
         // Kaldığı yeri gösteren ince çizgi

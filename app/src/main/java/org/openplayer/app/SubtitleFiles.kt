@@ -28,7 +28,7 @@ object SubtitleFiles {
                 }
             }
         }
-        return uri.lastPathSegment?.substringAfterLast('/') ?: "Video"
+        return uri.lastPathSegment?.substringAfterLast('/') ?: Tx.s(R.string.mediainfo_013)
     }
 
     fun sizeOf(context: Context, uri: Uri): Long {
