@@ -575,7 +575,12 @@ def sub_sync_test():
         steps.append(("Altyazı eşleştirme: menü düğmesi", "SORUN", " | ".join(texts(root)[:20]))); return
     tap(c); time.sleep(1.5)
     shot("Altyazı menüsü")
-    e = find_scroll("Bir altyazı satırıyla eşleştir…")
+    e = None
+    for _ in range(4):
+        e = find_text_any(dump(), "Bir altyazı satırıyla eşleştir…")
+        if e:
+            break
+        sh(f"input swipe {int(w*0.5)} {int(h*0.75)} {int(w*0.5)} {int(h*0.25)} 300"); time.sleep(0.8)
     if not e:
         steps.append(("Altyazı eşleştirme: menü öğesi", "bilgi", "harici altyazı yüklü değil olabilir")); return
     tap(e); time.sleep(1.5)
