@@ -3,14 +3,14 @@
 > Claude'un çalışma notu. Yalnızca `durum` dalında durur; `main`'e, README'ye ve sürüm notlarına girmez.
 > Yeni sohbette önce bunu oku, repoyu baştan tarama. Her sürümden sonra güncelle.
 
-Son güncelleme: 2026-10-24 · Son sürüm: **v1.0.0-beta15** (2026-10-24, ön sürüm)
+Son güncelleme: 2026-10-25 · Son sürüm: **v1.0.0-beta16** (2026-10-25, ön sürüm)
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
 
 ## Teknik
 - Android, Kotlin, Gradle KTS · `org.openplayer.app` · minSdk 24
-- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta15`)
+- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta16`)
 - Oynatma motoru + libVLC yedek motoru (otomatik geçiş, "Yalnız VLC" seçeneği)
 - CI: `build.yml` → `main`'e push'ta yeni sürüm numarası otomatik yayınlanır; `v*` etiketi de yayınlar
 - `emulator-test.yml` → `claude/**` dallarında Android 14 emülatör testi; ara sonuçları dala yazar.
@@ -45,14 +45,20 @@ Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikl
   **Tam emülatör koşusu iki kez sonuçsuz öldü** (71 dk), bu yüzden çeviri uçtan uca testi, ayar sayfası
   gezintisi ve monkey beta15'te koşmadı; beta14'ten beri o alanlar değişmedi.
 
-## Çoklu dil görevi — ENGELLENDİ (2026-10-25)
-- Zamanlanmış çalıştırma başladı ama Telemet reposu bu oturumda erişilemez (yalnız avsessisozx/openplayer tanımlı; add_repo/list_repos araçları yok).
-- Telemet'in dil listesi ve README düzeni bilinmeden başlanmadı; dil listesini tahmin etmedim. Koda, README'ye, sürüme dokunulmadı.
-- Gerekli: oturuma Telemet erişimi verilmesi (veya dil listesinin elle bildirilmesi), sonra görev yeniden çalıştırılır.
+## beta16 — çok dilli destek (2026-10-25)
+- 12 dil: İngilizce (varsayılan), tr, es, fr, it, de, pt-BR, zh-CN, ja, ko, ru, ar. Telemet'in dil listesi baz alındı.
+- Metinler `Tx.s(R.string.…)` ile; katalog `tools/i18n/*.py` (1080 anahtar), `tools/i18n/build.py` `values*/strings.xml` üretir
+  (`STRICT=1`), `merge.py <dil>` parçaları doğrular. Dil başına 3 parça dosya.
+- README İngilizce; diğer diller `docs/README.<kod>.md`.
+- **Doğrulandı:** birim testleri (StringsResourceTest: tüm dillerde yer tutucular), derleme, lint, hızlı emülatör (çökme 0).
+- **Doğrulanmadı:** tam emülatör koşusu 2 kez sonuçsuz öldü (~53 dk, günlük erişimi yok); emülatörde TR dışında dil
+  denenmedi (uzun metinli dillerde taşma olabilir); gerçek cihaz yok; çeviriler makine çevirisi, ana dili konuşan gözden geçirmedi;
+  mantık anahtarı olarak saklanan/karşılaştırılan metinler ve sınıf yüklenirken dil yakalayan sabitler taranmadı.
+- Repo açıklaması ve konu etiketleri API ile yazılamadı (ortam izin vermiyor); kullanıcı elle girmeli.
 
 ## Yarım / sıradaki
 - Kullanıcının kararı: önce uygulama özellik açısından tam ve hatasız olacak
-- Çoklu dil (uygulama + GitHub sayfası, Türkçe korunarak) **en sona** bırakıldı
+- Sıradaki: beta17 notları (360° sürükleme yönü, uzun basma çarkı, altyazı kaydırma/dokunarak senkron, kısayol satırı sürükleme, MX tarzı klasör ağacı)
 - Gerçek cihazda (Xiaomi Mi 10T Pro) kapsamlı deneme henüz raporlanmadı; özellikle beta15'te doğrulanmayanlar:
   gerçek 360° videoda baş takibi / VR gözlük hissi (emülatörde sanal sensör), kısayol satırı parmakla his
 - Kısayol satırı tamamen açıkken ekrana sığmayabilir (dar ekranda kaydırılır); ok sağda kalır
