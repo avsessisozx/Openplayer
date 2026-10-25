@@ -3,14 +3,14 @@
 > Claude'un çalışma notu. Yalnızca `durum` dalında durur; `main`'e, README'ye ve sürüm notlarına girmez.
 > Yeni sohbette önce bunu oku, repoyu baştan tarama. Her sürümden sonra güncelle.
 
-Son güncelleme: 2026-10-25 · Son sürüm: **v1.0.0-beta17** (2026-10-25, ön sürüm)
+Son güncelleme: 2026-10-25 · Son sürüm: **v1.0.0-beta19** (2026-10-25, ön sürüm)
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
 
 ## Teknik
 - Android, Kotlin, Gradle KTS · `org.openplayer.app` · minSdk 24
-- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta17`)
+- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta19`)
 - Oynatma motoru + libVLC yedek motoru (otomatik geçiş, "Yalnız VLC" seçeneği)
 - CI: `build.yml` → `main`'e push'ta yeni sürüm numarası otomatik yayınlanır; `v*` etiketi de yayınlar
 - `emulator-test.yml` → `claude/**` dallarında Android 14 emülatör testi; ara sonuçları dala yazar.
@@ -61,7 +61,13 @@ Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikl
 - **Doğrulandı:** birim testleri, derleme, lint, kısa emülatör [ray]: yavaş sürüklemede satır parmakla açılıyor (5→9→15), klasör ağacı Movies>Test>Alt>Derin gezinti + geri. Bir koşuda satır testi 0 okudu (kararsız UI dökümü), tekrarda geçti.
 - **Doğrulanmadı:** gerçek parmakla his, 360° yönü gerçek videoda (kod mantığı + işaret analizi), tam emülatör turu.
 - Ağaçta üst klasörlerde seçim/gizleme/yeniden adlandırma yok (yalnız videoyu doğrudan içeren klasörlerde).
-- Sıradaki: beta18 (uzun basma çarkı, altyazı kaydırarak geçiş, dokunarak senkron), beta19 (kare kare, pitch).
+
+## beta18 + beta19 (2026-10-25)
+- beta18: altyazı metni üstünde sola kaydır = sonraki, sağa = önceki satır (`GestureController`, alan altyazı konumuna göre genişledi); "Bir altyazı satırıyla eşleştir…" (`PlayerMenus.showSyncPick`, gecikme = video zamanı − satır/hız); çember yeniden çizildi (`VrWheel.kt`); kalan sabit metinler çevirilebilir yapıldı (sn → s).
+- beta19: ⋮ → "Kare kare ve perde" (`stepFrame`: duraklat + kare süresi kadar EXACT seek; `setPitchSemitones`: ±12 yarım ton, hız değişmez).
+- **Doğrulandı (emülatör [ray]):** satır eşleştirme listesi/seçim, çember çökmeden çizildi (ekran görüntüsü incelendi), kare/perde paneli açıldı, perde etiketi +1.
+- **Doğrulanmadı:** kare ilerlemenin gerçek görüntüde tam 1 kare olduğu, perdenin kulakla duyulması, çemberin 360° videoda gerçek parmakla hissi, tam emülatör turu. Tüm yeni metinler makine çevirisi.
+- Kalan piyasa eksikleri: Chromecast/DLNA, Android TV, GIF/klip dışa aktarma, Trakt/sesli komut.
 
 ## Yarım / sıradaki
 - Kullanıcının kararı: önce uygulama özellik açısından tam ve hatasız olacak
