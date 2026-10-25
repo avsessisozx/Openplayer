@@ -37,17 +37,17 @@ data class MusicTrack(
 data class MusicGroup(val key: String, val title: String, val subtitle: String, val tracks: List<MusicTrack>)
 
 enum class MusicSort(val label: String) {
-    TITLE("Başlık"),
-    ARTIST("Sanatçı"),
-    ALBUM("Albüm"),
-    NEWEST("Eklenme (yeniden eskiye)"),
-    DURATION("Süre (uzundan kısaya)"),
+    TITLE(Tx.s(R.string.mediainfo_007)),
+    ARTIST(Tx.s(R.string.mediainfo_008)),
+    ALBUM(Tx.s(R.string.mediainfo_009)),
+    NEWEST(Tx.s(R.string.musicrepos_006)),
+    DURATION(Tx.s(R.string.musicrepos_001)),
 }
 
 object MusicRepository {
 
-    private const val UNKNOWN_ARTIST = "Bilinmeyen sanatçı"
-    private const val UNKNOWN_ALBUM = "Bilinmeyen albüm"
+    private val UNKNOWN_ARTIST: String get() = Tx.s(R.string.musicrepos_unk_artist)
+    private val UNKNOWN_ALBUM: String get() = Tx.s(R.string.musicrepos_unk_album)
 
     fun loadAll(context: Context): List<MusicTrack> {
         val extended = runCatching { query(context, true) }.getOrNull()
@@ -136,14 +136,14 @@ object MusicRepository {
         }
     }
 
-    private fun countText(n: Int) = "$n şarkı"
+    private fun countText(n: Int) = Tx.s(R.string.musicactiv_017, n)
 
     fun albums(tracks: List<MusicTrack>): List<MusicGroup> =
         tracks.groupBy { it.albumId to it.album }.map { (k, list) ->
             val artists = list.map { it.artist }.distinct()
             MusicGroup(
                 "album_${k.first}", k.second,
-                (if (artists.size == 1) artists[0] else "Çeşitli sanatçılar") + " • " + countText(list.size),
+                (if (artists.size == 1) artists[0] else Tx.s(R.string.musicrepos_002)) + " • " + countText(list.size),
                 list.sortedWith(compareBy<MusicTrack> { it.trackNo }.thenBy(NaturalOrder) { it.title }),
             )
         }.sortedWith(compareBy(NaturalOrder) { it.title })
@@ -152,7 +152,7 @@ object MusicRepository {
         tracks.groupBy { it.artist }.map { (artist, list) ->
             val albums = list.map { it.album }.distinct().size
             MusicGroup(
-                "artist_$artist", artist, "$albums albüm • " + countText(list.size),
+                "artist_$artist", artist, Tx.s(R.string.musicrepos_003, albums) + countText(list.size),
                 list.sortedWith(compareBy<MusicTrack, String>(NaturalOrder) { it.album }.thenBy { it.trackNo }),
             )
         }.sortedWith(compareBy(NaturalOrder) { it.title })
@@ -171,16 +171,16 @@ object MusicRepository {
         }
 
     fun albumArtists(tracks: List<MusicTrack>): List<MusicGroup> =
-        group("aa", tracks, { it.albumArtist.ifBlank { it.artist } }, UNKNOWN_ARTIST) { l -> "${l.map { it.album }.distinct().size} albüm • " + countText(l.size) }
+        group("aa", tracks, { it.albumArtist.ifBlank { it.artist } }, UNKNOWN_ARTIST) { l -> Tx.s(R.string.musicrepos_003, l.map { it.album }.distinct().size) + countText(l.size) }
             .sortedWith(compareBy(NaturalOrder) { it.title })
 
     fun genres(tracks: List<MusicTrack>): List<MusicGroup> =
-        group("genre", tracks, { it.genre }, "Bilinmeyen tür").sortedWith(compareBy(NaturalOrder) { it.title })
+        group("genre", tracks, { it.genre }, Tx.s(R.string.musicrepos_004)).sortedWith(compareBy(NaturalOrder) { it.title })
 
     fun composers(tracks: List<MusicTrack>): List<MusicGroup> =
-        group("composer", tracks, { it.composer }, "Bilinmeyen besteci").sortedWith(compareBy(NaturalOrder) { it.title })
+        group("composer", tracks, { it.composer }, Tx.s(R.string.musicrepos_007)).sortedWith(compareBy(NaturalOrder) { it.title })
 
     fun years(tracks: List<MusicTrack>): List<MusicGroup> =
-        group("year", tracks, { if (it.year > 0) it.year.toString() else "" }, "Bilinmeyen yıl")
+        group("year", tracks, { if (it.year > 0) it.year.toString() else "" }, Tx.s(R.string.musicrepos_005))
             .sortedByDescending { it.title.toIntOrNull() ?: -1 }
 }

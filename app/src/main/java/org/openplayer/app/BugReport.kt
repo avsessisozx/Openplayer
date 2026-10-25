@@ -28,7 +28,7 @@ object BugReport {
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, e ->
             runCatching {
-                val text = "${stamp()} iş parçacığı=${thread.name}\n" + android.util.Log.getStackTraceString(e).take(6000)
+                val text = Tx.s(R.string.bugreport_001, stamp(), thread.name) + android.util.Log.getStackTraceString(e).take(6000)
                 prefs(app).edit().putString("last_crash", text).commit()
             }
             previous?.uncaughtException(thread, e)
@@ -55,39 +55,39 @@ object BugReport {
         val app = c.applicationContext
         val sb = StringBuilder()
         sb.append("=== OpenPlayer hata raporu ===\n")
-        sb.append("Zaman: ").append(stamp()).append('\n')
+        sb.append(Tx.s(R.string.bugreport_014)).append(stamp()).append('\n')
         val pi = runCatching { app.packageManager.getPackageInfo(app.packageName, 0) }.getOrNull()
-        sb.append("Sürüm: ").append(pi?.versionName ?: "?")
+        sb.append(Tx.s(R.string.bugreport_002)).append(pi?.versionName ?: "?")
         sb.append(" (kod ").append(pi?.let { versionCodeOf(it) } ?: "?").append(")\n")
-        sb.append("Cihaz: ").append(Build.MANUFACTURER).append(' ').append(Build.MODEL)
+        sb.append(Tx.s(R.string.bugreport_015)).append(Build.MANUFACTURER).append(' ').append(Build.MODEL)
             .append(" · Android ").append(Build.VERSION.RELEASE).append(" (API ").append(Build.VERSION.SDK_INT).append(")\n")
         val dm = app.resources.displayMetrics
-        sb.append("Ekran: ").append(dm.widthPixels).append('x').append(dm.heightPixels).append(" · yoğunluk ").append(dm.density).append('\n')
-        sb.append("Dil: ").append(Locale.getDefault()).append('\n')
+        sb.append(Tx.s(R.string.bugreport_016)).append(dm.widthPixels).append('x').append(dm.heightPixels).append(Tx.s(R.string.bugreport_003)).append(dm.density).append('\n')
+        sb.append(Tx.s(R.string.bugreport_017)).append(Locale.getDefault()).append('\n')
         runCatching {
             val st = StatFs(app.filesDir.path)
-            sb.append("Boş alan: ").append(st.availableBytes / (1024 * 1024)).append(" MB\n")
+            sb.append(Tx.s(R.string.bugreport_004)).append(st.availableBytes / (1024 * 1024)).append(" MB\n")
         }
         val mem = Runtime.getRuntime()
-        sb.append("Bellek: ").append(mem.totalMemory() / (1024 * 1024)).append(" / ").append(mem.maxMemory() / (1024 * 1024)).append(" MB\n")
+        sb.append(Tx.s(R.string.bugreport_018)).append(mem.totalMemory() / (1024 * 1024)).append(" / ").append(mem.maxMemory() / (1024 * 1024)).append(" MB\n")
 
-        sb.append("\n--- Ayarlar (gizli bilgiler hariç) ---\n")
+        sb.append(Tx.s(R.string.bugreport_005))
         runCatching {
             val all = app.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE).all
             for ((k, v) in all.toSortedMap()) {
-                if (isSecret(k)) sb.append(k).append(" = ").append(if (v.toString().isEmpty()) "(boş)" else "(gizli)").append('\n')
+                if (isSecret(k)) sb.append(k).append(" = ").append(if (v.toString().isEmpty()) Tx.s(R.string.bugreport_006) else "(gizli)").append('\n')
                 else sb.append(k).append(" = ").append(v.toString().take(120)).append('\n')
             }
         }
 
         val p = prefs(app)
-        sb.append("\n--- Son altyazı çevirisi ---\n")
-        sb.append(p.getString("last_translate", null) ?: "(henüz çeviri denenmedi)").append('\n')
+        sb.append(Tx.s(R.string.bugreport_007))
+        sb.append(p.getString("last_translate", null) ?: Tx.s(R.string.bugreport_008)).append('\n')
 
-        sb.append("\n--- Son çökme ---\n")
-        sb.append(p.getString("last_crash", null) ?: "(kayıtlı çökme yok)").append('\n')
+        sb.append(Tx.s(R.string.bugreport_009))
+        sb.append(p.getString("last_crash", null) ?: Tx.s(R.string.bugreport_010)).append('\n')
 
-        sb.append("\n--- Uygulama günlüğü (son hata/uyarılar) ---\n")
+        sb.append(Tx.s(R.string.bugreport_011))
         sb.append(recentLog()).append('\n')
         return sb.toString()
     }
@@ -99,8 +99,8 @@ object BugReport {
         val keep = lines.filter { l ->
             (" E/" in l || " W/" in l || "AndroidRuntime" in l || "OpenPlayer" in l || "OPFEAT" in l)
         }
-        keep.takeLast(120).joinToString("\n").ifBlank { "(günlük boş)" }.take(14000)
-    }.getOrElse { "(günlük okunamadı: ${it.message})" }
+        keep.takeLast(120).joinToString("\n").ifBlank { Tx.s(R.string.bugreport_012) }.take(14000)
+    }.getOrElse { Tx.s(R.string.bugreport_013, it.message) }
 
     /** Raporu arka planda hazırlayıp panoya koyar; bitince [done] ana iş parçacığında çağrılır. */
     fun copyToClipboard(activity: android.app.Activity, done: (Int) -> Unit) {
@@ -108,7 +108,7 @@ object BugReport {
             val text = build(activity)
             activity.runOnUiThread {
                 val cm = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                cm.setPrimaryClip(ClipData.newPlainText("OpenPlayer hata raporu", text))
+                cm.setPrimaryClip(ClipData.newPlainText(Tx.s(R.string.bugreport_019), text))
                 done(text.length)
             }
         }.start()

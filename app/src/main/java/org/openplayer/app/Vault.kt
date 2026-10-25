@@ -122,26 +122,26 @@ fun androidx.appcompat.app.AppCompatActivity.lockToVault(ops: FileOps, videos: L
     if (videos.isEmpty()) return
     val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     if (Build.VERSION.SDK_INT >= 23 && !km.isDeviceSecure) {
-        showMessage("Özel klasör", "Özel klasör için cihazında bir ekran kilidi (PIN, desen veya parmak izi) olmalı. Önce telefonun ayarlarından ekran kilidi belirle.")
+        showMessage(Tx.s(R.string.mainactivi_026), Tx.s(R.string.vault_001))
         return
     }
     PanelBuilder(this)
-        .setTitle("Özel klasöre kilitle")
+        .setTitle(Tx.s(R.string.mainactivi_046))
         .setMessage(
-            "${videos.size} video özel klasöre taşınacak; galeride ve diğer uygulamalarda görünmeyecek, " +
-                "açmak için ekran kilidin sorulacak.\n\n" +
-                "Dikkat: Uygulamayı kaldırırsan veya uygulama verisini silersen bu videolar KALICI olarak kaybolur. " +
-                "Önemli dosyaların yedeğini başka yerde tut."
+            Tx.s(R.string.vault_002, videos.size) +
+                Tx.s(R.string.vault_003) +
+                Tx.s(R.string.vault_004) +
+                Tx.s(R.string.vault_005)
         )
-        .setPositiveButton("Kilitle") { _, _ -> doLock(ops, videos, onDone) }
-        .setNegativeButton("İptal", null)
+        .setPositiveButton(Tx.s(R.string.vault_006)) { _, _ -> doLock(ops, videos, onDone) }
+        .setNegativeButton(Tx.s(R.string.fileops_004), null)
         .show()
 }
 
 private fun androidx.appcompat.app.AppCompatActivity.doLock(ops: FileOps, videos: List<VideoItem>, onDone: () -> Unit) {
     val bar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply { max = videos.size }
     val txt = label("0 / ${videos.size}")
-    val dialog = PanelBuilder(this).setTitle("Kopyalanıyor").setView(vertical { addView(txt); addView(bar) })
+    val dialog = PanelBuilder(this).setTitle(Tx.s(R.string.fileops_014)).setView(vertical { addView(txt); addView(bar) })
         .setCancelable(false).create()
     dialog.show()
     val app = applicationContext
@@ -154,10 +154,10 @@ private fun androidx.appcompat.app.AppCompatActivity.doLock(ops: FileOps, videos
         runOnUiThread {
             dialog.dismiss()
             if (done.isEmpty()) {
-                Toast.makeText(this, "Kilitlenemedi", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, Tx.s(R.string.vault_007), Toast.LENGTH_SHORT).show()
                 return@runOnUiThread
             }
-            Toast.makeText(this, "${done.size} video kasaya kopyalandı. Şimdi özgün dosyalar silinecek.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, Tx.s(R.string.vault_008, done.size), Toast.LENGTH_LONG).show()
             ops.delete(done.map { it.uri }, permanent = true) { onDone() }
         }
     }.start()
@@ -201,7 +201,7 @@ class VaultActivity : AppCompatActivity() {
             setPadding(dp(8), 0, dp(4), 0)
             addView(iconView(R.drawable.ic_back).apply { setOnClickListener { finish() } })
             addView(TextView(context).apply {
-                text = "Özel klasör"
+                text = Tx.s(R.string.mainactivi_026)
                 setTextColor(Color.WHITE)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
@@ -234,12 +234,12 @@ class VaultActivity : AppCompatActivity() {
     private fun requestAuth() {
         val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
         if (Build.VERSION.SDK_INT < 23 || !km.isDeviceSecure) {
-            showMessage("Özel klasör", "Cihazında ekran kilidi yok. Özel klasör için önce telefonun ayarlarından PIN, desen veya parmak izi belirle.")
+            showMessage(Tx.s(R.string.mainactivi_026), Tx.s(R.string.vault_009))
             finish()
             return
         }
         @Suppress("DEPRECATION")
-        val intent = km.createConfirmDeviceCredentialIntent("Özel klasör", "Devam etmek için ekran kilidini doğrula")
+        val intent = km.createConfirmDeviceCredentialIntent(Tx.s(R.string.mainactivi_026), Tx.s(R.string.vault_010))
         if (intent == null) {
             authed = true
             render()
@@ -252,7 +252,7 @@ class VaultActivity : AppCompatActivity() {
         val entries = Vault.list(this)
         if (entries.isEmpty()) {
             body.addView(TextView(this).apply {
-                text = "Özel klasör boş.\nBir videonun ⋮ menüsünden \"Özel klasöre kilitle\" ile ekleyebilirsin."
+                text = Tx.s(R.string.vault_011)
                 setTextColor(UiColors.textSecondary)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                 gravity = Gravity.CENTER
@@ -306,27 +306,27 @@ class VaultActivity : AppCompatActivity() {
 
     private fun menu(e: Vault.Entry) {
         showSheet(e.name, listOf(
-            SheetEntry(R.drawable.ic_play, "Oynat") { play(e) },
-            SheetEntry(R.drawable.ic_move, "Geri yükle (Movies/OpenPlayer)") {
+            SheetEntry(R.drawable.ic_play, Tx.s(R.string.playeracti_065)) { play(e) },
+            SheetEntry(R.drawable.ic_move, Tx.s(R.string.vault_012)) {
                 Thread {
                     val ok = Vault.restore(applicationContext, e)
                     runOnUiThread {
-                        Toast.makeText(this, if (ok) "Geri yüklendi" else "Geri yüklenemedi (Android 10+ gerekir)", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, if (ok) Tx.s(R.string.vault_014) else Tx.s(R.string.vault_013), Toast.LENGTH_SHORT).show()
                         render()
                     }
                 }.start()
             },
-            SheetEntry(R.drawable.ic_info, "Özellikler") {
+            SheetEntry(R.drawable.ic_info, Tx.s(R.string.mainactivi_069)) {
                 showMediaInfo(e.name, Uri.fromFile(e.file), e.file.length(), e.file.lastModified())
             },
-            SheetEntry(R.drawable.ic_delete, "Kalıcı olarak sil", danger = true) {
-                PanelBuilder(this).setTitle("Kalıcı silinsin mi?")
-                    .setMessage("${e.name}\n\nBu işlem geri alınamaz.")
-                    .setPositiveButton("Sil") { _, _ ->
+            SheetEntry(R.drawable.ic_delete, Tx.s(R.string.vault_015), danger = true) {
+                PanelBuilder(this).setTitle(Tx.s(R.string.vault_016))
+                    .setMessage(Tx.s(R.string.vault_017, e.name))
+                    .setPositiveButton(Tx.s(R.string.mainactivi_007)) { _, _ ->
                         Vault.remove(this, e)
                         render()
                     }
-                    .setNegativeButton("İptal", null).show()
+                    .setNegativeButton(Tx.s(R.string.fileops_004), null).show()
             },
         ))
     }

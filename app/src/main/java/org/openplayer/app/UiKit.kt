@@ -123,7 +123,7 @@ fun Context.vertical(padDp: Int = 20, build: LinearLayout.() -> Unit): LinearLay
 }
 
 fun Context.showChoice(title: String, items: List<String>, selected: Int, onPick: (Int) -> Unit) {
-    val builder = PanelBuilder(this).setTitle(title).setNegativeButton("İptal", null)
+    val builder = PanelBuilder(this).setTitle(title).setNegativeButton(Tx.s(R.string.fileops_004), null)
     if (selected >= 0) {
         builder.setSingleChoiceItems(items.toTypedArray(), selected) { d, which ->
             d.dismiss()
@@ -145,8 +145,8 @@ fun Context.showMultiChoice(
     PanelBuilder(this)
         .setTitle(title)
         .setMultiChoiceItems(items.toTypedArray(), state) { _, which, isChecked -> state[which] = isChecked }
-        .setPositiveButton("Tamam") { _, _ -> onOk(state) }
-        .setNegativeButton("İptal", null)
+        .setPositiveButton(Tx.s(R.string.mediainfo_022)) { _, _ -> onOk(state) }
+        .setNegativeButton(Tx.s(R.string.fileops_004), null)
         .show()
 }
 
@@ -170,13 +170,13 @@ fun Context.showInput(
     PanelBuilder(this)
         .setTitle(title)
         .setView(box)
-        .setPositiveButton("Tamam") { _, _ -> onOk(input.text.toString()) }
-        .setNegativeButton("İptal", null)
+        .setPositiveButton(Tx.s(R.string.mediainfo_022)) { _, _ -> onOk(input.text.toString()) }
+        .setNegativeButton(Tx.s(R.string.fileops_004), null)
         .show()
 }
 
 fun Context.showMessage(title: String, message: String) {
-    PanelBuilder(this).setTitle(title).setMessage(message).setPositiveButton("Tamam", null).show()
+    PanelBuilder(this).setTitle(title).setMessage(message).setPositiveButton(Tx.s(R.string.mediainfo_022), null).show()
 }
 
 

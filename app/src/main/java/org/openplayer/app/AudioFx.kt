@@ -18,7 +18,7 @@ class AudioFx(context: Context) {
     private var reverb: PresetReverb? = null
 
     companion object {
-        val reverbLabels = listOf("Kapalı", "Küçük oda", "Orta oda", "Büyük oda", "Orta salon", "Büyük salon", "Sahne (plate)")
+        val reverbLabels = listOf(Tx.s(R.string.audiofx_004), Tx.s(R.string.audiofx_003), Tx.s(R.string.audiofx_007), Tx.s(R.string.audiofx_002), Tx.s(R.string.audiofx_006), Tx.s(R.string.audiofx_001), Tx.s(R.string.audiofx_005))
     }
 
     /** Oynatıcıya bağlanacak yardımcı efekt (yankı) kimliği; 0 = yok. */

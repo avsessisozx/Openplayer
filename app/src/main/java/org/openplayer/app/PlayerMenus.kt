@@ -37,7 +37,7 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     private fun trackLabel(f: Format, index: Int): String {
         val lang = f.language?.let { Locale.forLanguageTag(it).getDisplayLanguage(Locale("tr")) }?.takeIf { it.isNotBlank() }
-        val name = f.label ?: lang ?: "Parça ${index + 1}"
+        val name = f.label ?: lang ?: Tx.s(R.string.cuesheet_001, index + 1)
         val details = buildList {
             if (f.label != null && lang != null) add(lang)
             mimeLabel(f.sampleMimeType).takeIf { it.isNotEmpty() }?.let { add(it) }
@@ -53,7 +53,7 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showAudioTracks() {
         val groups = a.player.currentTracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
         if (groups.isEmpty()) {
-            a.toast("Ses parçası bulunamadı")
+            a.toast(Tx.s(R.string.playermenu_001))
             return
         }
         val labels = groups.mapIndexed { i, g ->
@@ -61,7 +61,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         }
         val selected = groups.indexOfFirst { it.isSelected }.coerceAtLeast(0)
         PanelBuilder(a)
-            .setTitle("Ses parçası")
+            .setTitle(Tx.s(R.string.playermenu_002))
             .setSingleChoiceItems(labels.toTypedArray(), selected) { d, which ->
                 val p = a.player
                 p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
@@ -71,9 +71,9 @@ class PlayerMenus(private val a: PlayerActivity) {
                 if (u != null && a.settings.perVideoMemory && !a.settings.incognito) VideoMemory.setAudio(a, u, which)
                 d.dismiss()
             }
-            .setPositiveButton("Ses gecikmesi") { _, _ -> showAudioDelay() }
-            .setNeutralButton("Ekolayzır") { _, _ -> showEqualizer() }
-            .setNegativeButton("Kapat", null)
+            .setPositiveButton(Tx.s(R.string.playermenu_003)) { _, _ -> showAudioDelay() }
+            .setNeutralButton(Tx.s(R.string.musiccontr_002)) { _, _ -> showEqualizer() }
+            .setNegativeButton(Tx.s(R.string.nowplaying_009), null)
             .show()
     }
 
@@ -84,8 +84,8 @@ class PlayerMenus(private val a: PlayerActivity) {
         val delayLabel = a.label("", 16f)
         val btLabel = a.label("", 16f)
         fun refresh() {
-            delayLabel.text = "Ses gecikmesi: ${fmt(s.audioDelayMs)}\n(+ ses geç gelir, − ses erken gelir)"
-            btLabel.text = "Bluetooth ek gecikme: ${fmt(s.bluetoothDelayMs)}\n(yalnızca Bluetooth kulaklık/hoparlör bağlıyken)"
+            delayLabel.text = Tx.s(R.string.playermenu_004, fmt(s.audioDelayMs))
+            btLabel.text = Tx.s(R.string.playermenu_005, fmt(s.bluetoothDelayMs))
         }
         refresh()
         fun row(onStep: (Long) -> Unit): LinearLayout = LinearLayout(a).apply {
@@ -107,10 +107,10 @@ class PlayerMenus(private val a: PlayerActivity) {
             addView(row { s.bluetoothDelayMs += it }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(8) })
         }
         PanelBuilder(a)
-            .setTitle("Ses gecikmesi")
+            .setTitle(Tx.s(R.string.playermenu_003))
             .setView(root)
-            .setPositiveButton("Tamam") { _, _ -> AudioDelay.apply(a) }
-            .setNeutralButton("Sıfırla") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.mediainfo_022)) { _, _ -> AudioDelay.apply(a) }
+            .setNeutralButton(Tx.s(R.string.musiccontr_018)) { _, _ ->
                 s.audioDelayMs = 0L
                 s.bluetoothDelayMs = 0L
                 AudioDelay.apply(a)
@@ -129,18 +129,18 @@ class PlayerMenus(private val a: PlayerActivity) {
             setPadding(0, a.dp(10), 0, a.dp(10))
             setOnClickListener { onClick() }
         }
-        root.addView(rowButton("Stereo modu: ${a.settings.stereoMode.label}") { showStereoMode() })
-        root.addView(rowButton("Yankı: ${AudioFx.reverbLabels[a.settings.reverbPreset]}") { showReverb() })
-        root.addView(rowButton("Grafik EQ (10 bant, cihazdan bağımsız)") { showGraphicEq() })
-        val boostLabel = a.label("Ses artırma: %${a.settings.volumeBoostPercent}")
+        root.addView(rowButton(Tx.s(R.string.playermenu_006, a.settings.stereoMode.label)) { showStereoMode() })
+        root.addView(rowButton(Tx.s(R.string.playermenu_007, AudioFx.reverbLabels[a.settings.reverbPreset])) { showReverb() })
+        root.addView(rowButton(Tx.s(R.string.playermenu_008)) { showGraphicEq() })
+        val boostLabel = a.label(Tx.s(R.string.musiccontr_001, a.settings.volumeBoostPercent))
         root.addView(boostLabel)
         root.addView(a.seekBar(100, 200, a.settings.volumeBoostPercent) { v ->
             fx.setBoostPercent(v)
-            boostLabel.text = "Ses artırma: %$v"
+            boostLabel.text = Tx.s(R.string.musiccontr_001, v)
         })
         if (fx.available && fx.bandCount > 0) {
             val sw = SwitchCompat(a).apply {
-                text = "Ekolayzır"
+                text = Tx.s(R.string.musiccontr_002)
                 setTextColor(Color.WHITE)
                 isChecked = a.settings.eqEnabled
                 setOnCheckedChangeListener { _, on -> fx.setEnabled(on) }
@@ -154,14 +154,14 @@ class PlayerMenus(private val a: PlayerActivity) {
                 root.addView(a.seekBar(min, max, fx.level(band)) { v -> fx.setLevel(band, v) })
             }
         } else {
-            root.addView(a.label("Bu cihazda ekolayzır kullanılamıyor.", 13f, 0xFF9AA3AD.toInt()),
+            root.addView(a.label(Tx.s(R.string.playermenu_009), 13f, 0xFF9AA3AD.toInt()),
                 LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) })
         }
         PanelBuilder(a)
-            .setTitle("Ses ayarları")
+            .setTitle(Tx.s(R.string.musiccontr_017))
             .setView(ScrollView(a).apply { addView(root) })
-            .setPositiveButton("Tamam", null)
-            .setNeutralButton("Sıfırla") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+            .setNeutralButton(Tx.s(R.string.musiccontr_018)) { _, _ ->
                 fx.reset()
                 fx.setBoostPercent(100)
             }
@@ -198,14 +198,14 @@ class PlayerMenus(private val a: PlayerActivity) {
 
         val root = a.vertical {}
         root.addView(SwitchCompat(a).apply {
-            text = "Grafik EQ"
+            text = Tx.s(R.string.playermenu_010)
             setTextColor(Color.WHITE)
             isChecked = s.graphicEqEnabled
             setOnCheckedChangeListener { _, on -> s.graphicEqEnabled = on; AudioEq.current?.enabled = on }
         })
         val extraRows = ArrayList<View>()
         root.addView(SwitchCompat(a).apply {
-            text = "Parametrik (frekans / Q)"
+            text = Tx.s(R.string.playermenu_011)
             setTextColor(Color.WHITE)
             isChecked = s.graphicEqParametric
             setOnCheckedChangeListener { _, on ->
@@ -248,10 +248,10 @@ class PlayerMenus(private val a: PlayerActivity) {
         }
 
         PanelBuilder(a)
-            .setTitle("Grafik / Parametrik EQ")
+            .setTitle(Tx.s(R.string.playermenu_012))
             .setView(ScrollView(a).apply { addView(root) })
-            .setPositiveButton("Tamam", null)
-            .setNeutralButton("Sıfırla") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+            .setNeutralButton(Tx.s(R.string.musiccontr_018)) { _, _ ->
                 for (i in 0 until n) {
                     gains[i] = 0
                     freqs[i] = AudioEq.FREQS[i]
@@ -271,31 +271,31 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showSubtitleMenu() {
         val entries = ArrayList<Pair<String, () -> Unit>>()
         val sub = a.subtitles
-        entries += ((if (sub.mode == SubtitleController.Mode.OFF) "● " else "○ ") + "Altyazıyı kapat") to { sub.setOff() }
+        entries += ((if (sub.mode == SubtitleController.Mode.OFF) "● " else "○ ") + Tx.s(R.string.playermenu_013)) to { sub.setOff() }
 
         val groups = a.player.currentTracks.groups.filter { it.type == C.TRACK_TYPE_TEXT && it.length > 0 }
         groups.forEachIndexed { i, g ->
             val selected = sub.mode == SubtitleController.Mode.EMBEDDED && g.isSelected
-            entries += ((if (selected) "● " else "○ ") + "Gömülü: " + trackLabel(g.getTrackFormat(0), i)) to { sub.useEmbedded(g) }
+            entries += ((if (selected) "● " else "○ ") + Tx.s(R.string.playermenu_014) + trackLabel(g.getTrackFormat(0), i)) to { sub.useEmbedded(g) }
         }
         for (f in a.sidecars) {
             val selected = sub.mode == SubtitleController.Mode.EXTERNAL && sub.externalName == f.name
-            entries += ((if (selected) "● " else "○ ") + "Dosya: " + f.name) to { a.loadExternalSubtitle(f) }
+            entries += ((if (selected) "● " else "○ ") + Tx.s(R.string.playermenu_129) + f.name) to { a.loadExternalSubtitle(f) }
         }
         if (sub.mode == SubtitleController.Mode.EXTERNAL && a.sidecars.none { it.name == sub.externalName } && sub.externalName != null) {
             entries += "● Eklenen: ${sub.externalName}" to {}
         }
         entries += "＋  Dosyadan ekle…" to { a.pickSubtitleFile() }
-        entries += "＋  Çevrimiçi altyazı ara…" to { showOnlineSearch() }
-        entries += "🌐  Altyazıyı çevir…" to { showTranslate() }
-        entries += "⏱  Senkronizasyon (gecikme, hız)…" to { showSubtitleSync() }
+        entries += Tx.s(R.string.playermenu_015) to { showOnlineSearch() }
+        entries += Tx.s(R.string.playermenu_016) to { showTranslate() }
+        entries += Tx.s(R.string.playermenu_017) to { showSubtitleSync() }
         entries += "Aa  Stil ve boyut…" to { showSubtitleStyle() }
-        entries += "⚙  Karakter kodlaması…" to { showCharsetMenu() }
+        entries += Tx.s(R.string.playermenu_018) to { showCharsetMenu() }
 
         PanelBuilder(a)
-            .setTitle("Altyazı")
+            .setTitle(Tx.s(R.string.mediainfo_014))
             .setItems(entries.map { it.first }.toTypedArray()) { _, which -> entries[which].second() }
-            .setNegativeButton("Kapat", null)
+            .setNegativeButton(Tx.s(R.string.nowplaying_009), null)
             .show()
     }
 
@@ -303,9 +303,9 @@ class PlayerMenus(private val a: PlayerActivity) {
         val label = a.label("", 16f)
         fun refresh() {
             val d = a.subtitles.delayMs
-            label.text = "Gecikme: ${if (d >= 0) "+" else ""}${"%.1f".format(d / 1000f)} sn\n(+ altyazı daha geç, − daha erken görünür)"
+            label.text = Tx.s(R.string.playermenu_019, if (d >= 0) "+" else "", "%.1f".format(d / 1000f))
             if (d < 0 && a.subtitles.mode == SubtitleController.Mode.EMBEDDED) {
-                label.text = label.text.toString() + "\nNot: Gömülü altyazılarda sadece + yönü çalışır."
+                label.text = label.text.toString() + Tx.s(R.string.playermenu_020)
             }
         }
         refresh()
@@ -323,7 +323,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         }
         val speedLabel = a.label("", 16f)
         fun refreshSpeed() {
-            speedLabel.text = "Altyazı hızı: ×${"%.4f".format(a.subtitles.speed)}\n(kare hızı farkı için; 1.0000 = değişmez)"
+            speedLabel.text = Tx.s(R.string.playermenu_021, "%.4f".format(a.subtitles.speed))
         }
         refreshSpeed()
         val presets = listOf("23.976→25" to 23.976 / 25.0, "25→23.976" to 25.0 / 23.976, "24→25" to 24.0 / 25.0, "25→24" to 25.0 / 24.0)
@@ -367,10 +367,10 @@ class PlayerMenus(private val a: PlayerActivity) {
             addView(speedRow2, LinearLayout.LayoutParams(-1, -2))
         }
         PanelBuilder(a)
-            .setTitle("Altyazı senkronu")
+            .setTitle(Tx.s(R.string.playermenu_022))
             .setView(root)
-            .setPositiveButton("Tamam", null)
-            .setNeutralButton("Sıfırla") { _, _ ->
+            .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+            .setNeutralButton(Tx.s(R.string.musiccontr_018)) { _, _ ->
                 a.subtitles.delayMs = 0L
                 a.subtitles.speed = 1.0
             }
@@ -379,28 +379,28 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     fun showSubtitleStyle() {
         val s = a.settings
-        val colors = listOf("Beyaz" to 0xFFFFFFFF.toInt(), "Sarı" to 0xFFFFE600.toInt(), "Yeşil" to 0xFF7CFF7C.toInt(), "Camgöbeği" to 0xFF66E5FF.toInt())
-        val backgrounds = listOf("Şeffaf" to 0x00000000, "Yarı saydam" to 0x99000000.toInt(), "Siyah" to 0xFF000000.toInt())
-        val sizeLabel = a.label("Boyut: ${s.subtitleSizeSp.toInt()}")
-        val posLabel = a.label("Alttan boşluk: %${(s.subtitleBottomFraction * 100).toInt()}")
-        val colorBtn = Button(a).apply { text = "Renk: ${colors.firstOrNull { it.second == s.subtitleColor }?.first ?: "Özel"}" }
-        val bgBtn = Button(a).apply { text = "Arka plan: ${backgrounds.firstOrNull { it.second == s.subtitleBackground }?.first ?: "Özel"}" }
+        val colors = listOf(Tx.s(R.string.playermenu_130) to 0xFFFFFFFF.toInt(), Tx.s(R.string.playermenu_025) to 0xFFFFE600.toInt(), Tx.s(R.string.playermenu_024) to 0xFF7CFF7C.toInt(), Tx.s(R.string.playermenu_023) to 0xFF66E5FF.toInt())
+        val backgrounds = listOf(Tx.s(R.string.playermenu_027) to 0x00000000, Tx.s(R.string.playermenu_026) to 0x99000000.toInt(), Tx.s(R.string.playermenu_131) to 0xFF000000.toInt())
+        val sizeLabel = a.label(Tx.s(R.string.playermenu_028, s.subtitleSizeSp.toInt()))
+        val posLabel = a.label(Tx.s(R.string.playermenu_029, (s.subtitleBottomFraction * 100).toInt()))
+        val colorBtn = Button(a).apply { text = Tx.s(R.string.playermenu_030, colors.firstOrNull { it.second == s.subtitleColor }?.first ?: Tx.s(R.string.settingsac_156)) }
+        val bgBtn = Button(a).apply { text = Tx.s(R.string.playermenu_031, backgrounds.firstOrNull { it.second == s.subtitleBackground }?.first ?: Tx.s(R.string.settingsac_156)) }
         colorBtn.setOnClickListener {
-            a.showChoice("Yazı rengi", colors.map { it.first }, colors.indexOfFirst { it.second == s.subtitleColor }) { i ->
+            a.showChoice(Tx.s(R.string.playermenu_032), colors.map { it.first }, colors.indexOfFirst { it.second == s.subtitleColor }) { i ->
                 s.subtitleColor = colors[i].second
-                colorBtn.text = "Renk: ${colors[i].first}"
+                colorBtn.text = Tx.s(R.string.playermenu_030, colors[i].first)
                 a.subtitles.applyStyle()
             }
         }
         bgBtn.setOnClickListener {
-            a.showChoice("Arka plan", backgrounds.map { it.first }, backgrounds.indexOfFirst { it.second == s.subtitleBackground }) { i ->
+            a.showChoice(Tx.s(R.string.playermenu_132), backgrounds.map { it.first }, backgrounds.indexOfFirst { it.second == s.subtitleBackground }) { i ->
                 s.subtitleBackground = backgrounds[i].second
-                bgBtn.text = "Arka plan: ${backgrounds[i].first}"
+                bgBtn.text = Tx.s(R.string.playermenu_031, backgrounds[i].first)
                 a.subtitles.applyStyle()
             }
         }
         val outline = SwitchCompat(a).apply {
-            text = "Kenar çizgisi"
+            text = Tx.s(R.string.playermenu_033)
             setTextColor(Color.WHITE)
             isChecked = s.subtitleOutline
             setOnCheckedChangeListener { _, on ->
@@ -409,7 +409,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             }
         }
         val bold = SwitchCompat(a).apply {
-            text = "Kalın"
+            text = Tx.s(R.string.playermenu_034)
             setTextColor(Color.WHITE)
             isChecked = s.subtitleBold
             setOnCheckedChangeListener { _, on ->
@@ -421,13 +421,13 @@ class PlayerMenus(private val a: PlayerActivity) {
             addView(sizeLabel)
             addView(a.seekBar(10, 48, s.subtitleSizeSp.toInt()) { v ->
                 s.subtitleSizeSp = v.toFloat()
-                sizeLabel.text = "Boyut: $v"
+                sizeLabel.text = Tx.s(R.string.playermenu_028, v)
                 a.subtitles.applyStyle()
             })
             addView(posLabel, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) })
             addView(a.seekBar(0, 50, (s.subtitleBottomFraction * 100).toInt()) { v ->
                 s.subtitleBottomFraction = v / 100f
-                posLabel.text = "Alttan boşluk: %$v"
+                posLabel.text = Tx.s(R.string.playermenu_029, v)
                 a.subtitles.applyStyle()
             })
             addView(colorBtn)
@@ -436,31 +436,31 @@ class PlayerMenus(private val a: PlayerActivity) {
             addView(bold)
         }
         PanelBuilder(a)
-            .setTitle("Altyazı stili")
+            .setTitle(Tx.s(R.string.playermenu_035))
             .setView(ScrollView(a).apply { addView(root) })
-            .setPositiveButton("Tamam", null)
+            .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
             .show()
     }
 
     fun showCharsetMenu() {
         val options = listOf(
-            "Otomatik" to "auto",
+            Tx.s(R.string.playermenu_133) to "auto",
             "UTF-8" to "UTF-8",
-            "Türkçe (windows-1254)" to "windows-1254",
-            "Türkçe (ISO-8859-9)" to "ISO-8859-9",
-            "Batı Avrupa (windows-1252)" to "windows-1252",
-            "Orta Avrupa (windows-1250)" to "windows-1250",
-            "Kiril (windows-1251)" to "windows-1251",
-            "Yunanca (windows-1253)" to "windows-1253",
-            "İbranice (windows-1255)" to "windows-1255",
-            "Arapça (windows-1256)" to "windows-1256",
-            "Çince (GBK)" to "GBK",
-            "Çince (Big5)" to "Big5",
-            "Japonca (Shift_JIS)" to "Shift_JIS",
-            "Korece (EUC-KR)" to "EUC-KR",
+            Tx.s(R.string.playermenu_036) to "windows-1254",
+            Tx.s(R.string.playermenu_037) to "ISO-8859-9",
+            Tx.s(R.string.playermenu_038) to "windows-1252",
+            Tx.s(R.string.playermenu_134) to "windows-1250",
+            Tx.s(R.string.playermenu_135) to "windows-1251",
+            Tx.s(R.string.playermenu_136) to "windows-1253",
+            Tx.s(R.string.playermenu_039) to "windows-1255",
+            Tx.s(R.string.playermenu_040) to "windows-1256",
+            Tx.s(R.string.playermenu_041) to "GBK",
+            Tx.s(R.string.playermenu_042) to "Big5",
+            Tx.s(R.string.playermenu_137) to "Shift_JIS",
+            Tx.s(R.string.playermenu_138) to "EUC-KR",
             "UTF-16" to "UTF-16",
         )
-        a.showChoice("Karakter kodlaması", options.map { it.first }, options.indexOfFirst { it.second == a.settings.subtitleCharset }) { i ->
+        a.showChoice(Tx.s(R.string.playermenu_043), options.map { it.first }, options.indexOfFirst { it.second == a.settings.subtitleCharset }) { i ->
             a.settings.subtitleCharset = options[i].second
             val name = a.subtitles.externalName
             val file = a.sidecars.firstOrNull { it.name == name }
@@ -475,9 +475,9 @@ class PlayerMenus(private val a: PlayerActivity) {
         val cues = a.subtitles.externalCues
         if (cues.isEmpty()) {
             a.showMessage(
-                "Önce bir altyazı yükleyin",
-                "Çeviri, yüklü altyazı dosyası için çalışır. Altyazı menüsünden bir dosya ekleyin veya çevrimiçi arayın. " +
-                    "Videonun içine gömülü altyazılar çevrilemez."
+                Tx.s(R.string.playermenu_044),
+                Tx.s(R.string.playermenu_045) +
+                    Tx.s(R.string.playermenu_046)
             )
             return
         }
@@ -487,17 +487,17 @@ class PlayerMenus(private val a: PlayerActivity) {
             cfg.provider == TrProvider.OPENAI && cfg.model.isBlank()
         ) {
             PanelBuilder(a)
-                .setTitle("Çeviri ayarı gerekli")
-                .setMessage("Seçili sağlayıcı (${cfg.provider.label}) için adres${if (cfg.provider == TrProvider.OPENAI) " ve model" else ""} girilmemiş. " +
-                    "Ayarlar > Altyazı çevirisi bölümünden girebilir veya anahtarsız MyMemory'yi seçebilirsiniz.")
-                .setPositiveButton("Ayarlar") { _, _ -> a.openSettings("TRANSLATE") }
-                .setNegativeButton("İptal", null)
+                .setTitle(Tx.s(R.string.playermenu_047))
+                .setMessage(Tx.s(R.string.playermenu_048, cfg.provider.label, if (cfg.provider == TrProvider.OPENAI) " ve model" else "") +
+                    Tx.s(R.string.playermenu_049))
+                .setPositiveButton(Tx.s(R.string.mainactivi_032)) { _, _ -> a.openSettings("TRANSLATE") }
+                .setNegativeButton(Tx.s(R.string.fileops_004), null)
                 .show()
             return
         }
         val langs = TrLangs.all
-        val labels = langs.map { it.tr }
-        a.showChoice("Şu dile çevir", labels, langs.indexOfFirst { it.code == cfg.target }) { i ->
+        val labels = langs.map { it.name }
+        a.showChoice(Tx.s(R.string.playermenu_050), labels, langs.indexOfFirst { it.code == cfg.target }) { i ->
             s.trTarget = langs[i].code
             confirmQuota(cues, s.translateConfig())
         }
@@ -507,12 +507,12 @@ class PlayerMenus(private val a: PlayerActivity) {
         val chars = cues.sumOf { it.text.length.toLong() }
         if (cfg.provider == TrProvider.MYMEMORY && cfg.email.isBlank() && chars > 5000) {
             PanelBuilder(a)
-                .setTitle("Günlük kota uyarısı")
-                .setMessage("Bu altyazı yaklaşık $chars karakter. Anahtarsız MyMemory günde yalnız 5.000 karaktere izin verir; " +
-                    "e-posta adresi girilirse 50.000'e çıkar. Yapay zekâ veya LibreTranslate adresi eklemek de bir seçenektir.")
-                .setPositiveButton("Yine de çevir") { _, _ -> runTranslate(cues, cfg) }
-                .setNeutralButton("Ayarlar") { _, _ -> a.openSettings("TRANSLATE") }
-                .setNegativeButton("İptal", null)
+                .setTitle(Tx.s(R.string.playermenu_051))
+                .setMessage(Tx.s(R.string.playermenu_052, chars) +
+                    Tx.s(R.string.playermenu_053))
+                .setPositiveButton(Tx.s(R.string.playermenu_054)) { _, _ -> runTranslate(cues, cfg) }
+                .setNeutralButton(Tx.s(R.string.mainactivi_032)) { _, _ -> a.openSettings("TRANSLATE") }
+                .setNegativeButton(Tx.s(R.string.fileops_004), null)
                 .show()
             return
         }
@@ -548,10 +548,10 @@ class PlayerMenus(private val a: PlayerActivity) {
     private fun runTranslate(cues: List<SubCue>, cfg: TrConfig) {
         val cancel = java.util.concurrent.atomic.AtomicBoolean(false)
         val dialog = PanelBuilder(a)
-            .setTitle("Altyazı çevriliyor")
-            .setMessage("Başlıyor…")
+            .setTitle(Tx.s(R.string.playermenu_055))
+            .setMessage(Tx.s(R.string.playermenu_056))
             .setCancelable(false)
-            .setNegativeButton("İptal") { _, _ -> cancel.set(true) }
+            .setNegativeButton(Tx.s(R.string.fileops_004)) { _, _ -> cancel.set(true) }
             .show()
         val uri = a.currentUri
         Thread {
@@ -560,15 +560,15 @@ class PlayerMenus(private val a: PlayerActivity) {
             val cache = loadCache(cFile)
             var lastDone = 0
             var lastTotal = 0
-            val header = "sağlayıcı=${cfg.provider.id} model=${cfg.model} kaynak=${cfg.source} hedef=${cfg.target} " +
-                "adres=${runCatching { java.net.URI(cfg.apiUrl).host }.getOrNull() ?: cfg.apiUrl.take(40)} satır=${cues.size}"
+            val header = Tx.s(R.string.playermenu_057, cfg.provider.id, cfg.model, cfg.source, cfg.target) +
+                Tx.s(R.string.playermenu_058, runCatching { java.net.URI(cfg.apiUrl).host }.getOrNull() ?: cfg.apiUrl.take(40), cues.size)
             try {
                 val out = tr.translateCues(
                     cues,
                     cancelled = { cancel.get() },
                     progress = { done, total ->
                         lastDone = done; lastTotal = total
-                        a.runOnUiThread { if (!cancel.get()) dialog.setMessage("$done / $total satır çevrildi") }
+                        a.runOnUiThread { if (!cancel.get()) dialog.setMessage(Tx.s(R.string.playermenu_059, done, total)) }
                     },
                     cache = cache,
                     checkpoint = { saveCache(cFile, cache) },
@@ -577,31 +577,31 @@ class PlayerMenus(private val a: PlayerActivity) {
                 val file = File(SubtitleFiles.downloadDir(a), UriGuard.safeFileName(base, 70) + "." + cfg.target + ".srt")
                 file.writeText(SrtWriter.write(out), Charsets.UTF_8)
                 SubtitleFiles.pruneDownloads(a)
-                BugReport.noteTranslate(a, "BAŞARILI $lastDone/$lastTotal\n$header\n" + tr.log.takeLast(40).joinToString("\n"))
+                BugReport.noteTranslate(a, Tx.s(R.string.playermenu_060, lastDone, lastTotal, header) + tr.log.takeLast(40).joinToString("\n"))
                 a.runOnUiThread {
                     dialog.dismiss()
                     a.loadExternalSubtitle(file)
-                    a.toast("Çeviri tamamlandı (${out.size} satır)")
+                    a.toast(Tx.s(R.string.playermenu_061, out.size))
                 }
             } catch (e: TranslateCancelled) {
                 saveCache(cFile, cache)
-                BugReport.noteTranslate(a, "İPTAL EDİLDİ $lastDone/$lastTotal\n$header\n" + tr.log.takeLast(40).joinToString("\n"))
-                a.runOnUiThread { dialog.dismiss(); a.toast("Çeviri iptal edildi") }
+                BugReport.noteTranslate(a, Tx.s(R.string.playermenu_062, lastDone, lastTotal, header) + tr.log.takeLast(40).joinToString("\n"))
+                a.runOnUiThread { dialog.dismiss(); a.toast(Tx.s(R.string.playermenu_063)) }
             } catch (e: Exception) {
                 saveCache(cFile, cache)
                 BugReport.noteTranslate(
                     a,
-                    "BAŞARISIZ $lastDone/$lastTotal (${e.javaClass.simpleName}): ${e.message}\n$header\n" + tr.log.takeLast(60).joinToString("\n")
+                    Tx.s(R.string.playermenu_064, lastDone, lastTotal, e.javaClass.simpleName, e.message, header) + tr.log.takeLast(60).joinToString("\n")
                 )
                 a.runOnUiThread {
                     dialog.dismiss()
-                    val saved = if (lastTotal > 0) "\n\n$lastDone / $lastTotal satır çevrildi ve kaydedildi. Tekrar \"Altyazıyı çevir\" derseniz kaldığı yerden devam eder." else ""
+                    val saved = if (lastTotal > 0) Tx.s(R.string.playermenu_065, lastDone, lastTotal) else ""
                     PanelBuilder(a)
-                        .setTitle("Çeviri başarısız")
-                        .setMessage((e.message ?: "Bilinmeyen hata") + saved)
-                        .setPositiveButton("Tamam", null)
-                        .setNeutralButton("Raporu kopyala") { _, _ ->
-                            BugReport.copyToClipboard(a) { n -> a.toast("Rapor panoya kopyalandı ($n karakter)") }
+                        .setTitle(Tx.s(R.string.playermenu_066))
+                        .setMessage((e.message ?: Tx.s(R.string.playermenu_067)) + saved)
+                        .setPositiveButton(Tx.s(R.string.mediainfo_022), null)
+                        .setNeutralButton(Tx.s(R.string.playermenu_068)) { _, _ ->
+                            BugReport.copyToClipboard(a) { n -> a.toast(Tx.s(R.string.playermenu_069, n)) }
                         }
                         .show()
                 }
@@ -614,16 +614,16 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showOnlineSearch() {
         if (a.settings.osApiKey.isEmpty()) {
             PanelBuilder(a)
-                .setTitle("API anahtarı gerekli")
-                .setMessage("Çevrimiçi altyazı araması için opensubtitles.com hesabınızdan aldığınız API anahtarını Ayarlar > Altyazı bölümüne girin.")
-                .setPositiveButton("Ayarlar") { _, _ -> a.openSettings() }
-                .setNegativeButton("İptal", null)
+                .setTitle(Tx.s(R.string.playermenu_070))
+                .setMessage(Tx.s(R.string.playermenu_071))
+                .setPositiveButton(Tx.s(R.string.mainactivi_032)) { _, _ -> a.openSettings() }
+                .setNegativeButton(Tx.s(R.string.fileops_004), null)
                 .show()
             return
         }
         val uri = a.currentUri ?: return
         val title = OsHash.cleanTitle(SubtitleFiles.displayName(a, uri))
-        a.showInput("Altyazı ara", "Film veya dizi adı", title) { q -> runSearch(q) }
+        a.showInput(Tx.s(R.string.mainactivi_068), Tx.s(R.string.playermenu_072), title) { q -> runSearch(q) }
     }
 
     private fun busyDialog(message: String): AlertDialog =
@@ -631,7 +631,7 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     private fun runSearch(query: String) {
         val uri = a.currentUri ?: return
-        val busy = busyDialog("Aranıyor…")
+        val busy = busyDialog(Tx.s(R.string.musicactiv_066))
         val s = a.settings
         Thread {
             try {
@@ -645,7 +645,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             } catch (e: Exception) {
                 a.runOnUiThread {
                     busy.dismiss()
-                    a.showMessage("Arama başarısız", e.message ?: "Bilinmeyen hata")
+                    a.showMessage(Tx.s(R.string.playermenu_073), e.message ?: Tx.s(R.string.playermenu_067))
                 }
             }
         }.start()
@@ -653,16 +653,16 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     private fun showResults(results: List<OsResult>, client: OpenSubtitlesClient, query: String) {
         if (results.isEmpty()) {
-            a.showMessage("Sonuç yok", "\"$query\" için altyazı bulunamadı. Adı sadeleştirip tekrar deneyin.")
+            a.showMessage(Tx.s(R.string.playermenu_075), Tx.s(R.string.playermenu_074, query))
             return
         }
         val shown = results.take(50)
         val labels = shown.map { (if (it.hashMatch) "★ " else "") + "[${it.language}] ${it.release} (↓${it.downloads})" }
-        a.showChoice("Altyazı seçin", labels, -1) { i -> download(shown[i], client) }
+        a.showChoice(Tx.s(R.string.playermenu_076), labels, -1) { i -> download(shown[i], client) }
     }
 
     private fun download(r: OsResult, client: OpenSubtitlesClient) {
-        val busy = busyDialog("İndiriliyor…")
+        val busy = busyDialog(Tx.s(R.string.playermenu_077))
         Thread {
             try {
                 val bytes = client.download(r.fileId)
@@ -679,7 +679,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             } catch (e: Exception) {
                 a.runOnUiThread {
                     busy.dismiss()
-                    a.showMessage("İndirme başarısız", e.message ?: "Bilinmeyen hata")
+                    a.showMessage(Tx.s(R.string.playermenu_078), e.message ?: Tx.s(R.string.playermenu_067))
                 }
             }
         }.start()
@@ -691,8 +691,8 @@ class PlayerMenus(private val a: PlayerActivity) {
         val speeds = listOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f, 4f)
         val cur = a.player.playbackParameters.speed
         val sel = speeds.indexOfFirst { abs(it - cur) < 0.01f }
-        val labels = speeds.map { "${it}x" } + "Özel…"
-        a.showChoice("Oynatma hızı", labels, sel) { i ->
+        val labels = speeds.map { "${it}x" } + Tx.s(R.string.playermenu_079)
+        a.showChoice(Tx.s(R.string.gesturecon_003), labels, sel) { i ->
             if (i < speeds.size) a.setSpeed(speeds[i]) else showCustomSpeed()
         }
     }
@@ -710,23 +710,23 @@ class PlayerMenus(private val a: PlayerActivity) {
             label.text = "${"%.2f".format(value / 100f)}x"
         }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = a.dp(12) })
         PanelBuilder(a)
-            .setTitle("Özel hız")
+            .setTitle(Tx.s(R.string.playermenu_080))
             .setView(root)
-            .setPositiveButton("Uygula") { _, _ -> a.setSpeed(value / 100f) }
+            .setPositiveButton(Tx.s(R.string.mainactivi_064)) { _, _ -> a.setSpeed(value / 100f) }
             .setNeutralButton("1.0x") { _, _ -> a.setSpeed(1f) }
-            .setNegativeButton("Vazgeç", null)
+            .setNegativeButton(Tx.s(R.string.playermenu_081), null)
             .show()
     }
 
     fun showSleepTimer() {
-        val options = listOf("Kapalı", "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika", "120 dakika", "Video bitince", "Özel süre…")
-        a.showChoice("Uyku zamanlayıcısı", options, -1) { i ->
+        val options = listOf(Tx.s(R.string.audiofx_004), "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika", "120 dakika", Tx.s(R.string.playermenu_139), Tx.s(R.string.playermenu_082))
+        a.showChoice(Tx.s(R.string.nowplaying_004), options, -1) { i ->
             when (i) {
                 0 -> a.setSleepTimer(0, false)
                 7 -> a.setSleepTimer(0, true)
-                8 -> a.showInput("Kaç dakika sonra dursun?", "Dakika (1-600)") { txt ->
+                8 -> a.showInput(Tx.s(R.string.playermenu_083), Tx.s(R.string.playermenu_140)) { txt ->
                     val m = txt.trim().toIntOrNull()
-                    if (m == null || m !in 1..600) a.toast("1 ile 600 arasında bir sayı girin") else a.setSleepTimer(m, false)
+                    if (m == null || m !in 1..600) a.toast(Tx.s(R.string.playermenu_084)) else a.setSleepTimer(m, false)
                 }
                 else -> a.setSleepTimer(listOf(0, 15, 30, 45, 60, 90, 120)[i], false)
             }
@@ -735,48 +735,48 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     fun showStereoMode() {
         val modes = StereoMode.entries
-        a.showChoice("Stereo modu", modes.map { it.label }, modes.indexOf(a.settings.stereoMode)) { i ->
+        a.showChoice(Tx.s(R.string.playermenu_085), modes.map { it.label }, modes.indexOf(a.settings.stereoMode)) { i ->
             a.settings.stereoMode = modes[i]
             AudioBalance.update(a.settings)
         }
     }
 
     fun showReverb() {
-        a.showChoice("Yankı (reverb)", AudioFx.reverbLabels, a.settings.reverbPreset) { i ->
+        a.showChoice(Tx.s(R.string.playermenu_086), AudioFx.reverbLabels, a.settings.reverbPreset) { i ->
             a.audioFx.setReverb(i)
             a.applyAuxEffect()
-            if (i > 0 && a.audioFx.reverbId == 0) a.toast("Bu cihaz yankı efektini desteklemiyor")
+            if (i > 0 && a.audioFx.reverbId == 0) a.toast(Tx.s(R.string.playermenu_087))
         }
     }
 
     fun showDecoderMenu() {
         val modes = DecoderMode.entries
         val labels = listOf(
-            "Donanım (HW): sistemin MediaCodec çözücüsü",
-            "Donanım+ (HW+): HW, desteklenmeyen biçimde FFmpeg",
-            "Yazılım (SW): önce FFmpeg ile işlemci çözmesi",
+            Tx.s(R.string.playermenu_088),
+            Tx.s(R.string.playermenu_089),
+            Tx.s(R.string.playermenu_090),
         )
-        a.showChoice("Çözücü", labels, modes.indexOf(a.settings.decoder)) { i ->
+        a.showChoice(Tx.s(R.string.playermenu_091), labels, modes.indexOf(a.settings.decoder)) { i ->
             if (modes[i] != a.settings.decoder) a.changeDecoder(modes[i])
         }
     }
 
     fun showAspectMenu() {
         val modes = AspectMode.entries
-        a.showChoice("En boy oranı", modes.map { it.label }, a.aspect.ordinal) { a.setAspect(modes[it]) }
+        a.showChoice(Tx.s(R.string.playermenu_092), modes.map { it.label }, a.aspect.ordinal) { a.setAspect(modes[it]) }
     }
 
     fun showCustomizeShortcuts() {
         val all = Shortcut.entries
         val enabled = a.settings.shortcuts
-        a.showMultiChoice("Kısayolları seçin", all.map { it.label }, BooleanArray(all.size) { all[it] in enabled }) { state ->
+        a.showMultiChoice(Tx.s(R.string.playermenu_093), all.map { it.label }, BooleanArray(all.size) { all[it] in enabled }) { state ->
             a.settings.shortcuts = all.filterIndexed { i, _ -> state[i] }
             a.refreshShortcuts()
         }
     }
 
     fun showStreamDialog() {
-        a.showInput("Ağ akışı", "http://, https:// veya rtsp:// adresi") { url -> a.openStream(url) }
+        a.showInput(Tx.s(R.string.mainactivi_034), "http://, https:// veya rtsp:// adresi") { url -> a.openStream(url) }
     }
 
     fun showPlaylist() {
@@ -785,7 +785,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             p.getMediaItemAt(i).mediaMetadata.title?.toString() ?: "Video ${i + 1}"
         }
         if (titles.isEmpty()) return
-        a.showChoice("Oynatma listesi", titles, p.currentMediaItemIndex) { i ->
+        a.showChoice(Tx.s(R.string.playermenu_141), titles, p.currentMediaItemIndex) { i ->
             p.seekTo(i, 0L)
             p.play()
         }
@@ -796,22 +796,22 @@ class PlayerMenus(private val a: PlayerActivity) {
         val marks = ResumeStore.bookmarks(a, uri)
         val labels = listOf("＋ Bu konuma yer imi ekle (${timeLabel(a.player.currentPosition)})") + marks.map { timeLabel(it) }
         val dialog = PanelBuilder(a)
-            .setTitle("Yer imleri")
+            .setTitle(Tx.s(R.string.playermenu_094))
             .setItems(labels.toTypedArray()) { _, which ->
                 if (which == 0) {
                     ResumeStore.setBookmarks(a, uri, marks + a.player.currentPosition)
-                    a.toast("Yer imi eklendi")
+                    a.toast(Tx.s(R.string.playermenu_095))
                 } else {
                     a.player.seekTo(marks[which - 1])
                 }
             }
-            .setNegativeButton("Kapat", null)
+            .setNegativeButton(Tx.s(R.string.nowplaying_009), null)
             .create()
         dialog.setOnShowListener {
             dialog.listView.setOnItemLongClickListener { _, _, position, _ ->
                 if (position > 0) {
                     ResumeStore.setBookmarks(a, uri, marks.filterIndexed { i, _ -> i != position - 1 })
-                    a.toast("Yer imi silindi")
+                    a.toast(Tx.s(R.string.playermenu_096))
                     dialog.dismiss()
                 }
                 true
@@ -827,22 +827,22 @@ class PlayerMenus(private val a: PlayerActivity) {
         val au = p.audioFormat
         val size = SubtitleFiles.sizeOf(a, uri)
         val text = buildString {
-            appendLine("Ad: ${SubtitleFiles.displayName(a, uri)}")
-            SubtitleFiles.pathOf(a, uri)?.let { appendLine("Konum: $it") }
-            if (size > 0) appendLine("Boyut: ${"%.1f".format(size / 1048576.0)} MB")
-            if (p.duration > 0) appendLine("Süre: ${timeLabel(p.duration)}")
+            appendLine(Tx.s(R.string.playermenu_ad, SubtitleFiles.displayName(a, uri)))
+            SubtitleFiles.pathOf(a, uri)?.let { appendLine(Tx.s(R.string.playermenu_142, it)) }
+            if (size > 0) appendLine(Tx.s(R.string.playermenu_boyut_mb, "%.1f".format(size / 1048576.0)))
+            if (p.duration > 0) appendLine(Tx.s(R.string.playermenu_097, timeLabel(p.duration)))
             if (v != null) {
-                appendLine("Görüntü: ${v.width}x${v.height}" +
+                appendLine(Tx.s(R.string.playermenu_098, v.width, v.height) +
                         (if (v.frameRate > 0) " @ ${"%.2f".format(v.frameRate)} fps" else "") +
                         (if (v.codecs != null) ", ${v.codecs}" else ", ${mimeLabel(v.sampleMimeType)}"))
-                if (v.bitrate > 0) appendLine("Görüntü bit hızı: ${v.bitrate / 1000} kb/sn")
+                if (v.bitrate > 0) appendLine(Tx.s(R.string.playermenu_099, v.bitrate / 1000))
             }
             if (au != null) {
-                appendLine("Ses: ${mimeLabel(au.sampleMimeType)}, ${au.channelCount} kanal, ${au.sampleRate} Hz")
+                appendLine(Tx.s(R.string.playermenu_143, mimeLabel(au.sampleMimeType), au.channelCount, au.sampleRate))
             }
-            appendLine("Çözücü modu: ${a.settings.decoder.label}")
+            appendLine(Tx.s(R.string.playermenu_100, a.settings.decoder.label))
         }
-        a.showMessage("Bilgi", text.trim())
+        a.showMessage(Tx.s(R.string.playermenu_101), text.trim())
     }
 
     // ------------------------------------------------------------ üç nokta paneli
@@ -850,7 +850,7 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showTrim() {
         val uri = a.currentUri
         if (uri == null || uri.scheme == "http" || uri.scheme == "https" || uri.scheme == "rtsp") {
-            a.toast("Kesme yalnızca cihazdaki videolarda çalışır")
+            a.toast(Tx.s(R.string.playermenu_102))
             return
         }
         val title = a.player.currentMediaItem?.mediaMetadata?.title?.toString()
@@ -861,13 +861,13 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showChapters() {
         val list = a.chapters
         if (list.isEmpty()) {
-            a.toast("Bu videoda bölüm bilgisi yok (MKV ve MP4 bölümleri okunur)")
+            a.toast(Tx.s(R.string.playermenu_103))
             return
         }
         val pos = a.player.currentPosition
         val current = list.indexOfLast { it.startMs <= pos }.coerceAtLeast(0)
         val labels = list.map { "${formatDuration(it.startMs)}  ${it.title}" }
-        a.showChoice("Bölümler", labels, current) { a.player.seekTo(list[it].startMs) }
+        a.showChoice(Tx.s(R.string.playermenu_104), labels, current) { a.player.seekTo(list[it].startMs) }
     }
 
     /** 360° lens türü, 3B biçimi ve bakış ayarları. */
@@ -876,22 +876,22 @@ class PlayerMenus(private val a: PlayerActivity) {
         val labels = ArrayList<String>()
         val acts = ArrayList<() -> Unit>()
         fun add(label: String, act: () -> Unit) { labels += label; acts += act }
-        val stereoNames = listOf("3B değil", "Üst-alt", "Yan yana")
+        val stereoNames = listOf(Tx.s(R.string.playermenu_106), Tx.s(R.string.playermenu_105), Tx.s(R.string.playermenu_144))
         if (cur == VrMode.NONE) {
             add("360° olarak oynat") { pickVrLens(VrLens.SPHERE360, 0) }
             add("180° olarak oynat") { pickVrLens(VrLens.SPHERE180, 0) }
-            add("Balık gözü lens olarak oynat") { pickVrLens(VrLens.FISHEYE, 0) }
-            add("Normal lens (sanal ekran) olarak oynat") { pickVrLens(VrLens.NORMAL, 0) }
+            add(Tx.s(R.string.playermenu_107)) { pickVrLens(VrLens.FISHEYE, 0) }
+            add(Tx.s(R.string.playermenu_145)) { pickVrLens(VrLens.NORMAL, 0) }
         } else {
-            add("Lens türü: ${cur.lens.label}…") { pickVrLens(null, cur.stereo) }
-            add("3B biçimi: ${stereoNames[cur.stereo]}…") { pickVrStereo(cur) }
-            add(if (a.vrSensorEnabled()) "Hareket sensörünü kapat" else "Hareket sensörüyle bak") { a.vrSetSensor(!a.vrSensorEnabled()) }
-            add(if (a.vrCardboardEnabled()) "VR gözlük modunu kapat" else "VR gözlük modu (iki göz)") { a.vrSetCardboard(!a.vrCardboardEnabled()) }
-            add(if (a.vrAutoRotating()) "Otomatik döndürmeyi kapat" else "Otomatik döndür (panorama)") { a.vrSetAutoRotate(!a.vrAutoRotating()) }
-            add("Ufku düzelt (eğimi sıfırla)") { a.vrLevelHorizon() }
-            add("Bakış yönünü sıfırla") { a.vrReset() }
-            add("360° ayarları…") { a.openSettings("VR360") }
-            add("360° modundan çık") { a.setVr(VrMode.NONE, manual = true) }
+            add(Tx.s(R.string.playermenu_108, cur.lens.label)) { pickVrLens(null, cur.stereo) }
+            add(Tx.s(R.string.playermenu_109, stereoNames[cur.stereo])) { pickVrStereo(cur) }
+            add(if (a.vrSensorEnabled()) Tx.s(R.string.playermenu_111) else Tx.s(R.string.playermenu_110)) { a.vrSetSensor(!a.vrSensorEnabled()) }
+            add(if (a.vrCardboardEnabled()) Tx.s(R.string.playermenu_113) else Tx.s(R.string.playermenu_112)) { a.vrSetCardboard(!a.vrCardboardEnabled()) }
+            add(if (a.vrAutoRotating()) Tx.s(R.string.playermenu_115) else Tx.s(R.string.playermenu_114)) { a.vrSetAutoRotate(!a.vrAutoRotating()) }
+            add(Tx.s(R.string.playermenu_116)) { a.vrLevelHorizon() }
+            add(Tx.s(R.string.playermenu_117)) { a.vrReset() }
+            add(Tx.s(R.string.playermenu_118)) { a.openSettings("VR360") }
+            add(Tx.s(R.string.playermenu_119)) { a.setVr(VrMode.NONE, manual = true) }
         }
         AlertDialog.Builder(a)
             .setTitle("360° oynatma")
@@ -908,16 +908,16 @@ class PlayerMenus(private val a: PlayerActivity) {
         val lenses = VrLens.entries
         val labels = lenses.map { (if (a.vr.lens == it) "✓ " else "") + it.label }
         AlertDialog.Builder(a)
-            .setTitle("Lens türü")
+            .setTitle(Tx.s(R.string.playermenu_120))
             .setItems(labels.toTypedArray()) { _, i -> a.setVr(VrMode.of(lenses[i], stereo), manual = true) }
             .show()
     }
 
     private fun pickVrStereo(cur: VrMode) {
-        val names = listOf("3B değil", "Üst-alt", "Yan yana")
+        val names = listOf(Tx.s(R.string.playermenu_106), Tx.s(R.string.playermenu_105), Tx.s(R.string.playermenu_144))
         val labels = names.mapIndexed { i, n -> (if (cur.stereo == i) "✓ " else "") + n }
         AlertDialog.Builder(a)
-            .setTitle("3B biçimi")
+            .setTitle(Tx.s(R.string.playermenu_121))
             .setItems(labels.toTypedArray()) { _, i -> a.setVr(VrMode.of(cur.lens, i), manual = true) }
             .show()
     }
@@ -936,27 +936,27 @@ class PlayerMenus(private val a: PlayerActivity) {
         val grid = GridLayout(a).apply {
             columnCount = 4
             val items = listOf(
-                item(R.drawable.ic_list, "Listeler") { showPlaylist() },
-                item(R.drawable.ic_aspect, "En boy oranı") { showAspectMenu() },
-                item(R.drawable.ic_subtitles, "Özel stil") { showSubtitleStyle() },
-                item(R.drawable.ic_bookmark, "Yer imi") { showBookmarks() },
-                item(R.drawable.ic_info, "Bilgi") { showInfo() },
-                item(R.drawable.ic_list, "Bölümler") { showChapters() },
-                item(R.drawable.ic_cut, "Kes") { showTrim() },
-                item(R.drawable.ic_share, "Paylaş") { a.shareCurrent() },
-                item(R.drawable.ic_public, "Ağ akışı") { showStreamDialog() },
-                item(R.drawable.ic_lock, "Çocuk kilidi") { a.startKidsLock() },
-                item(R.drawable.ic_tune, "Ses ayarları") { showEqualizer() },
-                item(R.drawable.ic_headphones, "Ses gecikmesi") { showAudioDelay() },
-                item(R.drawable.ic_music_note, "Ses dosyası ekle") { a.pickExternalAudio() },
-                item(R.drawable.ic_timer, "Uyku zamanlayıcısı") { showSleepTimer() },
-                item(R.drawable.ic_timer, "Altyazı senkronu") { showSubtitleSync() },
-                item(R.drawable.ic_settings, "Ayarlar") { a.openSettings() },
+                item(R.drawable.ic_list, Tx.s(R.string.musicactiv_013)) { showPlaylist() },
+                item(R.drawable.ic_aspect, Tx.s(R.string.playermenu_092)) { showAspectMenu() },
+                item(R.drawable.ic_subtitles, Tx.s(R.string.playermenu_122)) { showSubtitleStyle() },
+                item(R.drawable.ic_bookmark, Tx.s(R.string.playermenu_123)) { showBookmarks() },
+                item(R.drawable.ic_info, Tx.s(R.string.playermenu_101)) { showInfo() },
+                item(R.drawable.ic_list, Tx.s(R.string.playermenu_104)) { showChapters() },
+                item(R.drawable.ic_cut, Tx.s(R.string.mainactivi_047)) { showTrim() },
+                item(R.drawable.ic_share, Tx.s(R.string.mainactivi_045)) { a.shareCurrent() },
+                item(R.drawable.ic_public, Tx.s(R.string.mainactivi_034)) { showStreamDialog() },
+                item(R.drawable.ic_lock, Tx.s(R.string.playermenu_124)) { a.startKidsLock() },
+                item(R.drawable.ic_tune, Tx.s(R.string.musiccontr_017)) { showEqualizer() },
+                item(R.drawable.ic_headphones, Tx.s(R.string.playermenu_003)) { showAudioDelay() },
+                item(R.drawable.ic_music_note, Tx.s(R.string.playermenu_125)) { a.pickExternalAudio() },
+                item(R.drawable.ic_timer, Tx.s(R.string.nowplaying_004)) { showSleepTimer() },
+                item(R.drawable.ic_timer, Tx.s(R.string.playermenu_022)) { showSubtitleSync() },
+                item(R.drawable.ic_settings, Tx.s(R.string.mainactivi_032)) { a.openSettings() },
             )
             items.forEach { addView(it) }
         }
         val shortcutsSwitch = SwitchCompat(a).apply {
-            text = "Kısayollar"
+            text = Tx.s(R.string.playermenu_126)
             setTextColor(Color.WHITE)
             setShadowLayer(a.dp(4).toFloat(), 0f, 0f, Color.BLACK)
             isChecked = a.settings.showShortcuts
@@ -966,14 +966,14 @@ class PlayerMenus(private val a: PlayerActivity) {
             }
         }
         val remainingSwitch = SwitchCompat(a).apply {
-            text = "Kalan süreyi göster"
+            text = Tx.s(R.string.playermenu_127)
             setTextColor(Color.WHITE)
             setShadowLayer(a.dp(4).toFloat(), 0f, 0f, Color.BLACK)
             isChecked = a.settings.showRemainingTime
             setOnCheckedChangeListener { _, on -> a.settings.showRemainingTime = on }
         }
         val vrRow = TextView(a).apply {
-            text = if (a.vr == VrMode.NONE) "360 olarak oynat" else "360° ayarları"
+            text = if (a.vr == VrMode.NONE) "360 olarak oynat" else Tx.s(R.string.playermenu_128)
             setTextColor(0xCCFFFFFF.toInt())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
             setShadowLayer(a.dp(4).toFloat(), 0f, 0f, Color.BLACK)

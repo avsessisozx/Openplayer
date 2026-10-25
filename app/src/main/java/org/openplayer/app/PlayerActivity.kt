@@ -65,13 +65,13 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 enum class AspectMode(val label: String, val resize: Int, val ratio: Float?, val inCycle: Boolean = true) {
-    FIT("Sığdır", AspectRatioFrameLayout.RESIZE_MODE_FIT, null),
-    FILL("Esnet (doldur)", AspectRatioFrameLayout.RESIZE_MODE_FILL, null),
-    CROP("Kırp (yakınlaştır)", AspectRatioFrameLayout.RESIZE_MODE_ZOOM, null),
+    FIT(Tx.s(R.string.playeracti_001), AspectRatioFrameLayout.RESIZE_MODE_FIT, null),
+    FILL(Tx.s(R.string.playeracti_060), AspectRatioFrameLayout.RESIZE_MODE_FILL, null),
+    CROP(Tx.s(R.string.playeracti_002), AspectRatioFrameLayout.RESIZE_MODE_ZOOM, null),
     R16_9("16:9", AspectRatioFrameLayout.RESIZE_MODE_FIT, 16f / 9f),
     R4_3("4:3", AspectRatioFrameLayout.RESIZE_MODE_FIT, 4f / 3f),
     R21_9("21:9", AspectRatioFrameLayout.RESIZE_MODE_FIT, 21f / 9f),
-    ORIGINAL("Özgün boyut (%100)", AspectRatioFrameLayout.RESIZE_MODE_FIT, null, false),
+    ORIGINAL(Tx.s(R.string.playeracti_003), AspectRatioFrameLayout.RESIZE_MODE_FIT, null, false),
     R1_1("1:1", AspectRatioFrameLayout.RESIZE_MODE_FIT, 1f, false),
     R5_4("5:4", AspectRatioFrameLayout.RESIZE_MODE_FIT, 5f / 4f, false),
     R16_10("16:10", AspectRatioFrameLayout.RESIZE_MODE_FIT, 16f / 10f, false),
@@ -116,7 +116,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun attachExternalAudio(audioUri: Uri) {
         val factory = PlayerHolder.mediaSourceFactory
         if (factory == null || player.mediaItemCount == 0) {
-            toast("Ses dosyası eklenemedi")
+            toast(Tx.s(R.string.playeracti_004))
             return
         }
         runCatching {
@@ -130,10 +130,10 @@ class PlayerActivity : AppCompatActivity() {
             player.setMediaSources(sources, index, pos)
             player.prepare()
             player.playWhenReady = wasPlaying
-            toast("Ses dosyası eklendi: ${SubtitleFiles.displayName(this, audioUri)}")
+            toast(Tx.s(R.string.playeracti_005, SubtitleFiles.displayName(this, audioUri)))
         }.onFailure {
             pendingExternalAudio = false
-            toast("Ses dosyası eklenemedi")
+            toast(Tx.s(R.string.playeracti_004))
         }
     }
 
@@ -146,7 +146,7 @@ class PlayerActivity : AppCompatActivity() {
         if (groups.size < 2) return
         val g = groups.last()
         if (!g.isSupported) {
-            toast("Eklenen ses biçimi desteklenmiyor")
+            toast(Tx.s(R.string.playeracti_006))
             return
         }
         player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
@@ -166,7 +166,7 @@ class PlayerActivity : AppCompatActivity() {
                 SubtitleFiles.pruneDownloads(this)
                 runOnUiThread { loadExternalSubtitle(file) }
             } catch (e: Exception) {
-                runOnUiThread { toast("Dosya okunamadı") }
+                runOnUiThread { toast(Tx.s(R.string.musicactiv_055)) }
             }
         }.start()
     }
@@ -340,21 +340,21 @@ class PlayerActivity : AppCompatActivity() {
     private val sleepRunnable = Runnable {
         player.pause()
         sleepDeadline = 0L
-        Toast.makeText(this, "Uyku zamanlayıcısı: oynatma durduruldu", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, Tx.s(R.string.playeracti_007), Toast.LENGTH_LONG).show()
         refreshShortcuts()
     }
 
     private val backCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             when {
-                kidsLocked -> showHud("Çocuk kilidi açık")
+                kidsLocked -> showHud(Tx.s(R.string.playeracti_008))
                 locked -> {
                     showUnlockButton()
-                    toast("Ekran kilitli")
+                    toast(Tx.s(R.string.playeracti_009))
                 }
                 settings.doubleBackToExit && SystemClock.uptimeMillis() - lastBackPress > 2000 -> {
                     lastBackPress = SystemClock.uptimeMillis()
-                    toast("Çıkmak için tekrar basın")
+                    toast(Tx.s(R.string.playeracti_010))
                 }
                 else -> {
                     isEnabled = false
@@ -583,7 +583,7 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
         if (uris.isEmpty()) {
-            if (rawUris.isNotEmpty()) toast("Bu adres güvenlik nedeniyle açılmadı")
+            if (rawUris.isNotEmpty()) toast(Tx.s(R.string.playeracti_011))
             return false
         }
         openItems(uris, titles, index)
@@ -618,7 +618,7 @@ class PlayerActivity : AppCompatActivity() {
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(
-                            if (isVaultUri(uri)) "Özel klasör videosu"
+                            if (isVaultUri(uri)) Tx.s(R.string.playeracti_012)
                             else titles?.getOrNull(i)?.takeIf { it.isNotBlank() } ?: SubtitleFiles.displayName(this, uri)
                         )
                         .build()
@@ -672,10 +672,10 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
         resumeDialog = PanelBuilder(this)
-            .setTitle("Kaldığı yerden devam edilsin mi?")
-            .setMessage("Son konum: ${formatDuration(positionMs)}")
-            .setPositiveButton("Devam et") { _, _ -> decide(true) }
-            .setNegativeButton("Baştan başla") { _, _ -> decide(false) }
+            .setTitle(Tx.s(R.string.playeracti_013))
+            .setMessage(Tx.s(R.string.playeracti_014, formatDuration(positionMs)))
+            .setPositiveButton(Tx.s(R.string.playeracti_015)) { _, _ -> decide(true) }
+            .setNegativeButton(Tx.s(R.string.playeracti_016)) { _, _ -> decide(false) }
             .setOnCancelListener { decide(false) }
             .show()
     }
@@ -685,10 +685,10 @@ class PlayerActivity : AppCompatActivity() {
         if (uri.scheme?.lowercase() !in setOf("http", "https", "rtsp") || uri.host.isNullOrBlank() ||
             !UriGuard.isAllowed(this, uri)
         ) {
-            toast("Geçerli bir adres girin (http://, https:// veya rtsp://)")
+            toast(Tx.s(R.string.playeracti_017))
             return
         }
-        openItems(listOf(uri), listOf(UriGuard.sanitizeTitle(url.trim().substringAfterLast('/')) ?: "Akış"), 0)
+        openItems(listOf(uri), listOf(UriGuard.sanitizeTitle(url.trim().substringAfterLast('/')) ?: Tx.s(R.string.mediainfo_015)), 0)
     }
 
     /** Geçerli videonun görünüm/hız/altyazı ayarlarını kaydeder. */
@@ -821,11 +821,11 @@ class PlayerActivity : AppCompatActivity() {
             runOnUiThread {
                 val cues = result.getOrNull()
                 if (cues.isNullOrEmpty()) {
-                    if (!quiet) toast("Altyazı okunamadı veya boş: ${file.name}")
+                    if (!quiet) toast(Tx.s(R.string.playeracti_018, file.name))
                 } else {
                     subtitles.useExternal(cues, file.name)
                     if (remember) currentUri?.let { SubtitleFiles.remember(this, it, file) }
-                    if (!quiet) toast("Altyazı yüklendi: ${file.name}")
+                    if (!quiet) toast(Tx.s(R.string.playeracti_019, file.name))
                 }
             }
         }.start()
@@ -842,7 +842,7 @@ class PlayerActivity : AppCompatActivity() {
         val idx = player.currentMediaItemIndex.coerceIn(0, uris.size - 1)
         val pos = player.currentPosition
         player.pause()
-        if (fromError) toast("ExoPlayer açamadı; VLC motoruyla açılıyor")
+        if (fromError) toast(Tx.s(R.string.playeracti_020))
         VlcPlayerActivity.launch(this, uris, titles, idx, pos)
         finish()
         return true
@@ -856,7 +856,7 @@ class PlayerActivity : AppCompatActivity() {
         if (next != null && settings.autoDecoderFallback) {
             // MX gibi: sormadan sıradaki çözücüyle aynı konumdan yeniden dener.
             decoderLabel.text = next.short
-            toast("${next.label} çözücüyle yeniden deneniyor")
+            toast(Tx.s(R.string.playeracti_021, next.label))
             handler.post {
                 if (isDestroyed) return@post
                 PlayerHolder.decoderOverride = next
@@ -866,7 +866,7 @@ class PlayerActivity : AppCompatActivity() {
         }
         if (settings.playbackEngine != PlaybackEngine.EXO && openInVlc(fromError = true)) return
         if (settings.skipOnError && player.hasNextMediaItem()) {
-            toast("Açılamadı, sonraki videoya geçiliyor")
+            toast(Tx.s(R.string.playeracti_022))
             player.seekToNextMediaItem()
             player.prepare()
             player.play()
@@ -874,13 +874,13 @@ class PlayerActivity : AppCompatActivity() {
         }
         if (errorDialogShown) return
         errorDialogShown = true
-        showMessage("Oynatma hatası", "Bu video oynatılamadı (${error.errorCodeName}). Tüm çözücüler denendi.")
+        showMessage(Tx.s(R.string.playeracti_024), Tx.s(R.string.playeracti_023, error.errorCodeName))
     }
 
     fun changeDecoder(mode: DecoderMode) {
         settings.decoder = mode
         PlayerHolder.rebuild(this)
-        toast("Çözücü: ${mode.label}")
+        toast(Tx.s(R.string.playeracti_025, mode.label))
     }
 
     // ---------------------------------------------------------------- arayüz oluşturma
@@ -928,7 +928,7 @@ class PlayerActivity : AppCompatActivity() {
             addView(clockView)
             addView(iconView(R.drawable.ic_music_note).apply { setOnClickListener { menus.showAudioTracks() } })
             addView(iconView(R.drawable.ic_subtitles).apply {
-                contentDescription = "Altyazı"
+                contentDescription = Tx.s(R.string.mediainfo_014)
                 setOnClickListener { menus.showSubtitleMenu() }
             })
             addView(decoderLabel, LinearLayout.LayoutParams(-2, dp(48)))
@@ -991,11 +991,11 @@ class PlayerActivity : AppCompatActivity() {
         playButton = iconView(R.drawable.ic_pause, 64, 14).apply { setOnClickListener { togglePlay() } }
         nextButton = iconView(R.drawable.ic_next, 56, 14).apply { setOnClickListener { next() } }
         rewButton = iconView(R.drawable.ic_replay10, 52, 13).apply {
-            contentDescription = "Geri sar"
+            contentDescription = Tx.s(R.string.playeracti_061)
             setOnClickListener { stepSeek(-1) }
         }
         ffButton = iconView(R.drawable.ic_forward10, 52, 13).apply {
-            contentDescription = "İleri sar"
+            contentDescription = Tx.s(R.string.playeracti_026)
             setOnClickListener { stepSeek(+1) }
         }
         aspectButton = iconView(R.drawable.ic_aspect).apply { setOnClickListener { cycleAspect() } }
@@ -1280,7 +1280,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun next() {
-        if (player.hasNextMediaItem()) player.seekToNextMediaItem() else toast("Sonraki video yok")
+        if (player.hasNextMediaItem()) player.seekToNextMediaItem() else toast(Tx.s(R.string.playeracti_027))
     }
 
     /** Bu oturumdaki hızı değiştirir (varsayılan hız Ayarlar → Oynatıcı'dan seçilir). */
@@ -1383,7 +1383,7 @@ class PlayerActivity : AppCompatActivity() {
         if (!value && settings.lockRotation) applyOrientation()
         if (value) {
             hideControls()
-            showHud("Ekran kilitlendi")
+            showHud(Tx.s(R.string.playeracti_062))
             hideHudSoon()
             showUnlockButton()
         } else {
@@ -1402,7 +1402,7 @@ class PlayerActivity : AppCompatActivity() {
         kidsLocked = true
         kidsStep = 0
         hideControls()
-        showHud("Çocuk kilidi açık\nAçmak için köşelere sırayla dokunun:\nsol üst, sağ üst, sağ alt, sol alt")
+        showHud(Tx.s(R.string.playeracti_028))
         hideHudSoon()
     }
 
@@ -1422,7 +1422,7 @@ class PlayerActivity : AppCompatActivity() {
             else -> -1
         }
         if (corner == -1) {
-            showHud("Çocuk kilidi açık")
+            showHud(Tx.s(R.string.playeracti_008))
             hideHudSoon()
             return
         }
@@ -1430,7 +1430,7 @@ class PlayerActivity : AppCompatActivity() {
         if (kidsStep >= 4) {
             kidsLocked = false
             kidsStep = 0
-            showHud("Kilit açıldı")
+            showHud(Tx.s(R.string.playeracti_029))
             hideHudSoon()
         }
     }
@@ -1461,7 +1461,7 @@ class PlayerActivity : AppCompatActivity() {
             panY = 0f
         }
         applyTransform()
-        showHud("Yakınlaştırma %${(zoom * 100).roundToInt()}")
+        showHud(Tx.s(R.string.playeracti_030, (zoom * 100).roundToInt()))
     }
 
     fun snapZoom() {
@@ -1569,7 +1569,7 @@ class PlayerActivity : AppCompatActivity() {
             v.mode = mode
             if (old == VrMode.NONE) {
                 v.resetLook()
-                showHud("360° video — kaydırarak etrafa bakın")
+                showHud(Tx.s(R.string.playeracti_031))
                 hideHudSoon()
             }
         }
@@ -1596,7 +1596,7 @@ class PlayerActivity : AppCompatActivity() {
     fun vrSetSensor(on: Boolean) {
         vrView?.setSensor(on)
         val actual = vrView?.sensorEnabled == true
-        if (on && !actual) toast("Bu cihazda hareket sensörü yok")
+        if (on && !actual) toast(Tx.s(R.string.playeracti_032))
         // Sensör açıkken ekran kendiliğinden dönüp görüntüyü bozmasın.
         if (actual && settings.vrLockRotation && !vrOrientationLocked) {
             vrOrientationLocked = true
@@ -1616,7 +1616,7 @@ class PlayerActivity : AppCompatActivity() {
     /** Ufku düzelt: elle verilen eğimi sıfırlar. */
     fun vrLevelHorizon() {
         vrView?.roll = 0f
-        showHud("Ufuk düzeltildi")
+        showHud(Tx.s(R.string.playeracti_033))
         hideHudSoon()
     }
 
@@ -1695,7 +1695,7 @@ class PlayerActivity : AppCompatActivity() {
             // Gözlük modu baş takibi ister: sensörü aç ve bakışı sıfırla.
             vrSetSensor(true)
             v.resetLook()
-            showHud("VR gözlük modu — telefonu gözlüğe yerleştirip yatay tutun")
+            showHud(Tx.s(R.string.playeracti_034))
             hideHudSoon()
         }
     }
@@ -1753,7 +1753,7 @@ class PlayerActivity : AppCompatActivity() {
         val target = if (landscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         orientationOverride = target
         requestedOrientation = target
-        showHud(if (landscape) "Dikey" else "Yatay")
+        showHud(if (landscape) Tx.s(R.string.playeracti_064) else Tx.s(R.string.playeracti_063))
         hideHudSoon()
     }
 
@@ -1781,7 +1781,7 @@ class PlayerActivity : AppCompatActivity() {
     fun adjustSubtitleSize(factor: Float) {
         settings.subtitleSizeSp = (settings.subtitleSizeSp * factor).coerceIn(10f, 48f)
         subtitles.applyStyle()
-        showHud("Altyazı boyutu ${settings.subtitleSizeSp.roundToInt()}")
+        showHud(Tx.s(R.string.gesturecon_014, settings.subtitleSizeSp.roundToInt()))
     }
 
     fun setSubtitleBottom(fraction: Float) {
@@ -1792,7 +1792,7 @@ class PlayerActivity : AppCompatActivity() {
     fun jumpSubtitle(next: Boolean) {
         val pos = player.currentPosition
         val target = if (next) subtitles.nextCueMs(pos) else subtitles.previousCueMs(pos)
-        if (target == null) toast("Altyazı satırı yok") else player.seekTo(target.coerceAtLeast(0))
+        if (target == null) toast(Tx.s(R.string.playeracti_035)) else player.seekTo(target.coerceAtLeast(0))
     }
 
     // ---------------------------------------------------------------- kısayollar
@@ -1820,7 +1820,7 @@ class PlayerActivity : AppCompatActivity() {
             val inner = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
             for (s in rest) inner.addView(buildShortcut(s))
             inner.addView(actionButton(
-                R.drawable.ic_edit, null, "Öğeleri özelleştir", false,
+                R.drawable.ic_edit, null, Tx.s(R.string.playeracti_036), false,
                 scale = settings.shortcutSizePercent / 100f,
                 bgOpacity = settings.shortcutOpacityPercent / 100f,
                 showLabel = false,
@@ -1957,7 +1957,7 @@ class PlayerActivity : AppCompatActivity() {
                 val sp = player.playbackParameters.speed
                 glyph = (if (sp == sp.roundToInt().toFloat()) sp.roundToInt().toString() else "%.2f".format(sp).trimEnd('0')) + "X"
                 active = sp != 1f
-                label = "Hız"
+                label = Tx.s(R.string.playeracti_037)
             }
             Shortcut.AB_REPEAT -> {
                 glyph = when {
@@ -2005,7 +2005,7 @@ class PlayerActivity : AppCompatActivity() {
             }
             Shortcut.BACKGROUND -> {
                 settings.backgroundPlay = !settings.backgroundPlay
-                toast(if (settings.backgroundPlay) "Arka planda oynatma açık" else "Arka planda oynatma kapalı")
+                toast(if (settings.backgroundPlay) Tx.s(R.string.playeracti_039) else Tx.s(R.string.playeracti_038))
                 refreshShortcuts()
             }
             Shortcut.MUTE -> {
@@ -2023,9 +2023,9 @@ class PlayerActivity : AppCompatActivity() {
                     else -> Player.REPEAT_MODE_OFF
                 }
                 showHud(when (player.repeatMode) {
-                    Player.REPEAT_MODE_ALL -> "Tümünü tekrarla"
+                    Player.REPEAT_MODE_ALL -> Tx.s(R.string.playeracti_040)
                     Player.REPEAT_MODE_ONE -> "Bu videoyu tekrarla"
-                    else -> "Tekrar kapalı"
+                    else -> Tx.s(R.string.playeracti_041)
                 })
                 hideHudSoon()
                 refreshShortcuts()
@@ -2047,20 +2047,20 @@ class PlayerActivity : AppCompatActivity() {
         when {
             abA < 0 -> {
                 abA = pos
-                showHud("A noktası: ${formatDuration(pos)}")
+                showHud(Tx.s(R.string.playeracti_042, formatDuration(pos)))
             }
             abB < 0 -> {
                 if (pos <= abA) {
-                    showHud("B noktası A'dan sonra olmalı")
+                    showHud(Tx.s(R.string.playeracti_043))
                 } else {
                     abB = pos
-                    showHud("A-B döngüsü: ${formatDuration(abA)} → ${formatDuration(abB)}")
+                    showHud(Tx.s(R.string.playeracti_044, formatDuration(abA), formatDuration(abB)))
                 }
             }
             else -> {
                 abA = -1L
                 abB = -1L
-                showHud("A-B tekrar kapatıldı")
+                showHud(Tx.s(R.string.playeracti_045))
             }
         }
         hideHudSoon()
@@ -2078,14 +2078,14 @@ class PlayerActivity : AppCompatActivity() {
             atEnd -> {
                 sleepAtEnd = true
                 player.pauseAtEndOfMediaItems = true
-                toast("Video bitince duraklatılacak")
+                toast(Tx.s(R.string.playeracti_046))
             }
             minutes > 0 -> {
                 sleepDeadline = System.currentTimeMillis() + minutes * 60_000L
                 handler.postDelayed(sleepRunnable, minutes * 60_000L)
                 toast("$minutes dakika sonra durdurulacak")
             }
-            else -> toast("Uyku zamanlayıcısı kapatıldı")
+            else -> toast(Tx.s(R.string.playeracti_047))
         }
         refreshShortcuts()
     }
@@ -2119,9 +2119,9 @@ class PlayerActivity : AppCompatActivity() {
         val seek = settings.pipSeekButtons
         val playing = player.isPlaying
         return listOf(
-            action(1, if (seek) R.drawable.ic_replay10 else R.drawable.ic_prev, if (seek) "10 sn geri" else "Önceki"),
-            action(2, if (playing) R.drawable.ic_pause else R.drawable.ic_play, if (playing) "Duraklat" else "Oynat"),
-            action(3, if (seek) R.drawable.ic_forward10 else R.drawable.ic_next, if (seek) "10 sn ileri" else "Sonraki"),
+            action(1, if (seek) R.drawable.ic_replay10 else R.drawable.ic_prev, if (seek) "10 sn geri" else Tx.s(R.string.playeracti_048)),
+            action(2, if (playing) R.drawable.ic_pause else R.drawable.ic_play, if (playing) Tx.s(R.string.playeracti_066) else Tx.s(R.string.playeracti_065)),
+            action(3, if (seek) R.drawable.ic_forward10 else R.drawable.ic_next, if (seek) "10 sn ileri" else Tx.s(R.string.playeracti_067)),
         )
     }
 
@@ -2143,20 +2143,20 @@ class PlayerActivity : AppCompatActivity() {
 
     fun enterPip() {
         if (Build.VERSION.SDK_INT < 24) {
-            toast("Bu Android sürümü pencere içinde pencere modunu desteklemiyor")
+            toast(Tx.s(R.string.playeracti_049))
             return
         }
         runCatching {
             if (Build.VERSION.SDK_INT >= 26) enterPictureInPictureMode(pipParams()!!)
             else @Suppress("DEPRECATION") enterPictureInPictureMode()
-        }.onFailure { toast("Pencere içinde pencere modu açılamadı") }
+        }.onFailure { toast(Tx.s(R.string.playeracti_050)) }
     }
 
     fun takeScreenshot() {
         val surface = playerView.videoSurfaceView
         val size = player.videoSize
         if (surface == null || size.width == 0) {
-            toast("Ekran görüntüsü için video oynatılıyor olmalı")
+            toast(Tx.s(R.string.playeracti_051))
             return
         }
         val bmp = Bitmap.createBitmap(size.width, size.height, Bitmap.Config.ARGB_8888)
@@ -2167,10 +2167,10 @@ class PlayerActivity : AppCompatActivity() {
             }
             surface is SurfaceView && Build.VERSION.SDK_INT >= 26 -> {
                 PixelCopy.request(surface, bmp, { result ->
-                    if (result == PixelCopy.SUCCESS) saveBitmap(bmp) else toast("Ekran görüntüsü alınamadı")
+                    if (result == PixelCopy.SUCCESS) saveBitmap(bmp) else toast(Tx.s(R.string.playeracti_052))
                 }, handler)
             }
-            else -> toast("Bu cihazda ekran görüntüsü desteklenmiyor")
+            else -> toast(Tx.s(R.string.playeracti_053))
         }
     }
 
@@ -2183,16 +2183,16 @@ class PlayerActivity : AppCompatActivity() {
                 if (Build.VERSION.SDK_INT >= 29) put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/OpenPlayer")
             }
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-                ?: error("kayıt açılamadı")
+                ?: error(Tx.s(R.string.playeracti_054))
             contentResolver.openOutputStream(uri)?.use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
-            toast("Ekran görüntüsü kaydedildi (Resimler/OpenPlayer)")
-        }.onFailure { toast("Ekran görüntüsü kaydedilemedi") }
+            toast(Tx.s(R.string.playeracti_055))
+        }.onFailure { toast(Tx.s(R.string.playeracti_056)) }
     }
 
     fun shareCurrent() {
         val uri = currentUri ?: return
         if (isVaultUri(uri)) {
-            toast("Özel klasördeki videolar paylaşılamaz")
+            toast(Tx.s(R.string.playeracti_057))
             return
         }
         // file:// adresi başka uygulamaya verilemez (Android 7+ uygulamayı çökertir); MediaStore adresi kullanılır.
@@ -2210,12 +2210,12 @@ class PlayerActivity : AppCompatActivity() {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, uri.toString())
             } else {
-                toast("Bu video paylaşılamıyor")
+                toast(Tx.s(R.string.playeracti_058))
                 return
             }
         }
-        runCatching { startActivity(Intent.createChooser(send, "Paylaş")) }
-            .onFailure { toast("Paylaşılamadı") }
+        runCatching { startActivity(Intent.createChooser(send, Tx.s(R.string.mainactivi_045))) }
+            .onFailure { toast(Tx.s(R.string.playeracti_059)) }
     }
 
     /** Dosya yolunu galerideki (MediaStore) içerik adresine çevirir; bulunamazsa null. */

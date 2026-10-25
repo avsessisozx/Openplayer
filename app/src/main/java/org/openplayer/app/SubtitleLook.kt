@@ -20,23 +20,23 @@ object SubtitleLook {
     const val EDGE_DEPRESSED = CaptionStyleCompat.EDGE_TYPE_DEPRESSED
 
     val edges = listOf(
-        EDGE_NONE to "Yok",
-        EDGE_OUTLINE to "Kenar çizgisi",
-        EDGE_SHADOW to "Gölge",
-        EDGE_RAISED to "Kabartma",
-        EDGE_DEPRESSED to "Gömme",
+        EDGE_NONE to Tx.s(R.string.subtitlelo_006),
+        EDGE_OUTLINE to Tx.s(R.string.playermenu_033),
+        EDGE_SHADOW to Tx.s(R.string.subtitlelo_001),
+        EDGE_RAISED to Tx.s(R.string.subtitlelo_007),
+        EDGE_DEPRESSED to Tx.s(R.string.subtitlelo_002),
     )
 
     val builtInFonts = listOf(
-        "default" to "Varsayılan",
+        "default" to Tx.s(R.string.subtitlelo_003),
         "sans" to "Sans",
         "serif" to "Serif",
-        "mono" to "Eş aralıklı",
-        "condensed" to "Dar",
-        "medium" to "Orta kalın",
+        "mono" to Tx.s(R.string.subtitlelo_004),
+        "condensed" to Tx.s(R.string.subtitlelo_008),
+        "medium" to Tx.s(R.string.subtitlelo_005),
     )
 
-    val alignLabels = listOf("Sol", "Orta", "Sağ")
+    val alignLabels = listOf(Tx.s(R.string.gesturecon_017), Tx.s(R.string.gesturecon_018), Tx.s(R.string.gesturecon_007))
 
     private const val MAX_FONT_BYTES = 30L * 1024 * 1024
     private var cachedName: String? = null
@@ -49,7 +49,7 @@ object SubtitleLook {
 
     fun fontLabel(context: Context, value: String): String =
         if (value.startsWith("file:")) value.removePrefix("file:")
-        else builtInFonts.firstOrNull { it.first == value }?.second ?: "Varsayılan"
+        else builtInFonts.firstOrNull { it.first == value }?.second ?: Tx.s(R.string.subtitlelo_003)
 
     fun typeface(context: Context, value: String, bold: Boolean): Typeface {
         val base: Typeface = when {

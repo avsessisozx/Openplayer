@@ -268,7 +268,7 @@ class NowPlayingActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             addView(back)
-            addView(text(16f, Color.WHITE).apply { text = "Çalıyor" }, LinearLayout.LayoutParams(0, -2, 1f))
+            addView(text(16f, Color.WHITE).apply { text = Tx.s(R.string.nowplaying_001) }, LinearLayout.LayoutParams(0, -2, 1f))
             addView(View(context), LinearLayout.LayoutParams(dp(48), dp(48)))
         }
 
@@ -357,13 +357,13 @@ class NowPlayingActivity : AppCompatActivity() {
         val u = currentUri() ?: return
         val fav = PlaylistStore.isFavorite(this, PlaylistStore.MUSIC, u)
         val e = ArrayList<SheetEntry>()
-        e += SheetEntry(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border, if (fav) "Favorilerden çıkar" else "Favorilere ekle") { toggleFavorite() }
-        e += SheetEntry(R.drawable.ic_playlist_add, "Oynatma listesine ekle") { showAddToPlaylist(PlaylistStore.MUSIC, listOf(u)) }
-        e += SheetEntry(R.drawable.ic_lyrics, "Sözler") { toggleLyrics() }
-        e += SheetEntry(R.drawable.ic_repeat, "Çalma hızı") { showSpeed() }
-        e += SheetEntry(R.drawable.ic_timer, "Uyku zamanlayıcısı") { showSleep() }
-        e += SheetEntry(R.drawable.ic_tune, "Ses ayarları") { MusicController.showFxPanel(this) }
-        e += SheetEntry(R.drawable.ic_view_list, "Kuyruk") { showQueue() }
+        e += SheetEntry(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border, if (fav) Tx.s(R.string.mainactivi_042) else Tx.s(R.string.mainactivi_077)) { toggleFavorite() }
+        e += SheetEntry(R.drawable.ic_playlist_add, Tx.s(R.string.mainactivi_067)) { showAddToPlaylist(PlaylistStore.MUSIC, listOf(u)) }
+        e += SheetEntry(R.drawable.ic_lyrics, Tx.s(R.string.nowplaying_002)) { toggleLyrics() }
+        e += SheetEntry(R.drawable.ic_repeat, Tx.s(R.string.nowplaying_003)) { showSpeed() }
+        e += SheetEntry(R.drawable.ic_timer, Tx.s(R.string.nowplaying_004)) { showSleep() }
+        e += SheetEntry(R.drawable.ic_tune, Tx.s(R.string.musiccontr_017)) { MusicController.showFxPanel(this) }
+        e += SheetEntry(R.drawable.ic_view_list, Tx.s(R.string.nowplaying_010)) { showQueue() }
         showSheet(titleView.text?.toString() ?: "", e)
     }
 
@@ -414,7 +414,7 @@ class NowPlayingActivity : AppCompatActivity() {
         }
         val end = MusicController.sleepEndsAtMs
         val sleepText = when {
-            MusicController.sleepAtEnd -> "Şarkı sonunda"
+            MusicController.sleepAtEnd -> Tx.s(R.string.nowplaying_005)
             end > System.currentTimeMillis() -> "${((end - System.currentTimeMillis()) / 60_000L).toInt() + 1} dk"
             else -> ""
         }
@@ -435,7 +435,7 @@ class NowPlayingActivity : AppCompatActivity() {
         if (showLyrics && !has) {
             showLyrics = false
             android.widget.Toast.makeText(
-                this, "Bu şarkı için söz dosyası yok. Kütüphanede şarkının ⋮ menüsü → Etiketleri düzenle → söz dosyası ekle.",
+                this, Tx.s(R.string.nowplaying_006),
                 android.widget.Toast.LENGTH_LONG
             ).show()
         }
@@ -504,13 +504,13 @@ class NowPlayingActivity : AppCompatActivity() {
         val speeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
         val cur = player?.playbackParameters?.speed ?: 1f
         val sel = speeds.indices.minByOrNull { kotlin.math.abs(speeds[it] - cur) } ?: 2
-        showChoice("Çalma hızı", speeds.map { "${it}x" }, sel) { player?.setPlaybackSpeed(speeds[it]) }
+        showChoice(Tx.s(R.string.nowplaying_003), speeds.map { "${it}x" }, sel) { player?.setPlaybackSpeed(speeds[it]) }
     }
 
     private fun showSleep() {
-        val options = listOf("Kapalı", "Bu şarkı bitince", "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika")
+        val options = listOf(Tx.s(R.string.audiofx_004), Tx.s(R.string.nowplaying_007), "15 dakika", "30 dakika", "45 dakika", "60 dakika", "90 dakika")
         val minutes = listOf(0, -1, 15, 30, 45, 60, 90)
-        showChoice("Uyku zamanlayıcısı", options, -1) {
+        showChoice(Tx.s(R.string.nowplaying_004), options, -1) {
             when (minutes[it]) {
                 0 -> { MusicController.startSleep(0); MusicController.sleepAtEndOfTrack(false) }
                 -1 -> MusicController.sleepAtEndOfTrack(true)
@@ -527,13 +527,13 @@ class NowPlayingActivity : AppCompatActivity() {
             "${m.title ?: ""} — ${m.artist ?: ""}"
         }
         PanelBuilder(this)
-            .setTitle("Kuyruk (${titles.size})")
+            .setTitle(Tx.s(R.string.nowplaying_008, titles.size))
             .setSingleChoiceItems(titles.toTypedArray(), p.currentMediaItemIndex) { d, which ->
                 p.seekToDefaultPosition(which)
                 p.play()
                 d.dismiss()
             }
-            .setNegativeButton("Kapat", null)
+            .setNegativeButton(Tx.s(R.string.nowplaying_009), null)
             .show()
     }
 }

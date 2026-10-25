@@ -35,7 +35,7 @@ object PlaylistStore {
                 val items = mutableListOf<String>()
                 val arr = p.optJSONArray("items")
                 if (arr != null) for (j in 0 until arr.length()) items.add(arr.getString(j))
-                lists += Playlist(p.getString("id"), p.optString("name", "Liste"), p.optString("kind", VIDEO), items)
+                lists += Playlist(p.getString("id"), p.optString("name", Tx.s(R.string.listpanel_012)), p.optString("kind", VIDEO), items)
             }
         }
         return Data(fav, lists)
@@ -79,7 +79,7 @@ object PlaylistStore {
 
     fun create(c: Context, kind: String, name: String): Playlist {
         val d = load(c)
-        val p = Playlist(UUID.randomUUID().toString(), name.trim().ifEmpty { "Yeni liste" }.take(80), kind, mutableListOf())
+        val p = Playlist(UUID.randomUUID().toString(), name.trim().ifEmpty { Tx.s(R.string.playlistac_033) }.take(80), kind, mutableListOf())
         d.lists += p
         save(c, d)
         return p
@@ -87,7 +87,7 @@ object PlaylistStore {
 
     fun rename(c: Context, id: String, name: String) {
         val d = load(c)
-        d.lists.firstOrNull { it.id == id }?.name = name.trim().ifEmpty { "Liste" }.take(80)
+        d.lists.firstOrNull { it.id == id }?.name = name.trim().ifEmpty { Tx.s(R.string.listpanel_012) }.take(80)
         save(c, d)
     }
 
@@ -128,25 +128,25 @@ fun android.app.Activity.showAddToPlaylist(kind: String, uris: List<String>, onD
     labels += "＋  Yeni liste…"
     lists.forEach { labels += "${it.name}  (${it.items.size})" }
     PanelBuilder(this)
-        .setTitle("Oynatma listesine ekle")
+        .setTitle(Tx.s(R.string.mainactivi_067))
         .setItems(labels.toTypedArray()) { _, which ->
             if (which == 0) {
-                showInput("Yeni liste", "Liste adı") { name ->
+                showInput(Tx.s(R.string.playlistac_033), Tx.s(R.string.playlistac_020)) { name ->
                     val p = PlaylistStore.create(this, kind, name)
                     val n = PlaylistStore.add(this, p.id, uris)
-                    android.widget.Toast.makeText(this, "\"${p.name}\" listesine $n öğe eklendi", android.widget.Toast.LENGTH_SHORT).show()
+                    android.widget.Toast.makeText(this, Tx.s(R.string.playlistst_001, p.name, n), android.widget.Toast.LENGTH_SHORT).show()
                     onDone()
                 }
             } else {
                 val p = lists[which - 1]
                 val n = PlaylistStore.add(this, p.id, uris)
                 android.widget.Toast.makeText(
-                    this, if (n == 0) "Zaten listede" else "\"${p.name}\" listesine $n öğe eklendi",
+                    this, if (n == 0) Tx.s(R.string.playlistst_002) else Tx.s(R.string.playlistst_001, p.name, n),
                     android.widget.Toast.LENGTH_SHORT
                 ).show()
                 onDone()
             }
         }
-        .setNegativeButton("İptal", null)
+        .setNegativeButton(Tx.s(R.string.fileops_004), null)
         .show()
 }

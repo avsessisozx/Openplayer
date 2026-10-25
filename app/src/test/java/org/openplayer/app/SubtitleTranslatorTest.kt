@@ -5,10 +5,18 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import java.net.URLDecoder
 
 class SubtitleTranslatorTest {
+    @Before
+    fun turkishStrings() = TestStrings.installTurkish()
+
+    @After
+    fun clearStrings() = TestStrings.uninstall()
+
 
     private class Call(val method: String, val url: String, val headers: Map<String, String>, val body: String?)
 

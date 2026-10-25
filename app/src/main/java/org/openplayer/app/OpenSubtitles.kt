@@ -51,7 +51,7 @@ class OpenSubtitlesClient(
             val text = stream?.bufferedReader()?.use { it.readText() } ?: ""
             if (code !in 200..299) {
                 val msg = runCatching { JSONObject(text).optString("message") }.getOrNull().orEmpty()
-                throw IOException("OpenSubtitles hatası $code${if (msg.isNotEmpty()) ": $msg" else ""}")
+                throw IOException(Tx.s(R.string.opensubtit_001, code, if (msg.isNotEmpty()) ": $msg" else ""))
             }
             return text
         } finally {
@@ -66,7 +66,7 @@ class OpenSubtitlesClient(
     }
 
     fun search(query: String, languages: String, movieHash: String?): List<OsResult> {
-        if (apiKey.isEmpty()) throw IOException("OpenSubtitles API anahtarı girilmemiş (Ayarlar > Altyazı)")
+        if (apiKey.isEmpty()) throw IOException(Tx.s(R.string.opensubtit_002))
         val params = buildString {
             append("query=").append(URLEncoder.encode(query, "UTF-8"))
             if (languages.isNotBlank()) append("&languages=").append(URLEncoder.encode(languages.replace(" ", ""), "UTF-8"))
@@ -95,18 +95,18 @@ class OpenSubtitlesClient(
         login()
         val response = JSONObject(call("POST", "$base/download", JSONObject().put("file_id", fileId).toString(), token))
         val link = response.optString("link")
-        if (link.isEmpty()) throw IOException("İndirme bağlantısı alınamadı")
+        if (link.isEmpty()) throw IOException(Tx.s(R.string.opensubtit_003))
         // Sunucudan gelen bağlantı güvenilmez: yalnızca https, yönlendirme yok, boyut sınırlı.
         val url = URL(link)
-        if (url.protocol != "https") throw IOException("Güvensiz indirme bağlantısı reddedildi")
+        if (url.protocol != "https") throw IOException(Tx.s(R.string.opensubtit_004))
         val conn = url.openConnection() as HttpURLConnection
         try {
             conn.instanceFollowRedirects = false
             conn.connectTimeout = 15_000
             conn.readTimeout = 30_000
-            if (conn.responseCode !in 200..299) throw IOException("İndirme hatası ${conn.responseCode}")
+            if (conn.responseCode !in 200..299) throw IOException(Tx.s(R.string.opensubtit_005, conn.responseCode))
             val out = ByteArrayOutputStream()
-            if (!SubtitleFiles.copyLimited(conn.inputStream, out)) throw IOException("Altyazı çok büyük, reddedildi")
+            if (!SubtitleFiles.copyLimited(conn.inputStream, out)) throw IOException(Tx.s(R.string.opensubtit_006))
             return out.toByteArray()
         } finally {
             conn.disconnect()

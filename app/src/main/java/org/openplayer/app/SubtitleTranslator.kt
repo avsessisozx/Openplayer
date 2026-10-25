@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 
 enum class TrProvider(val id: String, val label: String) {
-    MYMEMORY("mymemory", "MyMemory (ücretsiz, anahtarsız)"),
+    MYMEMORY("mymemory", Tx.s(R.string.subtitletr_001)),
     LIBRE("libre", "LibreTranslate uyumlu adres"),
     OPENAI("openai", "Yapay zekâ (OpenAI uyumlu adres)");
 
@@ -28,38 +28,41 @@ enum class TrProvider(val id: String, val label: String) {
 }
 
 object TrLangs {
-    class Lang(val code: String, val tr: String, val en: String)
+    class Lang(val code: String, val tr: String, val en: String) {
+        /** Arayüz Türkçe ise Türkçe ad, değilse İngilizce ad. */
+        val name: String get() = if (java.util.Locale.getDefault().language == "tr") tr else en
+    }
 
     val all = listOf(
-        Lang("tr", "Türkçe", "Turkish"),
-        Lang("en", "İngilizce", "English"),
-        Lang("es", "İspanyolca", "Spanish"),
+        Lang("tr", Tx.s(R.string.subtitletr_002), "Turkish"),
+        Lang("en", Tx.s(R.string.subtitletr_003), "English"),
+        Lang("es", Tx.s(R.string.subtitletr_004), "Spanish"),
         Lang("de", "Almanca", "German"),
-        Lang("fr", "Fransızca", "French"),
-        Lang("it", "İtalyanca", "Italian"),
+        Lang("fr", Tx.s(R.string.subtitletr_005), "French"),
+        Lang("it", Tx.s(R.string.subtitletr_006), "Italian"),
         Lang("pt", "Portekizce", "Portuguese"),
-        Lang("ru", "Rusça", "Russian"),
-        Lang("ar", "Arapça", "Arabic"),
-        Lang("fa", "Farsça", "Persian"),
+        Lang("ru", Tx.s(R.string.subtitletr_007), "Russian"),
+        Lang("ar", Tx.s(R.string.subtitletr_008), "Arabic"),
+        Lang("fa", Tx.s(R.string.subtitletr_009), "Persian"),
         Lang("ja", "Japonca", "Japanese"),
         Lang("ko", "Korece", "Korean"),
-        Lang("zh", "Çince", "Chinese"),
-        Lang("nl", "Felemenkçe", "Dutch"),
-        Lang("pl", "Lehçe", "Polish"),
+        Lang("zh", Tx.s(R.string.subtitletr_010), "Chinese"),
+        Lang("nl", Tx.s(R.string.subtitletr_011), "Dutch"),
+        Lang("pl", Tx.s(R.string.subtitletr_012), "Polish"),
         Lang("uk", "Ukraynaca", "Ukrainian"),
         Lang("el", "Yunanca", "Greek"),
         Lang("bg", "Bulgarca", "Bulgarian"),
         Lang("ro", "Romence", "Romanian"),
         Lang("hu", "Macarca", "Hungarian"),
-        Lang("cs", "Çekçe", "Czech"),
-        Lang("sv", "İsveççe", "Swedish"),
-        Lang("hi", "Hintçe", "Hindi"),
+        Lang("cs", Tx.s(R.string.subtitletr_013), "Czech"),
+        Lang("sv", Tx.s(R.string.subtitletr_014), "Swedish"),
+        Lang("hi", Tx.s(R.string.subtitletr_015), "Hindi"),
         Lang("id", "Endonezce", "Indonesian"),
         Lang("az", "Azerice", "Azerbaijani"),
     )
 
     fun byCode(code: String): Lang? = all.firstOrNull { it.code == code }
-    fun label(code: String): String = if (code == "auto") "Otomatik algıla" else byCode(code)?.tr ?: code
+    fun label(code: String): String = if (code == "auto") Tx.s(R.string.subtitletr_016) else byCode(code)?.name ?: code
     fun englishName(code: String): String = byCode(code)?.en ?: code
 }
 
@@ -92,9 +95,9 @@ object UrlConnectionTransport : HttpTransport {
         val u = try {
             URL(url)
         } catch (e: java.net.MalformedURLException) {
-            throw TranslateException("Geçersiz adres: $url")
+            throw TranslateException(Tx.s(R.string.subtitletr_017, url))
         }
-        if (u.protocol != "https" && u.protocol != "http") throw TranslateException("Yalnız http ve https adresleri desteklenir")
+        if (u.protocol != "https" && u.protocol != "http") throw TranslateException(Tx.s(R.string.subtitletr_018))
         val conn = u.openConnection() as HttpURLConnection
         try {
             conn.requestMethod = method
@@ -115,11 +118,11 @@ object UrlConnectionTransport : HttpTransport {
                 location = conn.getHeaderField("Location"),
             )
         } catch (e: java.net.UnknownHostException) {
-            throw TranslateException("Sunucuya ulaşılamadı. İnternet bağlantınızı ve adresi kontrol edin.")
+            throw TranslateException(Tx.s(R.string.subtitletr_019))
         } catch (e: java.net.SocketTimeoutException) {
-            throw TranslateException("Sunucu zamanında yanıt vermedi.")
+            throw TranslateException(Tx.s(R.string.subtitletr_020))
         } catch (e: IOException) {
-            throw TranslateException("Bağlantı hatası: ${e.message ?: e.javaClass.simpleName}")
+            throw TranslateException(Tx.s(R.string.subtitletr_021, e.message ?: e.javaClass.simpleName))
         } finally {
             conn.disconnect()
         }
@@ -278,8 +281,8 @@ class SubtitleTranslator(
             }
             if (r.code == 429 && isDailyQuota(r.body)) {
                 throw TranslateException(
-                    "Günlük ücretsiz kota doldu (HTTP 429).\nÇevrilen satırlar kaydedildi; kota yenilenince veya başka bir model/sağlayıcı seçince " +
-                        "\"Altyazıyı çevir\" dediğinde kaldığı yerden devam eder.\n" + serverMessage(r.body)
+                    Tx.s(R.string.subtitletr_022) +
+                        Tx.s(R.string.subtitletr_023) + serverMessage(r.body)
                 )
             }
             val retryable = r.code == 429 || r.code in 500..599
@@ -311,11 +314,11 @@ class SubtitleTranslator(
     private fun httpError(r: HttpResult): TranslateException {
         val server = serverMessage(r.body)
         val base = when (r.code) {
-            401, 403 -> "Sunucu erişimi reddetti (HTTP ${r.code}). API anahtarını ve adresi kontrol edin."
-            404 -> "Adres veya model bulunamadı (HTTP 404). Adresi kontrol edin; model adı eskimiş olabilir, 'Model listesini getir' ile güncel bir model seçin."
-            301, 302, 307, 308 -> "Adres başka yere yönlendiriyor${r.location?.let { ": $it" } ?: ""}. Doğru adresi girin."
-            429 -> "İstek sınırı aşıldı (HTTP 429). Biraz bekleyip tekrar deneyin veya başka sağlayıcı seçin."
-            else -> "Sunucu hatası (HTTP ${r.code})."
+            401, 403 -> Tx.s(R.string.subtitletr_024, r.code)
+            404 -> Tx.s(R.string.subtitletr_025)
+            301, 302, 307, 308 -> Tx.s(R.string.subtitletr_026, r.location?.let { ": $it" } ?: "")
+            429 -> Tx.s(R.string.subtitletr_027)
+            else -> Tx.s(R.string.subtitletr_028, r.code)
         }
         return TranslateException(if (server.isEmpty()) base else "$base\n$server")
     }
@@ -401,20 +404,20 @@ class SubtitleTranslator(
             if (cfg.email.isNotBlank()) append("&de=").append(URLEncoder.encode(cfg.email.trim(), "UTF-8"))
         }
         val r = call("GET", url, mapOf("Accept" to "application/json"), null, cancelled)
-        val json = runCatching { JSONObject(r.body) }.getOrNull() ?: throw TranslateException("MyMemory beklenmeyen yanıt verdi.")
+        val json = runCatching { JSONObject(r.body) }.getOrNull() ?: throw TranslateException(Tx.s(R.string.subtitletr_029))
         val translated = json.optJSONObject("responseData")?.optString("translatedText").orEmpty()
         if (translated.contains("MYMEMORY WARNING", ignoreCase = true)) {
             throw TranslateException(
-                "MyMemory günlük ücretsiz kotası doldu. Ayarlar > Altyazı çevirisi bölümüne e-posta adresi girerseniz kota günde 50.000 karaktere çıkar; " +
-                    "ya da başka bir sağlayıcı seçin."
+                Tx.s(R.string.subtitletr_030) +
+                    Tx.s(R.string.subtitletr_031)
             )
         }
         val status = json.optInt("responseStatus", 200)
         if (status != 200) {
             val details = json.optString("responseDetails").ifBlank { "durum $status" }
-            throw TranslateException("MyMemory hatası: ${details.take(160)}")
+            throw TranslateException(Tx.s(R.string.subtitletr_032, details.take(160)))
         }
-        if (translated.isBlank()) throw TranslateException("MyMemory boş çeviri döndürdü.")
+        if (translated.isBlank()) throw TranslateException(Tx.s(R.string.subtitletr_033))
         return unescapeHtml(translated)
     }
 
@@ -422,7 +425,7 @@ class SubtitleTranslator(
 
     private fun libreEndpoint(): String {
         val base = cfg.apiUrl.trim().trimEnd('/')
-        if (base.isEmpty()) throw TranslateException("LibreTranslate adresi girilmemiş (Ayarlar > Altyazı çevirisi).")
+        if (base.isEmpty()) throw TranslateException(Tx.s(R.string.subtitletr_034))
         return if (base.endsWith("/translate")) base else "$base/translate"
     }
 
@@ -441,7 +444,7 @@ class SubtitleTranslator(
             .put("format", "text")
         if (cfg.apiKey.isNotBlank()) body.put("api_key", cfg.apiKey.trim())
         val r = call("POST", endpoint, mapOf("Content-Type" to "application/json", "Accept" to "application/json"), body.toString(), cancelled)
-        val json = runCatching { JSONObject(r.body) }.getOrNull() ?: throw TranslateException("LibreTranslate beklenmeyen yanıt verdi.")
+        val json = runCatching { JSONObject(r.body) }.getOrNull() ?: throw TranslateException(Tx.s(R.string.subtitletr_035))
         val tt = json.opt("translatedText")
         val result: List<String>? = when (tt) {
             is JSONArray -> List(tt.length()) { tt.optString(it) }
@@ -456,24 +459,24 @@ class SubtitleTranslator(
             val mid = batch.size / 2
             return libreBatch(endpoint, batch.subList(0, mid), cancelled, tick) + libreBatch(endpoint, batch.subList(mid, batch.size), cancelled, tick)
         }
-        throw TranslateException("LibreTranslate beklenmeyen yanıt verdi.")
+        throw TranslateException(Tx.s(R.string.subtitletr_035))
     }
 
     // ------------------------------------------------------------------ OpenAI uyumlu yapay zekâ
 
     private fun chatEndpoint(): String {
         val base = cfg.apiUrl.trim().trimEnd('/')
-        if (base.isEmpty()) throw TranslateException("Yapay zekâ adresi girilmemiş (Ayarlar > Altyazı çevirisi).")
+        if (base.isEmpty()) throw TranslateException(Tx.s(R.string.subtitletr_036))
         return if (base.endsWith("/chat/completions")) base else "$base/chat/completions"
     }
 
     /** Kullanılabilir model adlarını sağlayıcıdan okur ({adres}/models). */
     fun listModels(cancelled: () -> Boolean = { false }): List<String> {
         val base = cfg.apiUrl.trim().trimEnd('/').removeSuffix("/chat/completions")
-        if (base.isEmpty()) throw TranslateException("Yapay zekâ adresi girilmemiş.")
+        if (base.isEmpty()) throw TranslateException(Tx.s(R.string.subtitletr_037))
         val r = call("GET", "$base/models", jsonHeaders(cfg.apiKey), null, cancelled)
-        val json = runCatching { JSONObject(r.body) }.getOrNull() ?: throw TranslateException("Model listesi okunamadı.")
-        val data = json.optJSONArray("data") ?: json.optJSONArray("models") ?: throw TranslateException("Model listesi okunamadı.")
+        val json = runCatching { JSONObject(r.body) }.getOrNull() ?: throw TranslateException(Tx.s(R.string.subtitletr_038))
+        val data = json.optJSONArray("data") ?: json.optJSONArray("models") ?: throw TranslateException(Tx.s(R.string.subtitletr_038))
         val ids = ArrayList<String>()
         for (i in 0 until data.length()) {
             val o = data.opt(i)
@@ -489,7 +492,7 @@ class SubtitleTranslator(
 
     private fun viaOpenAi(keys: List<String>, cancelled: () -> Boolean, tick: (Int) -> Unit): List<String> {
         val endpoint = chatEndpoint()
-        if (cfg.model.isBlank()) throw TranslateException("Model adı girilmemiş (Ayarlar > Altyazı çevirisi).")
+        if (cfg.model.isBlank()) throw TranslateException(Tx.s(R.string.subtitletr_039))
         val out = ArrayList<String>(keys.size)
         for (batch in batches(keys)) out += openAiBatch(endpoint, batch, cancelled, tick)
         return out
@@ -513,15 +516,15 @@ class SubtitleTranslator(
         }
         // Tek satır: model diziyi bozduysa düz metni kabul et.
         val single = cleanSingle(content)
-        if (single.isBlank()) throw TranslateException("Yapay zekâ boş yanıt verdi.")
+        if (single.isBlank()) throw TranslateException(Tx.s(R.string.subtitletr_040))
         tick(1)
         return listOf(single)
     }
 
     private fun chatContent(body: String): String {
-        val json = runCatching { JSONObject(body) }.getOrNull() ?: throw TranslateException("Yapay zekâ beklenmeyen yanıt verdi.")
+        val json = runCatching { JSONObject(body) }.getOrNull() ?: throw TranslateException(Tx.s(R.string.subtitletr_041))
         val msg = json.optJSONArray("choices")?.optJSONObject(0)?.optJSONObject("message")
-            ?: throw TranslateException("Yapay zekâ beklenmeyen yanıt verdi.")
+            ?: throw TranslateException(Tx.s(R.string.subtitletr_041))
         val c = msg.opt("content")
         return when (c) {
             is String -> c

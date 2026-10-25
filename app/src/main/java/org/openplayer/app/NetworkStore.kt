@@ -7,9 +7,9 @@ import org.json.JSONObject
 import java.util.UUID
 
 enum class NetProtocol(val label: String, val defaultPort: Int, val pathHint: String) {
-    SMB("SMB (Windows paylaşımı / NAS)", 445, "Paylaşım adı ve klasör (örn. Filmler/Dizi)"),
-    FTP("FTP", 21, "Başlangıç klasörü (örn. /video)"),
-    WEBDAV("WebDAV", 80, "Yol (örn. /dav/)"),
+    SMB(Tx.s(R.string.networksto_002), 445, Tx.s(R.string.networksto_001)),
+    FTP("FTP", 21, Tx.s(R.string.networksto_003)),
+    WEBDAV("WebDAV", 80, Tx.s(R.string.networksto_004)),
 }
 
 data class NetServer(

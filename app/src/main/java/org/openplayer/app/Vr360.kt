@@ -25,27 +25,27 @@ import kotlin.math.sin
 
 /** Lens türü: görüntünün küreye / sanal ekrana nasıl yerleştirileceği. */
 enum class VrLens(val label: String) {
-    NORMAL("Normal lens (sanal ekran)"),
-    FISHEYE("Balık gözü lens"),
-    SPHERE360("360° tam küre"),
-    SPHERE180("180° yarım küre"),
+    NORMAL(Tx.s(R.string.vr360_013)),
+    FISHEYE(Tx.s(R.string.vr360_001)),
+    SPHERE360(Tx.s(R.string.vr360_002)),
+    SPHERE180(Tx.s(R.string.vr360_003)),
 }
 
 /** 360° / VR180 / balık gözü / sanal ekran ve 3B video biçimleri (stereo: 0 = 3B değil, 1 = üst-alt, 2 = yan yana). */
 enum class VrMode(val label: String, val lens: VrLens, val stereo: Int) {
-    NONE("Kapalı", VrLens.SPHERE360, 0),
-    FULL("360° (tek görüntü)", VrLens.SPHERE360, 0),
-    FULL_TB("360° üst-alt 3B", VrLens.SPHERE360, 1),
+    NONE(Tx.s(R.string.audiofx_004), VrLens.SPHERE360, 0),
+    FULL(Tx.s(R.string.vr360_004), VrLens.SPHERE360, 0),
+    FULL_TB(Tx.s(R.string.vr360_005), VrLens.SPHERE360, 1),
     FULL_SBS("360° yan yana 3B", VrLens.SPHERE360, 2),
-    HALF("180° (tek görüntü)", VrLens.SPHERE180, 0),
-    HALF_TB("180° üst-alt 3B", VrLens.SPHERE180, 1),
+    HALF(Tx.s(R.string.vr360_006), VrLens.SPHERE180, 0),
+    HALF_TB(Tx.s(R.string.vr360_007), VrLens.SPHERE180, 1),
     HALF_SBS("180° yan yana 3B", VrLens.SPHERE180, 2),
-    FISHEYE("Balık gözü (tek görüntü)", VrLens.FISHEYE, 0),
-    FISHEYE_TB("Balık gözü üst-alt 3B", VrLens.FISHEYE, 1),
-    FISHEYE_SBS("Balık gözü yan yana 3B", VrLens.FISHEYE, 2),
-    FLAT("Normal lens (tek görüntü)", VrLens.NORMAL, 0),
-    FLAT_TB("Normal lens üst-alt 3B", VrLens.NORMAL, 1),
-    FLAT_SBS("Normal lens yan yana 3B", VrLens.NORMAL, 2);
+    FISHEYE(Tx.s(R.string.vr360_008), VrLens.FISHEYE, 0),
+    FISHEYE_TB(Tx.s(R.string.vr360_009), VrLens.FISHEYE, 1),
+    FISHEYE_SBS(Tx.s(R.string.vr360_010), VrLens.FISHEYE, 2),
+    FLAT(Tx.s(R.string.vr360_011), VrLens.NORMAL, 0),
+    FLAT_TB(Tx.s(R.string.vr360_012), VrLens.NORMAL, 1),
+    FLAT_SBS(Tx.s(R.string.vr360_014), VrLens.NORMAL, 2);
 
     /** Yarım küre üzerine çizilir (180° ve balık gözü). */
     val halfSphere: Boolean get() = lens == VrLens.SPHERE180 || lens == VrLens.FISHEYE
