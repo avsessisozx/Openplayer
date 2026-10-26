@@ -3,14 +3,14 @@
 > Claude'un çalışma notu. Yalnızca `durum` dalında durur; `main`'e, README'ye ve sürüm notlarına girmez.
 > Yeni sohbette önce bunu oku, repoyu baştan tarama. Her sürümden sonra güncelle.
 
-Son güncelleme: 2026-10-25 · Son sürüm: **v1.0.0-beta19** (2026-10-25, ön sürüm)
+Son güncelleme: 2026-10-26 · Son sürüm: **v1.0.0-beta20** (2026-10-26, ön sürüm)
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
 
 ## Teknik
 - Android, Kotlin, Gradle KTS · `org.openplayer.app` · minSdk 24
-- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta19`)
+- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta20`)
 - Oynatma motoru + libVLC yedek motoru (otomatik geçiş, "Yalnız VLC" seçeneği)
 - CI: `build.yml` → `main`'e push'ta yeni sürüm numarası otomatik yayınlanır; `v*` etiketi de yayınlar
 - `emulator-test.yml` → `claude/**` dallarında Android 14 emülatör testi; ara sonuçları dala yazar.
@@ -69,9 +69,19 @@ Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikl
 - **Doğrulanmadı:** kare ilerlemenin gerçek görüntüde tam 1 kare olduğu, perdenin kulakla duyulması, çemberin 360° videoda gerçek parmakla hissi, tam emülatör turu. Tüm yeni metinler makine çevirisi.
 - Kalan piyasa eksikleri: Chromecast/DLNA, Android TV, GIF/klip dışa aktarma, Trakt/sesli komut.
 
+## beta20 (2026-10-26)
+Kaynak: kullanıcının MX Player ekran kaydı + OpenPlayer hata raporu (çökme yok, davranış farkı). MX kare kare incelendi.
+- Altyazı: parmak değince gri vurgu kutusu (`SubtitleController.setGrab`); dikey sürükleme konumu (önceden vardı); yatay kaydırmada metin parmakla gelir, komşu satır ikinci görünümden (`ghostView`, yalnız harici altyazı) yandan girer,
+  bırakınca >60 dp ise `jumpSubtitle`, değilse yerine döner (`PlayerActivity.subtitleSwipeMove/End`). Parmak altyazıdayken uzun basış kapalı (`GestureController.subtitleHit`): tutup sürüklemek mümkün; eskiden tutunca kaydırma yok sayılıyordu.
+- Kısayol şeridi MX gibi yeniden yazıldı (`PlayerActivity.RayScroll`, FrameLayout): son 4 simge görünür, öncekiler + "Öğeleri özelleştir" solda gizli; parmak sağa = açılır, sola = kapanır, şerit parmağı birebir izler;
+  açıkken simge altında etiket; taşan kısım serbest kayar, kapanma aralığında en yakın uca oturur; ok düğmesi aç/kapa. `Shortcut` enum sırası MX'e çevrildi (Hız, Arka planda oynat, Ekran döndürme, Tekrarla sağda).
+- **Doğrulandı (emülatör [ray], 3. koşu):** birim testi, derleme, lint; şerit simge sayısı 5 → 15 → 5, yavaş çapraz sürükleme 5 → 9 → 15, boş alan tepkisiz; altyazı vurgu kutusu ve yatay kaydırmada metnin parmakla kayması (ekran görüntüsü), dikey sürükleme konumu; çökme yok.
+- **Doğrulanmadı:** gerçek parmakla his (şerit hızı/eşik, altyazı kaydırma eşiği 60 dp), komşu satırın önizlemesi (testte son satır olduğu için görünmedi), gömülü altyazıda önizleme yok (komşu satır bilinmiyor), etiketlerin dar ekranda taşması, tam emülatör turu.
+- Not: beta20 öncesi ilk iki koşuda şerit 0 okudu: 1. koşuda (neden: aynı), 2. koşuda 6 okudu (sol iç boşluk gizli simgenin kenarını gösteriyordu) → boşluk kaldırıldı.
+
 ## Yarım / sıradaki
 - Kullanıcının kararı: önce uygulama özellik açısından tam ve hatasız olacak
-- Sıradaki: beta17 notları (360° sürükleme yönü, uzun basma çarkı, altyazı kaydırma/dokunarak senkron, kısayol satırı sürükleme, MX tarzı klasör ağacı)
+- Sıradaki: kullanıcıdan beta20 geri bildirimi (altyazı/şerit sürükleme hissi); eski beta17 notları beta17–20 ile karşılandı
 - Gerçek cihazda (Xiaomi Mi 10T Pro) kapsamlı deneme henüz raporlanmadı; özellikle beta15'te doğrulanmayanlar:
   gerçek 360° videoda baş takibi / VR gözlük hissi (emülatörde sanal sensör), kısayol satırı parmakla his
 - Kısayol satırı tamamen açıkken ekrana sığmayabilir (dar ekranda kaydırılır); ok sağda kalır
