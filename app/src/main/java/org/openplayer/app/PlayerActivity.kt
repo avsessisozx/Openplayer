@@ -938,7 +938,8 @@ class PlayerActivity : AppCompatActivity() {
 
         shortcutRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(dp(8), 0, dp(8), 0)
+            // Sol boşluk yok: kapalıyken gizli simgelerin kenarı taşıp görünmesin.
+            setPadding(0, 0, dp(8), 0)
         }
         shortcutScroll = RayScroll(this).apply {
             addView(shortcutRow, FrameLayout.LayoutParams(-2, -2))
