@@ -464,6 +464,11 @@ def rail_test():
 
     shot("Kısayol rayı: varsayılan")
     n0 = rail_count()
+    if not n0:
+        # Teşhis: sayım 0 ise ekrandaki tıklanabilir öğeleri (sınırlarıyla) rapora yaz.
+        r0 = dump()
+        info = [f"{l}@{c[0]},{c[1]}" for l, c, _ in clickables(r0)][:25] if r0 is not None else ["dump yok"]
+        steps.append(("Kısayol rayı: teşhis (tıklanabilirler)", "bilgi", f"h={h} " + " | ".join(info)))
     y = int(h * 0.23)
     # beta20 (MX gibi): gizli simgeler solda; parmağı sağa çekince açılır, sola çekince kapanır.
     # Satır dar (içeriğe göre) olduğundan sürükleme simgelerin üstünden başlamalı.

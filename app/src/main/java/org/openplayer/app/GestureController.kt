@@ -182,10 +182,8 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                     (e.y > height * 0.72f ||
                         (e.y > height * (1f - a.settings.subtitleBottomFraction - 0.16f) &&
                             e.y < height * (1f - a.settings.subtitleBottomFraction + 0.04f)))
-            // Parmak altyazı metninin hizasında mı: vurgu kutusu çıkar, uzun basış hızlı oynatmayı başlatmaz.
-            onSubtitleText = inSubtitleArea && a.subtitles.showing &&
-                e.y > height * (1f - a.settings.subtitleBottomFraction - 0.16f) &&
-                e.y < height * (1f - a.settings.subtitleBottomFraction + 0.04f)
+            // Parmak altyazı metninin hizasında mı: vurgu kutusu çıkar (uzun basış kapatma onTouch'ta yapılır).
+            onSubtitleText = subtitleHit(e)
             if (onSubtitleText) a.subtitleGrab(true)
             startPos = a.player.currentPosition
             startVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
@@ -293,6 +291,13 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         }
     })
 
+    /** Parmak altyazı satırının hizasında mı (altyazı açık ve ekranda satır var). */
+    private fun subtitleHit(e: MotionEvent): Boolean =
+        a.vr == VrMode.NONE && a.settings.subtitleGestures && a.subtitles.mode != SubtitleController.Mode.OFF &&
+            a.subtitles.showing &&
+            e.y > height * (1f - a.settings.subtitleBottomFraction - 0.16f) &&
+            e.y < height * (1f - a.settings.subtitleBottomFraction + 0.04f)
+
     private fun applyVertical(fraction: Float) {
         when (prefs.get(zone)) {
             GestureAction.BRIGHTNESS -> {
@@ -358,6 +363,11 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
         if (ignoring) {
             if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) ignoring = false
             return true
+        }
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            // Altyazıyı tutup sürüklemek için: parmak altyazıdayken uzun basış (hızlı oynat) kapalı,
+            // yoksa tutunca sonraki kaydırma hareketleri yok sayılır.
+            detector.setIsLongpressEnabled(!subtitleHit(event))
         }
         if (a.vr != VrMode.NONE) vrTouch(event)
         scaleDetector.onTouchEvent(event)
