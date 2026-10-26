@@ -101,6 +101,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
     private var seekTarget = 0L
     private var subSwipe = 0f
     private var inSubtitleArea = false
+    private var onSubtitleText = false
     private var scaleOnSubtitle = false
     private var scaling = false
     private var width = 1
@@ -181,6 +182,11 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                     (e.y > height * 0.72f ||
                         (e.y > height * (1f - a.settings.subtitleBottomFraction - 0.16f) &&
                             e.y < height * (1f - a.settings.subtitleBottomFraction + 0.04f)))
+            // Parmak altyazı metninin hizasında mı: vurgu kutusu çıkar, uzun basış hızlı oynatmayı başlatmaz.
+            onSubtitleText = inSubtitleArea && a.subtitles.showing &&
+                e.y > height * (1f - a.settings.subtitleBottomFraction - 0.16f) &&
+                e.y < height * (1f - a.settings.subtitleBottomFraction + 0.04f)
+            if (onSubtitleText) a.subtitleGrab(true)
             startPos = a.player.currentPosition
             startVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
             val b = a.window.attributes.screenBrightness
@@ -224,11 +230,10 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                 Mode.VERTICAL -> applyVertical(-totalY / height)
                 Mode.SUB_H -> {
                     subSwipe = totalX
-                    a.showHud(if (totalX > 0) Tx.s(R.string.gesturecon_009) else Tx.s(R.string.gesturecon_008))
+                    a.subtitleSwipeMove(totalX)
                 }
                 Mode.SUB_V -> {
                     a.setSubtitleBottom(startSubBottom - totalY / height)
-                    a.showHud(Tx.s(R.string.gesturecon_004))
                 }
                 Mode.NONE -> Unit
             }
@@ -240,7 +245,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                 if (a.settings.vrHoldWheel && !scaling) a.vrWheelStart(e.x, e.y)
                 return
             }
-            if (scaling) return
+            if (scaling || onSubtitleText) return
             if (a.startFastPlay()) mode = Mode.NONE
         }
 
@@ -370,8 +375,15 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
                     verticalSeeking = false
                     a.scrubEnd(seekTarget)
                 }
-                Mode.SUB_H -> if (abs(subSwipe) > a.dp(60)) a.jumpSubtitle(subSwipe < 0)
+                Mode.SUB_H -> a.subtitleSwipeEnd(
+                    event.actionMasked == MotionEvent.ACTION_UP && abs(subSwipe) > a.dp(60),
+                    subSwipe < 0,
+                )
                 else -> Unit
+            }
+            if (onSubtitleText) {
+                onSubtitleText = false
+                a.subtitleGrab(false)
             }
             mode = Mode.NONE
             a.hideHudSoon()

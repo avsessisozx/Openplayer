@@ -465,11 +465,12 @@ def rail_test():
     shot("Kısayol rayı: varsayılan")
     n0 = rail_count()
     y = int(h * 0.23)
+    # beta20 (MX gibi): gizli simgeler solda; parmağı sağa çekince açılır, sola çekince kapanır.
     # Satır dar (içeriğe göre) olduğundan sürükleme simgelerin üstünden başlamalı.
-    sh(f"input swipe {int(w*0.28)} {y} {int(w*0.01)} {y} 350"); time.sleep(1.2)
-    shot("Kısayol rayı: çekilince açık")
+    sh(f"input swipe {int(w*0.12)} {y} {int(w*0.62)} {y} 350"); time.sleep(1.2)
+    shot("Kısayol rayı: çekilince açık (etiketli)")
     n1 = rail_count()
-    sh(f"input swipe {int(w*0.20)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.2)
+    sh(f"input swipe {int(w*0.62)} {y} {int(w*0.05)} {y} 350"); time.sleep(1.2)
     shot("Kısayol rayı: geri çekilince kapalı")
     n2 = rail_count()
     if None in (n0, n1, n2):
@@ -479,16 +480,16 @@ def rail_test():
         steps.append(("Kısayol rayı: simge sayısı", "ok" if good else "SORUN",
                       f"varsayılan {n0}, açık {n1}, kapanınca {n2} (beklenen: ≤5, artış, aynı)"))
     # beta17: yavaş, hafif çapraz parmak sürüklemesi (gerçek parmak gibi) – satır sürükleme sırasında da açılmalı.
-    x0 = int(w * 0.20)
+    x0 = int(w * 0.12)
     sh(f"input motionevent DOWN {x0} {y}")
     for i in range(1, 13):
-        sh(f"input motionevent MOVE {x0 - i * int(w * 0.02)} {y + (i % 3) * 4}"); time.sleep(0.05)
+        sh(f"input motionevent MOVE {x0 + i * int(w * 0.02)} {y + (i % 3) * 4}"); time.sleep(0.05)
     n_mid = rail_count_nopause()
-    sh(f"input motionevent UP {x0 - 12 * int(w * 0.02)} {y + 4}"); time.sleep(1.2)
+    sh(f"input motionevent UP {x0 + 12 * int(w * 0.02)} {y + 4}"); time.sleep(1.2)
     n4 = rail_count()
     steps.append(("Kısayol rayı: yavaş sürükleme", "ok" if (n_mid or 0) > n0 and (n4 or 0) >= (n_mid or 0) else "SORUN",
                   f"varsayılan {n0}, sürüklerken {n_mid}, bırakınca {n4}"))
-    sh(f"input swipe {int(w*0.20)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.2)
+    sh(f"input swipe {int(w*0.62)} {y} {int(w*0.05)} {y} 350"); time.sleep(1.2)
     # Satırın sağındaki boş alan sürüklemeye tepki vermemeli.
     sh(f"input swipe {int(w*0.95)} {y} {int(w*0.60)} {y} 350"); time.sleep(1.0)
     n3 = rail_count()
@@ -595,10 +596,20 @@ def sub_sync_test():
         if row:
             tap(row); time.sleep(1.5)
             steps.append(("Altyazı eşleştirme: seçim sonrası liste kapandı", "ok" if "Şu an söylenen satıra dokunun" not in texts(dump()) else "SORUN", ""))
-    # Altyazı metni üstünde sola/sağa kaydır: çökmemeli
+    # Altyazı metni üstünde: parmak değince vurgu kutusu, kaydırırken metin parmakla gelir; çökmemeli
     y = int(h * 0.85)
+    sh("input keyevent 126"); time.sleep(0.5)  # oynat (altyazı satırı ekranda olsun)
+    sh(f"input motionevent DOWN {int(w*0.50)} {y}"); time.sleep(0.4)
+    shot("Altyazı: parmak üstünde (vurgu kutusu)")
+    for i in range(1, 9):
+        sh(f"input motionevent MOVE {int(w*0.50) - i * int(w*0.04)} {y}"); time.sleep(0.05)
+    shot("Altyazı: kaydırırken (komşu satır yandan)")
+    sh(f"input motionevent UP {int(w*0.50) - 8 * int(w*0.04)} {y}"); time.sleep(1)
     sh(f"input swipe {int(w*0.75)} {y} {int(w*0.25)} {y} 300"); time.sleep(1)
     sh(f"input swipe {int(w*0.25)} {y} {int(w*0.75)} {y} 300"); time.sleep(1)
+    # Dikey sürükleme: altyazı konumu değişir
+    sh(f"input swipe {int(w*0.50)} {y} {int(w*0.50)} {int(h*0.45)} 400"); time.sleep(1)
+    shot("Altyazı: yukarı sürüklendi")
     check_crash("Altyazı eşleştirme / kaydırma")
     sh("input keyevent KEYCODE_BACK"); time.sleep(1)
 

@@ -31,7 +31,6 @@ import android.view.TextureView
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -179,12 +178,13 @@ class PlayerActivity : AppCompatActivity() {
     // Görünümler
     private lateinit var playerView: PlayerView
     private lateinit var subtitleView: SubtitleView
+    private lateinit var ghostSubtitleView: SubtitleView
     private lateinit var nightOverlay: View
     private lateinit var controls: FrameLayout
     private lateinit var controlsInner: FrameLayout
     private lateinit var titleView: TextView
     private lateinit var decoderLabel: TextView
-    private lateinit var shortcutScroll: HorizontalScrollView
+    private lateinit var shortcutScroll: FrameLayout
     private lateinit var shortcutRow: LinearLayout
     private lateinit var seekBar: ChapterSeekBar
     var chapters: List<Chapter> = emptyList()
@@ -396,7 +396,7 @@ class PlayerActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, backCallback)
 
         audioFx = AudioFx(this)
-        subtitles = SubtitleController(this, subtitleView)
+        subtitles = SubtitleController(this, subtitleView).also { it.ghostView = ghostSubtitleView }
         subtitles.applyStyle()
         menus = PlayerMenus(this)
 
@@ -895,6 +895,7 @@ class PlayerActivity : AppCompatActivity() {
             subtitleView?.visibility = View.GONE
         }
         subtitleView = SubtitleView(this)
+        ghostSubtitleView = SubtitleView(this).apply { visibility = View.GONE }
         nightOverlay = View(this).apply {
             setBackgroundColor(0x66301800)
             visibility = View.GONE
@@ -940,7 +941,6 @@ class PlayerActivity : AppCompatActivity() {
             setPadding(dp(8), 0, dp(8), 0)
         }
         shortcutScroll = RayScroll(this).apply {
-            isHorizontalScrollBarEnabled = false
             addView(shortcutRow, FrameLayout.LayoutParams(-2, -2))
         }
 
@@ -1084,6 +1084,7 @@ class PlayerActivity : AppCompatActivity() {
             addView(playerView, FrameLayout.LayoutParams(-1, -1))
             addView(nightOverlay, FrameLayout.LayoutParams(-1, -1))
             addView(subtitleView, FrameLayout.LayoutParams(-1, -1))
+            addView(ghostSubtitleView, FrameLayout.LayoutParams(-1, -1))
             addView(controls, FrameLayout.LayoutParams(-1, -1))
             addView(osdView, FrameLayout.LayoutParams(-2, -2, Gravity.TOP or Gravity.END))
             addView(hud, FrameLayout.LayoutParams(-2, -2, Gravity.CENTER))
@@ -1811,6 +1812,41 @@ class PlayerActivity : AppCompatActivity() {
     var pitchSemitones = 0
         private set
 
+    // --- Altyazı üstünde parmak: vurgu kutusu + yatay kaydırmada metin parmakla gelir, komşu satır yandan girer (MX gibi).
+    private var ghostDir = 0
+
+    fun subtitleGrab(on: Boolean) = subtitles.setGrab(on)
+
+    fun subtitleSwipeMove(dx: Float) {
+        val w = subtitleView.width.coerceAtLeast(1).toFloat()
+        val dir = if (dx < 0) 1 else -1   // 1 = sonraki (sola kaydırınca), -1 = önceki
+        if (dir != ghostDir) {
+            ghostDir = dir
+            val any = subtitles.prepareGhost(dir > 0)
+            ghostSubtitleView.visibility = if (any) View.VISIBLE else View.GONE
+        }
+        val a = abs(dx)
+        subtitleView.animate().cancel()
+        ghostSubtitleView.animate().cancel()
+        subtitleView.translationX = dx * 0.9f
+        subtitleView.alpha = (1f - a / (w * 0.6f)).coerceIn(0.2f, 1f)
+        // Komşu satır karşı kenardan görünür; parmak ilerledikçe ortaya gelir.
+        ghostSubtitleView.translationX = dir * w * 0.82f + dx
+        ghostSubtitleView.alpha = (0.35f + a / (w * 0.5f)).coerceIn(0.35f, 0.9f)
+    }
+
+    /** Parmak kalkınca: yeterince çekildiyse atla, her durumda metni yerine döndür. */
+    fun subtitleSwipeEnd(commit: Boolean, next: Boolean) {
+        if (commit) jumpSubtitle(next)
+        ghostDir = 0
+        subtitleView.animate().translationX(0f).alpha(1f).setDuration(160).start()
+        ghostSubtitleView.animate().alpha(0f).setDuration(120).withEndAction {
+            ghostSubtitleView.visibility = View.GONE
+            ghostSubtitleView.translationX = 0f
+            subtitles.clearGhost()
+        }.start()
+    }
+
     fun jumpSubtitle(next: Boolean) {
         val pos = player.currentPosition
         val target = if (next) subtitles.nextCueMs(pos) else subtitles.previousCueMs(pos)
@@ -1833,136 +1869,207 @@ class PlayerActivity : AppCompatActivity() {
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         shortcutRow.removeAllViews()
         val all = settings.shortcuts
-        // Varsayılan olarak yalnızca ilk 4 simge görünür; kalanlar parmakla çekilince veya ok ile açılır.
-        val head = all.take(SHORTCUT_DEFAULT_COUNT)
-        val rest = all.drop(SHORTCUT_DEFAULT_COUNT)
-        for (s in head) shortcutRow.addView(buildShortcut(s))
-        extraRow = null; extraInner = null; arrowView = null
-        if (rest.isNotEmpty()) {
-            val inner = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            for (s in rest) inner.addView(buildShortcut(s))
-            inner.addView(actionButton(
-                R.drawable.ic_edit, null, Tx.s(R.string.playeracti_036), false,
-                scale = settings.shortcutSizePercent / 100f,
-                bgOpacity = settings.shortcutOpacityPercent / 100f,
-                showLabel = false,
-            ) { menus.showCustomizeShortcuts() })
-            val frame = FrameLayout(this).apply {
-                clipChildren = true
-                addView(inner, FrameLayout.LayoutParams(-2, -2, Gravity.START or Gravity.CENTER_VERTICAL))
+        // Varsayılan olarak yalnızca son 4 simge görünür (MX gibi); kalanlar solda gizlidir, parmağı sağa
+        // çekince şerit birebir parmakla kayarak açılır ve her simgenin altında etiket belirir.
+        val tail = all.takeLast(SHORTCUT_DEFAULT_COUNT)
+        val hidden = all.dropLast(SHORTCUT_DEFAULT_COUNT)
+        val labels = ArrayList<View>()
+        fun item(v: View): View {
+            ((v as? LinearLayout)?.takeIf { it.childCount > 1 }?.getChildAt(1))?.let { labels += it }
+            return v
+        }
+        var group: LinearLayout? = null
+        var arrow: View? = null
+        if (hidden.isNotEmpty()) {
+            group = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                addView(item(actionButton(
+                    R.drawable.ic_edit, null, Tx.s(R.string.playeracti_036), false,
+                    scale = settings.shortcutSizePercent / 100f,
+                    bgOpacity = settings.shortcutOpacityPercent / 100f,
+                ) { menus.showCustomizeShortcuts() }))
+                for (s in hidden) addView(item(buildShortcut(s)))
             }
-            extraInner = inner
-            extraRow = frame
-            shortcutRow.addView(frame, LinearLayout.LayoutParams(0, -2))
-            val arrow = iconView(R.drawable.ic_back, 48, 12).apply {
+            shortcutRow.addView(group)
+        }
+        for (s in tail) shortcutRow.addView(item(buildShortcut(s)))
+        if (hidden.isNotEmpty()) {
+            arrow = iconView(R.drawable.ic_back, 48, 12).apply {
                 setOnClickListener {
-                    settleRay(if (rayFraction > 0.5f) 0f else 1f)
+                    (shortcutScroll as RayScroll).toggle()
                     scheduleAutoHide()
                 }
             }
-            arrowView = arrow
             shortcutRow.addView(arrow)
-            applyRay(rayFraction)
         }
+        (shortcutScroll as RayScroll).rebuilt(group, labels, arrow)
     }
 
-    // --- Kısayol rayı: parmakla çekince yumuşakça açılır/kapanır (0 = varsayılan 5 simge, 1 = tümü).
-    // Oynatıcıdan çıkınca sıfırlanır (Activity alanı).
+    // --- Kısayol şeridi (MX gibi): tüm simgeler tek şerit; varsayılanda son 4'ü görünür, öncekiler solda gizli.
+    // Parmak şeridi birebir izler (sağa = açılır, sola = kapanır); açıkken simge altında etiket görünür.
+    // Oynatıcıdan çıkınca ve yeni videoda kapanır.
     private val SHORTCUT_DEFAULT_COUNT = 4
-    private var rayFraction = 0f
-    private var rayAnim: android.animation.ValueAnimator? = null
-    private var extraRow: FrameLayout? = null
-    private var extraInner: LinearLayout? = null
-    private var arrowView: View? = null
 
-    private fun rayFull(): Int {
-        val inner = extraInner ?: return 0
-        inner.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        return inner.measuredWidth
-    }
-
-    private fun applyRay(f: Float) {
-        rayFraction = f.coerceIn(0f, 1f)
-        val row = extraRow ?: return
-        val lp = row.layoutParams
-        lp.width = (rayFull() * rayFraction).toInt()
-        row.layoutParams = lp
-        row.alpha = 0.25f + 0.75f * rayFraction
-        arrowView?.rotation = 180f * (1f - rayFraction)
-    }
+    /** Şeridin kaydırma konumu (px, ≤ 0): -gizliGenişlik = kapalı, 0 = en soldan açık. */
+    private var rayTx = Float.NEGATIVE_INFINITY
 
     /** Satırı varsayılan (kapalı) hâle getirir; yeni videoya geçerken ve oynatıcıdan çıkarken kullanılır. */
     private fun resetRay() {
-        rayAnim?.cancel()
-        applyRay(0f)
-        if (::shortcutScroll.isInitialized) shortcutScroll.scrollTo(0, 0)
+        rayTx = Float.NEGATIVE_INFINITY
+        if (::shortcutScroll.isInitialized) (shortcutScroll as? RayScroll)?.reset()
     }
 
-    private fun settleRay(target: Float) {
-        rayAnim?.cancel()
-        rayAnim = android.animation.ValueAnimator.ofFloat(rayFraction, target).apply {
-            duration = 220
-            interpolator = android.view.animation.DecelerateInterpolator()
-            addUpdateListener { applyRay(it.animatedValue as Float) }
-            start()
-        }
-    }
-
-    private inner class RayScroll(ctx: android.content.Context) : HorizontalScrollView(ctx) {
+    private inner class RayScroll(ctx: android.content.Context) : FrameLayout(ctx) {
         private val slop = android.view.ViewConfiguration.get(ctx).scaledTouchSlop
         private var downX = 0f
         private var downY = 0f
         private var prevX = 0f
-        private var startF = 0f
+        private var startTx = 0f
         private var lastDelta = 0f
-        private var ray = false
+        private var dragging = false
+        private var anim: android.animation.ValueAnimator? = null
+
+        private var group: LinearLayout? = null
+        private var labels: List<View> = emptyList()
+        private var arrow: View? = null
+        private var hiddenW = 0f
+        private var fullW = 0f
+        private var availW = resources.displayMetrics.widthPixels.toFloat()
+
+        init { clipChildren = true }
+
+        /** Gizli kısım yoksa şerit sabittir ve etiket görünmez. */
+        private fun clampTx(v: Float) = if (hiddenW <= 0f) 0f else v.coerceIn(-hiddenW, 0f)
+
+        /** Sağ uç ekrandan taşıyorsa, en sağa kadar kaydırılmış açık konum. */
+        private fun expandedTx() = -maxOf(0f, fullW - availW).coerceAtMost(hiddenW)
+
+        /** 0 = kapalı, 1 = açık (etiketler ve ok buna bağlı). */
+        private fun openFraction(t: Float): Float {
+            if (hiddenW <= 0f) return 0f
+            val e = expandedTx()
+            if (t >= e) return 1f
+            val span = e + hiddenW
+            return if (span < 1f) 1f else ((t + hiddenW) / span).coerceIn(0f, 1f)
+        }
+
+        fun rebuilt(g: LinearLayout?, l: List<View>, a: View?) {
+            group = g; labels = l; arrow = a
+            measureStrip()
+            sync()
+            requestLayout()
+        }
+
+        private fun measureStrip() {
+            shortcutRow.measure(
+                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+            )
+            fullW = shortcutRow.measuredWidth.toFloat()
+            hiddenW = group?.measuredWidth?.toFloat() ?: 0f
+        }
+
+        fun reset() {
+            anim?.cancel()
+            rayTx = Float.NEGATIVE_INFINITY
+            sync()
+            requestLayout()
+        }
+
+        fun toggle() {
+            val target = if (openFraction(clampTx(rayTx)) > 0.5f) -hiddenW else expandedTx()
+            settle(target)
+        }
+
+        private fun sync() {
+            val t = clampTx(rayTx)
+            shortcutRow.translationX = t
+            val f = openFraction(t)
+            for (l in labels) {
+                l.alpha = f
+                l.visibility = if (f > 0.02f) View.VISIBLE else View.GONE
+            }
+            arrow?.rotation = 180f * (1f - f)
+        }
+
+        private fun move(v: Float) {
+            rayTx = clampTx(v)
+            sync()
+            requestLayout()
+        }
+
+        private fun settle(target: Float) {
+            anim?.cancel()
+            val from = clampTx(rayTx)
+            if (kotlin.math.abs(from - target) < 1f) { move(target); return }
+            anim = android.animation.ValueAnimator.ofFloat(from, target).apply {
+                duration = 220
+                interpolator = android.view.animation.DecelerateInterpolator()
+                addUpdateListener { move(it.animatedValue as Float) }
+                start()
+            }
+        }
+
+        override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+            val child = getChildAt(0)
+            if (child == null) { super.onMeasure(widthMeasureSpec, heightMeasureSpec); return }
+            val avail = MeasureSpec.getSize(widthMeasureSpec).toFloat()
+            if (avail > 0f) availW = avail
+            measureStrip()
+            val width = (fullW + clampTx(rayTx)).coerceIn(0f, availW)
+            setMeasuredDimension(width.toInt(), shortcutRow.measuredHeight)
+        }
 
         override fun onInterceptTouchEvent(ev: android.view.MotionEvent): Boolean {
             when (ev.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
                     downX = ev.x; downY = ev.y; prevX = ev.x; lastDelta = 0f
-                    ray = false
-                    rayAnim?.cancel()
-                    return super.onInterceptTouchEvent(ev)
+                    dragging = false
+                    anim?.cancel()
                 }
-                android.view.MotionEvent.ACTION_MOVE -> if (!ray) {
+                android.view.MotionEvent.ACTION_MOVE -> if (!dragging && hiddenW > 0f) {
                     val dx = ev.x - downX
                     val dy = ev.y - downY
-                    if (kotlin.math.abs(dx) > slop && kotlin.math.abs(dx) > kotlin.math.abs(dy) * 0.6f && rayFull() > 0 &&
-                        ((dx < 0 && rayFraction < 1f) || (dx > 0 && rayFraction > 0f && scrollX == 0))
+                    val t = clampTx(rayTx)
+                    if (kotlin.math.abs(dx) > slop && kotlin.math.abs(dx) > kotlin.math.abs(dy) * 0.6f &&
+                        ((dx > 0 && t < 0f) || (dx < 0 && t > -hiddenW))
                     ) {
-                        ray = true
-                        startF = rayFraction
-                        // Parmağı birebir izle: eşik (slop) kadar mesafe kayıp sayılır, ilk karede sıçrama olmaz.
-                        downX = downX + (if (dx < 0) -slop else slop).toFloat()
+                        dragging = true
+                        startTx = t
+                        // Eşik (slop) kadar mesafe kayıp sayılır: ilk karede sıçrama olmaz, parmak birebir izlenir.
+                        downX += if (dx > 0) slop else -slop
                         prevX = ev.x
-                        applyRay(startF - (ev.x - downX) / rayFull().coerceAtLeast(1))
                         parent?.requestDisallowInterceptTouchEvent(true)
+                        move(startTx + (ev.x - downX))
                         return true
                     }
                 }
             }
-            return if (ray) true else super.onInterceptTouchEvent(ev)
+            return dragging
         }
 
         override fun onTouchEvent(ev: android.view.MotionEvent): Boolean {
-            if (!ray) return super.onTouchEvent(ev)
+            if (!dragging) return true
             when (ev.actionMasked) {
                 android.view.MotionEvent.ACTION_MOVE -> {
-                    val full = rayFull().coerceAtLeast(1)
-                    applyRay(startF - (ev.x - downX) / full)
+                    move(startTx + (ev.x - downX))
                     lastDelta = ev.x - prevX
                     prevX = ev.x
                 }
                 android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-                    ray = false
-                    val target = when {
-                        lastDelta < -2f -> 1f
-                        lastDelta > 2f -> 0f
-                        rayFraction > 0.5f -> 1f
-                        else -> 0f
+                    dragging = false
+                    val t = clampTx(rayTx)
+                    val e = expandedTx()
+                    // Taşan kısım serbestçe kaydırılır; kapanma aralığında (e ile -gizli arası) en yakın uca oturur.
+                    if (t < e) {
+                        val target = when {
+                            lastDelta < -2f -> -hiddenW
+                            lastDelta > 2f -> e
+                            t < (e - hiddenW) / 2f -> -hiddenW
+                            else -> e
+                        }
+                        settle(target)
                     }
-                    settleRay(target)
                     scheduleAutoHide()
                 }
             }
@@ -2014,7 +2121,6 @@ class PlayerActivity : AppCompatActivity() {
             icon, glyph, label, active, rotation,
             scale = settings.shortcutSizePercent / 100f,
             bgOpacity = settings.shortcutOpacityPercent / 100f,
-            showLabel = false,
         ) { onShortcut(s) }
     }
 

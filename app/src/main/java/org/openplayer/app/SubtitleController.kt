@@ -39,6 +39,16 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
     private var align = 1
     private var italicSlash = false
 
+    /** Kaydırma önizlemesi için ikinci görünüm (komşu altyazı satırı); PlayerActivity atar. */
+    var ghostView: SubtitleView? = null
+
+    /** Parmak altyazının üstündeyken metnin arkasında vurgu kutusu çizilir (MX gibi). */
+    private var grab = false
+
+    /** Ekranda şu an altyazı satırı var mı (dokunma hareketleri için). */
+    var showing = false
+        private set
+
     private fun styled(cues: List<Cue>): List<Cue> =
         if (align == 1 && !italicSlash) cues else cues.map { SubtitleLook.align(it, align, italicSlash) }
 
@@ -49,22 +59,50 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
 
     fun applyStyle() {
         val s = host.settings
-        view.setStyle(
-            CaptionStyleCompat(
-                s.subtitleColor,
-                s.subtitleBackground,
-                Color.TRANSPARENT,
-                s.subtitleEdge,
-                s.subtitleEdgeColor,
-                SubtitleLook.typeface(host, s.subtitleFont, s.subtitleBold)
-            )
+        val bg = if (grab && (s.subtitleBackground ushr 24) < 0x60) GRAB_BACKGROUND else s.subtitleBackground
+        val style = CaptionStyleCompat(
+            s.subtitleColor,
+            bg,
+            Color.TRANSPARENT,
+            s.subtitleEdge,
+            s.subtitleEdgeColor,
+            SubtitleLook.typeface(host, s.subtitleFont, s.subtitleBold)
         )
         align = s.subtitleAlign
         italicSlash = s.subtitleItalicSlash
+        for (v in listOfNotNull(view, ghostView)) {
+            v.setStyle(style)
+            v.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, s.subtitleSizeSp)
+            v.setBottomPaddingFraction(s.subtitleBottomFraction)
+        }
         // Görünüm değişince ekrandaki satırlar yeni ayarla yeniden çizilsin.
         if (mode == Mode.EXTERNAL) lastKey = listOf(-1)
-        view.setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, s.subtitleSizeSp)
-        view.setBottomPaddingFraction(s.subtitleBottomFraction)
+    }
+
+    /** Parmak altyazıya değince vurgu kutusunu açar/kapatır. */
+    fun setGrab(on: Boolean) {
+        if (grab == on) return
+        grab = on
+        applyStyle()
+        if (mode == Mode.EXTERNAL) tick(host.player.currentPosition)
+    }
+
+    /**
+     * Kaydırma önizlemesi: sonraki/önceki altyazı satırı ikinci görünümde gösterilir.
+     * Satır yoksa (ya da gömülü altyazıda) boş bırakılır; true dönerse gösterilecek satır var.
+     */
+    fun prepareGhost(next: Boolean): Boolean {
+        val g = ghostView ?: return false
+        val pos = host.player.currentPosition
+        val cue = if (mode != Mode.EXTERNAL) null else {
+            if (next) external.firstOrNull { videoMs(it) > pos + 400 } else external.lastOrNull { videoMs(it) < pos - 1200 }
+        }
+        g.setCues(if (cue == null) emptyList() else styled(listOf(toCue(cue))))
+        return cue != null
+    }
+
+    fun clearGhost() {
+        ghostView?.setCues(emptyList())
     }
 
     fun setOff() {
@@ -110,16 +148,18 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         pendingEmbedded.forEach { handler.removeCallbacks(it) }
         pendingEmbedded.clear()
         lastKey = emptyList()
+        showing = false
         view.setCues(emptyList())
     }
 
     fun onEmbeddedCues(cues: List<Cue>) {
         if (mode != Mode.EMBEDDED) return
         if (delayMs > 0) {
-            val r = Runnable { view.setCues(styled(cues)) }
+            val r = Runnable { showing = cues.isNotEmpty(); view.setCues(styled(cues)) }
             pendingEmbedded += r
             handler.postDelayed(r, delayMs)
         } else {
+            showing = cues.isNotEmpty()
             view.setCues(styled(cues))
         }
     }
@@ -131,6 +171,7 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         val active = activeIndexes(t)
         if (active != lastKey) {
             lastKey = active
+            showing = active.isNotEmpty()
             view.setCues(styled(active.map { toCue(external[it]) }))
         }
     }
@@ -172,4 +213,9 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         external.lastOrNull { videoMs(it) < positionMs - 1200 }?.let { videoMs(it) }
 
     private fun videoMs(c: SubCue): Long = (c.startMs / speed).toLong() + delayMs
+
+    private companion object {
+        /** Dokunma vurgusu: yarı saydam gri kutu. */
+        const val GRAB_BACKGROUND = 0x80808080.toInt()
+    }
 }

@@ -93,20 +93,20 @@ enum class UiMode(val label: String, val scale: Float) {
 }
 
 enum class Shortcut(val id: String, val label: String, val icon: Int, val glyph: String? = null) {
-    ROTATE("rotate", Tx.s(R.string.settings_026), R.drawable.ic_screen_rotation),
-    BACKGROUND("background", Tx.s(R.string.settings_039), R.drawable.ic_headphones),
-    MUTE("mute", Tx.s(R.string.settings_040), R.drawable.ic_volume_off),
-    EQUALIZER("equalizer", Tx.s(R.string.musiccontr_002), R.drawable.ic_tune),
-    AB_REPEAT("ab", "A-B tekrar", 0, "A-B"),
-    SPEED("speed", Tx.s(R.string.gesturecon_003), 0, "1X"),
-    REPEAT("repeat", Tx.s(R.string.settings_041), R.drawable.ic_repeat),
+    SKIP_INTRO("skipintro", Tx.s(R.string.settings_029), 0, "»"),
+    VFLIP("vflip", Tx.s(R.string.settings_028), R.drawable.ic_flip),
+    MIRROR("mirror", Tx.s(R.string.settings_043), R.drawable.ic_flip),
+    NIGHT("night", Tx.s(R.string.settings_042), R.drawable.ic_night),
     SHUFFLE("shuffle", Tx.s(R.string.musicactiv_020), R.drawable.ic_shuffle),
     SLEEP("sleep", Tx.s(R.string.nowplaying_004), R.drawable.ic_timer),
-    NIGHT("night", Tx.s(R.string.settings_042), R.drawable.ic_night),
+    AB_REPEAT("ab", "A-B tekrar", 0, "A-B"),
+    EQUALIZER("equalizer", Tx.s(R.string.musiccontr_002), R.drawable.ic_tune),
+    MUTE("mute", Tx.s(R.string.settings_040), R.drawable.ic_volume_off),
     SCREENSHOT("screenshot", Tx.s(R.string.settings_027), R.drawable.ic_camera),
-    MIRROR("mirror", Tx.s(R.string.settings_043), R.drawable.ic_flip),
-    VFLIP("vflip", Tx.s(R.string.settings_028), R.drawable.ic_flip),
-    SKIP_INTRO("skipintro", Tx.s(R.string.settings_029), 0, "»");
+    SPEED("speed", Tx.s(R.string.gesturecon_003), 0, "1X"),
+    BACKGROUND("background", Tx.s(R.string.settings_039), R.drawable.ic_headphones),
+    ROTATE("rotate", Tx.s(R.string.settings_026), R.drawable.ic_screen_rotation),
+    REPEAT("repeat", Tx.s(R.string.settings_041), R.drawable.ic_repeat);
 
     companion object {
         fun byId(id: String) = entries.firstOrNull { it.id == id }
