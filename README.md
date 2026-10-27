@@ -43,6 +43,8 @@ The app is available in 12 languages (English, Türkçe, Español, Français, It
 
 Get `OpenPlayer.apk` from the [Releases page](../../releases) and install it (Android 7.0+). You may need to allow installing from unknown sources.
 
+> **Only download from the Releases page.** The signing key is public (open source), so an APK from anywhere else could be a tampered copy that installs over the real app.
+
 > **Status: beta.** Built and tested on CI and an emulator, but not yet extensively tested on real devices. Report problems in [Issues](../../issues).
 
 ## Features

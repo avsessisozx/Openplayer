@@ -41,6 +41,8 @@ OpenPlayer 是一款开源的 Android 视频播放器，没有广告，也不追
 
 从[发布页面](https://github.com/avsessisozx/Openplayer/releases)下载 `OpenPlayer.apk` 并安装（Android 7.0+）。可能需要允许安装未知来源的应用。
 
+> **请仅从发布页面下载。** 签名密钥是公开的(开源项目);来自其他地方的 APK 可能是被篡改的副本,并会覆盖安装在正版应用之上。
+
 > **状态：测试版。** 已在 CI 和模拟器上构建并测试，但尚未在真机上充分测试。请在 [Issues](https://github.com/avsessisozx/Openplayer/issues) 中反馈问题。
 
 ## 功能

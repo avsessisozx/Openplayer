@@ -41,6 +41,8 @@ L'app è disponibile in 12 lingue. Le traduzioni sono automatiche e non sono sta
 
 Scarica `OpenPlayer.apk` dalla [pagina delle versioni](https://github.com/avsessisozx/Openplayer/releases) e installalo (Android 7.0+). Potrebbe servire l'autorizzazione per le origini sconosciute.
 
+> **Scarica solo dalla pagina delle versioni.** La chiave di firma è pubblica (open source); un APK da altre fonti potrebbe essere una copia manomessa che si installa sopra l'app originale.
+
 > **Stato: beta.** Compilato e testato su CI ed emulatore, ma non ancora ampiamente su dispositivi reali. Segnala i problemi in [Issues](https://github.com/avsessisozx/Openplayer/issues).
 
 ## Funzioni

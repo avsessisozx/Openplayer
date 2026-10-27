@@ -41,6 +41,8 @@ OpenPlayer는 광고와 추적이 없는 오픈 소스 안드로이드 동영상
 
 [릴리스 페이지](https://github.com/avsessisozx/Openplayer/releases)에서 `OpenPlayer.apk`를 내려받아 설치하세요(Android 7.0 이상). 출처를 알 수 없는 앱 설치를 허용해야 할 수 있습니다.
 
+> **릴리스 페이지에서만 다운로드하세요.** 서명 키는 공개되어 있습니다(오픈 소스). 다른 곳의 APK는 정식 앱 위에 설치되는 변조된 사본일 수 있습니다.
+
 > **상태: 베타.** CI와 에뮬레이터에서 빌드 및 테스트했으나 실제 기기에서는 아직 충분히 테스트하지 않았습니다. 문제는 [Issues](https://github.com/avsessisozx/Openplayer/issues)에 알려 주세요.
 
 ## 기능

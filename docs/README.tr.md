@@ -41,6 +41,8 @@ Uygulama 12 dilde kullanılabilir. Çeviriler makine çevirisidir ve ana dili ko
 
 [Sürümler sayfasından](https://github.com/avsessisozx/Openplayer/releases) `OpenPlayer.apk` dosyasını indirip kurun (Android 7.0+). "Bilinmeyen kaynaklardan kurulum" izni gerekebilir.
 
+> **Yalnızca Releases sayfasından indirin.** İmza anahtarı herkese açıktır (açık kaynak); başka bir yerden gelen APK, gerçek uygulamanın üstüne kurulan değiştirilmiş bir kopya olabilir.
+
 > **Durum: beta.** CI ve emülatörde derlenip sınandı, gerçek cihazlarda henüz kapsamlı sınanmadı. Hataları [Issues](https://github.com/avsessisozx/Openplayer/issues) bölümünden bildirin.
 
 ## Özellikler
