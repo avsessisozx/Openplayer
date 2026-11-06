@@ -3,14 +3,14 @@
 > Claude'un çalışma notu. Yalnızca `durum` dalında durur; `main`'e, README'ye ve sürüm notlarına girmez.
 > Yeni sohbette önce bunu oku, repoyu baştan tarama. Her sürümden sonra güncelle.
 
-Son güncelleme: 2026-10-26 · Son sürüm: **v1.0.0-beta20** (2026-10-26, ön sürüm)
+Son güncelleme: 2026-11-06 · Son sürüm: **v1.0.0-beta21** (2026-11-06, ön sürüm)
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
 
 ## Teknik
 - Android, Kotlin, Gradle KTS · `org.openplayer.app` · minSdk 24
-- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta20`)
+- `versionName` elle: `app/build.gradle.kts` (şu an `1.0.0-beta21`)
 - Oynatma motoru + libVLC yedek motoru (otomatik geçiş, "Yalnız VLC" seçeneği)
 - CI: `build.yml` → `main`'e push'ta yeni sürüm numarası otomatik yayınlanır; `v*` etiketi de yayınlar
 - `emulator-test.yml` → `claude/**` dallarında Android 14 emülatör testi; ara sonuçları dala yazar.
@@ -78,6 +78,18 @@ Kaynak: kullanıcının MX Player ekran kaydı + OpenPlayer hata raporu (çökme
 - **Doğrulandı (emülatör [ray], 3. koşu):** birim testi, derleme, lint; şerit simge sayısı 5 → 15 → 5, yavaş çapraz sürükleme 5 → 9 → 15, boş alan tepkisiz; altyazı vurgu kutusu ve yatay kaydırmada metnin parmakla kayması (ekran görüntüsü), dikey sürükleme konumu; çökme yok.
 - **Doğrulanmadı:** gerçek parmakla his (şerit hızı/eşik, altyazı kaydırma eşiği 60 dp), komşu satırın önizlemesi (testte son satır olduğu için görünmedi), gömülü altyazıda önizleme yok (komşu satır bilinmiyor), etiketlerin dar ekranda taşması, tam emülatör turu.
 - Not: beta20 öncesi ilk iki koşuda şerit 0 okudu: 1. koşuda (neden: aynı), 2. koşuda 6 okudu (sol iç boşluk gizli simgenin kenarını gösteriyordu) → boşluk kaldırıldı.
+
+## beta21 (2026-11-06)
+İstek: yerel videoda sarma akıcılığı, online takılma/ön bellek, Galaxy Tab A9+ (SD695) gibi cihazlarda 4K/360° için yazılımla yapılabilecekler.
+Bulgu: kodek paketi (nextlib FFmpeg), libVLC yedeği, çözücü zinciri (HW→HW+→SW→VLC) ve 360° (`Vr360`) zaten vardı; WebView hiç yok.
+- `PlayerHolder`: `DefaultLoadControl` (20–60 sn tampon, başlama 1,5 sn, yeniden başlama 3 sn, 15 sn geri tampon → kısa geri sarma anında).
+- `PlayerActivity.seekRelative`: 700 ms içinde art arda ±sn dokunuşunda `CLOSEST_SYNC`, seri bitince 900 ms sonra eski ayar; `scrubMove` aralığı ≥2000 px yükseklikte 40→90 ms.
+- Performans modu (`PerformanceBoost.kt`, Ayarlar → Video, varsayılan kapalı): `setSustainedPerformanceMode` + `PerformanceHintManager` (API 31+). Donanım sınırını aşmaz.
+- Çözücü hataları (EXCEEDS_CAPABILITIES, FORMAT_UNSUPPORTED, DECODER_INIT_FAILED, DECODING_FAILED) için son mesajda video biçimi + ne denenebileceği (`playeracti_hwlimit`, 12 dil).
+- **Doğrulandı:** derleme + birim testleri (CI), emülatörde "videolar" kontrol noktası (53 ekran, çökme yok; HEVC 10-bit, mkv, wmv açma/sarma).
+- **Doğrulanmadı:** gerçek cihazda (Tab A9+, Mi 10T Pro) sarma hissi ve 4K/360° davranışı; performans modunun gerçek etkisi (küçük beklenir); tam emülatör turu, "360" kontrol noktası bitmedi.
+- Not: Tab A9+ 4K 360 yüksek bitrate/HEVC videoda donanım çözücü sınırı büyük ihtimalle aşılıyor; yazılım çözücüyle de akıcı olmaz. Kullanıcıdan hata mesajı/VLC karşılaştırması bekleniyor.
+- Sıradaki: kullanıcıdan Tab A9+ geri bildirimi (hata mesajı, aynı videonun VLC'de durumu).
 
 ## Yarım / sıradaki
 - Kullanıcının kararı: önce uygulama özellik açısından tam ve hatasız olacak
