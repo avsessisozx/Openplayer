@@ -1090,4 +1090,8 @@ S = {
 'playermenu_framepitch': 'Frame step and pitch',
 'playermenu_frame': 'Frame by frame (video pauses)',
 'playermenu_pitch': 'Pitch: %1$s semitones',
+'perfmode_title': 'Performance mode',
+'perfmode_desc': "Asks the device to keep the processor fast while a video plays. Helps heavy 4K/360° videos stutter less. Uses more battery and can warm the device. It cannot go beyond the hardware's limit.",
+'playeracti_hwlimit': 'This video (%1$s) is beyond what this device can play smoothly (%2$s). Try the VLC engine or the software decoder in the settings, turn on Performance mode, or use a lower-resolution copy.',
+'playeracti_unknown': 'unknown format',
 }

@@ -1090,4 +1090,8 @@ S = {
 'playermenu_framepitch': 'Kare kare ve perde',
 'playermenu_frame': 'Kare kare (video duraklar)',
 'playermenu_pitch': 'Perde: %1$s yarım ton',
+'perfmode_title': 'Performans modu',
+'perfmode_desc': 'Video oynarken cihazdan işlemciyi hızlı tutmasını ister. Ağır 4K/360° videolarda takılmayı azaltır. Pili daha çok harcar, cihaz ısınabilir. Donanımın sınırını aşamaz.',
+'playeracti_hwlimit': 'Bu video (%1$s) bu cihazın akıcı oynatabileceği sınırın üstünde (%2$s). Ayarlardan VLC motorunu veya yazılım çözücüyü deneyin, Performans modunu açın ya da düşük çözünürlüklü bir kopya kullanın.',
+'playeracti_unknown': 'bilinmeyen biçim',
 }

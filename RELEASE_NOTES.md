@@ -1,8 +1,8 @@
-# 1.0.0-beta20
+# 1.0.0-beta21
 
-Altyazı ve kısayol satırı sürüklemesi MX Player gibi yapıldı. Birim testleri, derleme ve emülatör testinden geçti; gerçek cihazda his sende.
+Sarma ve ön bellek akıcılığı iyileştirildi, ağır 4K/360° videolar için performans modu eklendi. Birim testleri ve derleme geçti; gerçek cihazda (özellikle Galaxy Tab A9+) his sende.
 
-- **Altyazıya dokununca** metnin arkasında gri vurgu kutusu çıkar. Dokunup tutmak hızlı oynatmayı başlatmaz, altyazıyı tutup sürükleyebilirsin.
-- **Altyazıyı yukarı/aşağı sürükle:** konumu parmağınla birlikte kayar.
-- **Altyazıyı sola/sağa kaydır:** metin parmağınla gelir, sonraki/önceki satır yandan görünür; yeterince çekip bırakırsan o satıra atlar, azsa yerine döner.
-- **Kısayol satırı:** son 4 simge görünür, öncekiler solda gizli. Parmağı sağa çekince şerit parmağınla birebir kayıp açılır ve simgelerin altında etiketler görünür; sola çekince kapanır. Ok düğmesi de açıp kapatır. Simge sırası MX gibi değişti (Hız, Arka planda oynat, Ekran döndürme, Tekrarla en sağda).
+- **Daha akıcı sarma:** oynatılmış kısmın son 15 sn'si bellekte tutulur, kısa geri sarmalar anında olur. Ön bellek eşikleri düşürüldü, sarma sonrası bekleme kısaldı.
+- **Seri ±sn dokunuşları:** art arda hızlı dokunuşlarda en yakın anahtar kareye gidilir, seri bitince tam konum ayarı geri gelir. 4K videolarda parmakla sararken istek aralığı açıldı.
+- **Performans modu** (Ayarlar → Video): oynarken işlemciyi yavaşlatmamasını ister. Pil daha çok gider, cihaz ısınabilir; donanımın sınırını aşmaz.
+- **Açılmayan videoda net mesaj:** video çözünürlüğü ve biçimiyle birlikte "bu cihazın sınırının üstünde" uyarısı ve ne denenebileceği gösterilir.

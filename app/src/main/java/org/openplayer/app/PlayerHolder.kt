@@ -11,6 +11,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -126,7 +127,14 @@ object PlayerHolder {
             .setDataSourceFactory(dataSources)
 
         mediaSourceFactory = mediaSources
+        // Ön bellek: geriye sarma anında olsun diye oynatılmış kısmın son 15 sn'si tutulur (anahtar
+        // kareden itibaren); sarma/yeniden başlama eşikleri düşürülerek sarma sonrası bekleme kısaltılır.
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(20_000, 60_000, 1_500, 3_000)
+            .setBackBuffer(15_000, true)
+            .build()
         val exo = ExoPlayer.Builder(app, renderers)
+            .setLoadControl(loadControl)
             .setMediaSourceFactory(mediaSources)
             .setAudioAttributes(AudioAttributes.DEFAULT, settings.audioFocus)
             .setHandleAudioBecomingNoisy(settings.pauseOnNoisy)
