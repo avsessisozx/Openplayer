@@ -1092,4 +1092,8 @@
     <string name="playermenu_framepitch">Kare kare ve perde</string>
     <string name="playermenu_frame">Kare kare (video duraklar)</string>
     <string name="playermenu_pitch">Perde: %1$s yarım ton</string>
+    <string name="perfmode_title">Performans modu</string>
+    <string name="perfmode_desc">Video oynarken cihazdan işlemciyi hızlı tutmasını ister. Ağır 4K/360° videolarda takılmayı azaltır. Pili daha çok harcar, cihaz ısınabilir. Donanımın sınırını aşamaz.</string>
+    <string name="playeracti_hwlimit">Bu video (%1$s) bu cihazın akıcı oynatabileceği sınırın üstünde (%2$s). Ayarlardan VLC motorunu veya yazılım çözücüyü deneyin, Performans modunu açın ya da düşük çözünürlüklü bir kopya kullanın.</string>
+    <string name="playeracti_unknown">bilinmeyen biçim</string>
 </resources>

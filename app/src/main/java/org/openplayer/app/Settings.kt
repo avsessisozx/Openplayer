@@ -461,6 +461,11 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("exact_seek_release", true)
         set(v) = prefs.edit().putBoolean("exact_seek_release", v).apply()
 
+    /** Oynatırken işlemciyi yüksek hızda tutar (ağır 4K/360° videolar için); pil ve ısınma bedeli vardır. */
+    var performanceMode: Boolean
+        get() = prefs.getBoolean("performance_mode", false)
+        set(v) = prefs.edit().putBoolean("performance_mode", v).apply()
+
     /** Sararken görüntü canlı akar (ileri-geri sararken önizleme). */
     var liveScrub: Boolean
         get() = prefs.getBoolean("live_scrub", true)

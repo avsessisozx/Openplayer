@@ -1092,4 +1092,8 @@
     <string name="playermenu_framepitch">الإطار بإطار ودرجة الصوت</string>
     <string name="playermenu_frame">إطارًا بإطار (يتوقف الفيديو مؤقتًا)</string>
     <string name="playermenu_pitch">درجة الصوت: %1$s نصف نغمة</string>
+    <string name="perfmode_title">وضع الأداء</string>
+    <string name="perfmode_desc">يطلب من الجهاز إبقاء المعالج سريعًا أثناء تشغيل الفيديو. يساعد في تقليل التقطيع في فيديوهات 4K/360° الثقيلة. يستهلك بطارية أكثر وقد يسخن الجهاز. لا يمكنه تجاوز حدود العتاد.</string>
+    <string name="playeracti_hwlimit">هذا الفيديو (%1$s) يتجاوز ما يستطيع هذا الجهاز تشغيله بسلاسة (%2$s). جرّب محرك VLC أو مفكك الترميز البرمجي من الإعدادات، أو فعّل وضع الأداء، أو استخدم نسخة بدقة أقل.</string>
+    <string name="playeracti_unknown">تنسيق غير معروف</string>
 </resources>

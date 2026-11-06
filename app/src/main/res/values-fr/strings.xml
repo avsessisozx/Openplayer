@@ -1092,4 +1092,8 @@
     <string name="playermenu_framepitch">Image par image et hauteur</string>
     <string name="playermenu_frame">Image par image (la vidéo se met en pause)</string>
     <string name="playermenu_pitch">Hauteur : %1$s demi-tons</string>
+    <string name="perfmode_title">Mode performance</string>
+    <string name="perfmode_desc">Demande à l\'appareil de garder le processeur rapide pendant la lecture. Réduit les saccades des vidéos lourdes en 4K/360°. Consomme plus de batterie et peut chauffer l\'appareil. Ne dépasse pas la limite du matériel.</string>
+    <string name="playeracti_hwlimit">Cette vidéo (%1$s) dépasse ce que cet appareil peut lire de façon fluide (%2$s). Essayez le moteur VLC ou le décodeur logiciel dans les réglages, activez le Mode performance ou utilisez une copie en plus basse résolution.</string>
+    <string name="playeracti_unknown">format inconnu</string>
 </resources>

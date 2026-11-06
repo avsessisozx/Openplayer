@@ -383,6 +383,7 @@ class PlayerActivity : AppCompatActivity() {
         ContextCompat.registerReceiver(this, pipReceiver, android.content.IntentFilter(ACTION_PIP), ContextCompat.RECEIVER_NOT_EXPORTED)
         pipReceiverRegistered = true
         if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (settings.performanceMode) PerformanceBoost.start(this)
         if (settings.rememberBrightness && settings.savedBrightness > 0f) {
             window.attributes = window.attributes.apply { screenBrightness = settings.savedBrightness.coerceIn(0.01f, 1f) }
         }
@@ -459,6 +460,7 @@ class PlayerActivity : AppCompatActivity() {
             runCatching { unregisterReceiver(pipReceiver) }
             pipReceiverRegistered = false
         }
+        PerformanceBoost.stop(this)
         PlayerHolder.removeRebuildListener(rebuildListener)
         if (::player.isInitialized) player.removeListener(playerListener)
         if (isFinishing) {
@@ -874,7 +876,22 @@ class PlayerActivity : AppCompatActivity() {
         }
         if (errorDialogShown) return
         errorDialogShown = true
-        showMessage(Tx.s(R.string.playeracti_024), Tx.s(R.string.playeracti_023, error.errorCodeName))
+        val hardwareLimit = error.errorCode == PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES ||
+            error.errorCode == PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED ||
+            error.errorCode == PlaybackException.ERROR_CODE_DECODER_INIT_FAILED ||
+            error.errorCode == PlaybackException.ERROR_CODE_DECODING_FAILED
+        val vf = player.videoFormat
+        val videoDesc = if (vf != null && vf.width > 0 && vf.height > 0) {
+            "${vf.width}x${vf.height}" + (vf.sampleMimeType?.let { " " + it.substringAfter('/') } ?: "")
+        } else {
+            Tx.s(R.string.playeracti_unknown)
+        }
+        val body = if (hardwareLimit) {
+            Tx.s(R.string.playeracti_hwlimit, videoDesc, error.errorCodeName)
+        } else {
+            Tx.s(R.string.playeracti_023, error.errorCodeName)
+        }
+        showMessage(Tx.s(R.string.playeracti_024), body)
     }
 
     fun changeDecoder(mode: DecoderMode) {
@@ -1232,7 +1249,9 @@ class PlayerActivity : AppCompatActivity() {
     fun scrubMove(posMs: Long) {
         if (!scrubActive || !settings.liveScrub) return
         val now = SystemClock.uptimeMillis()
-        if (now - lastScrubAt < 40) return
+        // Çok büyük videolarda (4K ve üstü) her karede sarma isteği çözücüyü boğar; aralık açılır.
+        val gap = if ((player.videoFormat?.height ?: 0) >= 2000) 90L else 40L
+        if (now - lastScrubAt < gap) return
         lastScrubAt = now
         player.seekTo(posMs)
     }
@@ -1271,8 +1290,23 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    private var lastRelativeSeekAt = 0L
+    private val restoreSeekParams = Runnable {
+        player.setSeekParameters(if (settings.exactSeekOnRelease) SeekParameters.EXACT else SeekParameters.CLOSEST_SYNC)
+    }
+
     fun seekRelative(deltaMs: Long) {
         val duration = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
+        val now = SystemClock.uptimeMillis()
+        // Arka arkaya ±sn dokunuşlarında her seferinde tam kareye çözmek takılma yapar:
+        // seri dokunuş sürerken en yakın anahtar kareye gidilir, seri bitince tam konum ayarı geri gelir.
+        val burst = now - lastRelativeSeekAt < 700
+        lastRelativeSeekAt = now
+        handler.removeCallbacks(restoreSeekParams)
+        if (burst) {
+            player.setSeekParameters(SeekParameters.CLOSEST_SYNC)
+            handler.postDelayed(restoreSeekParams, 900)
+        }
         player.seekTo((player.currentPosition + deltaMs).coerceIn(0L, duration))
         if (player.isPlaying) fadeIn()
     }
@@ -1357,12 +1391,14 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun tick() {
+        val tickStart = System.nanoTime()
         val pos = player.currentPosition
         subtitles.tick(pos)
         if (abA >= 0 && abB > abA && pos >= abB) player.seekTo(abA)
         if (controlsVisible) updateProgress(pos)
         if (ticks % 5 == 0) updateClock()
         if (++ticks % 50 == 0 && player.isPlaying) saveResume()
+        if (settings.performanceMode) PerformanceBoost.report(System.nanoTime() - tickStart)
     }
 
     fun saveResume() {

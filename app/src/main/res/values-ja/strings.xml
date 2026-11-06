@@ -1092,4 +1092,8 @@
     <string name="playermenu_framepitch">コマ送りとピッチ</string>
     <string name="playermenu_frame">コマ送り（動画は一時停止します）</string>
     <string name="playermenu_pitch">ピッチ：%1$s 半音</string>
+    <string name="perfmode_title">パフォーマンスモード</string>
+    <string name="perfmode_desc">動画の再生中、プロセッサを高速に保つよう端末に要求します。重い4K/360°動画のカクつきを減らします。バッテリー消費が増え、端末が熱くなることがあります。ハードウェアの限界は超えられません。</string>
+    <string name="playeracti_hwlimit">この動画(%1$s)は、この端末が滑らかに再生できる範囲を超えています(%2$s)。設定でVLCエンジンまたはソフトウェアデコーダーを試すか、パフォーマンスモードをオンにするか、低解像度のコピーを使ってください。</string>
+    <string name="playeracti_unknown">不明な形式</string>
 </resources>
