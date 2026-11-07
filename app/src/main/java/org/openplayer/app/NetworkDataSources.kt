@@ -194,7 +194,7 @@ internal abstract class SequentialStreamSource : StreamSource {
     final override fun read(offset: Long, buffer: ByteArray, bufferOffset: Int, length: Int): Int {
         var current = stream
         if (current == null || offset != position) {
-            releaseTransfer()
+            if (current != null) releaseTransfer()
             current = openTransfer(offset)
             stream = current
             position = offset
