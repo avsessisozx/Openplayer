@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.SharedFlow
  * 3. `af` serbesttir: `lavfi=[...]` zinciri oynarken değiştirilebilir. AAR'da `rubberband` YOK;
  *    perde için `asetrate` + `aresample` + `atempo` ya da `scaletempo2` kullanın.
  * 4. Düşen kare sayacı `frame-drop-count`tur; `vo-drop-frame-count` bu sürümde boş döner.
+ * 6. `vid` özelliğini de yazmayın: yüzey yokken motor videoyu kapalı tutar (`vid=no`), yüzey gelince
+ *    kendisi açar. `video-params` her karede tetiklenir; izlemeyin, [MpvEvent.VideoSizeChanged] kullanın.
  * 5. `content://` adresi mpv'ye verilmez; [open] Uri'yi kendisi çözer. SMB/FTP/WebDAV yerel
  *    HTTP vekili üzerinden `http://127.0.0.1:...` olarak açılır; mpv Range isteği gönderir.
  */

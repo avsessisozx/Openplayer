@@ -86,6 +86,8 @@ object MpvJson {
 /**
  * [MpvEngine]'in libmpv gerçeklemesi. Sınıf açıklamasındaki kilitlenme kuralları burada uygulanır:
  * çözücü canlıyken VO veya `hwdec` değişmez; önce `vid=no` ile video kapatılır, iş bitince açılır.
+ * Yüzey yokken video hep kapalıdır (`vid=no`): böylece yüzeysiz çözücü kurulmaz, dosya yüklenirken
+ * gelen yüzey de canlı bir çözücüye denk gelmez ve doğrudan donanım çıkışı kullanılabilir.
  */
 class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserver {
 
@@ -145,6 +147,7 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
             "tls-verify" to "yes",
             "tls-ca-file" to "$dir/cacert.pem",
             "volume-max" to "200",
+            "vid" to "no",
             "sid" to "no",
             "sub-auto" to "no",
             "audio-file-auto" to "no",
@@ -170,7 +173,9 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
         observeInternal("paused-for-cache", MPV.mpvFormat.MPV_FORMAT_FLAG)
         observeInternal("eof-reached", MPV.mpvFormat.MPV_FORMAT_FLAG)
         observeInternal("track-list", MPV.mpvFormat.MPV_FORMAT_NONE)
-        observeInternal("video-params", MPV.mpvFormat.MPV_FORMAT_NONE)
+        // `video-params` her karede tetiklenir; boyut için yalnız boyut değişince gelenler izlenir.
+        observeInternal("dwidth", MPV.mpvFormat.MPV_FORMAT_NONE)
+        observeInternal("dheight", MPV.mpvFormat.MPV_FORMAT_NONE)
     }
 
     private fun observeInternal(name: String, format: Int) {
@@ -283,28 +288,20 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
 
     // ---------------------------------------------------------------- görüntü
 
-    /** Çözücüyü kapatıp [block] sonrası geri açar: canlı MediaCodec üstünde değişiklik mpv'yi kilitler. */
-    private inline fun withVideoOff(block: () -> Unit) {
-        val active = fileOpen && getProperty("vid") != "no"
-        if (active) mpv.setPropertyString("vid", "no")
-        block()
-        if (active || (fileOpen && surface != null)) mpv.setPropertyString("vid", "auto")
-    }
-
     @Synchronized
     override fun attachSurface(surface: Surface, width: Int, height: Int) = guarded("attach") {
         if (this.surface === surface) {
             setSurfaceSize(width, height)
             return@guarded
         }
-        withVideoOff {
-            if (this.surface != null) dropSurface()
-            mpv.attachSurface(surface)
-            this.surface = surface
-            setSurfaceSize(width, height)
-            mpv.setPropertyString("force-window", "yes")
-            mpv.setPropertyString("vo", "gpu")
-        }
+        mpv.setPropertyString("vid", "no")
+        if (this.surface != null) dropSurface()
+        mpv.attachSurface(surface)
+        this.surface = surface
+        setSurfaceSize(width, height)
+        mpv.setPropertyString("force-window", "yes")
+        mpv.setPropertyString("vo", "gpu")
+        mpv.setPropertyString("vid", "auto")
     }
 
     private fun setSurfaceSize(width: Int, height: Int) {
@@ -321,7 +318,7 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
     @Synchronized
     override fun detachSurface() = guarded("detach") {
         if (surface == null) return@guarded
-        if (fileOpen) mpv.setPropertyString("vid", "no")
+        mpv.setPropertyString("vid", "no")
         dropSurface()
     }
 
@@ -340,16 +337,16 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
     /** Yazılım filtresi varken doğrudan donanım karesi kullanılamaz: kopyalı kipe geçilir. */
     private fun applyDecoding() {
         val hwdec = effectiveHwdec(wantedHwdec, videoFilter)
-        val hwdecChanged = hwdec != appliedHwdec
-        if (hwdecChanged) {
-            withVideoOff {
-                mpv.setPropertyString("hwdec", hwdec)
-                appliedHwdec = hwdec
-                mpv.setPropertyString("vf", videoFilter)
-            }
-        } else {
+        if (hwdec == appliedHwdec) {
             mpv.setPropertyString("vf", videoFilter)
+            return
         }
+        val videoOn = surface != null
+        if (videoOn) mpv.setPropertyString("vid", "no")
+        mpv.setPropertyString("hwdec", hwdec)
+        appliedHwdec = hwdec
+        mpv.setPropertyString("vf", videoFilter)
+        if (videoOn) mpv.setPropertyString("vid", "auto")
     }
 
     private var appliedHwdec = HWDEC_DEFAULT
@@ -358,7 +355,7 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
         synchronized(this) {
             if (released) return
             runCatching {
-                if (fileOpen) mpv.setPropertyString("vid", "no")
+                mpv.setPropertyString("vid", "no")
                 if (surface != null) dropSurface()
             }
             released = true
@@ -376,7 +373,7 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
     override fun eventProperty(property: String) {
         when (property) {
             "track-list" -> post(MpvEvent.TracksChanged)
-            "video-params" -> main.post(::readVideoSize)
+            "dwidth", "dheight" -> main.post(::readVideoSize)
         }
         deliver(property, null)
     }
@@ -458,16 +455,20 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
         }
     }
 
+    private var lastSize = Triple(-1, -1, -1)
+
     private fun readVideoSize() {
         if (released) return
         val w = getProperty("video-params/dw")?.toIntOrNull() ?: 0
         val h = getProperty("video-params/dh")?.toIntOrNull() ?: 0
         val rotation = getProperty("video-params/rotate")?.toIntOrNull() ?: 0
         val sideways = rotation == 90 || rotation == 270
-        listOf(MpvEvent.VideoSizeChanged(if (sideways) h else w, if (sideways) w else h, rotation)).forEach { e ->
-            flow.tryEmit(e)
-            listeners.forEach { it(e) }
-        }
+        val size = Triple(if (sideways) h else w, if (sideways) w else h, rotation)
+        if (size == lastSize) return
+        lastSize = size
+        val event = MpvEvent.VideoSizeChanged(size.first, size.second, rotation)
+        flow.tryEmit(event)
+        listeners.forEach { it(event) }
     }
 
     private fun deliver(property: String, value: String?) {

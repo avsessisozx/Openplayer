@@ -211,15 +211,27 @@ class PlayerActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- yaşam döngüsü
 
+    private fun logState(what: String) {
+        val e = player.engine
+        android.util.Log.i(
+            "OPFEAT",
+            "mpv $what pos=${e.positionMs} dur=${e.durationMs} playing=${e.isPlaying} speed=${e.speed} " +
+                "size=${player.videoWidth}x${player.videoHeight} hw=${e.getProperty("hwdec-current")} " +
+                "vo=${e.getProperty("current-vo")} vf=${e.getProperty("vf")} aspect=${aspect.name}"
+        )
+    }
+
     private val engineListener: (MpvEvent) -> Unit = { e ->
         when (e) {
             is MpvEvent.PlayingChanged -> {
+                logState(if (e.playing) "playing" else "stopped")
                 updatePlayButton()
                 scheduleAutoHide()
                 if (e.playing) fadeIn()
                 updatePipParams()
             }
             is MpvEvent.VideoSizeChanged -> {
+                logState("video-size")
                 vrUpdateAspect(e.width, e.height)
                 applyOrientation()
                 applyTransform()
@@ -231,7 +243,10 @@ class PlayerActivity : AppCompatActivity() {
                 detectVr()
             }
             is MpvEvent.FileLoaded -> updatePlayButton()
-            is MpvEvent.Error -> onPlaybackError(e.message)
+            is MpvEvent.Error -> {
+                android.util.Log.w("OPFEAT", "mpv error: ${e.message}")
+                onPlaybackError(e.message)
+            }
             else -> Unit
         }
     }
@@ -1640,6 +1655,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun applyFlip() {
         val filters = listOfNotNull("hflip".takeIf { mirror }, "vflip".takeIf { vflip })
         player.engine.setVideoFilter(if (filters.isEmpty()) "" else "lavfi=[${filters.joinToString(",")}]")
+        logState("flip")
     }
 
     /** En-boy, yakınlaştırma ve kaydırma mpv tarafında uygulanır; görüntü yeniden çözülmez. */
