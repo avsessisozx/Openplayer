@@ -1094,4 +1094,7 @@ S = {
 'perfmode_desc': "Asks the device to keep the processor fast while a video plays. Helps heavy 4K/360° videos stutter less. Uses more battery and can warm the device. It cannot go beyond the hardware's limit.",
 'playeracti_hwlimit': 'This video (%1$s) is beyond what this device can play smoothly (%2$s). Try the VLC engine or the software decoder in the settings, turn on Performance mode, or use a lower-resolution copy.',
 'playeracti_unknown': 'unknown format',
+'smooth_title': 'Switch to VLC if playback is choppy',
+'smooth_desc': 'When a heavy local video (e.g. 4K 10-bit) keeps dropping frames with the software decoder, playback continues in the VLC engine from the same position. Has no effect if the playback engine is fixed to the built-in player.',
+'playeracti_smooth_switch': 'Playback is choppy with the software decoder, switching to the VLC engine',
 }

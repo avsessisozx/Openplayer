@@ -466,6 +466,11 @@ class AppSettings private constructor(context: Context) {
         get() = prefs.getBoolean("performance_mode", false)
         set(v) = prefs.edit().putBoolean("performance_mode", v).apply()
 
+    /** Yazılım çözücüyle oynarken kareler sürekli atlanıyorsa (yerel video) VLC motoruna otomatik geçer. */
+    var smoothSwitch: Boolean
+        get() = prefs.getBoolean("smooth_switch", true)
+        set(v) = prefs.edit().putBoolean("smooth_switch", v).apply()
+
     /** Sararken görüntü canlı akar (ileri-geri sararken önizleme). */
     var liveScrub: Boolean
         get() = prefs.getBoolean("live_scrub", true)

@@ -1096,4 +1096,7 @@
     <string name="perfmode_desc">動画の再生中、プロセッサを高速に保つよう端末に要求します。重い4K/360°動画のカクつきを減らします。バッテリー消費が増え、端末が熱くなることがあります。ハードウェアの限界は超えられません。</string>
     <string name="playeracti_hwlimit">この動画(%1$s)は、この端末が滑らかに再生できる範囲を超えています(%2$s)。設定でVLCエンジンまたはソフトウェアデコーダーを試すか、パフォーマンスモードをオンにするか、低解像度のコピーを使ってください。</string>
     <string name="playeracti_unknown">不明な形式</string>
+    <string name="smooth_title">カクつく場合は VLC に切り替え</string>
+    <string name="smooth_desc">重いローカル動画(例: 4K 10bit)がソフトウェアデコーダーで継続的にコマ落ちする場合、同じ位置から VLC エンジンで再生を続けます。再生エンジンが内蔵プレーヤーに固定されている場合は無効です。</string>
+    <string name="playeracti_smooth_switch">ソフトウェアデコードでカクつくため、VLC エンジンに切り替えます</string>
 </resources>

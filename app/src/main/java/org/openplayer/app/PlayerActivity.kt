@@ -243,6 +243,8 @@ class PlayerActivity : AppCompatActivity() {
     private var kidsLastTap = 0L
     private var ticks = 0
     private var errorDialogShown = false
+    private val smoothness = SmoothnessWatchdog()
+    private var smoothSwitched = false
     private var lastBackPress = 0L
     private var fastPlaying = false
     private var fastPrevSpeed = 1f
@@ -464,6 +466,7 @@ class PlayerActivity : AppCompatActivity() {
         PlayerHolder.removeRebuildListener(rebuildListener)
         if (::player.isInitialized) player.removeListener(playerListener)
         if (isFinishing) {
+            if (PlaybackStats.lastReport.isNotEmpty()) BugReport.notePlayback(this, PlaybackStats.lastReport)
             saveResume()
             audioFx.release()
             PlayerHolder.release()
@@ -552,6 +555,8 @@ class PlayerActivity : AppCompatActivity() {
             p.setHandleAudioBecomingNoisy(settings.pauseOnNoisy)
         }
         p.addListener(playerListener)
+        PlaybackStats.attach(p)
+        smoothness.reset()
         bindVideo(p)
         audioFx.attach(p.audioSessionId)
         applyAuxEffect()
@@ -640,6 +645,8 @@ class PlayerActivity : AppCompatActivity() {
         player.prepare()
         player.playWhenReady = !ask
         errorDialogShown = false
+        smoothSwitched = false
+        smoothness.reset()
         onItemChanged()
         if (ask) askResume(uris[index], stored)
     }
@@ -742,6 +749,8 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun onItemChanged() {
+        smoothSwitched = false
+        smoothness.reset()
         val item = player.currentMediaItem ?: return
         val uri = item.localConfiguration?.uri
         if (uri != currentUri) saveMemory()
@@ -1398,7 +1407,34 @@ class PlayerActivity : AppCompatActivity() {
         if (controlsVisible) updateProgress(pos)
         if (ticks % 5 == 0) updateClock()
         if (++ticks % 50 == 0 && player.isPlaying) saveResume()
+        if (ticks % 10 == 0) checkSmoothness()
         if (settings.performanceMode) PerformanceBoost.report(System.nanoTime() - tickStart)
+    }
+
+    /**
+     * Saniyede bir: yerel videoda FFmpeg (yazılım) çözücüsüyle kareler sürekli atlanıyorsa
+     * (4K/10-bit gibi ağır dosyalar) ve ayar açıksa VLC motoruna aynı konumdan geçer.
+     */
+    private fun checkSmoothness() {
+        if (!::player.isInitialized) return
+        val speedOk = player.playbackParameters.speed == 1f
+        val playing = player.isPlaying && speedOk && !scrubbing && !fastPlaying
+        val scheme = currentUri?.scheme
+        val local = scheme == "content" || scheme == "file"
+        if (!playing || !local || !PlaybackStats.isFfmpegDecoder()) {
+            smoothness.reset()
+            if (playing) PlaybackStats.lastReport = PlaybackStats.report(player, null)
+            return
+        }
+        val fps = player.videoFormat?.frameRate?.takeIf { it > 0f } ?: 0f
+        val bad = smoothness.sample(player, fps)
+        PlaybackStats.lastReport = PlaybackStats.report(player, smoothness)
+        if (!bad || smoothSwitched || !settings.smoothSwitch) return
+        if (settings.playbackEngine == PlaybackEngine.EXO) return
+        smoothSwitched = true
+        BugReport.notePlayback(this, PlaybackStats.lastReport)
+        toast(Tx.s(R.string.playeracti_smooth_switch))
+        openInVlc(fromError = false)
     }
 
     fun saveResume() {

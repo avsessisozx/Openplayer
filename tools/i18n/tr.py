@@ -1094,4 +1094,7 @@ S = {
 'perfmode_desc': 'Video oynarken cihazdan işlemciyi hızlı tutmasını ister. Ağır 4K/360° videolarda takılmayı azaltır. Pili daha çok harcar, cihaz ısınabilir. Donanımın sınırını aşamaz.',
 'playeracti_hwlimit': 'Bu video (%1$s) bu cihazın akıcı oynatabileceği sınırın üstünde (%2$s). Ayarlardan VLC motorunu veya yazılım çözücüyü deneyin, Performans modunu açın ya da düşük çözünürlüklü bir kopya kullanın.',
 'playeracti_unknown': 'bilinmeyen biçim',
+'smooth_title': "Akıcı değilse VLC'ye geç",
+'smooth_desc': 'Ağır bir yerel video (ör. 4K 10-bit) yazılım çözücüyle sürekli kare atlıyorsa, aynı konumdan VLC motorunda devam eder. Oynatma motoru yalnız yerleşik oynatıcıya sabitlenmişse etkisizdir.',
+'playeracti_smooth_switch': 'Yazılım çözücüyle oynatma akıcı değil, VLC motoruna geçiliyor',
 }

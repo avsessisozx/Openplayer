@@ -1,8 +1,6 @@
-# 1.0.0-beta21
+# 1.0.0-beta22
 
-Sarma ve ön bellek akıcılığı iyileştirildi, ağır 4K/360° videolar için performans modu eklendi. Birim testleri ve derleme geçti; gerçek cihazda (özellikle Galaxy Tab A9+) his sende.
+Ağır 4K videolarda yazılım çözücü takılmasına karşı ölçüm ve otomatik geçiş eklendi. Birim testleri ve derleme CI'da geçti; gerçek cihazda (Galaxy Tab A9+) his sende.
 
-- **Daha akıcı sarma:** oynatılmış kısmın son 15 sn'si bellekte tutulur, kısa geri sarmalar anında olur. Ön bellek eşikleri düşürüldü, sarma sonrası bekleme kısaldı.
-- **Seri ±sn dokunuşları:** art arda hızlı dokunuşlarda en yakın anahtar kareye gidilir, seri bitince tam konum ayarı geri gelir. 4K videolarda parmakla sararken istek aralığı açıldı.
-- **Performans modu** (Ayarlar → Video): oynarken işlemciyi yavaşlatmamasını ister. Pil daha çok gider, cihaz ısınabilir; donanımın sınırını aşmaz.
-- **Açılmayan videoda net mesaj:** video çözünürlüğü ve biçimiyle birlikte "bu cihazın sınırının üstünde" uyarısı ve ne denenebileceği gösterilir.
+- **Akıcı değilse VLC'ye geç** (Ayarlar → Video, varsayılan açık): yerel bir videoda yazılım (FFmpeg) çözücüsüyle kareler birkaç saniye boyunca sürekli atlanıyorsa, oynatma aynı konumdan VLC motorunda devam eder. Oynatma motoru "yalnız yerleşik" seçiliyse devreye girmez.
+- **Hata raporuna "Son oynatma" bölümü:** video biçimi (çözünürlük, kodek, bit derinliği, kare hızı, bit hızı), çalışan çözücü, çizilen/atlanan kare sayıları. Takılmayı ekran görüntüsü yerine rapordan teşhis edebilmek için.

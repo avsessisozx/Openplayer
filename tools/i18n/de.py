@@ -1094,4 +1094,7 @@ S = {
 'perfmode_desc': 'Fordert das Gerät auf, den Prozessor während der Wiedergabe schnell zu halten. Hilft bei schweren 4K-/360°-Videos gegen Ruckeln. Verbraucht mehr Akku und kann das Gerät erwärmen. Die Grenze der Hardware lässt sich nicht überschreiten.',
 'playeracti_hwlimit': 'Dieses Video (%1$s) übersteigt, was dieses Gerät flüssig abspielen kann (%2$s). Probiere in den Einstellungen die VLC-Engine oder den Software-Decoder, aktiviere den Leistungsmodus oder nutze eine Kopie mit niedrigerer Auflösung.',
 'playeracti_unknown': 'unbekanntes Format',
+'smooth_title': 'Bei Rucklern zu VLC wechseln',
+'smooth_desc': 'Wenn ein schweres lokales Video (z. B. 4K mit 10 Bit) mit dem Software-Decoder dauerhaft Bilder auslässt, wird es an derselben Stelle in der VLC-Engine fortgesetzt. Ohne Wirkung, wenn die Engine auf den integrierten Player festgelegt ist.',
+'playeracti_smooth_switch': 'Wiedergabe mit dem Software-Decoder ruckelt, wechsle zur VLC-Engine',
 }
