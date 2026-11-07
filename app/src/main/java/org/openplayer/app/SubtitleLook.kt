@@ -192,7 +192,7 @@ object SubtitleLook {
             EDGE_DEPRESSED -> size * 0.03f to 0f
             else -> size * 0.06f to 0f
         }
-        val box = Color.alpha(s.background) > 0
+        val box = (s.background ushr 24) > 0
         val list = ArrayList<Pair<String, String>>()
         list += "sub-ass-override" to "yes"
         list += "sub-font-provider" to "none"
@@ -224,7 +224,7 @@ object SubtitleLook {
 
     private fun fmt(f: Float) = String.format(Locale.ROOT, "%.2f", f)
     private fun withAlpha(c: Int, a: Int) = (c and 0x00FFFFFF) or (a shl 24)
-    private fun darker(c: Int) = Color.argb(Color.alpha(c), Color.red(c) / 2, Color.green(c) / 2, Color.blue(c) / 2)
+    private fun darker(c: Int) = (c and 0xFF000000.toInt()) or ((c and 0x00FEFEFE) ushr 1)
 
     // ------------------------------------------------------------------ mpv yazı tipi
 
