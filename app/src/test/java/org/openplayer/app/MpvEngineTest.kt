@@ -59,6 +59,14 @@ class MpvEngineTest {
     }
 
     @Test
+    fun decoderSettingMapsToHwdec() {
+        // Varsayılan ayar (HW+) doğrudan donanım çıkışını kullanmalı; kopyalı kip 4K'da pahalı.
+        assertEquals("mediacodec,mediacodec-copy,no", MpvPlayer.hwdecFor(DecoderMode.HW_PLUS))
+        assertEquals("mediacodec", MpvPlayer.hwdecFor(DecoderMode.HW))
+        assertEquals("no", MpvPlayer.hwdecFor(DecoderMode.SW))
+    }
+
+    @Test
     fun reportHasAllRequiredFields() {
         val r = PlaybackStats.format(
             mapOf(

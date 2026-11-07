@@ -423,6 +423,7 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
         when (eventId) {
             EVENT_START_FILE -> {
                 fileOpen = false
+                main.post { lastSize = Triple(-1, -1, -1) }
                 post(MpvEvent.FileStarted(openUri))
             }
             EVENT_FILE_LOADED -> {
@@ -456,7 +457,6 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
     }
 
     private var lastSize = Triple(-1, -1, -1)
-
     private fun readVideoSize() {
         if (released) return
         val w = getProperty("video-params/dw")?.toIntOrNull() ?: 0
@@ -489,9 +489,14 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
 
         const val HWDEC_DEFAULT = "mediacodec,mediacodec-copy,no"
 
+        /**
+         * Ayar → mpv `hwdec`. Varsayılan [DecoderMode.HW_PLUS]: doğrudan donanım çıkışı, olmazsa kopyalı
+         * donanım, o da olmazsa yazılım (mpv-android'in varsayılanı). [DecoderMode.HW] yalnız doğrudan
+         * donanım dener; açamazsa ekran sıradaki kipe kendisi geçer.
+         */
         fun hwdecFor(mode: DecoderMode): String = when (mode) {
-            DecoderMode.HW -> HWDEC_DEFAULT
-            DecoderMode.HW_PLUS -> "mediacodec-copy,no"
+            DecoderMode.HW -> "mediacodec"
+            DecoderMode.HW_PLUS -> HWDEC_DEFAULT
             DecoderMode.SW -> "no"
         }
 
