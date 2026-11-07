@@ -24,8 +24,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -144,10 +142,14 @@ class MusicActivity : AppCompatActivity() {
         }
     }
 
-    private val playerListener = object : Player.Listener {
-        override fun onEvents(player: Player, events: Player.Events) {
-            updateMini()
-            if (events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION)) render(keepScroll = true)
+    private var miniTrackId: String? = null
+
+    private val musicListener: () -> Unit = {
+        updateMini()
+        val id = MusicController.current?.id?.toString()
+        if (id != miniTrackId) {
+            miniTrackId = id
+            render(keepScroll = true)
         }
     }
 
@@ -176,7 +178,8 @@ class MusicActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        PlayerHolder.get(this).addListener(playerListener)
+        MusicController.addListener(musicListener)
+        miniTrackId = MusicController.current?.id?.toString()
         updateMini()
         if (hasPermission()) load() else requestPermission.launch(permission)
         if (Build.VERSION.SDK_INT >= 33 && !askedNotifications &&
@@ -190,7 +193,7 @@ class MusicActivity : AppCompatActivity() {
     private var askedNotifications = false
 
     override fun onStop() {
-        PlayerHolder.player?.removeListener(playerListener)
+        MusicController.removeListener(musicListener)
         super.onStop()
     }
 
@@ -309,12 +312,11 @@ class MusicActivity : AppCompatActivity() {
         miniSub = text(12f, UiColors.textSecondary)
         miniPlay = iconView(R.drawable.ic_play).apply {
             setOnClickListener {
-                val p = PlayerHolder.player ?: return@setOnClickListener
-                if (p.isPlaying) p.pause() else p.play()
+                MusicController.togglePlay()
             }
         }
         val miniNext = iconView(R.drawable.ic_next).apply {
-            setOnClickListener { PlayerHolder.player?.seekToNextMediaItem() }
+            setOnClickListener { MusicController.next() }
         }
         mini = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -512,8 +514,7 @@ class MusicActivity : AppCompatActivity() {
     }
 
     private fun currentMediaId(): String? {
-        val item = PlayerHolder.player?.currentMediaItem
-        return if (MusicController.isMusic(item)) item?.mediaId else null
+        return MusicController.current?.id?.toString()
     }
 
     private fun render(keepScroll: Boolean = false) {
@@ -993,18 +994,16 @@ class MusicActivity : AppCompatActivity() {
     }
 
     private fun updateMini() {
-        val p = PlayerHolder.player
-        val item = p?.currentMediaItem
-        if (p == null || !MusicController.isMusic(item)) {
+        val track = MusicController.current
+        if (track == null) {
             mini.visibility = View.GONE
             return
         }
         mini.visibility = View.VISIBLE
-        miniTitle.text = item?.mediaMetadata?.title ?: ""
-        miniSub.text = item?.mediaMetadata?.artist ?: ""
-        val track = all.firstOrNull { it.id.toString() == item?.mediaId }
+        miniTitle.text = track.title
+        miniSub.text = track.artist
         ArtLoader.load(miniArt, track, dp(96))
-        miniPlay.setImageResource(if (p.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        miniPlay.setImageResource(if (MusicController.playWhenReady) R.drawable.ic_pause else R.drawable.ic_play)
     }
 
     // ------------------------------------------------------------ liste

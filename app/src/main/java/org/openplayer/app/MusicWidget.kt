@@ -35,23 +35,22 @@ class MusicWidget : AppWidgetProvider() {
             val mgr = AppWidgetManager.getInstance(app)
             val ids = mgr.getAppWidgetIds(ComponentName(app, MusicWidget::class.java))
             if (ids.isEmpty()) return
-            // ExoPlayer yalnız ana iş parçacığından okunabilir; durumu burada alıp kapak işini arka plana veriyoruz.
+            // Oynatma durumu yalnız ana iş parçacığında okunur; kapak işi arka plana verilir.
             if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
                 android.os.Handler(android.os.Looper.getMainLooper()).post { update(app) }
                 return
             }
-            val p = PlayerHolder.player
-            val item = p?.currentMediaItem
-            val music = MusicController.isMusic(item)
-            val playing = p?.isPlaying == true
+            val track = MusicController.current
+            val music = track != null
+            val playing = PlaybackHub.target?.isPlaying == true
             worker.execute {
                 val views = RemoteViews(app.packageName, R.layout.widget_music)
-                views.setTextViewText(R.id.widget_title, if (music) item?.mediaMetadata?.title ?: "" else "OpenPlayer")
-                views.setTextViewText(R.id.widget_artist, if (music) item?.mediaMetadata?.artist ?: "" else Tx.s(R.string.musicwidge_001))
+                views.setTextViewText(R.id.widget_title, if (music) track?.title ?: "" else "OpenPlayer")
+                views.setTextViewText(R.id.widget_artist, if (music) track?.artist ?: "" else Tx.s(R.string.musicwidge_001))
                 views.setImageViewResource(R.id.widget_play, if (playing) R.drawable.ic_pause else R.drawable.ic_play)
                 var bmp: android.graphics.Bitmap? = null
                 if (music && Build.VERSION.SDK_INT >= 29) {
-                    val uri = item?.localConfiguration?.uri
+                    val uri = track?.uri
                     if (uri != null) bmp = runCatching { app.contentResolver.loadThumbnail(uri, Size(160, 160), null) }.getOrNull()
                 }
                 if (bmp != null) views.setImageViewBitmap(R.id.widget_art, bmp)
@@ -71,11 +70,12 @@ class MusicWidget : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        val p = PlayerHolder.player
+        // Widget, motoru o an kullanan oynatıcıyı denetler (eskiden de ortak oynatıcıyı denetliyordu).
+        val t = PlaybackHub.target
         when (intent.action) {
-            ACTION_PLAY -> p?.let { if (it.isPlaying) it.pause() else it.play() }
-            ACTION_NEXT -> p?.seekToNextMediaItem()
-            ACTION_PREV -> p?.seekToPrevious()
+            ACTION_PLAY -> t?.let { if (it.playWhenReady) it.pause() else it.play() }
+            ACTION_NEXT -> t?.next()
+            ACTION_PREV -> t?.previous()
             else -> return
         }
         update(context)

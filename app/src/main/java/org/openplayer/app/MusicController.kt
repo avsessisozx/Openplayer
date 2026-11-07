@@ -2,105 +2,285 @@ package org.openplayer.app
 
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.C
-import androidx.media3.common.Player
-import androidx.media3.common.Tracks
-import androidx.media3.extractor.metadata.id3.TextInformationFrame
-import androidx.media3.extractor.metadata.vorbis.VorbisComment
-import androidx.media3.exoplayer.ExoPlayer
+import android.util.Size
+import java.util.concurrent.CopyOnWriteArrayList
 
-/** Müzik çalarını yöneten ortak nokta: kuyruk kurma, ses efektleri, uyku zamanlayıcısı. */
+/** Çalan parçanın ses biçimi ("Çalıyor" ekranındaki kHz / kbps / biçim satırı için). */
+data class MusicAudioFormat(val sampleRate: Int, val bitrate: Int, val codec: String?)
+
+/**
+ * Müzik çalarını yöneten ortak nokta: sıra, ses düzeyi (ReplayGain, geçiş), uyku zamanlayıcısı.
+ * Motor tektir ([MpvEngines]); müzik çalarken [PlaybackHub] hedefi bu denetleyicidir. Video motoru
+ * devralınca müzik sırası boşalır (eskiden de video oynatıcının listesini değiştiriyordu).
+ * Yalnız ana iş parçacığından kullanılır.
+ */
 object MusicController {
-
-    const val EXTRA_MUSIC = "op_music"
 
     private val main = Handler(Looper.getMainLooper())
     private var fx: AudioFx? = null
-    private var installedOn: ExoPlayer? = null
+    private var appCtx: Context? = null
+    private val listeners = CopyOnWriteArrayList<() -> Unit>()
 
     var sleepEndsAtMs = 0L
         private set
 
     private val sleepRunnable = Runnable {
         sleepEndsAtMs = 0L
-        PlayerHolder.player?.pause()
+        PlaybackHub.target?.pause()
     }
 
-    val fxOrNull: AudioFx? get() = fx
-
-    fun isMusic(item: MediaItem?): Boolean =
-        item?.mediaMetadata?.extras?.getBoolean(EXTRA_MUSIC, false) == true
-
-    fun toItem(t: MusicTrack): MediaItem {
-        val extras = Bundle().apply { putBoolean(EXTRA_MUSIC, true) }
-        val b = MediaItem.Builder()
-            .setUri(t.uri)
-            .setMediaId(t.id.toString())
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(t.title)
-                    .setArtist(t.artist)
-                    .setAlbumTitle(t.album)
-                    .setArtworkUri(t.artworkUri)
-                    .setExtras(extras)
-                    .build()
-            )
-        // .cue sanal parçası: aynı dosyayı belirtilen aralıkta kırp (ExoPlayer sınırları yönetir).
-        if (t.clipStartMs > 0 || t.clipEndMs > t.clipStartMs) {
-            b.setClippingConfiguration(
-                MediaItem.ClippingConfiguration.Builder()
-                    .setStartPositionMs(t.clipStartMs.coerceAtLeast(0L))
-                    .apply { if (t.clipEndMs > t.clipStartMs) setEndPositionMs(t.clipEndMs) }
-                    .build()
-            )
-        }
-        return b.build()
+    private val deck = MusicDeck<MusicTrack>(
+        engine = { MpvEngines.get(appCtx ?: error("MusicController bağlanmadı")) },
+        entryOf = { t -> DeckEntry(t.id.toString(), t.uri.toString(), t.clipStartMs, t.clipEndMs, t.durationMs) },
+    ).apply {
+        onTrackChanged = { trackChanged() }
+        onStateChanged = { stateChanged() }
+        onPausedAtEnd = { sleepAtEnd = false }
     }
 
-    /** Verilen listeyi kuyruk yapıp [index]. şarkıdan çalmaya başlar. */
+    /** Geçici uyumluluk: video ekranı henüz Media3 öğesi soruyor. Müzik artık Media3'ten geçmez. */
+    @Suppress("UNUSED_PARAMETER")
+    fun isMusic(item: androidx.media3.common.MediaItem?): Boolean = false // MPV-REMOVE
+
+    // ------------------------------------------------------------ durum
+
+    /** Müzik şu an motoru kullanıyor mu. */
+    val isActive: Boolean get() = PlaybackHub.target === target && deck.queue.size > 0
+    val current: MusicTrack? get() = if (isActive) deck.current else null
+    val queue: List<MusicTrack> get() = if (isActive) deck.queue.items else emptyList()
+    val queueIndex: Int get() = deck.queue.index
+    val isPlaying: Boolean get() = isActive && deck.isPlaying
+    /** Kullanıcı niyeti; parça geçişinde ve tamponda da true kalır. */
+    val playWhenReady: Boolean get() = isActive && deck.playIntent && !deck.ended
+    val positionMs: Long get() = if (isActive) deck.positionMs else 0L
+    val durationMs: Long get() = if (isActive) deck.durationMs else 0L
+    val shuffle: Boolean get() = deck.queue.shuffle
+    /** [MusicQueue.REPEAT_OFF], [MusicQueue.REPEAT_ONE] ya da [MusicQueue.REPEAT_ALL]. */
+    val repeatMode: Int get() = deck.queue.repeatMode
+    val speed: Float get() = MpvEngines.current?.takeIf { isActive }?.speed ?: 1f
+
+    /** Parça, çalma durumu ya da sıra değişince çalışır (ana iş parçacığı). onStop'ta kaldırın. */
+    fun addListener(listener: () -> Unit) {
+        listeners += listener
+    }
+
+    fun removeListener(listener: () -> Unit) {
+        listeners -= listener
+    }
+
+    // ------------------------------------------------------------ denetim
+
+    /** Verilen listeyi sıra yapıp [index]. şarkıdan çalmaya başlar. */
     fun play(context: Context, tracks: List<MusicTrack>, index: Int, shuffle: Boolean? = null) {
         if (tracks.isEmpty()) return
         val app = context.applicationContext
+        appCtx = app
         val s = AppSettings.get(app)
-        val p = PlayerHolder.get(app)
-        ensureInstalled(app, p)
         if (shuffle != null) s.musicShuffle = shuffle
-        p.setMediaItems(tracks.map { toItem(it) }, index.coerceIn(0, tracks.size - 1), 0L)
-        p.setPlaybackSpeed(1f)
-        p.shuffleModeEnabled = s.musicShuffle
-        p.repeatMode = s.musicRepeat
-        p.prepare()
-        p.playWhenReady = true
-        // Düz startService: Media3 oynatma başlayınca servisi kendisi ön plana alır.
-        // startForegroundService süre içinde startForeground çağrılmazsa uygulamayı çökertir.
-        runCatching { app.startService(Intent(app, PlaybackService::class.java)) }
-        syncFx(app, p)
+        PlaybackHub.setTarget(app, target)
+        val engine = MpvEngines.get(app)
+        // Gömülü kapak resmi görüntü parçası olarak çözülmesin; video devralınca geri alınır.
+        engine.setProperty("audio-display", "no")
+        engine.setSpeed(1f)
+        deck.queue.repeatMode = s.musicRepeat
+        deck.queue.shuffle = s.musicShuffle
+        deck.start(tracks, index.coerceIn(0, tracks.size - 1))
+        syncFx(app)
+        ensureService(app)
     }
 
     fun enqueue(context: Context, track: MusicTrack, next: Boolean) {
         val app = context.applicationContext
-        val p = PlayerHolder.get(app)
-        if (!isMusic(p.currentMediaItem) || p.mediaItemCount == 0) {
+        if (!isActive) {
             play(app, listOf(track), 0)
             return
         }
-        val at = if (next) p.currentMediaItemIndex + 1 else p.mediaItemCount
-        p.addMediaItem(at, toItem(track))
+        if (next) deck.queue.insertNext(track) else deck.queue.append(track)
+        notifyListeners()
+    }
+
+    fun resume() {
+        if (!isActive) return
+        deck.play()
+        appCtx?.let { ensureService(it) }
+    }
+
+    fun pause() {
+        if (isActive) deck.pause()
+    }
+
+    fun togglePlay() {
+        if (playWhenReady) pause() else resume()
+    }
+
+    fun next() {
+        if (isActive) deck.next()
+    }
+
+    fun previous() {
+        if (isActive) deck.previous()
+    }
+
+    fun playAt(index: Int) {
+        if (!isActive) return
+        deck.playAt(index)
+        appCtx?.let { ensureService(it) }
+    }
+
+    fun seekTo(ms: Long) {
+        if (isActive) deck.seekTo(ms)
+    }
+
+    fun setSpeed(value: Float) {
+        if (!isActive) return
+        MpvEngines.current?.setSpeed(value)
+        notifyListeners()
     }
 
     fun setRepeat(context: Context, mode: Int) {
         AppSettings.get(context).musicRepeat = mode
-        PlayerHolder.player?.repeatMode = mode
+        deck.queue.repeatMode = mode
+        notifyListeners()
     }
 
     fun setShuffle(context: Context, on: Boolean) {
         AppSettings.get(context).musicShuffle = on
-        PlayerHolder.player?.shuffleModeEnabled = on
+        deck.queue.shuffle = on
+        notifyListeners()
+    }
+
+    /** Çalan parçanın ses biçimi; motorda dosya yoksa boş değerler. */
+    fun audioFormat(): MusicAudioFormat {
+        val e = MpvEngines.current?.takeIf { isActive } ?: return MusicAudioFormat(0, 0, null)
+        val track = e.tracks().firstOrNull { it.type == MpvTrackType.AUDIO && it.selected }
+        val rate = track?.sampleRate?.takeIf { it > 0 } ?: e.getProperty("audio-params/samplerate")?.toDoubleOrNull()?.toInt() ?: 0
+        // Ham değer bit/sn'dir (yalnız OSD biçimi kbps yazar).
+        val bitrate = e.getProperty("audio-bitrate")?.toDoubleOrNull()?.toInt() ?: 0
+        return MusicAudioFormat(rate, bitrate, track?.codec)
+    }
+
+    /** Kapak: klasördeki kapak dosyası, yoksa sistemin küçük resmi. Arka plan iş parçacığında çağrılır. */
+    fun artwork(context: Context, t: MusicTrack, sizePx: Int): Bitmap? = runCatching {
+        val cover = t.coverFile
+        if (cover != null) {
+            val o = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(cover, o)
+            var sample = 1
+            while (o.outWidth / (sample * 2) >= sizePx) sample *= 2
+            return@runCatching BitmapFactory.decodeFile(cover, BitmapFactory.Options().apply { inSampleSize = sample })
+        }
+        if (Build.VERSION.SDK_INT >= 29) context.contentResolver.loadThumbnail(t.uri, Size(sizePx, sizePx), null)
+        else context.contentResolver.openInputStream(t.artworkUri)?.use { BitmapFactory.decodeStream(it) }
+    }.getOrNull()
+
+    private fun ensureService(app: Context) {
+        if (!PlaybackService.running) PlaybackService.start(app)
+    }
+
+    // ------------------------------------------------------------ PlaybackHub hedefi
+
+    private val target = object : PlaybackTarget {
+        override val isMusic: Boolean get() = true
+        override val title: String get() = deck.current?.title.orEmpty()
+        override val artist: String get() = deck.current?.artist.orEmpty()
+        override val album: String get() = deck.current?.album.orEmpty()
+        override val positionMs: Long get() = deck.positionMs
+        override val durationMs: Long get() = deck.durationMs
+        override val isPlaying: Boolean get() = deck.isPlaying
+        override val playWhenReady: Boolean get() = deck.playIntent && !deck.ended
+        override val speed: Float get() = MpvEngines.current?.speed ?: 1f
+        override val canSkipNext: Boolean get() = deck.queue.peekNext(auto = false) != null
+        override val canSkipPrevious: Boolean get() = deck.queue.size > 0
+
+        override fun play() = resume()
+        override fun pause() = deck.pause()
+        override fun next() = deck.next()
+        override fun previous() = deck.previous()
+        override fun seekTo(ms: Long) = deck.seekTo(ms)
+
+        override fun openIntent(context: Context): Intent =
+            Intent(context, NowPlayingActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+
+        override val artworkKey: String get() = deck.current?.let { "${it.id}|${it.coverFile}|${it.albumId}" }.orEmpty()
+
+        override fun artwork(context: Context, sizePx: Int): Bitmap? =
+            deck.current?.let { artwork(context, it, sizePx) }
+
+        override fun setDuck(factor: Float) {
+            duckFactor = factor
+            applyVolume()
+        }
+
+        override fun onEngineEvent(event: MpvEvent) {
+            deck.onEvent(event)
+            when (event) {
+                is MpvEvent.PlayingChanged -> playingChanged(event.playing)
+                MpvEvent.FileLoaded, MpvEvent.TracksChanged -> updateReplayGain()
+                else -> Unit
+            }
+        }
+
+        override fun onDetached() = detached()
+    }
+
+    private fun detached() {
+        main.removeCallbacks(fadeTicker)
+        sleepAtEnd = false
+        deck.clear()
+        replayFactor = 1f
+        fadeFactor = 1f
+        duckFactor = 1f
+        lastVolume = -1
+        MpvEngines.current?.takeIf { !it.isReleased }?.let { e ->
+            e.setProperty("audio-display", "embedded-first")
+            e.setVolume(100)
+        }
+        fx?.release()
+        fx = null
+        notifyListeners()
+    }
+
+    private fun notifyListeners() {
+        listeners.forEach { it() }
+        appCtx?.let { MusicWidget.update(it) }
+    }
+
+    private fun trackChanged() {
+        appCtx?.let { syncFx(it) }
+        if (deck.isPlaying) countPlay()
+        main.removeCallbacks(fadeTicker)
+        main.post(fadeTicker)
+        updateReplayGain()
+        PlaybackHub.notifyChanged()
+        notifyListeners()
+    }
+
+    private fun stateChanged() {
+        PlaybackHub.notifyChanged()
+        notifyListeners()
+    }
+
+    private fun playingChanged(playing: Boolean) {
+        main.removeCallbacks(fadeTicker)
+        if (playing) {
+            main.post(fadeTicker)
+            countPlay()
+        }
+        notifyListeners()
+    }
+
+    private var lastCountedId: String? = null
+
+    private fun countPlay() {
+        val id = deck.current?.id?.toString() ?: return
+        if (id == lastCountedId) return
+        lastCountedId = id
+        appCtx?.let { MusicStats.record(it, id) }
     }
 
     // ------------------------------------------------------------ uyku zamanlayıcısı
@@ -113,7 +293,7 @@ object MusicController {
         main.removeCallbacks(sleepRunnable)
         sleepEndsAtMs = 0L
         sleepAtEnd = on
-        PlayerHolder.player?.pauseAtEndOfMediaItems = on
+        deck.pauseAtEnd = on
     }
 
     fun startSleep(minutes: Int) {
@@ -127,138 +307,74 @@ object MusicController {
         main.postDelayed(sleepRunnable, minutes * 60_000L)
     }
 
-    // ------------------------------------------------------------ ses efektleri
+    // ------------------------------------------------------------ ses düzeyi
 
-    private var lastCountedId: String? = null
-    private var lastTracks: Tracks? = null
     private var replayFactor = 1f
     private var fadeFactor = 1f
+    private var duckFactor = 1f
+    private var lastVolume = -1
 
-    private fun parseGain(value: String?): Float? =
-        value?.let { Regex("-?\\d+(\\.\\d+)?").find(it)?.value?.toFloatOrNull() }
-
-    private fun replayGainDb(tracks: Tracks, mode: Int): Float? {
-        var track: Float? = null
-        var album: Float? = null
-        for (g in tracks.groups) {
-            if (g.type != C.TRACK_TYPE_AUDIO) continue
-            for (i in 0 until g.length) {
-                val md = g.getTrackFormat(i).metadata ?: continue
-                for (j in 0 until md.length()) {
-                    val e = md.get(j)
-                    val key: String
-                    val value: String?
-                    when (e) {
-                        is VorbisComment -> { key = e.key; value = e.value }
-                        is TextInformationFrame -> { key = e.description ?: ""; value = e.values.firstOrNull() }
-                        else -> continue
-                    }
-                    when (key.uppercase()) {
-                        "REPLAYGAIN_TRACK_GAIN" -> track = parseGain(value)
-                        "REPLAYGAIN_ALBUM_GAIN" -> album = parseGain(value)
-                    }
-                }
-            }
-        }
-        return if (mode == 2) album ?: track else track ?: album
-    }
-
-    /** ReplayGain (yalnızca ses kısma) ve geçiş yumuşatmasını birleştirip oynatıcı sesine uygular. */
-    private fun applyVolume() {
-        val p = PlayerHolder.player ?: return
-        // Video oynarken ses düzeyine dokunma: video ekranının "sessiz" ayarını bozmasın.
-        if (!isMusic(p.currentMediaItem)) return
-        p.volume = (replayFactor * fadeFactor).coerceIn(0f, 1f)
+    /**
+     * Müzik çalarken motorun `volume` özelliği burada yönetilir: ses artırma × ReplayGain ×
+     * geçiş yumuşatması × kısma. Video çalarken dokunulmaz.
+     */
+    private fun applyVolume(force: Boolean = false) {
+        val c = appCtx ?: return
+        if (!isActive) return
+        val percent = musicVolumePercent(AppSettings.get(c).volumeBoostPercent, replayFactor, fadeFactor, duckFactor)
+        if (!force && percent == lastVolume) return
+        lastVolume = percent
+        MpvEngines.current?.setVolume(percent)
     }
 
     private fun updateReplayGain() {
         val c = appCtx ?: return
+        if (!isActive) return
         val mode = AppSettings.get(c).replayGainMode
-        val db = if (mode == 0) null else lastTracks?.let { replayGainDb(it, mode) }
+        val e = MpvEngines.current
+        val db = if (mode == 0 || e == null) null
+        else MediaTags.replayGainDb(e.getPropertyJson("track-list"), e.getPropertyJson("metadata"), mode)
         replayFactor = if (db == null) 1f else Math.pow(10.0, db / 20.0).toFloat().coerceAtMost(1f)
         applyVolume()
     }
 
     private val fadeTicker = object : Runnable {
         override fun run() {
-            val p = PlayerHolder.player
             val c = appCtx
-            if (p == null || c == null || !isMusic(p.currentMediaItem)) {
+            if (c == null || !isActive) {
                 fadeFactor = 1f
-                applyVolume()
                 return
             }
             val ms = AppSettings.get(c).crossfadeSec * 1000L
             var f = 1f
             if (ms > 0) {
-                val pos = p.currentPosition
-                val dur = p.duration
+                val pos = deck.positionMs
+                val dur = deck.durationMs
                 if (pos < ms) f = minOf(f, Math.sqrt(pos.coerceAtLeast(0L).toDouble() / ms).toFloat())
                 if (dur > 0 && dur - pos < ms) f = minOf(f, Math.sqrt((dur - pos).coerceAtLeast(0L).toDouble() / ms).toFloat())
             }
             fadeFactor = f.coerceIn(0f, 1f)
             applyVolume()
-            if (p.isPlaying) main.postDelayed(this, 120)
+            if (deck.isPlaying) main.postDelayed(this, 120)
         }
     }
 
-    /** Ses ayarları panelinden: ReplayGain veya geçiş süresi değişince çağrılır. */
+    /** Ses ayarları panelinden: ReplayGain, geçiş süresi ya da ses artırma değişince çağrılır. */
     fun refreshAudioSettings() {
         updateReplayGain()
+        applyVolume(force = true)
         main.removeCallbacks(fadeTicker)
         main.post(fadeTicker)
     }
 
-    private val listener = object : Player.Listener {
-        override fun onTracksChanged(tracks: Tracks) {
-            lastTracks = tracks
-            updateReplayGain()
-        }
-
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            appCtx?.let { MusicWidget.update(it) }
-            main.removeCallbacks(fadeTicker)
-            if (isPlaying) main.post(fadeTicker)
-            val item = PlayerHolder.player?.currentMediaItem
-            if (isPlaying && isMusic(item) && item?.mediaId != lastCountedId) {
-                lastCountedId = item?.mediaId
-                appCtx?.let { c -> item?.mediaId?.let { MusicStats.record(c, it) } }
-            }
-        }
-
-        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-            if (!playWhenReady && reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM && sleepAtEnd) {
-                sleepAtEnd = false
-                PlayerHolder.player?.pauseAtEndOfMediaItems = false
-            }
-        }
-
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            appCtx?.let { MusicWidget.update(it) }
-            main.post(fadeTicker)
-            PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
-        }
-
-        override fun onAudioSessionIdChanged(audioSessionId: Int) {
-            PlayerHolder.player?.let { p -> appCtx?.let { syncFx(it, p) } }
-        }
-    }
-
-    private var appCtx: Context? = null
-
-    private fun ensureInstalled(app: Context, p: ExoPlayer) {
-        appCtx = app
-        if (installedOn === p) return
-        installedOn?.removeListener(listener)
-        p.addListener(listener)
-        installedOn = p
-    }
-
-    /** Ekolayzır yalnızca müzik çalarken bu denetleyiciye bağlıdır; video ekranı kendisininkini kullanır. */
-    private fun syncFx(app: Context, p: ExoPlayer) {
-        if (isMusic(p.currentMediaItem)) {
-            val f = fx ?: AudioFx(app).also { fx = it }
-            f.attach(p.audioSessionId)
+    /**
+     * Ses zinciri (ekolayzır, denge, reverb...) yalnızca müzik çalarken bu denetleyiciye bağlıdır;
+     * video ekranı kendisininkini kullanır.
+     */
+    private fun syncFx(app: Context) {
+        if (isActive) {
+            if (fx == null) fx = AudioFx(app)
+            // B ajanı bağlama noktası: mpv ses zinciri burada kurulur, örn. MpvAudio.apply(AppSettings.get(app)).
         } else {
             fx?.release()
             fx = null
@@ -274,6 +390,7 @@ object MusicController {
         root.addView(boostLabel)
         root.addView(a.seekBar(100, 200, st.volumeBoostPercent) { v ->
             if (f != null) f.setBoostPercent(v) else st.volumeBoostPercent = v
+            applyVolume(force = true)
             boostLabel.text = Tx.s(R.string.musiccontr_001, v)
         })
         if (f != null && f.available && f.bandCount > 0) {
@@ -367,6 +484,8 @@ object MusicController {
             .setNeutralButton(Tx.s(R.string.musiccontr_018)) { _, _ ->
                 f?.reset()
                 f?.setBoostPercent(100)
+                st.volumeBoostPercent = 100
+                applyVolume(force = true)
                 st.audioBalance = 0
                 st.monoMix = false
                 AudioBalance.update(st)
