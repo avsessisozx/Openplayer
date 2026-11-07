@@ -326,7 +326,7 @@ class SubtitleController internal constructor(
         for (t in e.tracks()) if (t.type == MpvTrackType.SUB && t.isExternal) e.command("sub-remove", t.id.toString())
     }
 
-    fun onEmbeddedCues(cues: List<*>) = Unit // MPV-REMOVE: eski PlayerActivity Media3 onCues
+    fun onEmbeddedCues(cues: List<*>) = Unit // MPV-REMOVE: eski PlayerActivity onCues
 
     fun tick(positionMs: Long) = Unit // MPV-REMOVE: mpv zamanlamayı kendisi yapıyor
 
