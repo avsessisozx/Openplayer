@@ -123,7 +123,7 @@ class ProbeActivity : Activity() {
             "mpv-version", "ffmpeg-version", "libass-version", "current-vo", "current-ao",
             "hwdec-current", "video-codec", "video-params/pixelformat", "video-params/w",
             "video-out-params/pixelformat", "playback-time", "core-idle", "estimated-vf-fps",
-            "vo-delayed-frame-count", "vo-drop-frame-count", "decoder-frame-drop-count",
+            "vo-delayed-frame-count", "vo-drop-frame-count", "frame-drop-count", "decoder-frame-drop-count",
             "display-fps", "file-format", "gpu-context",
         )) {
             val v = try { m.getPropertyString(p) } catch (e: Throwable) { "ERR ${e.message}" }

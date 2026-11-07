@@ -15,7 +15,7 @@ for f in media/*; do
   adb shell run-as $P cp "/data/local/tmp/$(basename "$f")" files/
 done
 D=/data/data/$P/files
-while read -r name vo ctx hwdec target file; do
+while read -r name vo ctx hwdec target file <&3; do
   [ -z "${name:-}" ] && continue
   case "$file" in http*) ;; *) file=$D/$file ;; esac
   echo "=== $name"
@@ -31,5 +31,5 @@ while read -r name vo ctx hwdec target file; do
   grep -E "FATAL|signal 1[01]|DEBUG   :|dlopen failed" "out/$name.logcat.txt" | head -30 >> "out/$name.txt"
   adb shell am force-stop $P
   sleep 1
-done < .github/emulator/mpv-probe/cases.txt
+done 3< .github/emulator/mpv-probe/cases.txt
 exit 0
