@@ -35,12 +35,6 @@
         </activity>
 
         <activity
-            android:name=".VlcPlayerActivity"
-            android:exported="false"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|keyboard|navigation|uiMode"
-            android:theme="@style/Theme.OpenPlayer" />
-
-        <activity
             android:name=".PlayerActivity"
             android:exported="true"
             android:launchMode="singleTop"

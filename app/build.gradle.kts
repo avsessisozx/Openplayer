@@ -70,6 +70,7 @@ kotlin {
 }
 
 dependencies {
+    // MPV-REMOVE: Media3 yalnız taşınmamış dosyalar derlensin diye duruyor, Faz 7 siler.
     val media3 = "1.10.1"
     implementation("androidx.media3:media3-exoplayer:$media3")
     implementation("androidx.media3:media3-exoplayer-hls:$media3")
@@ -81,9 +82,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.hierynomus:smbj:0.13.0")
     implementation("commons-net:commons-net:3.11.1")
-    implementation("io.github.anilbeesetti:nextlib-media3ext:1.10.1-0.13.0")
-    // Yedek oynatma motoru: ExoPlayer açamayan biçimler için (LGPL-2.1).
-    implementation("org.videolan.android:libvlc-all:3.6.0")
+    // Oynatma motoru. POM coroutines vermiyor ama sınıfları kullanıyor: coroutines satırı zorunlu.
+    implementation("io.github.abdallahmehiz:mpv-android-lib:0.1.12")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")

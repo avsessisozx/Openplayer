@@ -353,12 +353,8 @@ class SettingsActivity : AppCompatActivity() {
         choice(Tx.s(R.string.settingsac_130), s.decoder.label, DecoderMode.entries.map { it.label }, DecoderMode.entries.indexOf(s.decoder)) {
             s.decoder = DecoderMode.entries[it]
         }
-        choice(Tx.s(R.string.settingsac_131), s.playbackEngine.label, PlaybackEngine.entries.map { it.label }, s.playbackEngine.ordinal) {
-            s.playbackEngine = PlaybackEngine.entries[it]
-        }
         toggle(Tx.s(R.string.settingsac_133), Tx.s(R.string.settingsac_132), s.autoDecoderFallback) { s.autoDecoderFallback = it }
         toggle(Tx.s(R.string.perfmode_title), Tx.s(R.string.perfmode_desc), s.performanceMode) { s.performanceMode = it }
-        toggle(Tx.s(R.string.smooth_title), Tx.s(R.string.smooth_desc), s.smoothSwitch) { s.smoothSwitch = it }
         note(Tx.s(R.string.settingsac_134))
         note(Tx.s(R.string.settingsac_135))
     }

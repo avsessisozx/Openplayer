@@ -15,11 +15,10 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory
 
 /**
- * Oynatıcı bir etkinliğe değil, tüm uygulamaya aittir. Böylece arka planda
- * oynatma, PiP ve ekran döndürme sırasında oynatma kesilmez.
+ * MPV-REMOVE: Geçici derleme köprüsü. Video mpv'ye geçti; bu nesne yalnız henüz taşınmamış müzik
+ * ve bildirim dosyaları derlensin ve çalışsın diye duruyor. D ajanının işi birleşince silinir.
  */
 object PlayerHolder {
 
@@ -31,12 +30,6 @@ object PlayerHolder {
     /** Harici ses dosyası eklemek için kullanılan kaynak fabrikası (son kurulan oynatıcınınki). */
     var mediaSourceFactory: androidx.media3.exoplayer.source.MediaSource.Factory? = null
         private set
-
-    /** O an açık video için geçici çözücü modu (ayarı değiştirmez). */
-    @Volatile var decoderOverride: DecoderMode? = null
-
-    fun effectiveDecoder(context: Context): DecoderMode =
-        decoderOverride ?: AppSettings.get(context.applicationContext).decoder
 
     fun get(context: Context): ExoPlayer =
         current ?: create(context.applicationContext).also { current = it }
@@ -94,23 +87,10 @@ object PlayerHolder {
                 .setEnableAudioOutputPlaybackParameters(playbackParams)
                 .setAudioProcessors(arrayOf<AudioProcessor>(delay, balance, eq))
                 .build()
-        val renderers: DefaultRenderersFactory = when (decoderOverride ?: settings.decoder) {
-            DecoderMode.HW ->
-                object : DefaultRenderersFactory(app) {
-                    override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =
-                        sink(context, enableFloatOutput, enableAudioOutputPlaybackParameters)
-                }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
-            DecoderMode.HW_PLUS ->
-                object : NextRenderersFactory(app) {
-                    override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =
-                        sink(context, enableFloatOutput, enableAudioOutputPlaybackParameters)
-                }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-            DecoderMode.SW ->
-                object : NextRenderersFactory(app) {
-                    override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =
-                        sink(context, enableFloatOutput, enableAudioOutputPlaybackParameters)
-                }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-        }
+        val renderers = object : DefaultRenderersFactory(app) {
+            override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioOutputPlaybackParameters: Boolean): AudioSink =
+                sink(context, enableFloatOutput, enableAudioOutputPlaybackParameters)
+        }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
         renderers.setEnableDecoderFallback(true)
 
         // OkHttp: farklı bir sunucuya yönlendirmede Authorization başlığını otomatik düşürür;

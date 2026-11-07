@@ -25,9 +25,9 @@ import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.PixelCopy
+import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
-import android.view.TextureView
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -45,38 +45,26 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.media3.common.C
-import androidx.media3.common.Format
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
-import androidx.media3.common.Tracks
-import androidx.media3.common.VideoSize
-import androidx.media3.common.text.CueGroup
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.SeekParameters
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import androidx.media3.ui.SubtitleView
 import java.io.File
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-enum class AspectMode(val label: String, val resize: Int, val ratio: Float?, val inCycle: Boolean = true) {
-    FIT(Tx.s(R.string.playeracti_001), AspectRatioFrameLayout.RESIZE_MODE_FIT, null),
-    FILL(Tx.s(R.string.playeracti_060), AspectRatioFrameLayout.RESIZE_MODE_FILL, null),
-    CROP(Tx.s(R.string.playeracti_002), AspectRatioFrameLayout.RESIZE_MODE_ZOOM, null),
-    R16_9("16:9", AspectRatioFrameLayout.RESIZE_MODE_FIT, 16f / 9f),
-    R4_3("4:3", AspectRatioFrameLayout.RESIZE_MODE_FIT, 4f / 3f),
-    R21_9("21:9", AspectRatioFrameLayout.RESIZE_MODE_FIT, 21f / 9f),
-    ORIGINAL(Tx.s(R.string.playeracti_003), AspectRatioFrameLayout.RESIZE_MODE_FIT, null, false),
-    R1_1("1:1", AspectRatioFrameLayout.RESIZE_MODE_FIT, 1f, false),
-    R5_4("5:4", AspectRatioFrameLayout.RESIZE_MODE_FIT, 5f / 4f, false),
-    R16_10("16:10", AspectRatioFrameLayout.RESIZE_MODE_FIT, 16f / 10f, false),
-    R18_9("18:9 (2:1)", AspectRatioFrameLayout.RESIZE_MODE_FIT, 2f, false),
-    R235("2.35:1", AspectRatioFrameLayout.RESIZE_MODE_FIT, 2.35f, false),
-    R239("2.39:1", AspectRatioFrameLayout.RESIZE_MODE_FIT, 2.39f, false),
+enum class AspectMode(val label: String, val ratio: Float?, val inCycle: Boolean = true) {
+    FIT(Tx.s(R.string.playeracti_001), null),
+    FILL(Tx.s(R.string.playeracti_060), null),
+    CROP(Tx.s(R.string.playeracti_002), null),
+    R16_9("16:9", 16f / 9f),
+    R4_3("4:3", 4f / 3f),
+    R21_9("21:9", 21f / 9f),
+    ORIGINAL(Tx.s(R.string.playeracti_003), null, false),
+    R1_1("1:1", 1f, false),
+    R5_4("5:4", 5f / 4f, false),
+    R16_10("16:10", 16f / 10f, false),
+    R18_9("18:9 (2:1)", 2f, false),
+    R235("2.35:1", 2.35f, false),
+    R239("2.39:1", 2.39f, false),
 }
 
 class PlayerActivity : AppCompatActivity() {
@@ -86,6 +74,9 @@ class PlayerActivity : AppCompatActivity() {
         const val EXTRA_TITLES = "org.openplayer.app.TITLES"
         const val EXTRA_INDEX = "org.openplayer.app.INDEX"
         const val ACTION_PIP = "org.openplayer.app.PIP_ACTION"
+
+        /** Eski ekran geç kapanırsa yenisinin motorunu kapatmasın. */
+        private var liveInstance: PlayerActivity? = null
     }
 
     val settings by lazy { AppSettings.get(this) }
@@ -110,47 +101,14 @@ class PlayerActivity : AppCompatActivity() {
         audioPicker.launch(arrayOf("audio/*", "application/octet-stream"))
     }
 
-    private var pendingExternalAudio = false
-
     private fun attachExternalAudio(audioUri: Uri) {
-        val factory = PlayerHolder.mediaSourceFactory
-        if (factory == null || player.mediaItemCount == 0) {
+        val target = if (player.isIdle) null else MpvUris.resolve(this, audioUri.toString())
+        if (target == null) {
             toast(Tx.s(R.string.playeracti_004))
             return
         }
-        runCatching {
-            val index = player.currentMediaItemIndex
-            val pos = player.currentPosition
-            val wasPlaying = player.playWhenReady
-            val sources = MutableList(player.mediaItemCount) { factory.createMediaSource(player.getMediaItemAt(it)) }
-            val audio = factory.createMediaSource(MediaItem.fromUri(audioUri))
-            sources[index] = androidx.media3.exoplayer.source.MergingMediaSource(true, true, sources[index], audio)
-            pendingExternalAudio = true
-            player.setMediaSources(sources, index, pos)
-            player.prepare()
-            player.playWhenReady = wasPlaying
-            toast(Tx.s(R.string.playeracti_005, SubtitleFiles.displayName(this, audioUri)))
-        }.onFailure {
-            pendingExternalAudio = false
-            toast(Tx.s(R.string.playeracti_004))
-        }
-    }
-
-    /** Eklenen dış ses, ses parçalarının sonuncusu olarak gelir; onu seç. */
-    private fun selectExternalAudio(tracks: Tracks) {
-        if (!pendingExternalAudio) return
-        val groups = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
-        if (groups.isEmpty()) return
-        pendingExternalAudio = false
-        if (groups.size < 2) return
-        val g = groups.last()
-        if (!g.isSupported) {
-            toast(Tx.s(R.string.playeracti_006))
-            return
-        }
-        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
-            .setOverrideForType(androidx.media3.common.TrackSelectionOverride(g.mediaTrackGroup, 0))
-            .build()
+        player.engine.command("audio-add", target, "select")
+        toast(Tx.s(R.string.playeracti_005, SubtitleFiles.displayName(this, audioUri)))
     }
 
     private fun importSubtitle(uri: Uri) {
@@ -170,13 +128,13 @@ class PlayerActivity : AppCompatActivity() {
         }.start()
     }
 
-    lateinit var player: ExoPlayer
+    lateinit var player: VideoPlayer
     lateinit var subtitles: SubtitleController
     lateinit var audioFx: AudioFx
     private lateinit var menus: PlayerMenus
 
     // Görünümler
-    private lateinit var playerView: PlayerView
+    private lateinit var playerView: SurfaceView
     private lateinit var subtitleView: SubtitleView
     private lateinit var ghostSubtitleView: SubtitleView
     private lateinit var nightOverlay: View
@@ -243,8 +201,6 @@ class PlayerActivity : AppCompatActivity() {
     private var kidsLastTap = 0L
     private var ticks = 0
     private var errorDialogShown = false
-    private val smoothness = SmoothnessWatchdog()
-    private var smoothSwitched = false
     private var lastBackPress = 0L
     private var fastPlaying = false
     private var fastPrevSpeed = 1f
@@ -255,77 +211,47 @@ class PlayerActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- yaşam döngüsü
 
-    private val rebuildListener: (ExoPlayer) -> Unit = { fresh ->
-        runOnUiThread {
-            bindPlayer(fresh)
-            onItemChanged()
-            refreshAll()
+    private val engineListener: (MpvEvent) -> Unit = { e ->
+        when (e) {
+            is MpvEvent.PlayingChanged -> {
+                updatePlayButton()
+                scheduleAutoHide()
+                if (e.playing) fadeIn()
+                updatePipParams()
+            }
+            is MpvEvent.VideoSizeChanged -> {
+                vrUpdateAspect(e.width, e.height)
+                applyOrientation()
+                applyTransform()
+                updatePipParams()
+            }
+            MpvEvent.TracksChanged -> player.engine.tracks().takeIf { it.isNotEmpty() }?.let { tracks ->
+                autoSelectSubtitle(tracks)
+                applyPendingAudio(tracks)
+                detectVr()
+            }
+            is MpvEvent.FileLoaded -> updatePlayButton()
+            is MpvEvent.Error -> onPlaybackError(e.message)
+            else -> Unit
         }
     }
 
-    private val playerListener = object : Player.Listener {
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
+    private fun bindPlayerCallbacks() {
+        player.onItemChanged = { item, repeat ->
+            onItemChanged()
+            // Listede sonraki/önceki videoya geçince de kaldığı yerden devam (MX gibi).
+            if (!repeat && !settings.resumeOnlyFirst) item?.uri?.let { offerResume(it, autoPlay = true) }
+        }
+        player.onEnded = {
             updatePlayButton()
-            scheduleAutoHide()
-            if (isPlaying) fadeIn()
-            updatePipParams()
+            stopFastPlay()
+            if (settings.backToList && player.repeatMode == RepeatMode.OFF && !sleepAtEnd) finish()
+            else showControls(sticky = true)
         }
-
-        override fun onPlaybackStateChanged(state: Int) {
+        player.onStoppedAtEnd = {
+            sleepAtEnd = false
             updatePlayButton()
-            if (state == Player.STATE_ENDED) {
-                stopFastPlay()
-                if (settings.backToList && player.repeatMode == Player.REPEAT_MODE_OFF && !sleepAtEnd) {
-                    finish()
-                    return
-                }
-                showControls(sticky = true)
-            }
-        }
-
-        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-            if (reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM && sleepAtEnd) {
-                sleepAtEnd = false
-                player.pauseAtEndOfMediaItems = false
-                refreshShortcuts()
-            }
-        }
-
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED) {
-                onItemChanged()
-                // Listede sonraki/önceki videoya geçince de kaldığı yerden devam (MX gibi).
-                if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT && !settings.resumeOnlyFirst) {
-                    mediaItem?.localConfiguration?.uri?.let { offerResume(it, autoPlay = true) }
-                }
-            }
-        }
-
-        override fun onVideoSizeChanged(videoSize: VideoSize) {
-            vrUpdateAspect(videoSize)
-            applyOrientation()
-            applyTransform()
-            updatePipParams()
-        }
-
-        override fun onTracksChanged(tracks: Tracks) {
-            autoSelectSubtitle(tracks)
-            applyPendingAudio(tracks)
-            selectExternalAudio(tracks)
-            detectVr(tracks)
-        }
-
-        override fun onCues(cueGroup: CueGroup) {
-            subtitles.onEmbeddedCues(cueGroup.cues)
-        }
-
-        override fun onAudioSessionIdChanged(audioSessionId: Int) {
-            audioFx.attach(audioSessionId)
-            applyAuxEffect()
-        }
-
-        override fun onPlayerError(error: PlaybackException) {
-            onPlaybackError(error)
+            refreshShortcuts()
         }
     }
 
@@ -403,9 +329,9 @@ class PlayerActivity : AppCompatActivity() {
         subtitles.applyStyle()
         menus = PlayerMenus(this)
 
-        player = PlayerHolder.get(this)
-        bindPlayer(player)
-        PlayerHolder.addRebuildListener(rebuildListener)
+        liveInstance = this
+        player = VideoPlayer.shared(MpvEngines.get(this))
+        bindPlayer()
 
         val loaded = loadFromIntent(intent)
         if (isFinishing) return
@@ -432,7 +358,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        bindVideo(player)
+        bindVideo(true)
         handler.post(ticker)
         applyOrientation()
     }
@@ -453,7 +379,7 @@ class PlayerActivity : AppCompatActivity() {
         } else if (!inPip) {
             player.pause()
         }
-        if (!inPip) bindVideo(null)
+        if (!inPip) bindVideo(false)
     }
 
     override fun onDestroy() {
@@ -463,13 +389,15 @@ class PlayerActivity : AppCompatActivity() {
             pipReceiverRegistered = false
         }
         PerformanceBoost.stop(this)
-        PlayerHolder.removeRebuildListener(rebuildListener)
-        if (::player.isInitialized) player.removeListener(playerListener)
+        if (::player.isInitialized) player.engine.removeListener(engineListener)
         if (isFinishing) {
             if (PlaybackStats.lastReport.isNotEmpty()) BugReport.notePlayback(this, PlaybackStats.lastReport)
             saveResume()
             audioFx.release()
-            PlayerHolder.release()
+            if (liveInstance === this) {
+                liveInstance = null
+                VideoPlayer.releaseShared()
+            }
             stopService(Intent(this, PlaybackService::class.java))
         }
         super.onDestroy()
@@ -482,7 +410,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        if (isInPictureInPictureMode) hideControls() else bindVideo(player)
+        if (isInPictureInPictureMode) hideControls() else bindVideo(true)
     }
 
 
@@ -520,8 +448,8 @@ class PlayerActivity : AppCompatActivity() {
             KeyEvent.KEYCODE_M -> { onShortcut(Shortcut.MUTE); true }
             KeyEvent.KEYCODE_F -> { cycleAspect(); true }
             KeyEvent.KEYCODE_R -> { cycleOrientation(); true }
-            KeyEvent.KEYCODE_LEFT_BRACKET -> { setSpeed((player.playbackParameters.speed - 0.1f).coerceIn(0.25f, 4f)); true }
-            KeyEvent.KEYCODE_RIGHT_BRACKET -> { setSpeed((player.playbackParameters.speed + 0.1f).coerceIn(0.25f, 4f)); true }
+            KeyEvent.KEYCODE_LEFT_BRACKET -> { setSpeed((player.speed - 0.1f).coerceIn(0.25f, 4f)); true }
+            KeyEvent.KEYCODE_RIGHT_BRACKET -> { setSpeed((player.speed + 0.1f).coerceIn(0.25f, 4f)); true }
             KeyEvent.KEYCODE_COMMA -> { jumpSubtitle(false); true }
             KeyEvent.KEYCODE_PERIOD -> { jumpSubtitle(true); true }
             else -> false
@@ -546,30 +474,44 @@ class PlayerActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- oynatıcı bağlama
 
-    private fun bindPlayer(p: ExoPlayer) {
-        if (::player.isInitialized) player.removeListener(playerListener)
-        player = p
-        p.skipSilenceEnabled = settings.skipSilence
-        runCatching {
-            p.setAudioAttributes(androidx.media3.common.AudioAttributes.DEFAULT, settings.audioFocus)
-            p.setHandleAudioBecomingNoisy(settings.pauseOnNoisy)
-        }
-        p.addListener(playerListener)
-        PlaybackStats.attach(p)
-        smoothness.reset()
-        bindVideo(p)
-        audioFx.attach(p.audioSessionId)
-        applyAuxEffect()
+    private fun bindPlayer() {
+        val engine = player.engine
+        engine.addListener(engineListener)
+        bindPlayerCallbacks()
+        engine.setHardwareDecoding(MpvPlayer.hwdecFor(effectiveDecoder()))
+        engine.setProperty("user-agent", settings.httpUserAgent.ifBlank { "OpenPlayer/1.0" })
+        val audioLangs = settings.audioLanguages.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        if (audioLangs.isNotEmpty()) engine.setProperty("alang", audioLangs.joinToString(","))
+        player.setSpeed(settings.playbackSpeed)
     }
 
-    /** Yankı (reverb) gibi yardımcı efekti oynatıcıya bağlar. */
-    fun applyAuxEffect() {
-        if (!::player.isInitialized) return
-        val id = audioFx.reverbId
-        runCatching { player.setAuxEffectInfo(androidx.media3.common.AuxEffectInfo(id, if (id != 0) 1f else 0f)) }
-            .onFailure { android.util.Log.w("OPFEAT", "aux effect failed", it) }
-        if (settings.reverbPreset > 0) android.util.Log.i("OPFEAT", "reverb preset=${settings.reverbPreset} id=$id")
+    private val surfaceCallback = object : SurfaceHolder.Callback {
+        override fun surfaceCreated(holder: SurfaceHolder) = Unit
+
+        override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+            if (vr == VrMode.NONE) attachVideo(holder.surface, width, height)
+        }
+
+        override fun surfaceDestroyed(holder: SurfaceHolder) {
+            if (attachedSurface === holder.surface) detachVideo()
+        }
     }
+
+    private var attachedSurface: android.view.Surface? = null
+
+    private fun attachVideo(surface: android.view.Surface, width: Int, height: Int) {
+        if (!::player.isInitialized) return
+        attachedSurface = surface
+        player.engine.attachSurface(surface, width, height)
+    }
+
+    private fun detachVideo() {
+        attachedSurface = null
+        if (::player.isInitialized) player.engine.detachSurface()
+    }
+
+    // MPV-REMOVE: Faz 3'te ses efektleri mpv filtrelerine geçince (MpvAudio) kalkacak.
+    fun applyAuxEffect() = Unit
 
     private fun loadFromIntent(intent: Intent): Boolean {
         @Suppress("DEPRECATION")
@@ -614,39 +556,20 @@ class PlayerActivity : AppCompatActivity() {
 
     fun openItems(uris: List<Uri>, titles: List<String>?, index: Int) {
         resetRay()
-        if (settings.playbackEngine == PlaybackEngine.VLC) {
-            VlcPlayerActivity.launch(this, uris, titles, index, if (settings.resumePlayback) ResumeStore.position(this, uris[index]) else 0L)
-            finish()
-            return
-        }
         val items = uris.mapIndexed { i, uri ->
-            MediaItem.Builder()
-                .setUri(uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(
-                            if (isVaultUri(uri)) Tx.s(R.string.playeracti_012)
-                            else titles?.getOrNull(i)?.takeIf { it.isNotBlank() } ?: SubtitleFiles.displayName(this, uri)
-                        )
-                        .build()
-                )
-                .build()
+            QueueItem(
+                uri,
+                if (isVaultUri(uri)) Tx.s(R.string.playeracti_012)
+                else titles?.getOrNull(i)?.takeIf { it.isNotBlank() } ?: SubtitleFiles.displayName(this, uri)
+            )
         }
         val stored = if (settings.resumeMode != ResumeMode.NO && !settings.incognito) ResumeStore.position(this, uris[index]) else 0L
         val ask = settings.resumeMode == ResumeMode.ASK && stored > 5_000
         val saved = if (ask) 0L else stored
-        if (MusicController.isMusic(player.currentMediaItem)) {
-            // Müzikten kalan tekrar/karıştırma ayarları videoya taşınmasın.
-            player.repeatMode = Player.REPEAT_MODE_OFF
-            player.shuffleModeEnabled = false
-        }
+        PlayerHolder.player?.pause() // MPV-REMOVE: müzik mpv'ye geçince tek motor zaten keser.
         player.volume = if (muted) 0f else 1f
-        player.setMediaItems(items, index, if (saved > 5_000) saved else 0L)
-        player.prepare()
-        player.playWhenReady = !ask
+        player.setItems(items, index, if (saved > 5_000) saved else 0L, paused = ask)
         errorDialogShown = false
-        smoothSwitched = false
-        smoothness.reset()
         onItemChanged()
         if (ask) askResume(uris[index], stored)
     }
@@ -708,7 +631,7 @@ class PlayerActivity : AppCompatActivity() {
         VideoMemory.put(
             this, uri,
             VideoMemory.Entry(
-                speed = player.playbackParameters.speed,
+                speed = player.speed,
                 aspect = aspect.name,
                 zoom = zoom,
                 subDelayMs = subtitles.delayMs,
@@ -724,7 +647,7 @@ class PlayerActivity : AppCompatActivity() {
         pendingAudioIndex = -1
         if (uri == null || !settings.perVideoMemory) return
         val e = VideoMemory.get(this, uri) ?: return
-        player.setPlaybackSpeed(e.speed)
+        player.setSpeed(e.speed)
         AspectMode.entries.firstOrNull { it.name == e.aspect }?.let { setAspect(it) }
         zoom = e.zoom
         if (zoom <= 1f) { panX = 0f; panY = 0f }
@@ -735,62 +658,55 @@ class PlayerActivity : AppCompatActivity() {
         refreshShortcuts()
     }
 
-    private fun applyPendingAudio(tracks: Tracks) {
+    private fun applyPendingAudio(tracks: List<MpvTrack>) {
         val idx = pendingAudioIndex
         if (idx < 0) return
-        val groups = tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
-        if (groups.isEmpty()) return
+        val audio = tracks.filter { it.type == MpvTrackType.AUDIO }
+        if (audio.isEmpty()) return
         pendingAudioIndex = -1
-        val g = groups.getOrNull(idx) ?: return
-        if (g.isSelected || !g.isSupported) return
-        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
-            .setOverrideForType(androidx.media3.common.TrackSelectionOverride(g.mediaTrackGroup, 0))
-            .build()
+        val t = audio.getOrNull(idx) ?: return
+        if (!t.selected) player.engine.setProperty("aid", t.id.toString())
     }
 
     private fun onItemChanged() {
-        smoothSwitched = false
-        smoothness.reset()
-        val item = player.currentMediaItem ?: return
-        val uri = item.localConfiguration?.uri
+        val item = player.currentItem ?: return
+        val uri = item.uri
         if (uri != currentUri) saveMemory()
         if (uri != currentUri) {
             triedDecoders.clear()
             orientationOverride = null
-            if (PlayerHolder.decoderOverride != null) {
-                PlayerHolder.decoderOverride = null
-                handler.post { if (!isDestroyed) PlayerHolder.rebuild(this) }
+            if (decoderOverride != null) {
+                decoderOverride = null
+                player.engine.setHardwareDecoding(MpvPlayer.hwdecFor(settings.decoder))
             }
             vrManual = null
             if (vr != VrMode.NONE) setVr(VrMode.NONE, remember = false)
             if (fastPlaying) fastPlaying = false
             // Her yeni video varsayılan hızla başlar; videoya özel hafıza varsa aşağıda geri yüklenir.
-            player.setPlaybackSpeed(settings.playbackSpeed)
+            player.setSpeed(settings.playbackSpeed)
         }
         currentUri = uri
         applyVaultSecurity(uri)
         chapters = emptyList()
         seekBar.startsSec = emptyList()
-        if (uri != null) {
-            Thread {
-                val list = Chapters.load(applicationContext, uri)
-                runOnUiThread {
-                    if (!isDestroyed && currentUri == uri && list.isNotEmpty()) {
-                        chapters = list
-                        seekBar.startsSec = list.map { (it.startMs / 1000).toInt() }
-                    }
+        Thread {
+            val list = Chapters.load(applicationContext, uri)
+            runOnUiThread {
+                if (!isDestroyed && currentUri == uri && list.isNotEmpty()) {
+                    chapters = list
+                    seekBar.startsSec = list.map { (it.startMs / 1000).toInt() }
                 }
-            }.start()
-        }
-        titleView.text = item.mediaMetadata.title ?: uri?.let { SubtitleFiles.displayName(this, it) } ?: ""
+            }
+        }.start()
+        titleView.text = item.title
         abA = -1L
         abB = -1L
         subtitleAutoDone = false
         subtitles.delayMs = settings.subtitleDefaultDelayMs
         subtitles.speed = 1.0
         subtitles.setOff()
-        sidecars = if (uri != null) SubtitleFiles.findSidecars(this, uri) else emptyList()
-        val remembered = uri?.let { SubtitleFiles.remembered(this, it) }
+        sidecars = SubtitleFiles.findSidecars(this, uri)
+        val remembered = SubtitleFiles.remembered(this, uri)
         if (settings.autoEnableSubtitle) {
             when {
                 remembered != null -> loadExternalSubtitle(remembered, remember = false, quiet = true)
@@ -802,23 +718,23 @@ class PlayerActivity : AppCompatActivity() {
         refreshShortcuts()
     }
 
-    private fun autoSelectSubtitle(tracks: Tracks) {
-        if (subtitleAutoDone || tracks.groups.isEmpty()) return
+    private fun autoSelectSubtitle(tracks: List<MpvTrack>) {
+        if (subtitleAutoDone || tracks.isEmpty()) return
         subtitleAutoDone = true
         if (subtitles.mode != SubtitleController.Mode.OFF || !settings.autoEnableSubtitle) return
-        val groups = tracks.groups.filter { it.type == C.TRACK_TYPE_TEXT && it.length > 0 }
-        if (groups.isEmpty()) return
+        val subs = tracks.filter { it.type == MpvTrackType.SUB }
+        if (subs.isEmpty()) return
         val wanted = settings.subtitleLanguages.split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }
         val byLang = wanted.firstNotNullOfOrNull { lang ->
-            groups.firstOrNull { g ->
-                val l = g.getTrackFormat(0).language?.lowercase() ?: ""
+            subs.firstOrNull { t ->
+                val l = t.language?.lowercase() ?: ""
                 l.startsWith(lang) || (lang == "tr" && l.startsWith("tur"))
             }
         }
         val pick = byLang
-            ?: groups.firstOrNull { it.getTrackFormat(0).selectionFlags and C.SELECTION_FLAG_DEFAULT != 0 }
+            ?: subs.firstOrNull { it.isDefault }
             // Dil etiketi olmayan tek/ilk parça: otomatik altyazı açıkken onu göster (MX gibi).
-            ?: groups.firstOrNull { g -> g.getTrackFormat(0).language.let { it.isNullOrBlank() || it == "und" } }
+            ?: subs.firstOrNull { it.language.isNullOrBlank() || it.language == "und" }
         if (pick != null) subtitles.useEmbedded(pick)
     }
 
@@ -844,23 +760,13 @@ class PlayerActivity : AppCompatActivity() {
 
     private val triedDecoders = HashSet<DecoderMode>()
 
-    /** Mevcut kuyruğu VLC yedek motoruna devreder ve bu ekranı kapatır. */
-    private fun openInVlc(fromError: Boolean): Boolean {
-        if (!::player.isInitialized || player.mediaItemCount == 0) return false
-        val uris = List(player.mediaItemCount) { player.getMediaItemAt(it).localConfiguration?.uri }.filterNotNull()
-        if (uris.isEmpty()) return false
-        val titles = List(player.mediaItemCount) { player.getMediaItemAt(it).mediaMetadata.title?.toString() ?: "" }
-        val idx = player.currentMediaItemIndex.coerceIn(0, uris.size - 1)
-        val pos = player.currentPosition
-        player.pause()
-        if (fromError) toast(Tx.s(R.string.playeracti_020))
-        VlcPlayerActivity.launch(this, uris, titles, idx, pos)
-        finish()
-        return true
-    }
+    /** O an açık video için geçici çözücü modu (ayarı değiştirmez). */
+    private var decoderOverride: DecoderMode? = null
 
-    private fun onPlaybackError(error: PlaybackException) {
-        val cur = PlayerHolder.effectiveDecoder(this)
+    private fun effectiveDecoder(): DecoderMode = decoderOverride ?: settings.decoder
+
+    private fun onPlaybackError(message: String) {
+        val cur = effectiveDecoder()
         triedDecoders += cur
         val order = listOf(DecoderMode.HW, DecoderMode.HW_PLUS, DecoderMode.SW)
         val next = order.firstOrNull { it !in triedDecoders }
@@ -870,42 +776,27 @@ class PlayerActivity : AppCompatActivity() {
             toast(Tx.s(R.string.playeracti_021, next.label))
             handler.post {
                 if (isDestroyed) return@post
-                PlayerHolder.decoderOverride = next
-                PlayerHolder.rebuild(this)
+                decoderOverride = next
+                player.engine.setHardwareDecoding(MpvPlayer.hwdecFor(next))
+                player.reopen(paused = false)
             }
             return
         }
-        if (settings.playbackEngine != PlaybackEngine.EXO && openInVlc(fromError = true)) return
-        if (settings.skipOnError && player.hasNextMediaItem()) {
+        if (settings.skipOnError && player.hasNext()) {
             toast(Tx.s(R.string.playeracti_022))
-            player.seekToNextMediaItem()
-            player.prepare()
-            player.play()
+            player.seekToNext()
             return
         }
         if (errorDialogShown) return
         errorDialogShown = true
-        val hardwareLimit = error.errorCode == PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES ||
-            error.errorCode == PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED ||
-            error.errorCode == PlaybackException.ERROR_CODE_DECODER_INIT_FAILED ||
-            error.errorCode == PlaybackException.ERROR_CODE_DECODING_FAILED
-        val vf = player.videoFormat
-        val videoDesc = if (vf != null && vf.width > 0 && vf.height > 0) {
-            "${vf.width}x${vf.height}" + (vf.sampleMimeType?.let { " " + it.substringAfter('/') } ?: "")
-        } else {
-            Tx.s(R.string.playeracti_unknown)
-        }
-        val body = if (hardwareLimit) {
-            Tx.s(R.string.playeracti_hwlimit, videoDesc, error.errorCodeName)
-        } else {
-            Tx.s(R.string.playeracti_023, error.errorCodeName)
-        }
-        showMessage(Tx.s(R.string.playeracti_024), body)
+        showMessage(Tx.s(R.string.playeracti_024), Tx.s(R.string.playeracti_023, message))
     }
 
     fun changeDecoder(mode: DecoderMode) {
         settings.decoder = mode
-        PlayerHolder.rebuild(this)
+        decoderOverride = null
+        player.engine.setHardwareDecoding(MpvPlayer.hwdecFor(mode))
+        decoderLabel.text = mode.short
         toast(Tx.s(R.string.playeracti_025, mode.label))
     }
 
@@ -914,12 +805,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun scrimColor(): Int = ((settings.scrimPercent.coerceIn(0, 100) * 255 / 100) shl 24)
 
     private fun buildUi(): View {
-        playerView = (layoutInflater.inflate(R.layout.player_view, null) as PlayerView).apply {
-            useController = false
-            setShutterBackgroundColor(Color.BLACK)
-            setKeepContentOnPlayerReset(true)
-            subtitleView?.visibility = View.GONE
-        }
+        playerView = SurfaceView(this).apply { holder.addCallback(surfaceCallback) }
         subtitleView = SubtitleView(this)
         ghostSubtitleView = SubtitleView(this).apply { visibility = View.GONE }
         nightOverlay = View(this).apply {
@@ -1162,11 +1048,11 @@ class PlayerActivity : AppCompatActivity() {
 
     fun startFastPlay(): Boolean {
         if (!settings.longPressSpeed || locked || kidsLocked || fastPlaying) return false
-        if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) return false
-        fastPrevSpeed = player.playbackParameters.speed
+        if (player.isIdle || player.isEnded) return false
+        fastPrevSpeed = player.speed
         val fast = settings.longPressSpeedValue
         fastPlaying = true
-        player.setPlaybackSpeed(fast)
+        player.setSpeed(fast)
         if (!player.playWhenReady) player.play()
         val label = if (fast == fast.roundToInt().toFloat()) fast.roundToInt().toString() else "%.2f".format(fast).trimEnd('0').trimEnd(',', '.')
         showHud("${label}x ▶▶")
@@ -1177,7 +1063,7 @@ class PlayerActivity : AppCompatActivity() {
     fun stopFastPlay() {
         if (!fastPlaying) return
         fastPlaying = false
-        player.setPlaybackSpeed(fastPrevSpeed)
+        player.setSpeed(fastPrevSpeed)
         hideHudSoon()
         android.util.Log.i("OPFEAT", "fast off speed=$fastPrevSpeed")
     }
@@ -1250,8 +1136,7 @@ class PlayerActivity : AppCompatActivity() {
         scrubWasPlaying = player.playWhenReady
         if (settings.liveScrub) {
             player.pause()
-            player.setSeekParameters(SeekParameters.CLOSEST_SYNC)
-            runCatching { player.isScrubbingModeEnabled = true }
+            player.exactSeek = false
         }
     }
 
@@ -1259,7 +1144,7 @@ class PlayerActivity : AppCompatActivity() {
         if (!scrubActive || !settings.liveScrub) return
         val now = SystemClock.uptimeMillis()
         // Çok büyük videolarda (4K ve üstü) her karede sarma isteği çözücüyü boğar; aralık açılır.
-        val gap = if ((player.videoFormat?.height ?: 0) >= 2000) 90L else 40L
+        val gap = if (player.videoHeight >= 2000) 90L else 40L
         if (now - lastScrubAt < gap) return
         lastScrubAt = now
         player.seekTo(posMs)
@@ -1268,8 +1153,7 @@ class PlayerActivity : AppCompatActivity() {
     fun scrubEnd(posMs: Long) {
         if (!scrubActive) return
         scrubActive = false
-        runCatching { player.isScrubbingModeEnabled = false }
-        player.setSeekParameters(if (settings.exactSeekOnRelease) SeekParameters.EXACT else SeekParameters.CLOSEST_SYNC)
+        player.exactSeek = settings.exactSeekOnRelease
         player.seekTo(posMs)
         if (settings.liveScrub && scrubWasPlaying) player.play()
         if (scrubWasPlaying) fadeIn()
@@ -1289,7 +1173,7 @@ class PlayerActivity : AppCompatActivity() {
     fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
     fun togglePlay() {
-        if (player.playbackState == Player.STATE_ENDED) {
+        if (player.isEnded) {
             player.seekTo(0)
             player.play()
         } else if (player.isPlaying || player.playWhenReady) {
@@ -1300,9 +1184,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private var lastRelativeSeekAt = 0L
-    private val restoreSeekParams = Runnable {
-        player.setSeekParameters(if (settings.exactSeekOnRelease) SeekParameters.EXACT else SeekParameters.CLOSEST_SYNC)
-    }
+    private val restoreSeekParams = Runnable { player.exactSeek = settings.exactSeekOnRelease }
 
     fun seekRelative(deltaMs: Long) {
         val duration = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
@@ -1313,7 +1195,7 @@ class PlayerActivity : AppCompatActivity() {
         lastRelativeSeekAt = now
         handler.removeCallbacks(restoreSeekParams)
         if (burst) {
-            player.setSeekParameters(SeekParameters.CLOSEST_SYNC)
+            player.exactSeek = false
             handler.postDelayed(restoreSeekParams, 900)
         }
         player.seekTo((player.currentPosition + deltaMs).coerceIn(0L, duration))
@@ -1321,27 +1203,27 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun previous() {
-        if (player.currentPosition > 3000 || !player.hasPreviousMediaItem()) player.seekTo(0) else player.seekToPreviousMediaItem()
+        if (player.currentPosition > 3000 || !player.hasPrevious()) player.seekTo(0) else player.seekToPrevious()
     }
 
     private fun next() {
-        if (player.hasNextMediaItem()) player.seekToNextMediaItem() else toast(Tx.s(R.string.playeracti_027))
+        if (player.hasNext()) player.seekToNext() else toast(Tx.s(R.string.playeracti_027))
     }
 
     /** Bu oturumdaki hızı değiştirir (varsayılan hız Ayarlar → Oynatıcı'dan seçilir). */
     fun setSpeed(speed: Float) {
         fastPlaying = false
-        player.setPlaybackSpeed(speed)
+        player.setSpeed(speed)
         refreshShortcuts()
     }
 
     private fun updatePlayButton() {
-        playButton.setImageResource(if (player.isPlaying || player.playWhenReady && player.playbackState != Player.STATE_ENDED) R.drawable.ic_pause else R.drawable.ic_play)
+        playButton.setImageResource(if (player.isPlaying || player.playWhenReady) R.drawable.ic_pause else R.drawable.ic_play)
     }
 
     private fun updateNavButtons() {
         prevButton.alpha = 1f
-        nextButton.alpha = if (player.hasNextMediaItem()) 1f else 0.4f
+        nextButton.alpha = if (player.hasNext()) 1f else 0.4f
         val nav = if (settings.showPrevNext) View.VISIBLE else View.GONE
         prevButton.visibility = nav
         nextButton.visibility = nav
@@ -1396,7 +1278,7 @@ class PlayerActivity : AppCompatActivity() {
         }
         remainingView.text = if (settings.showRemainingTime) "-" + formatDuration((duration - pos).coerceAtLeast(0)) else formatDuration(duration)
         seekBar.secondaryProgress = (player.bufferedPosition / 1000).toInt()
-        decoderLabel.text = PlayerHolder.effectiveDecoder(this).short
+        decoderLabel.text = effectiveDecoder().short
     }
 
     private fun tick() {
@@ -1407,34 +1289,8 @@ class PlayerActivity : AppCompatActivity() {
         if (controlsVisible) updateProgress(pos)
         if (ticks % 5 == 0) updateClock()
         if (++ticks % 50 == 0 && player.isPlaying) saveResume()
-        if (ticks % 10 == 0) checkSmoothness()
+        if (ticks % 10 == 0 && player.isPlaying) PlaybackStats.update(player.engine)
         if (settings.performanceMode) PerformanceBoost.report(System.nanoTime() - tickStart)
-    }
-
-    /**
-     * Saniyede bir: yerel videoda FFmpeg (yazılım) çözücüsüyle kareler sürekli atlanıyorsa
-     * (4K/10-bit gibi ağır dosyalar) ve ayar açıksa VLC motoruna aynı konumdan geçer.
-     */
-    private fun checkSmoothness() {
-        if (!::player.isInitialized) return
-        val speedOk = player.playbackParameters.speed == 1f
-        val playing = player.isPlaying && speedOk && !scrubbing && !fastPlaying
-        val scheme = currentUri?.scheme
-        val local = scheme == "content" || scheme == "file"
-        if (!playing || !local || !PlaybackStats.isFfmpegDecoder()) {
-            smoothness.reset()
-            if (playing) PlaybackStats.lastReport = PlaybackStats.report(player, null)
-            return
-        }
-        val fps = player.videoFormat?.frameRate?.takeIf { it > 0f } ?: 0f
-        val bad = smoothness.sample(player, fps)
-        PlaybackStats.lastReport = PlaybackStats.report(player, smoothness)
-        if (!bad || smoothSwitched || !settings.smoothSwitch) return
-        if (settings.playbackEngine == PlaybackEngine.EXO) return
-        smoothSwitched = true
-        BugReport.notePlayback(this, PlaybackStats.lastReport)
-        toast(Tx.s(R.string.playeracti_smooth_switch))
-        openInVlc(fromError = false)
     }
 
     fun saveResume() {
@@ -1521,7 +1377,6 @@ class PlayerActivity : AppCompatActivity() {
 
     fun setAspect(mode: AspectMode) {
         aspect = mode
-        playerView.resizeMode = mode.resize
         applyTransform()
     }
 
@@ -1567,30 +1422,19 @@ class PlayerActivity : AppCompatActivity() {
     private var vrView: Vr360View? = null
     private var vrRoot: FrameLayout? = null
 
-    /** Görüntü yüzeyini bağlar: 360° açıksa GL küreye, değilse normal görünüme. */
-    private fun bindVideo(p: ExoPlayer?) {
+    /** 360° görünümü ekranla birlikte durur/sürer; normal görünümde yüzey kendi geri çağrılarıyla bağlanır. */
+    private fun bindVideo(visible: Boolean) {
         val v = vrView
         if (vr != VrMode.NONE && v != null) {
-            playerView.player = null
-            if (p != null) v.onResume() else v.onPause()
-        } else {
-            playerView.player = p
+            if (visible) v.onResume() else v.onPause()
         }
     }
 
-    private fun detectVr(tracks: Tracks) {
-        val manual = vrManual
-        if (manual != null) return
-        var format: Format? = null
-        for (g in tracks.groups) {
-            if (g.type == C.TRACK_TYPE_VIDEO && g.length > 0) {
-                val idx = (0 until g.length).firstOrNull { g.isTrackSelected(it) } ?: 0
-                format = g.getTrackFormat(idx)
-                break
-            }
-        }
+    private fun detectVr() {
+        if (vrManual != null) return
         val name = titleView.text?.toString().orEmpty()
-        var detected = Vr360.detect(format, name)
+        // MPV-REMOVE: Vr360.detect Media3 Format istiyor; küresel üst veri okuması Faz 6'da (E).
+        var detected = Vr360.detect(null, name)
         if (detected == VrMode.NONE) detected = currentUri?.let { Vr360.saved(this, it.toString()) } ?: VrMode.NONE
         if (detected != vr) setVr(detected, remember = true)
     }
@@ -1612,9 +1456,8 @@ class PlayerActivity : AppCompatActivity() {
             }
             vrView = null
             if (old != VrMode.NONE && ::player.isInitialized) {
-                player.clearVideoSurface()
+                detachVideo()
                 playerView.visibility = View.VISIBLE
-                playerView.player = player
             }
             zoom = 1f
             panX = 0f
@@ -1624,8 +1467,8 @@ class PlayerActivity : AppCompatActivity() {
             if (v == null) {
                 v = Vr360View(this) { sf ->
                     handler.post {
-                        if (sf != null && vr != VrMode.NONE && ::player.isInitialized) player.setVideoSurface(sf)
-                        else if (sf == null && ::player.isInitialized) player.clearVideoSurface()
+                        if (sf != null && vr != VrMode.NONE) attachVideo(sf, vrView?.width ?: 0, vrView?.height ?: 0)
+                        else if (sf == null) detachVideo()
                     }
                 }
                 v.setOnTouchListener(GestureController(this))
@@ -1633,8 +1476,7 @@ class PlayerActivity : AppCompatActivity() {
                 v.setSensorAlt(settings.vrSensorAlt)
                 v.setAutoRotate(settings.vrAutoRotate)
                 vrView = v
-                vrUpdateAspect(player.videoSize)
-                playerView.player = null
+                vrUpdateAspect(player.videoWidth, player.videoHeight)
                 playerView.visibility = View.GONE
                 val parent = playerView.parent as ViewGroup
                 parent.addView(v, parent.indexOfChild(playerView) + 1, FrameLayout.LayoutParams(-1, -1))
@@ -1662,9 +1504,9 @@ class PlayerActivity : AppCompatActivity() {
 
     private var vrOrientationLocked = false
 
-    fun vrUpdateAspect(size: VideoSize) {
+    fun vrUpdateAspect(width: Int, height: Int) {
         val v = vrView ?: return
-        if (size.width > 0 && size.height > 0) v.videoAspect = size.width * size.pixelWidthHeightRatio / size.height
+        if (width > 0 && height > 0) v.videoAspect = width.toFloat() / height
     }
 
     fun vrSetSensor(on: Boolean) {
@@ -1777,14 +1619,14 @@ class PlayerActivity : AppCompatActivity() {
     fun toggleMirror() {
         if (vr != VrMode.NONE) return
         mirror = !mirror
-        applyTransform()
+        applyFlip()
         refreshShortcuts()
     }
 
     fun toggleVerticalFlip() {
         if (vr != VrMode.NONE) return
         vflip = !vflip
-        applyTransform()
+        applyFlip()
         refreshShortcuts()
     }
 
@@ -1794,29 +1636,26 @@ class PlayerActivity : AppCompatActivity() {
         refreshShortcuts()
     }
 
+    /** Ayna ve dikey çevirme: SurfaceView içeriği görünümle çevrilemez, mpv filtresi kullanılır. */
+    private fun applyFlip() {
+        val filters = listOfNotNull("hflip".takeIf { mirror }, "vflip".takeIf { vflip })
+        player.engine.setVideoFilter(if (filters.isEmpty()) "" else "lavfi=[${filters.joinToString(",")}]")
+    }
+
+    /** En-boy, yakınlaştırma ve kaydırma mpv tarafında uygulanır; görüntü yeniden çözülmez. */
     private fun applyTransform() {
-        val surface = playerView.videoSurfaceView ?: return
-        val size = player.videoSize
-        val videoRatio = if (size.height > 0) size.width * size.pixelWidthHeightRatio / size.height else 0f
-        var sx = 1f
-        var sy = 1f
-        val target = aspect.ratio
-        if (target != null && videoRatio > 0f) {
-            if (target > videoRatio) sx = target / videoRatio else sy = videoRatio / target
-        }
-        if (aspect == AspectMode.ORIGINAL && size.width > 0 && size.height > 0 && playerView.width > 0 && playerView.height > 0) {
-            // Görüntü ekrana sığdırılmış hâlinden, videonun kendi piksel boyutuna ölçeklenir.
-            val vw = size.width * size.pixelWidthHeightRatio
-            val fit = minOf(playerView.width / vw, playerView.height / size.height.toFloat())
-            if (fit > 0f) {
-                sx = 1f / fit
-                sy = 1f / fit
-            }
-        }
-        surface.scaleX = sx * zoom * (if (mirror) -1f else 1f)
-        surface.scaleY = sy * zoom * (if (vflip) -1f else 1f)
-        surface.translationX = panX
-        surface.translationY = panY
+        if (!::player.isInitialized) return
+        val e = player.engine
+        fun num(v: Double) = String.format(Locale.ROOT, "%.4f", v)
+        e.setProperty("video-aspect-override", aspect.ratio?.let { num(it.toDouble()) } ?: "no")
+        e.setProperty("keepaspect", if (aspect == AspectMode.FILL) "no" else "yes")
+        e.setProperty("panscan", if (aspect == AspectMode.CROP) "1.0" else "0.0")
+        e.setProperty("video-unscaled", if (aspect == AspectMode.ORIGINAL) "yes" else "no")
+        e.setProperty("video-zoom", num(Math.log(zoom.toDouble()) / Math.log(2.0)))
+        val w = playerView.width.coerceAtLeast(1) * zoom
+        val h = playerView.height.coerceAtLeast(1) * zoom
+        e.setProperty("video-pan-x", num((panX / w).toDouble()))
+        e.setProperty("video-pan-y", num((panY / h).toDouble()))
     }
 
     /** Döndür düğmesi: o an dikeyse yataya, yataysa dikeye geçer (ayardaki varsayılan mod değişmez). */
@@ -1837,11 +1676,10 @@ class PlayerActivity : AppCompatActivity() {
             requestedOrientation = it
             return
         }
-        val size = player.videoSize
         requestedOrientation = when (settings.orientation) {
             OrientationMode.AUTO -> when {
-                size.width == 0 -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                size.width >= size.height -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                player.videoWidth == 0 -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                player.videoWidth >= player.videoHeight -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
             }
             OrientationMode.SENSOR -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
@@ -1863,22 +1701,24 @@ class PlayerActivity : AppCompatActivity() {
         subtitles.applyStyle()
     }
 
-    /** Kare kare ilerleme/geri: duraklatır ve bir kare süresi kadar tam konuma atlar. */
+    /** Kare kare ilerleme/geri: mpv tam bir kare atlar ve duraklı kalır. */
     fun stepFrame(forward: Boolean) {
-        if (player.playbackState == Player.STATE_IDLE) return
+        if (player.isIdle) return
         player.pause()
-        val fps = player.videoFormat?.frameRate?.takeIf { it > 1f } ?: 30f
-        val step = (1000f / fps).roundToInt().coerceAtLeast(1)
-        val dur = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
-        val target = (player.currentPosition + if (forward) step else -step).coerceIn(0L, dur)
-        player.setSeekParameters(SeekParameters.EXACT)
-        player.seekTo(target)
+        player.engine.command(if (forward) "frame-step" else "frame-back-step")
     }
 
-    /** Ses perdesini yarım ton cinsinden ayarlar (hız değişmez). */
+    /** Ses perdesini yarım ton cinsinden ayarlar (hız değişmez). AAR'da rubberband yok. */
     fun setPitchSemitones(st: Int) {
-        val ratio = Math.pow(2.0, st / 12.0).toFloat()
-        player.playbackParameters = player.playbackParameters.withPitch(ratio)
+        val e = player.engine
+        if (st == 0) {
+            e.setProperty("af", "")
+        } else {
+            val rate = e.getProperty("audio-params/samplerate")?.toIntOrNull() ?: 48000
+            val ratio = Math.pow(2.0, st / 12.0)
+            val f = { v: Double -> String.format(Locale.ROOT, "%.6f", v) }
+            e.setProperty("af", "lavfi=[asetrate=${(rate * ratio).toInt()},aresample=$rate,atempo=${f(1.0 / ratio)}]")
+        }
         pitchSemitones = st
     }
 
@@ -1932,7 +1772,7 @@ class PlayerActivity : AppCompatActivity() {
         refreshShortcuts()
         updatePlayButton()
         updateNavButtons()
-        decoderLabel.text = PlayerHolder.effectiveDecoder(this).short
+        decoderLabel.text = effectiveDecoder().short
         shortcutScroll.visibility = if (settings.showShortcuts) View.VISIBLE else View.GONE
         subtitles.applyStyle()
     }
@@ -2158,7 +1998,7 @@ class PlayerActivity : AppCompatActivity() {
         var rotation = 0f
         when (s) {
             Shortcut.SPEED -> {
-                val sp = player.playbackParameters.speed
+                val sp = player.speed
                 glyph = (if (sp == sp.roundToInt().toFloat()) sp.roundToInt().toString() else "%.2f".format(sp).trimEnd('0')) + "X"
                 active = sp != 1f
                 label = Tx.s(R.string.playeracti_037)
@@ -2172,8 +2012,8 @@ class PlayerActivity : AppCompatActivity() {
                 active = abA >= 0
             }
             Shortcut.REPEAT -> {
-                icon = if (player.repeatMode == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat
-                active = player.repeatMode != Player.REPEAT_MODE_OFF
+                icon = if (player.repeatMode == RepeatMode.ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat
+                active = player.repeatMode != RepeatMode.OFF
             }
             Shortcut.SHUFFLE -> active = player.shuffleModeEnabled
             Shortcut.MUTE -> {
@@ -2221,13 +2061,13 @@ class PlayerActivity : AppCompatActivity() {
             Shortcut.SPEED -> menus.showSpeed()
             Shortcut.REPEAT -> {
                 player.repeatMode = when (player.repeatMode) {
-                    Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
-                    Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
-                    else -> Player.REPEAT_MODE_OFF
+                    RepeatMode.OFF -> RepeatMode.ALL
+                    RepeatMode.ALL -> RepeatMode.ONE
+                    else -> RepeatMode.OFF
                 }
                 showHud(when (player.repeatMode) {
-                    Player.REPEAT_MODE_ALL -> Tx.s(R.string.playeracti_040)
-                    Player.REPEAT_MODE_ONE -> "Bu videoyu tekrarla"
+                    RepeatMode.ALL -> Tx.s(R.string.playeracti_040)
+                    RepeatMode.ONE -> "Bu videoyu tekrarla"
                     else -> Tx.s(R.string.playeracti_041)
                 })
                 hideHudSoon()
@@ -2276,11 +2116,11 @@ class PlayerActivity : AppCompatActivity() {
         handler.removeCallbacks(sleepRunnable)
         sleepDeadline = 0L
         sleepAtEnd = false
-        player.pauseAtEndOfMediaItems = false
+        player.pauseAtEndOfItems = false
         when {
             atEnd -> {
                 sleepAtEnd = true
-                player.pauseAtEndOfMediaItems = true
+                player.pauseAtEndOfItems = true
                 toast(Tx.s(R.string.playeracti_046))
             }
             minutes > 0 -> {
@@ -2305,7 +2145,7 @@ class PlayerActivity : AppCompatActivity() {
             when (intent.getIntExtra("pip_action", 0)) {
                 1 -> if (seek) seekRelative(-10_000) else previous()
                 2 -> if (player.isPlaying) player.pause() else player.play()
-                3 -> if (seek) seekRelative(10_000) else if (player.hasNextMediaItem()) player.seekToNextMediaItem()
+                3 -> if (seek) seekRelative(10_000) else if (player.hasNext()) player.seekToNext()
             }
         }
     }
@@ -2330,11 +2170,10 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun pipParams(): PictureInPictureParams? {
         if (Build.VERSION.SDK_INT < 26) return null
-        val size = player.videoSize
         val builder = PictureInPictureParams.Builder()
         runCatching { builder.setActions(pipActions()) }
-        if (size.width > 0 && size.height > 0) {
-            val ratio = (size.width.toFloat() / size.height).coerceIn(0.42f, 2.38f)
+        if (player.videoWidth > 0 && player.videoHeight > 0) {
+            val ratio = (player.videoWidth.toFloat() / player.videoHeight).coerceIn(0.42f, 2.38f)
             builder.setAspectRatio(Rational((ratio * 1000).toInt(), 1000))
         }
         return builder.build()
@@ -2356,25 +2195,33 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     fun takeScreenshot() {
-        val surface = playerView.videoSurfaceView
-        val size = player.videoSize
-        if (surface == null || size.width == 0) {
+        if (player.videoWidth == 0) {
             toast(Tx.s(R.string.playeracti_051))
             return
         }
-        val bmp = Bitmap.createBitmap(size.width, size.height, Bitmap.Config.ARGB_8888)
-        when {
-            surface is TextureView -> {
-                surface.getBitmap(bmp)
-                saveBitmap(bmp)
+        val file = File(cacheDir, "shot_${System.currentTimeMillis()}.png")
+        val engine = player.engine
+        Thread {
+            engine.command("screenshot-to-file", file.path, "video")
+            val bmp = if (file.length() > 0) android.graphics.BitmapFactory.decodeFile(file.path) else null
+            file.delete()
+            runOnUiThread {
+                if (isDestroyed) return@runOnUiThread
+                if (bmp != null) saveBitmap(bmp) else screenshotFromSurface()
             }
-            surface is SurfaceView && Build.VERSION.SDK_INT >= 26 -> {
-                PixelCopy.request(surface, bmp, { result ->
-                    if (result == PixelCopy.SUCCESS) saveBitmap(bmp) else toast(Tx.s(R.string.playeracti_052))
-                }, handler)
-            }
-            else -> toast(Tx.s(R.string.playeracti_053))
+        }.start()
+    }
+
+    /** Doğrudan donanım karesi dosyaya yazılamazsa yüzeyden kopyalanır. */
+    private fun screenshotFromSurface() {
+        if (Build.VERSION.SDK_INT < 26 || vr != VrMode.NONE) {
+            toast(Tx.s(R.string.playeracti_053))
+            return
         }
+        val bmp = Bitmap.createBitmap(player.videoWidth, player.videoHeight, Bitmap.Config.ARGB_8888)
+        PixelCopy.request(playerView, bmp, { result ->
+            if (result == PixelCopy.SUCCESS) saveBitmap(bmp) else toast(Tx.s(R.string.playeracti_052))
+        }, handler)
     }
 
     private fun saveBitmap(bmp: Bitmap) {

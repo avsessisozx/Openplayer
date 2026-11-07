@@ -8,5 +8,6 @@ class OpenPlayerApp : Application() {
         Tx.init(this)
         ThemeManager.install(this)
         BugReport.install(this)
+        MpvPlayer.install()
     }
 }

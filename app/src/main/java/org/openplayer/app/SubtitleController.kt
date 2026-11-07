@@ -5,9 +5,6 @@ import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
-import androidx.media3.common.C
-import androidx.media3.common.Tracks
-import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.text.Cue
 import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.SubtitleView
@@ -110,31 +107,21 @@ class SubtitleController(private val host: PlayerActivity, private val view: Sub
         external = emptyList()
         externalName = null
         clearCues()
-        val p = host.player
-        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
-            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
-            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
-            .build()
+        host.player.engine.setProperty("sid", "no") // MPV-REMOVE: köprü, Faz 2'de A yeniden yazar.
     }
 
-    fun useEmbedded(group: Tracks.Group) {
+    // MPV-REMOVE: köprü. Gömülü altyazıyı şimdilik mpv kendisi çizer; Faz 2'de A yeniden yazar.
+    fun useEmbedded(track: MpvTrack) {
         mode = Mode.EMBEDDED
         external = emptyList()
         externalName = null
         clearCues()
-        val p = host.player
-        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
-            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
-            .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, 0))
-            .build()
+        host.player.engine.setProperty("sid", track.id.toString())
     }
 
     fun useExternal(cues: List<SubCue>, name: String) {
         val p = host.player
-        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
-            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
-            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
-            .build()
+        p.engine.setProperty("sid", "no") // MPV-REMOVE: köprü, Faz 2'de A yeniden yazar.
         mode = Mode.EXTERNAL
         external = cues
         externalName = name
