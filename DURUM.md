@@ -8,7 +8,7 @@ Son güncelleme: 2026-11-07 · Son sürüm: **v1.0.0-beta22** (2026-11-07, ön s
 ## Devam noktası (mpv geçişi)
 > Kota dolup devam edilirse: önce `git fetch --all`, bu bölümü ve `claude/mpv-*` dallarını oku; bitenleri yeniden yapma.
 Güncelleme: 2026-11-07 · Plan: yerel `OpenPlayer-mpv-TEK-PROMPT.md` (hedef sürüm 1.0.0-beta23; ara sürüm yok)
-- **Biten faz:** Faz 0 bitti (G). F'nin başlangıç görevi bitti. Faz 1 sürüyor (G). 2026-11-08 00:48: kota + oturum kesintisinden sonra tüm işçiler kaldıkları yerden sürdürüldü.
+- **Biten faz:** Faz 0 bitti (G). F'nin başlangıç görevi bitti. **Faz 1 bitti ve KABUL** (G, claude/mpv-ana d457a2a). 2026-11-08 00:48: kota + oturum kesintisinden sonra tüm işçiler kaldıkları yerden sürdürüldü.
 - **Ara uçlar (00:48):** ana 396572c (Faz 1 ara), a f96c043 (push yok, wt-a'da yarım), b a438c29, c 42c75c3 (ara), d e88e0d9, e 3d145b3, f bfd17ff. Hiçbiri henüz yönetici tarafından doğrulanmadı.
 - **Karar:** AAR `io.github.abdallahmehiz:mpv-android-lib:0.1.12` + `kotlinx-coroutines-android:1.10.2`. 360° SurfaceTexture yolu çalışıyor, alternatif gerekmiyor. Lisans uyumlu: ikili GPLv3, AGPLv3 ile birleşebilir (hukuki görüş değil).
 - **Yayın öncesi zorunlu:** mpv/FFmpeg vb. karşılık gelen kaynak sunulmalı; uygulama içinde lisans bildirimi + GPLv3 metni olmalı (`docs/mpv-licenses.md`).
@@ -22,8 +22,10 @@ Güncelleme: 2026-11-07 · Plan: yerel `OpenPlayer-mpv-TEK-PROMPT.md` (hedef sü
 - **A (altyazı, Faz 2) KABUL — claude/mpv-a 5ed5ff6:** yönetici doğruladı: yalnız kendi dosyaları, derleme + lint yeşil, EmbeddedSubtitlesTest 12, SubtitleControllerTest 11, SubtitleTranslatorTest 17 geçti. libass, `sub-ass-override=yes`, gömülü altyazı çıkarma (MKV/WebM kendi okuyucu, MP4 MediaExtractor; 34 parçalı 1,5 GB MKV 5,6 sn). **Değişen:** ASS altyazıda boyut/renk ayarı uygulanmaz; "/" italik gömülüde çalışmaz; AVI/TS gömülü altyazı çevrilemez.
 - **Birleştirme denemesi (A+B+C+D+E):** dosya çakışması yok, ana kod derleniyor; A'nın 5ed5ff6 düzeltmesiyle A+B+C+D+E birlikte derleme + lint yeşil, 14 test sınıfı / 172 test, hata 0 (yönetici, yerel).
 - **Kararlar (yönetici):** müzikte `volume`'u MusicController yönetir, `MpvAudio.volumeManagedElsewhere=true`; tutarlılık için MusicController `MpvAudio.volumeFor` (public yapılacak) ile kübik eğri kullanır. 360'ta altyazı `subtitles.overlayOnly=true` (A) — E'nin önerisiyle aynı.
+- **G Faz 1 KABUL — d457a2a:** yönetici doğruladı: derleme + lint + birim test yeşil; CI emülatör [ray] 471e193 ve e265af5 success (ilk koşuda şerit 0 okudu, ikincide 14/14 ok; beta17'deki kararsızlıkla aynı). MpvPlayer + VideoPlayer kuyruğu, PlayerActivity SurfaceView; PlayerHolder, VlcPlayerActivity, akıcılık bekçisi, VLC ayarları silindi; lisans `assets/licenses/` (THIRD_PARTY_NOTICES, GPL-3.0, Apache-2.0); hata raporuna mpv bilgisi (`path` yok). Geçici: `LegacyMusicBridge.kt` (müzik eski ExoPlayer'da, D ile silinir), 7 MPV-REMOVE, Media3 gradle'da (Faz 7). Spike kanıtı `claude/mpv-spike` 65006eb. Doğrulanmayan: gerçek cihaz, 4K, ses parçası menüsü, döndürme, harici ses, ekran görüntüsü.
+- **Birleştirme denemesi G + A–E:** tek çakışma `SubtitleController.kt` (G'nin köprüleri) → A'nın sürümü esas. Diğer dallar temiz.
 - **Plan düzeltmesi:** rubberband yok (perde: asetrate+aresample+atempo); kare sayacı `frame-drop-count`.
-- **Sıradaki adım:** G Faz 1'i bitirir, sonra A–F'yi `claude/mpv-ana`'ya birleştirip bağlama notlarını uygular (Faz 7 öncesi).
+- **Sıradaki adım:** G, A–E'yi `claude/mpv-ana`'ya birleştirip bağlama notlarını uygular + Faz 7 temizliği; sonra F son görev (grep kanıtı, APK içeriği, sürüm notu), tam emülatör, yayın kapısı.
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
