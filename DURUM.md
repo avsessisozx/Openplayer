@@ -3,7 +3,7 @@
 > Claude'un çalışma notu. Yalnızca `durum` dalında durur; `main`'e, README'ye ve sürüm notlarına girmez.
 > Yeni sohbette önce bunu oku, repoyu baştan tarama. Her sürümden sonra güncelle.
 
-Son güncelleme: 2026-11-06 · Son sürüm: **v1.0.0-beta21** (2026-11-06, ön sürüm)
+Son güncelleme: 2026-11-07 · Son sürüm: **v1.0.0-beta22** (2026-11-07, ön sürüm)
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
@@ -90,6 +90,17 @@ Bulgu: kodek paketi (nextlib FFmpeg), libVLC yedeği, çözücü zinciri (HW→H
 - **Doğrulanmadı:** gerçek cihazda (Tab A9+, Mi 10T Pro) sarma hissi ve 4K/360° davranışı; performans modunun gerçek etkisi (küçük beklenir); tam emülatör turu, "360" kontrol noktası bitmedi.
 - Not: Tab A9+ 4K 360 yüksek bitrate/HEVC videoda donanım çözücü sınırı büyük ihtimalle aşılıyor; yazılım çözücüyle de akıcı olmaz. Kullanıcıdan hata mesajı/VLC karşılaştırması bekleniyor.
 - Sıradaki: kullanıcıdan Tab A9+ geri bildirimi (hata mesajı, aynı videonun VLC'de durumu).
+
+## beta22 (2026-11-07)
+İstek: Tab A9+ (SD695) üzerinde 4K HEVC 10-bit (Spider-Man, 3840x1600, 23,976 fps, ~6,4 Mbit/s) takılıyor; MX Player daha az takılarak oynatıyor. Hedef: ağır dosyalarda yazılımla en iyi verim.
+Bulgu (nextlib 1.10.1-0.13.0 kaynağı okundu): FFmpeg thread sayısı zaten `availableProcessors()`. Darboğaz render yolu: her karede `ANativeWindow_lock` + `sws_scale` (10-bit → 8-bit YUV420P, SWS_BILINEAR) TEK iş parçacığında, oynatma iş parçacığını bloke ediyor. Kaynak: `ffvideo.cpp ffmpegRenderFrame`. Uygulama tarafından değiştirilemez; native fork gerekir.
+- `PlaybackStats.kt` (yeni): AnalyticsListener ile çözücü adı ("ffmpeg<sürüm>-<kodek>") + video biçimi; `report()` hata raporuna "Son oynatma" bölümü yazar (biçim, çözücü, çizilen/atlanan kare).
+- `SmoothnessWatchdog`: yalnız yerel dosya + FFmpeg çözücü + 1x hız + oynuyor iken saniyede örnek; 6 sn pencerede atlanan oran >%25 ya da kare hızı <%70 (fps biliniyorsa), art arda 3 kez kötüyse "akıcı değil".
+- `PlayerActivity.checkSmoothness`: akıcı değilse (ayar `smoothSwitch`, varsayılan açık, Ayarlar → Video) `openInVlc(fromError=false)`; motor "yalnız yerleşik" ise yapmaz. Öğe başına bir kez.
+- Metinler 12 dilde: `smooth_title`, `smooth_desc`, `playeracti_smooth_switch`.
+- **Doğrulandı:** CI derleme + birim testleri + lint; kısa emülatör [ray] (14 adım, çökme 0, oynatıcı döngüsü çalıştı). [ayar] koşusu Altyazı→Liste→Tema sayfalarında çökmesiz ilerledi ama "Tema ve görünüm"de takılıp iptal edildi (bilinen sorun); Video sayfasındaki yeni anahtar emülatörde gezilmedi.
+- **Doğrulanmadı:** gerçek cihazda (Tab A9+) bekçinin eşikleri, VLC'ye geçişin gerçekten daha akıcı olması (VLC'nin bu dosyada ne yaptığı bilinmiyor), kare atlama oranı. Çözücü adının cihazda gerçekten "ffmpeg…" ile başladığı (kaynaktan doğrulandı, cihazda görülmedi).
+- Sıradaki (veriye bağlı): kullanıcıdan Tab A9+ hata raporu ("Son oynatma" bölümü). Veri VLC'nin de yetmediğini gösterirse: (a) `VideoDecoderGLSurfaceView` ile YUV çıkış modu (dönüşüm oynatma iş parçacığından çıkar), (b) nextlib native fork (çok iş parçacıklı dönüşüm / loop filter atlama; CI'da FFmpeg derlemesi gerekir, ağır iş).
 
 ## Yarım / sıradaki
 - Kullanıcının kararı: önce uygulama özellik açısından tam ve hatasız olacak
