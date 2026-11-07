@@ -48,7 +48,7 @@ class Vr360PhotoActivity : AppCompatActivity() {
             hide(WindowInsetsCompat.Type.systemBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
-        view = Vr360View(this) { }
+        view = Vr360View(this)
         view.horizonLevel = settings.vrHorizonLevel
         view.setSensorAlt(settings.vrSensorAlt)
         view.setAutoRotate(settings.vrAutoRotate)
