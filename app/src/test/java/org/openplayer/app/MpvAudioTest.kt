@@ -381,6 +381,19 @@ class MpvAudioTest {
     }
 
     @Test
+    fun musicOwnedVolumeIsNeverWritten() {
+        val e = FakeEngine()
+        MpvAudio.volumeManagedElsewhere = true
+        MpvAudio.apply(e, everything.copy(boostPercent = 200))
+        MpvAudio.setGainFactor(0.5f)
+        assertTrue(e.values("volume").isEmpty())
+        assertEquals(listOf(MpvAudio.buildChain(everything)), e.values("af"))
+        MpvAudio.volumeManagedElsewhere = false
+        MpvAudio.apply(e, everything.copy(boostPercent = 200))
+        assertEquals(1, e.values("volume").size)
+    }
+
+    @Test
     fun pitchStateIsClamped() {
         MpvAudio.setPitchSemitones(30)
         assertEquals(12, MpvAudio.pitchSemitones)

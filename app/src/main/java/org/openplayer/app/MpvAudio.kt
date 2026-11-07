@@ -306,7 +306,20 @@ object MpvAudio {
         engine.setProperty("audio-pitch-correction", "yes")
     }
 
+    /**
+     * true iken `volume` özelliğine dokunulmaz: müzik çalarken onu `MusicController` yönetir.
+     * false'a dönünce bir sonraki [apply] ya da [setGainFactor] sesi yeniden yazar.
+     */
+    @Volatile var volumeManagedElsewhere = false
+        set(value) {
+            synchronized(this) {
+                field = value
+                if (!value) writtenVolume = null
+            }
+        }
+
     private fun writeVolume(engine: MpvEngine) {
+        if (volumeManagedElsewhere) return
         val value = volumeFor(boostPercent, gainFactor)
         if (value == writtenVolume) return
         writtenVolume = value
@@ -422,6 +435,7 @@ object MpvAudio {
             boostPercent = 100
             lastSettings = null
         }
+        volumeManagedElsewhere = false
         pitchSemitones = 0
     }
 }
