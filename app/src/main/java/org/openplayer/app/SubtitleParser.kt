@@ -48,6 +48,13 @@ object SubtitleParser {
         }
     }
 
+    /** "/" ile başlayan SRT/WebVTT satırlarını `<i>` ile sarar (mpv'ye verilen kopyada MX tarzı italik). */
+    fun italicSlashMarkup(text: String): String =
+        text.split('\n').joinToString("\n") { line ->
+            val t = line.trimStart()
+            if (t.startsWith("/")) "<i>" + t.substring(1).trimStart() + "</i>" else line
+        }
+
     private const val MAX_CUES = 50_000
     private const val MAX_CUE_CHARS = 2_000
 
@@ -122,6 +129,35 @@ object SubtitleParser {
         return runCatching {
             Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY).trimEnd()
         }.getOrDefault(noAss.replace(Regex("<[^>]*>"), ""))
+    }
+
+    // ---------- Düz metin (gömülü parçalar, Android'e bağlı değil) ----------
+
+    private val htmlTag = Regex("""</?[a-zA-Z][^>]*>""")
+    private val assOverride = Regex("""\{[^}]*\}""")
+
+    /** SRT/WebVTT satırından biçim etiketlerini atar: `<i>`, `<font>`, `{\an8}`, `&amp;`... */
+    fun plainText(raw: String): String =
+        raw.replace("\r\n", "\n").replace('\r', '\n')
+            .replace(assOverride, "")
+            .replace(Regex("""<br\s*/?>""", RegexOption.IGNORE_CASE), "\n")
+            .replace(htmlTag, "")
+            .replace("&nbsp;", " ").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&amp;", "&")
+            .lines().joinToString("\n") { it.trimEnd() }
+            .trim()
+
+    /**
+     * Matroska ASS/SSA bloğu (`ReadOrder,Layer,Style,Name,MarginL,MarginR,MarginV,Effect,Text`)
+     * ya da düz ASS metni: yalnız konuşma metni. Çizim (`\p1`) satırları için null.
+     */
+    fun assEventText(payload: String): String? {
+        val fields = payload.split(',', limit = 9)
+        val body = if (fields.size == 9) fields[8] else payload
+        if (Regex("""\\p[1-9]""").containsMatchIn(body)) return null
+        return body.replace(assOverride, "")
+            .replace("\\N", "\n").replace("\\n", "\n").replace("\\h", " ")
+            .lines().joinToString("\n") { it.trim() }
+            .trim()
     }
 
     // ---------- SSA / ASS ----------
