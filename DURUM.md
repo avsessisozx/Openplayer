@@ -8,12 +8,14 @@ Son güncelleme: 2026-11-07 · Son sürüm: **v1.0.0-beta22** (2026-11-07, ön s
 ## Devam noktası (mpv geçişi)
 > Kota dolup devam edilirse: önce `git fetch --all`, bu bölümü ve `claude/mpv-*` dallarını oku; bitenleri yeniden yapma.
 Güncelleme: 2026-11-07 · Plan: yerel `OpenPlayer-mpv-TEK-PROMPT.md` (hedef sürüm 1.0.0-beta23; ara sürüm yok)
-- **Biten faz:** yok. Ortam hazır: push ve gh çalışıyor; yerelde Gradle 8.13 + JDK 21 ile derleme ve birim test geçti.
-- **Cihaz:** gerçek cihaz bağlı değil (yalnız offline emulator-5554).
-- **Dallar/işçiler:** `claude/mpv-ana` (G: Faz 0+1, başlıyor), `claude/mpv-f` (F: lisans/ABI/CI, başlıyor). A–E: `MpvEngine` commit edilince.
-- **Doğrulanan:** çıkış noktası main eb6c058 yerelde derleniyor.
-- **Doğrulanmayan:** mpv ile ilgili hiçbir şey henüz.
-- **Sıradaki adım:** F ve G raporları.
+- **Biten faz:** Faz 0 bitti (G). F'nin başlangıç görevi bitti. Faz 1 sürüyor (G).
+- **Karar:** AAR `io.github.abdallahmehiz:mpv-android-lib:0.1.12` + `kotlinx-coroutines-android:1.10.2`. 360° SurfaceTexture yolu çalışıyor, alternatif gerekmiyor. Lisans uyumlu: ikili GPLv3, AGPLv3 ile birleşebilir (hukuki görüş değil).
+- **Yayın öncesi zorunlu:** mpv/FFmpeg vb. karşılık gelen kaynak sunulmalı; uygulama içinde lisans bildirimi + GPLv3 metni olmalı (`docs/mpv-licenses.md`).
+- **Dallar/işçiler:** `claude/mpv-ana` (G, Faz 1), `claude/mpv-f` (F bitti, bfd17ff; birleştirilecek; sonda yeniden çağrılacak). `claude/mpv-a/b/c/d/e` f96c043'ten başlıyor (A altyazı, B ses, C ağ, D müzik/sistem, E 360°).
+- **Doğrulanan:** f96c043 yönetici tarafından yerelde derlendi + birim test geçti. CI emülatöründe (x86_64, API 34) mpv yükleme, görüntü, https, `af` filtreleri (prob 9/9 çökmesiz). Yerel emülatörde SurfaceTexture → OES.
+- **Doğrulanmayan:** gerçek cihaz, akıcılık, 4K, API 24, ses kalitesi kulakla, HLS/DASH/RTSP canlı akış.
+- **Plan düzeltmesi:** rubberband yok (perde: asetrate+aresample+atempo); kare sayacı `frame-drop-count`.
+- **Sıradaki adım:** A–E ve G (Faz 1) raporları, sonra birleştirme.
 
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
