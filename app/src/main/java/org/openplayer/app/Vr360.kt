@@ -10,14 +10,25 @@ import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
+import android.net.Uri
+import android.os.Handler
+import android.os.HandlerThread
 import android.view.Surface
 import android.view.SurfaceHolder
-import androidx.media3.common.C
-import androidx.media3.common.Format
+import androidx.media3.common.C // MPV-REMOVE
+import androidx.media3.common.Format // MPV-REMOVE
+import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
+import java.nio.channels.FileChannel
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.cos
@@ -64,21 +75,92 @@ enum class VrMode(val label: String, val lens: VrLens, val stereo: Int) {
 object Vr360 {
     private const val PREFS = "vr360"
 
-    /** Video biçiminden (koddaki gibi) küresel video olup olmadığını anlar; bilmiyorsa NONE. */
-    fun detect(format: Format?, name: String): VrMode {
-        if (format == null) return VrMode.NONE
-        val hasProjection = format.projectionData != null
+    // MPV-REMOVE: yalnız PlayerActivity geçişi için; yerine probe().
+    fun detect(format: Format?, name: String): VrMode { // MPV-REMOVE
+        if (format == null) return VrMode.NONE // MPV-REMOVE
+        val stereo = when (format.stereoMode) { // MPV-REMOVE
+            C.STEREO_MODE_TOP_BOTTOM -> 1 // MPV-REMOVE
+            C.STEREO_MODE_LEFT_RIGHT -> 2 // MPV-REMOVE
+            else -> 0 // MPV-REMOVE
+        } // MPV-REMOVE
+        return modeFor(format.projectionData != null, stereo, name) // MPV-REMOVE
+    } // MPV-REMOVE
+
+    /** Üstveriden kip: küresel değilse NONE; 180° ayrımı üstveride olmadığından dosya adından gelir. */
+    fun modeFor(spherical: Boolean, stereo: Int, name: String): VrMode {
+        if (!spherical) return VrMode.NONE
         val lower = name.lowercase()
         val is180 = "180" in lower || "vr180" in lower
-        val stereo = format.stereoMode
-        if (!hasProjection) return VrMode.NONE
         return when {
-            is180 && stereo == C.STEREO_MODE_TOP_BOTTOM -> VrMode.HALF_TB
-            is180 && stereo == C.STEREO_MODE_LEFT_RIGHT -> VrMode.HALF_SBS
+            is180 && stereo == 1 -> VrMode.HALF_TB
+            is180 && stereo == 2 -> VrMode.HALF_SBS
             is180 -> VrMode.HALF
-            stereo == C.STEREO_MODE_TOP_BOTTOM -> VrMode.FULL_TB
-            stereo == C.STEREO_MODE_LEFT_RIGHT -> VrMode.FULL_SBS
+            stereo == 1 -> VrMode.FULL_TB
+            stereo == 2 -> VrMode.FULL_SBS
             else -> VrMode.FULL
+        }
+    }
+
+    /**
+     * Dosyanın küresel üstverisini okuyup kipi bulur (mpv bu bilgiyi özellik olarak vermez).
+     * [uri]: dosya yolu, `file://`, `content://`, `http(s)://`. SMB/FTP/WebDAV için yerel vekil adresi
+     * verilmelidir. Disk ve ağ okur: ana iş parçacığında çağırmayın. Okunamazsa NONE.
+     */
+    fun probe(context: Context, uri: String, name: String, headers: Map<String, String> = emptyMap()): VrMode {
+        val meta = runCatching { readMeta(context, uri, headers) }.getOrNull() ?: return VrMode.NONE
+        return modeFor(meta.spherical, meta.stereo, name)
+    }
+
+    private fun readMeta(context: Context, uri: String, headers: Map<String, String>): VrVideoMeta? {
+        val u = Uri.parse(uri)
+        return when (u.scheme?.lowercase()) {
+            null -> File(uri).inputStream().channel.use { VrMeta.read(ChannelSource(it)) }
+            "file" -> File(u.path ?: return null).inputStream().channel.use { VrMeta.read(ChannelSource(it)) }
+            "content" -> context.contentResolver.openFileDescriptor(u, "r")?.use { pfd ->
+                java.io.FileInputStream(pfd.fileDescriptor).channel.let { VrMeta.read(ChannelSource(it)) }
+            }
+            "http", "https" -> VrMeta.read(HttpSource(uri, headers))
+            else -> null
+        }
+    }
+
+    private class ChannelSource(private val channel: FileChannel) : VrMeta.Source {
+        override val length: Long = channel.size()
+        override fun read(position: Long, into: ByteArray, count: Int): Int =
+            channel.read(ByteBuffer.wrap(into, 0, count), position)
+    }
+
+    /** Range isteğiyle okur; sunucu Range tanımıyorsa yalnız dosya başı okunabilir. */
+    private class HttpSource(private val url: String, private val headers: Map<String, String>) : VrMeta.Source {
+        override var length: Long = Long.MAX_VALUE
+            private set
+
+        override fun read(position: Long, into: ByteArray, count: Int): Int {
+            val c = URL(url).openConnection() as HttpURLConnection
+            try {
+                c.connectTimeout = 4000
+                c.readTimeout = 4000
+                headers.forEach { (k, v) -> c.setRequestProperty(k, v) }
+                c.setRequestProperty("Range", "bytes=$position-${position + count - 1}")
+                val partial = c.responseCode == 206
+                if (!partial && (c.responseCode != 200 || position > 0)) return -1
+                if (partial) {
+                    c.getHeaderField("Content-Range")?.substringAfterLast('/')?.toLongOrNull()?.let { length = it }
+                } else if (c.contentLengthLong > 0) {
+                    length = c.contentLengthLong
+                }
+                c.inputStream.use { input ->
+                    var done = 0
+                    while (done < count) {
+                        val n = input.read(into, done, count - done)
+                        if (n < 0) break
+                        done += n
+                    }
+                    return if (done == 0) -1 else done
+                }
+            } finally {
+                c.disconnect()
+            }
         }
     }
 
@@ -103,14 +185,403 @@ object Vr360 {
         (saved(context, uri)?.let { it.lens != VrLens.NORMAL } ?: false) || nameLooksSpherical(name)
 }
 
+/** Dosyadan okunan küresel üstveri. [stereo]: 0 = 3B değil, 1 = üst-alt, 2 = yan yana. */
+internal data class VrVideoMeta(val spherical: Boolean, val stereo: Int)
+
 /**
- * Videoyu bir kürenin içinden gösteren GL yüzeyi. ExoPlayer'ın çıktısı [onSurface] ile verilen
+ * MP4 (`sv3d`/`st3d`) ve Matroska/WebM (`Projection`/`StereoMode`) videolarından küresel üstveriyi okur.
+ * Android'e bağlı değildir, birim testle sınanır. Bozuk ya da kesik dosyada null döner.
+ */
+internal object VrMeta {
+    interface Source {
+        /** Bilinmiyorsa [Long.MAX_VALUE]. */
+        val length: Long
+        /** [position] konumundan en çok [count] bayt okur; bittiyse -1. */
+        fun read(position: Long, into: ByteArray, count: Int): Int
+    }
+
+    private const val WINDOW = 64 * 1024
+    private const val MAX_READS = 96
+    private const val MAX_ELEMENTS = 4096
+    private const val MKV_MAGIC = 0x1A45DFA3L
+    private const val MKV_SEGMENT = 0x18538067L
+    private const val MKV_TRACKS = 0x1654AE6BL
+    private const val MKV_CLUSTER = 0x1F43B675L
+    private const val MKV_TRACK_ENTRY = 0xAEL
+    private const val MKV_TRACK_TYPE = 0x83L
+    private const val MKV_VIDEO = 0xE0L
+    private const val MKV_STEREO_MODE = 0x53B8L
+    private const val MKV_PROJECTION = 0x7670L
+    private const val MKV_PROJECTION_TYPE = 0x7671L
+
+    private class Stop : Exception()
+
+    /** Ağ isteği sayısını sınırlayan tek pencerelik okuma tamponu. */
+    private class Reader(private val src: Source) {
+        private val buf = ByteArray(WINDOW)
+        private var start = 0L
+        private var filled = 0
+        private var reads = 0
+        val length: Long get() = src.length
+
+        fun u8(pos: Long): Int {
+            if (pos < start || pos >= start + filled) {
+                if (++reads > MAX_READS) throw Stop()
+                start = pos
+                filled = src.read(pos, buf, WINDOW).coerceAtLeast(0)
+                if (filled == 0) throw Stop()
+            }
+            return buf[(pos - start).toInt()].toInt() and 0xFF
+        }
+
+        fun u32(pos: Long): Long = (0..3).fold(0L) { acc, i -> (acc shl 8) or u8(pos + i).toLong() }
+        fun u64(pos: Long): Long = (0..7).fold(0L) { acc, i -> (acc shl 8) or u8(pos + i).toLong() }
+        fun tag(pos: Long): String = String(CharArray(4) { u8(pos + it).toChar() })
+    }
+
+    fun read(src: Source): VrVideoMeta? = try {
+        val r = Reader(src)
+        if (r.u32(0) == MKV_MAGIC) matroska(r) else mp4(r)
+    } catch (_: Stop) {
+        null
+    }
+
+    // ---------------------------------------------------------------- MP4
+
+    private class Box(val type: String, val body: Long, val end: Long)
+
+    private fun box(r: Reader, pos: Long, limit: Long): Box? {
+        if (pos + 8 > limit) return null
+        val size32 = r.u32(pos)
+        val type = r.tag(pos + 4)
+        val header = if (size32 == 1L) 16L else 8L
+        val size = when (size32) {
+            0L -> limit - pos
+            1L -> r.u64(pos + 8)
+            else -> size32
+        }
+        if (size < header) return null
+        return Box(type, pos + header, if (size > limit - pos) limit else pos + size)
+    }
+
+    /** [from]..[to] arasındaki kutuları gezer; [visit] null dışı dönerse durup onu verir. */
+    private fun <T : Any> boxes(r: Reader, from: Long, to: Long, visit: (Box) -> T?): T? {
+        var pos = from
+        repeat(MAX_ELEMENTS) {
+            val b = box(r, pos, to) ?: return null
+            visit(b)?.let { return it }
+            pos = b.end
+        }
+        return null
+    }
+
+    private fun child(r: Reader, parent: Box, type: String): Box? =
+        boxes(r, parent.body, parent.end) { b -> b.takeIf { it.type == type } }
+
+    private fun mp4(r: Reader): VrVideoMeta? {
+        val moov = boxes(r, 0L, r.length) { b -> b.takeIf { it.type == "moov" } } ?: return null
+        return boxes(r, moov.body, moov.end) { trak ->
+            if (trak.type == "trak") videoTrack(r, trak) else null
+        }
+    }
+
+    private fun videoTrack(r: Reader, trak: Box): VrVideoMeta? {
+        val mdia = child(r, trak, "mdia") ?: return null
+        val hdlr = child(r, mdia, "hdlr") ?: return null
+        if (r.tag(hdlr.body + 8) != "vide") return null
+        val minf = child(r, mdia, "minf") ?: return null
+        val stbl = child(r, minf, "stbl") ?: return null
+        val stsd = child(r, stbl, "stsd") ?: return null
+        // stsd: 8 bayt sürüm + sayı; görsel örnek girişinde alt kutular başlıktan 78 bayt sonra başlar.
+        val entry = box(r, stsd.body + 8, stsd.end) ?: return null
+        var spherical = false
+        var stereo = 0
+        boxes<Unit>(r, entry.body + 78, entry.end) { b ->
+            when (b.type) {
+                "sv3d" -> spherical = child(r, b, "proj") != null
+                "st3d" -> stereo = when (r.u8(b.body + 4)) {
+                    1 -> 1
+                    2 -> 2
+                    else -> 0
+                }
+            }
+            null
+        }
+        return VrVideoMeta(spherical, stereo)
+    }
+
+    // ---------------------------------------------------------------- Matroska
+
+    private class Element(val id: Long, val body: Long, val end: Long)
+
+    private fun vintLength(first: Int): Int {
+        if (first == 0) throw Stop()
+        return Integer.numberOfLeadingZeros(first) - 23
+    }
+
+    private fun element(r: Reader, pos: Long, limit: Long): Element? {
+        if (pos >= limit) return null
+        val idLen = vintLength(r.u8(pos))
+        if (idLen > 4) return null
+        val id = (0 until idLen).fold(0L) { acc, i -> (acc shl 8) or r.u8(pos + i).toLong() }
+        val sizePos = pos + idLen
+        val sizeLen = vintLength(r.u8(sizePos))
+        val mask = (1L shl (8 - sizeLen)) - 1
+        var size = r.u8(sizePos).toLong() and mask
+        var unknown = size == mask
+        for (i in 1 until sizeLen) {
+            val b = r.u8(sizePos + i).toLong()
+            unknown = unknown && b == 0xFFL
+            size = (size shl 8) or b
+        }
+        val body = sizePos + sizeLen
+        return Element(id, body, if (unknown || size > limit - body) limit else body + size)
+    }
+
+    private fun <T : Any> elements(r: Reader, from: Long, to: Long, visit: (Element) -> T?): T? {
+        var pos = from
+        repeat(MAX_ELEMENTS) {
+            val e = element(r, pos, to) ?: return null
+            visit(e)?.let { return it }
+            pos = e.end
+        }
+        return null
+    }
+
+    private fun uint(r: Reader, e: Element): Long =
+        (e.body until e.end).fold(0L) { acc, p -> (acc shl 8) or r.u8(p).toLong() }
+
+    private fun matroska(r: Reader): VrVideoMeta? {
+        val ebml = element(r, 0L, r.length) ?: return null
+        val segment = elements(r, ebml.end, r.length) { e -> e.takeIf { it.id == MKV_SEGMENT } } ?: return null
+        val tracks = elements(r, segment.body, segment.end) { e ->
+            when (e.id) {
+                MKV_TRACKS -> e
+                MKV_CLUSTER -> throw Stop() // Tracks kümelerden önce gelir; yoksa aramayı uzatma.
+                else -> null
+            }
+        } ?: return null
+        return elements(r, tracks.body, tracks.end) { e ->
+            if (e.id == MKV_TRACK_ENTRY) matroskaVideo(r, e) else null
+        }
+    }
+
+    private fun matroskaVideo(r: Reader, entry: Element): VrVideoMeta? {
+        var isVideo = false
+        var video: Element? = null
+        elements<Unit>(r, entry.body, entry.end) { e ->
+            when (e.id) {
+                MKV_TRACK_TYPE -> isVideo = uint(r, e) == 1L
+                MKV_VIDEO -> video = e
+            }
+            null
+        }
+        val v = video?.takeIf { isVideo } ?: return null
+        var spherical = false
+        var stereo = 0
+        elements<Unit>(r, v.body, v.end) { e ->
+            when (e.id) {
+                MKV_STEREO_MODE -> stereo = when (uint(r, e)) {
+                    1L -> 2 // yan yana (sol göz önce)
+                    3L -> 1 // üst-alt (sol göz önce)
+                    else -> 0
+                }
+                MKV_PROJECTION -> elements<Unit>(r, e.body, e.end) { p ->
+                    if (p.id == MKV_PROJECTION_TYPE) spherical = uint(r, p) in 1L..3L
+                    null
+                }
+            }
+            null
+        }
+        return VrVideoMeta(spherical, stereo)
+    }
+}
+
+/** [Vr360View]'ın görüntü çıkışı. Yöntemler görünümün işçi iş parçacığında, sırayla çağrılır. */
+interface VrVideoOutput {
+    /** Aynı [surface] yeniden gelirse yalnız boyut değişmiştir. */
+    fun attach(surface: Surface, width: Int, height: Int)
+    fun detach()
+}
+
+/** 360° görüntüsünü mpv motoruna bağlar. */
+class MpvVrOutput(private val engine: MpvEngine) : VrVideoOutput {
+    override fun attach(surface: Surface, width: Int, height: Int) = engine.attachSurface(surface, width, height)
+    override fun detach() = engine.detachSurface()
+}
+
+/**
+ * Yüzey ile motor arasındaki sırayı tek yerde tutar: istenen durum yazılır, [runner] üzerinde asıl
+ * duruma getirilir. Eski yüzey her zaman önce ayrılır, sonra serbest bırakılır, sonra yenisi
+ * bağlanır (bağlıyken serbest bırakılan yüzey MediaCodec ve EGL hatası üretir).
+ * Android'e bağlı değildir, birim testle sınanır.
+ */
+internal class VrSurfaceLink<S : Any>(
+    private val runner: (Runnable) -> Unit,
+    private val attach: (S, Int, Int) -> Unit,
+    private val detach: () -> Unit,
+    private val retire: (S) -> Unit,
+) {
+    private var wanted: S? = null
+    private var wantedW = 0
+    private var wantedH = 0
+    private var maxSize = 0
+    private val retiring = ArrayList<S>()
+    // Yalnız runner üzerinde kullanılır.
+    private var attached: S? = null
+    private var attachedW = 0
+    private var attachedH = 0
+
+    fun surfaceReady(surface: S) = change {
+        if (wanted !== surface) wanted?.let { retiring += it }
+        wanted = surface
+    }
+
+    fun surfaceLost() = change {
+        wanted?.let { retiring += it }
+        wanted = null
+    }
+
+    fun videoSize(width: Int, height: Int) = change {
+        wantedW = width
+        wantedH = height
+    }
+
+    fun maxTextureSize(size: Int) = change { maxSize = size }
+
+    private inline fun change(block: () -> Unit) {
+        synchronized(this, block)
+        runner(Runnable { reconcile() })
+    }
+
+    private fun reconcile() {
+        val surface: S?
+        val size: Pair<Int, Int>
+        val done: List<S>
+        synchronized(this) {
+            surface = wanted
+            size = fitSize(wantedW, wantedH, maxSize)
+            done = retiring.toList()
+            retiring.clear()
+        }
+        if (attached != null && attached !== surface) {
+            attached = null
+            detach()
+        }
+        done.forEach(retire)
+        if (surface == null) return
+        val (w, h) = size
+        if (attached !== surface || w != attachedW || h != attachedH) {
+            attach(surface, w, h)
+            attached = surface
+            attachedW = w
+            attachedH = h
+        }
+    }
+
+    /** Sıradaki işler bitene dek bekler; [timeoutMs] içinde bitmezse false. */
+    fun flush(timeoutMs: Long): Boolean {
+        val latch = CountDownLatch(1)
+        runner(Runnable { latch.countDown() })
+        return latch.await(timeoutMs, TimeUnit.MILLISECONDS)
+    }
+
+    companion object {
+        /** Video boyutu henüz bilinmezken; boyut gelince düzeltilir. */
+        const val FALLBACK_W = 1920
+        const val FALLBACK_H = 1080
+
+        /** Küre dokusu video boyutunda olur; GL sınırını aşarsa oran korunarak küçülür. */
+        fun fitSize(width: Int, height: Int, max: Int): Pair<Int, Int> {
+            val known = width > 0 && height > 0
+            val w = if (known) width else FALLBACK_W
+            val h = if (known) height else FALLBACK_H
+            val longest = maxOf(w, h)
+            if (max <= 0 || longest <= max) return w to h
+            return (w.toLong() * max / longest).toInt().coerceAtLeast(1) to (h.toLong() * max / longest).toInt().coerceAtLeast(1)
+        }
+    }
+}
+
+/** Bir SurfaceTexture ile yüzeyi; ikisi birlikte ve bir kez serbest kalır. */
+private class VideoTexture(val texture: SurfaceTexture) {
+    val surface = Surface(texture)
+    /** Çizilmeyi bekleyen kare sayısı. */
+    val pending = AtomicInteger(0)
+    private var released = false
+
+    /**
+     * Bekleyen tüm kareleri alıp dönüşüm matrisini yazar; doku bittiyse false.
+     * Biri alınmazsa kuyruk dolar ve mpv'nin çıktı iş parçacığı boş tampon beklerken takılır.
+     */
+    @Synchronized
+    fun latest(matrix: FloatArray): Boolean {
+        if (released) return false
+        repeat(pending.getAndSet(0).coerceAtLeast(1)) { runCatching { texture.updateTexImage() } }
+        texture.getTransformMatrix(matrix)
+        return true
+    }
+
+    @Synchronized
+    fun resize(width: Int, height: Int) {
+        if (!released) texture.setDefaultBufferSize(width, height)
+    }
+
+    /** Fotoğraf modu: bitmap'i yüzeye çizer (video karesi gibi küreye uygulanır). */
+    @Synchronized
+    fun drawBitmap(bmp: android.graphics.Bitmap) {
+        if (released) return
+        texture.setDefaultBufferSize(bmp.width, bmp.height)
+        val c = surface.lockCanvas(null)
+        c.drawBitmap(bmp, 0f, 0f, null)
+        surface.unlockCanvasAndPost(c)
+    }
+
+    @Synchronized
+    fun release() {
+        if (released) return
+        released = true
+        surface.release()
+        texture.release()
+    }
+}
+
+/**
+ * Videoyu bir kürenin içinden gösteren GL yüzeyi. mpv'nin çıktısı [output] ile motora bağlanan
  * yüzeye yazılır; bakış yönü [yaw]/[pitch]/[fov] ile (veya hareket sensörüyle) değişir.
  *
  * [cardboard] açıkken ekran ikiye bölünür: her göz için küre ayrı çizilir ve lens için
  * barrel (fıçı) ön-distorsiyonu uygulanır; böylece telefon bir VR gözlüğüne yerleştirilebilir.
+ *
+ * Yüzey kuralları (mpv'nin takılmaması için):
+ * - mpv `vo=gpu` ile EGL üzerinden yazar; tampon boyutunu `SurfaceTexture.setDefaultBufferSize`
+ *   belirler, verilmezse 1x1 kalır. Bu yüzden [setVideoSize] önce dokuyu, sonra mpv'yi boyutlar.
+ * - Tüketici kareleri almazsa mpv'nin çıktı iş parçacığı takılır ve `detachSurface` da onu bekler.
+ *   Bu yüzden ayırma GL iş parçacığı hâlâ çizerken yapılır (`onPause` ve `surfaceDestroyed` içinde
+ *   `super`den önce), motor çağrısı GL ya da ana iş parçacığında yapılmaz (işçi iş parçacığı) ve
+ *   kare bildirimi ana iş parçacığına bağlı değildir.
+ * - Süre aşılırsa doku bırakılır: üretici hata alır ve mpv takılmaktan kurtulur.
  */
-class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : GLSurfaceView(context), SensorEventListener {
+class Vr360View(context: Context, private val output: VrVideoOutput? = null) : GLSurfaceView(context), SensorEventListener {
+
+    // MPV-REMOVE: PlayerActivity geçişi için eski geri çağrı; yerine MpvVrOutput.
+    constructor(context: Context, onSurface: (Surface?) -> Unit) : this(context, object : VrVideoOutput { // MPV-REMOVE
+        override fun attach(surface: Surface, width: Int, height: Int) = onSurface(surface) // MPV-REMOVE
+        override fun detach() = onSurface(null) // MPV-REMOVE
+    }) // MPV-REMOVE
+
+    private val link = VrSurfaceLink<VideoTexture>(
+        runner = { outputWorker.execute(it) },
+        attach = { t, w, h ->
+            if (output != null) {
+                // Önce doku: mpv boyutu değiştirince EGL yüzeyi yeni tamponu almalı.
+                t.resize(w, h)
+                output.attach(t.surface, w, h)
+            }
+        },
+        detach = { output?.detach() },
+        retire = { it.release() },
+    )
 
     @Volatile var yaw = 0f
     @Volatile var pitch = 0f
@@ -269,6 +740,13 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
 
     val sensorEnabled get() = useSensor
 
+    /** Videonun gösterim boyutu ([MpvEvent.VideoSizeChanged]). Küre dokusu bu boyutta olur. */
+    fun setVideoSize(width: Int, height: Int) {
+        if (width <= 0 || height <= 0) return
+        videoAspect = width.toFloat() / height
+        link.videoSize(width, height)
+    }
+
     private fun updateSensor() {
         val want = useSensor && isAttachedToWindow
         if (want == sensorOn) return
@@ -320,7 +798,7 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        onSurface(null)
+        releaseOutput()
         super.surfaceDestroyed(holder)
     }
 
@@ -329,8 +807,22 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             sensors.unregisterListener(this)
             sensorOn = false
         }
-        onSurface(null)
+        releaseOutput()
         super.onPause()
+    }
+
+    /**
+     * Motoru yüzeyden ayırır ve dokuyu bırakır. GL iş parçacığı bu sırada kare almayı sürdürür.
+     * Dönünce motor bu yüzeyden ayrılmıştır, başka yüzey bağlanabilir.
+     */
+    private fun releaseOutput() {
+        val t = renderer.currentTexture ?: return
+        link.surfaceLost()
+        if (!link.flush(DETACH_WAIT_MS)) {
+            android.util.Log.w("Vr360View", "detach timed out, abandoning surface")
+            t.release()
+        }
+        renderer.currentTexture = null
     }
 
     override fun onResume() {
@@ -341,9 +833,8 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
     private inner class Renderer : GLSurfaceView.Renderer {
         private var program = 0
         private var texId = 0
-        private var st: SurfaceTexture? = null
-        private var surface: Surface? = null
-        private val texMatrix = FloatArray(16)
+        @Volatile var currentTexture: VideoTexture? = null
+        private val texMatrix = FloatArray(16).also { Matrix.setIdentityM(it, 0) }
         private val proj = FloatArray(16)
         private val view = FloatArray(16)
         private val mvp = FloatArray(16)
@@ -444,9 +935,8 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         }
 
         override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-            st?.release()
-            surface?.release()
-            // GL bağlamı yeniden oluştu: eski FBO kimlikleri geçersiz.
+            // GL bağlamı yeniden oluştu: eski doku ve FBO kimlikleri geçersiz.
+            texId = 0
             fbo = 0
             fboTex = 0
             fboW = 0
@@ -478,6 +968,19 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             q.position(0)
             quad = q
 
+            val max = IntArray(1)
+            GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, max, 0)
+            link.maxTextureSize(max[0])
+
+            createTexture()
+        }
+
+        /**
+         * Dış dokuyu ve mpv'nin yazacağı yüzeyi kurar. Önceki doku hâlâ bağlı olabilir (GL bağlamı
+         * kaybı): [link] onu önce ayırır, sonra serbest bırakır.
+         */
+        private fun createTexture() {
+            if (texId != 0) GLES20.glDeleteTextures(1, intArrayOf(texId), 0)
             val ids = IntArray(1)
             GLES20.glGenTextures(1, ids, 0)
             texId = ids[0]
@@ -487,14 +990,17 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
             GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
 
-            val tex = SurfaceTexture(texId)
-            tex.setOnFrameAvailableListener { requestRender() }
-            st = tex
-            val sf = Surface(tex)
-            surface = sf
+            val t = VideoTexture(SurfaceTexture(texId))
+            // Bu iş parçacığında Looper yok: işleyici verilmezse bildirim ana iş parçacığına gider ve
+            // ana iş parçacığı motoru beklerken kareler alınmaz.
+            t.texture.setOnFrameAvailableListener({
+                t.pending.incrementAndGet()
+                requestRender()
+            }, frameHandler)
+            currentTexture = t
             meshKeyBuilt = ""
             buildMesh()
-            post { onSurface(sf) }
+            link.surfaceReady(t)
             if (photo != null) drawPhoto()
         }
 
@@ -502,6 +1008,8 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             surfaceW = width
             surfaceH = height
             aspect = width.toFloat() / height.coerceAtLeast(1)
+            // GL bağlamı korunarak yüzey geri geldi: bırakılan doku yeniden kurulur.
+            if (currentTexture == null) createTexture()
         }
 
         /** Göz başına ara dokuyu (FBO) istenen boyutta hazırlar; boyut değişince yeniden kurar. */
@@ -531,9 +1039,8 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
         }
 
         override fun onDrawFrame(gl: GL10?) {
-            val tex = st ?: return
-            runCatching { tex.updateTexImage() }
-            tex.getTransformMatrix(texMatrix)
+            val tex = currentTexture ?: return
+            if (!tex.latest(texMatrix)) return
 
             if (meshKey() != meshKeyBuilt) buildMesh()
 
@@ -742,18 +1249,22 @@ class Vr360View(context: Context, private val onSurface: (Surface?) -> Unit) : G
             indexCount = lonSteps * latSteps * 6
         }
 
-        /** Fotoğraf modu: bitmap'i SurfaceTexture'a çizer (video karesi gibi küreye uygulanır). */
+        /** Fotoğraf modu: bitmap'i dokuya çizer. */
         fun drawPhoto() {
             val b = photo ?: return
-            val tex = st ?: return
-            val sf = surface ?: return
-            runCatching {
-                tex.setDefaultBufferSize(b.width, b.height)
-                val c = sf.lockCanvas(null)
-                c.drawBitmap(b, 0f, 0f, null)
-                sf.unlockCanvasAndPost(c)
-            }
+            val tex = currentTexture ?: return
+            runCatching { tex.drawBitmap(b) }
             requestRender()
         }
+    }
+
+    private companion object {
+        const val DETACH_WAIT_MS = 2000L
+
+        /** Motor çağrıları: mpv beklerken ana ve GL iş parçacığı durmaz. */
+        val outputWorker = Executors.newSingleThreadExecutor { r -> Thread(r, "vr360-output").apply { isDaemon = true } }
+
+        /** Kare bildirimleri: ana iş parçacığı meşgulken de sürer. */
+        val frameHandler: Handler by lazy { Handler(HandlerThread("vr360-frames").apply { start() }.looper) }
     }
 }
