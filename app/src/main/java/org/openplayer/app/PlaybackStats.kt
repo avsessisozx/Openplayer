@@ -14,8 +14,21 @@ object PlaybackStats {
         "decoder-frame-drop-count", "frame-drop-count",
     )
 
+    private val busy = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
+     * Özellikleri arka planda okur: her okuma mpv çekirdeğinin kilidini bekler, ana iş parçacığında
+     * saniyede 17 okuma yavaş cihazda dokunuşları ve kare çizimini geciktirir. Önceki okuma sürüyorsa atlanır.
+     */
     fun update(engine: MpvEngine) {
-        lastReport = format(PROPERTIES.associateWith { engine.getProperty(it) })
+        if (!busy.compareAndSet(false, true)) return
+        Thread({
+            try {
+                if (!engine.isReleased) lastReport = format(PROPERTIES.associateWith { engine.getProperty(it) })
+            } finally {
+                busy.set(false)
+            }
+        }, "mpv-stats").start()
     }
 
     /** Eksik değer "?" yazılır; yazılım ya da donanım çözme bilgisi `hwdec-current`ten çıkar. */
