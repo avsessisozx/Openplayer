@@ -5,6 +5,16 @@
 
 Son güncelleme: 2026-11-07 · Son sürüm: **v1.0.0-beta22** (2026-11-07, ön sürüm)
 
+## Devam noktası (mpv geçişi)
+> Kota dolup devam edilirse: önce `git fetch --all`, bu bölümü ve `claude/mpv-*` dallarını oku; bitenleri yeniden yapma.
+Güncelleme: 2026-11-07 · Plan: yerel `OpenPlayer-mpv-TEK-PROMPT.md` (hedef sürüm 1.0.0-beta23; ara sürüm yok)
+- **Biten faz:** yok. Ortam hazır: push ve gh çalışıyor; yerelde Gradle 8.13 + JDK 21 ile derleme ve birim test geçti.
+- **Cihaz:** gerçek cihaz bağlı değil (yalnız offline emulator-5554).
+- **Dallar/işçiler:** `claude/mpv-ana` (G: Faz 0+1, başlıyor), `claude/mpv-f` (F: lisans/ABI/CI, başlıyor). A–E: `MpvEngine` commit edilince.
+- **Doğrulanan:** çıkış noktası main eb6c058 yerelde derleniyor.
+- **Doğrulanmayan:** mpv ile ilgili hiçbir şey henüz.
+- **Sıradaki adım:** F ve G raporları.
+
 ## Ne yapıyor
 Açık kaynak Android video + müzik oynatıcı. Hedef: MX Player'daki özellikleri kendi kodumuzla sunmak.
 
