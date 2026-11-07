@@ -1,0 +1,9 @@
+sw-gpu gpu android no surface h264.mp4
+sw-gpu-next gpu-next android no surface h264.mp4
+mc-gpu gpu android mediacodec surface h264.mp4
+mccopy-gpu gpu android mediacodec-copy surface h264.mp4
+embed mediacodec_embed android mediacodec surface h264.mp4
+sw-hevc10 gpu android no surface hevc10.mkv
+tex-gpu gpu android no texture h264.mp4
+tex-gpu-next gpu-next android no texture h264.mp4
+https-tls gpu android no surface https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4
