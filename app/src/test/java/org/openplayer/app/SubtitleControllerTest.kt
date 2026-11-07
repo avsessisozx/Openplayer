@@ -14,7 +14,7 @@ import java.io.File
 import java.nio.file.Files
 
 /** Sahte motor: yazılan özellikleri ve komutları kaydeder. */
-class FakeEngine : MpvEngine {
+class SubtitleFakeEngine : MpvEngine {
     val props = LinkedHashMap<String, String>()
     val commands = ArrayList<List<String>>()
     val watchers = HashMap<String, (String?) -> Unit>()
@@ -55,7 +55,7 @@ class FakeEngine : MpvEngine {
 }
 
 class SubtitleControllerTest {
-    private lateinit var engine: FakeEngine
+    private lateinit var engine: SubtitleFakeEngine
     private lateinit var dir: File
     private var style = SubtitleStyle()
     private val shown = ArrayList<String>()
@@ -86,7 +86,7 @@ class SubtitleControllerTest {
     @Before
     fun setUp() {
         TestStrings.installTurkish()
-        engine = FakeEngine()
+        engine = SubtitleFakeEngine()
         dir = Files.createTempDirectory("subs").toFile()
     }
 
