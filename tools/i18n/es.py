@@ -1094,4 +1094,7 @@ S = {
 'perfmode_desc': 'Pide al dispositivo que mantenga el procesador rápido mientras se reproduce un vídeo. Ayuda a que los vídeos pesados en 4K/360° se entrecorten menos. Gasta más batería y puede calentar el dispositivo. No puede superar el límite del hardware.',
 'playeracti_hwlimit': 'Este vídeo (%1$s) supera lo que este dispositivo puede reproducir con fluidez (%2$s). Prueba el motor VLC o el decodificador por software en los ajustes, activa el Modo de rendimiento o usa una copia de menor resolución.',
 'playeracti_unknown': 'formato desconocido',
+'smooth_title': 'Cambiar a VLC si se entrecorta',
+'smooth_desc': 'Si un vídeo local pesado (p. ej. 4K de 10 bits) pierde fotogramas continuamente con el decodificador por software, la reproducción continúa en el motor VLC desde la misma posición. No tiene efecto si el motor está fijado al reproductor integrado.',
+'playeracti_smooth_switch': 'La reproducción con el decodificador por software se entrecorta; cambiando al motor VLC',
 }

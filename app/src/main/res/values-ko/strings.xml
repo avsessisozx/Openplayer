@@ -1096,4 +1096,7 @@
     <string name="perfmode_desc">동영상을 재생하는 동안 기기가 프로세서를 빠르게 유지하도록 요청합니다. 무거운 4K/360° 동영상의 끊김을 줄여 줍니다. 배터리를 더 쓰고 기기가 뜨거워질 수 있습니다. 하드웨어의 한계는 넘을 수 없습니다.</string>
     <string name="playeracti_hwlimit">이 동영상(%1$s)은 이 기기가 매끄럽게 재생할 수 있는 범위를 넘습니다(%2$s). 설정에서 VLC 엔진이나 소프트웨어 디코더를 시도하거나, 성능 모드를 켜거나, 해상도가 낮은 사본을 사용하세요.</string>
     <string name="playeracti_unknown">알 수 없는 형식</string>
+    <string name="smooth_title">끊기면 VLC로 전환</string>
+    <string name="smooth_desc">무거운 로컬 동영상(예: 4K 10비트)이 소프트웨어 디코더에서 계속 프레임을 놓치면 같은 위치에서 VLC 엔진으로 이어서 재생합니다. 재생 엔진이 내장 플레이어로 고정되어 있으면 적용되지 않습니다.</string>
+    <string name="playeracti_smooth_switch">소프트웨어 디코더로 재생이 끊겨 VLC 엔진으로 전환합니다</string>
 </resources>

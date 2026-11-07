@@ -1094,4 +1094,7 @@ S = {
 'perfmode_desc': 'Pede ao dispositivo para manter o processador rápido durante a reprodução. Ajuda vídeos pesados em 4K/360° a travar menos. Gasta mais bateria e pode aquecer o dispositivo. Não ultrapassa o limite do hardware.',
 'playeracti_hwlimit': 'Este vídeo (%1$s) está além do que este dispositivo consegue reproduzir com fluidez (%2$s). Experimente o mecanismo VLC ou o decodificador por software nas configurações, ative o Modo de desempenho ou use uma cópia de resolução menor.',
 'playeracti_unknown': 'formato desconhecido',
+'smooth_title': 'Mudar para o VLC se travar',
+'smooth_desc': 'Se um vídeo local pesado (ex.: 4K de 10 bits) perde quadros continuamente com o decodificador por software, a reprodução continua no mecanismo VLC a partir da mesma posição. Sem efeito se o mecanismo estiver fixado no player integrado.',
+'playeracti_smooth_switch': 'A reprodução trava com o decodificador por software; mudando para o mecanismo VLC',
 }

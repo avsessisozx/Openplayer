@@ -1094,4 +1094,7 @@ S = {
 'perfmode_desc': "Demande à l'appareil de garder le processeur rapide pendant la lecture. Réduit les saccades des vidéos lourdes en 4K/360°. Consomme plus de batterie et peut chauffer l'appareil. Ne dépasse pas la limite du matériel.",
 'playeracti_hwlimit': 'Cette vidéo (%1$s) dépasse ce que cet appareil peut lire de façon fluide (%2$s). Essayez le moteur VLC ou le décodeur logiciel dans les réglages, activez le Mode performance ou utilisez une copie en plus basse résolution.',
 'playeracti_unknown': 'format inconnu',
+'smooth_title': 'Passer à VLC en cas de saccades',
+'smooth_desc': 'Si une vidéo locale lourde (p. ex. 4K 10 bits) perd sans cesse des images avec le décodeur logiciel, la lecture continue dans le moteur VLC à la même position. Sans effet si le moteur est limité au lecteur intégré.',
+'playeracti_smooth_switch': 'La lecture saccade avec le décodeur logiciel, passage au moteur VLC',
 }

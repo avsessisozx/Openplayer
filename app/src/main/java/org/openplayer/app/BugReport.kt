@@ -40,6 +40,11 @@ object BugReport {
         prefs(c).edit().putString("last_translate", "${stamp()}\n$text".take(12000)).apply()
     }
 
+    /** Son oynatmanın ölçümleri (video biçimi, çözücü, atlanan kare); rapora girer. */
+    fun notePlayback(c: Context, text: String) {
+        prefs(c).edit().putString("last_playback", "${stamp()}\n$text".take(4000)).apply()
+    }
+
     @Suppress("DEPRECATION")
     private fun versionCodeOf(pi: android.content.pm.PackageInfo): Long =
         if (Build.VERSION.SDK_INT >= 28) pi.longVersionCode else pi.versionCode.toLong()
@@ -83,6 +88,10 @@ object BugReport {
         val p = prefs(app)
         sb.append(Tx.s(R.string.bugreport_007))
         sb.append(p.getString("last_translate", null) ?: Tx.s(R.string.bugreport_008)).append('\n')
+
+        sb.append("\n--- Son oynatma ---\n")
+        val live = PlaybackStats.lastReport
+        sb.append(if (live.isNotEmpty()) live else (p.getString("last_playback", null) ?: "(henüz video oynatılmadı)")).append('\n')
 
         sb.append(Tx.s(R.string.bugreport_009))
         sb.append(p.getString("last_crash", null) ?: Tx.s(R.string.bugreport_010)).append('\n')
