@@ -15,8 +15,6 @@ import android.widget.ScrollView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 
 /** "Çalıyor" ekranı: kapak, ilerleme, denetimler, kuyruk, uyku zamanlayıcısı, ses ayarları. */
 class NowPlayingActivity : AppCompatActivity() {
@@ -37,7 +35,6 @@ class NowPlayingActivity : AppCompatActivity() {
     private lateinit var lyricsScroll: ScrollView
     private lateinit var lyricsBox: LinearLayout
     private lateinit var artFrame: android.widget.FrameLayout
-    private var library: Map<String, MusicTrack> = emptyMap()
     private var lyricLines: List<LyricLine>? = null
     private var lyricViews: List<TextView> = emptyList()
     private var lyricIndex = -1
@@ -46,11 +43,7 @@ class NowPlayingActivity : AppCompatActivity() {
     private var dragging = false
     private var lastMediaId: String? = null
 
-    private val player: Player? get() = PlayerHolder.player
-
-    private val listener = object : Player.Listener {
-        override fun onEvents(player: Player, events: Player.Events) = refresh()
-    }
+    private val listener: () -> Unit = { refresh() }
 
     private val ticker = object : Runnable {
         override fun run() {
@@ -81,30 +74,19 @@ class NowPlayingActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val p = PlayerHolder.player
-        if (p == null || !MusicController.isMusic(p.currentMediaItem)) {
+        if (!MusicController.isActive) {
             finish()
             return
         }
-        p.addListener(listener)
+        MusicController.addListener(listener)
+        lastMediaId = null
         refresh()
         handler.post(ticker)
-        val app = applicationContext
-        Thread {
-            val map = MusicRepository.loadAll(app).associateBy { it.id.toString() }
-            runOnUiThread {
-                if (!isFinishing && !isDestroyed) {
-                    library = map
-                    lastMediaId = null
-                    refresh()
-                }
-            }
-        }.start()
     }
 
     override fun onStop() {
         handler.removeCallbacks(ticker)
-        PlayerHolder.player?.removeListener(listener)
+        MusicController.removeListener(listener)
         super.onStop()
     }
 
@@ -183,12 +165,12 @@ class NowPlayingActivity : AppCompatActivity() {
 
         wave = WaveSeekView(this).apply {
             onScrub = { f ->
-                val d = player?.duration?.coerceAtLeast(0) ?: 0L
+                val d = MusicController.durationMs
                 posView.text = formatDuration((f * d).toLong())
             }
             onSeek = { f ->
-                val p = player
-                if (p != null && p.duration > 0) p.seekTo((f * p.duration).toLong())
+                val d = MusicController.durationMs
+                if (d > 0) MusicController.seekTo((f * d).toLong())
             }
             onDragChanged = { dragging = it }
         }
@@ -208,15 +190,15 @@ class NowPlayingActivity : AppCompatActivity() {
         }
 
         shuffleButton = pill(R.drawable.ic_shuffle) {
-            MusicController.setShuffle(this, !(player?.shuffleModeEnabled ?: false))
+            MusicController.setShuffle(this, !MusicController.shuffle)
         }
         repeatButton = pill(R.drawable.ic_repeat) {
             val cur = AppSettings.get(this).musicRepeat
             // kapalı -> tüm liste -> tek şarkı -> kapalı
             val nextMode = when (cur) {
-                Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
-                Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
-                else -> Player.REPEAT_MODE_OFF
+                MusicQueue.REPEAT_OFF -> MusicQueue.REPEAT_ALL
+                MusicQueue.REPEAT_ALL -> MusicQueue.REPEAT_ONE
+                else -> MusicQueue.REPEAT_OFF
             }
             MusicController.setRepeat(this, nextMode)
         }
@@ -234,20 +216,17 @@ class NowPlayingActivity : AppCompatActivity() {
         }
 
         val back10 = circle(R.drawable.ic_replay10, 52, 14, 0x4D000000) {
-            player?.let { it.seekTo((it.currentPosition - 10_000).coerceAtLeast(0)) }
+            MusicController.seekTo((MusicController.positionMs - 10_000).coerceAtLeast(0))
         }
-        val prev = circle(R.drawable.ic_prev, 64, 18, Color.BLACK) { player?.seekToPrevious() }
+        val prev = circle(R.drawable.ic_prev, 64, 18, Color.BLACK) { MusicController.previous() }
         playButton = circle(R.drawable.ic_play, 88, 24, Color.BLACK) {
-            val p = player ?: return@circle
-            if (p.isPlaying) p.pause() else p.play()
+            MusicController.togglePlay()
         }
-        val next = circle(R.drawable.ic_next, 64, 18, Color.BLACK) { player?.seekToNextMediaItem() }
+        val next = circle(R.drawable.ic_next, 64, 18, Color.BLACK) { MusicController.next() }
         val fwd10 = circle(R.drawable.ic_forward10, 52, 14, 0x4D000000) {
-            player?.let { p ->
-                val d = p.duration
-                val t = p.currentPosition + 10_000
-                p.seekTo(if (d > 0) t.coerceAtMost(d) else t)
-            }
+            val d = MusicController.durationMs
+            val t = MusicController.positionMs + 10_000
+            MusicController.seekTo(if (d > 0) t.coerceAtMost(d) else t)
         }
         val controls = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -319,7 +298,7 @@ class NowPlayingActivity : AppCompatActivity() {
         )
     }
 
-    private fun currentUri(): String? = player?.currentMediaItem?.localConfiguration?.uri?.toString()
+    private fun currentUri(): String? = MusicController.current?.uri?.toString()
 
     private fun toggleFavorite() {
         val u = currentUri() ?: return
@@ -335,20 +314,19 @@ class NowPlayingActivity : AppCompatActivity() {
     }
 
     private fun kbpsText(): String {
-        val p = PlayerHolder.player ?: return ""
-        val fmt = p.audioFormat
+        val track = MusicController.current ?: return ""
+        val fmt = MusicController.audioFormat()
         val parts = ArrayList<String>()
-        val rate = fmt?.sampleRate ?: 0
+        val rate = fmt.sampleRate
         if (rate > 0) {
             val khz = rate / 1000.0
             parts += (if (khz == khz.toInt().toDouble()) khz.toInt().toString() else "%.1f".format(khz)) + " kHz"
         }
-        val track = library[p.currentMediaItem?.mediaId ?: ""]
-        var bitrate = fmt?.bitrate ?: -1
-        if (bitrate <= 0 && track != null && track.durationMs > 0) bitrate = (track.sizeBytes * 8 * 1000 / track.durationMs).toInt()
+        var bitrate = fmt.bitrate
+        if (bitrate <= 0 && track.durationMs > 0) bitrate = (track.sizeBytes * 8 * 1000 / track.durationMs).toInt()
         if (bitrate > 0) parts += "${bitrate / 1000} kbps"
-        val ext = track?.path?.substringAfterLast('.', "")?.takeIf { it.isNotEmpty() && it.length <= 5 }
-            ?: fmt?.sampleMimeType?.substringAfterLast('/')
+        val ext = track.path.substringAfterLast('.', "").takeIf { it.isNotEmpty() && it.length <= 5 }
+            ?: fmt.codec
         if (!ext.isNullOrEmpty()) parts += ext
         return parts.joinToString("  ").uppercase()
     }
@@ -368,35 +346,25 @@ class NowPlayingActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
-        val p = player ?: return
-        val item = p.currentMediaItem
-        if (!MusicController.isMusic(item)) {
+        val track = MusicController.current
+        if (track == null) {
             finish()
             return
         }
-        val meta = item?.mediaMetadata
-        titleView.text = meta?.title ?: ""
-        artistView.text = listOfNotNull(meta?.artist, meta?.albumTitle).joinToString(" • ")
-        if (item?.mediaId != lastMediaId) {
-            lastMediaId = item?.mediaId
-            val id = item?.mediaId?.toLongOrNull()
-            val albumUri = meta?.artworkUri
-            val albumId = albumUri?.lastPathSegment?.toLongOrNull() ?: 0L
-            val uri = item?.localConfiguration?.uri
-            val track = if (id != null && uri != null) MusicTrack(
-                id = id, uri = uri, title = "", artist = "", album = "",
-                albumId = albumId, durationMs = 0, trackNo = 0, dateAddedSec = 0, folderPath = ""
-            ) else null
-            val full = library[item?.mediaId ?: ""] ?: track
-            ArtLoader.load(art, full, 800) { applyBackground(it) }
-            wave.setSeed(item?.mediaId?.toLongOrNull() ?: 0L)
-            loadLyrics(library[item?.mediaId ?: ""])
+        titleView.text = track.title
+        artistView.text = listOf(track.artist, track.album).filter { it.isNotEmpty() }.joinToString(" • ")
+        val id = track.id.toString()
+        if (id != lastMediaId) {
+            lastMediaId = id
+            ArtLoader.load(art, track, 800) { applyBackground(it) }
+            wave.setSeed(track.id)
+            loadLyrics(track)
         }
-        playButton.setImageResource(if (p.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
-        (shuffleButton.getChildAt(0) as ImageView).setColorFilter(if (p.shuffleModeEnabled) UiColors.accent else Color.WHITE)
+        playButton.setImageResource(if (MusicController.playWhenReady) R.drawable.ic_pause else R.drawable.ic_play)
+        (shuffleButton.getChildAt(0) as ImageView).setColorFilter(if (MusicController.shuffle) UiColors.accent else Color.WHITE)
         (repeatButton.getChildAt(0) as ImageView).apply {
-            setImageResource(if (p.repeatMode == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat)
-            setColorFilter(if (p.repeatMode == Player.REPEAT_MODE_OFF) Color.WHITE else UiColors.accent)
+            setImageResource(if (MusicController.repeatMode == MusicQueue.REPEAT_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat)
+            setColorFilter(if (MusicController.repeatMode == MusicQueue.REPEAT_OFF) Color.WHITE else UiColors.accent)
         }
         updateFavorite()
         infoView.text = kbpsText()
@@ -405,12 +373,13 @@ class NowPlayingActivity : AppCompatActivity() {
     }
 
     private fun tick() {
-        val p = player ?: return
-        val dur = p.duration
+        if (!MusicController.isActive) return
+        val dur = MusicController.durationMs
+        val pos = MusicController.positionMs
         durView.text = if (dur > 0) formatDuration(dur) else "--:--"
         if (!dragging) {
-            posView.text = formatDuration(p.currentPosition)
-            wave.progress = if (dur > 0) (p.currentPosition.toFloat() / dur) else 0f
+            posView.text = formatDuration(pos)
+            wave.progress = if (dur > 0) (pos.toFloat() / dur) else 0f
         }
         val end = MusicController.sleepEndsAtMs
         val sleepText = when {
@@ -420,7 +389,7 @@ class NowPlayingActivity : AppCompatActivity() {
         }
         sleepLabel.text = sleepText
         sleepLabel.visibility = if (sleepText.isEmpty()) View.GONE else View.VISIBLE
-        updateLyricHighlight(p.currentPosition)
+        updateLyricHighlight(MusicController.positionMs)
     }
 
     // ------------------------------------------------------------ sözler
@@ -463,7 +432,7 @@ class NowPlayingActivity : AppCompatActivity() {
                             setTextColor(UiColors.textSecondary)
                             setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
                             setPadding(0, dp(6), 0, dp(6))
-                            if (l.timeMs >= 0) setOnClickListener { player?.seekTo(l.timeMs.coerceAtLeast(0)) }
+                            if (l.timeMs >= 0) setOnClickListener { MusicController.seekTo(l.timeMs.coerceAtLeast(0)) }
                         }
                         lyricsBox.addView(tv, LinearLayout.LayoutParams(-1, -2))
                         views += tv
@@ -502,9 +471,9 @@ class NowPlayingActivity : AppCompatActivity() {
 
     private fun showSpeed() {
         val speeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f)
-        val cur = player?.playbackParameters?.speed ?: 1f
+        val cur = MusicController.speed
         val sel = speeds.indices.minByOrNull { kotlin.math.abs(speeds[it] - cur) } ?: 2
-        showChoice(Tx.s(R.string.nowplaying_003), speeds.map { "${it}x" }, sel) { player?.setPlaybackSpeed(speeds[it]) }
+        showChoice(Tx.s(R.string.nowplaying_003), speeds.map { "${it}x" }, sel) { MusicController.setSpeed(speeds[it]) }
     }
 
     private fun showSleep() {
@@ -521,16 +490,12 @@ class NowPlayingActivity : AppCompatActivity() {
     }
 
     private fun showQueue() {
-        val p = player ?: return
-        val titles = List(p.mediaItemCount) { i ->
-            val m = p.getMediaItemAt(i).mediaMetadata
-            "${m.title ?: ""} — ${m.artist ?: ""}"
-        }
+        if (!MusicController.isActive) return
+        val titles = MusicController.queue.map { "${it.title} — ${it.artist}" }
         PanelBuilder(this)
             .setTitle(Tx.s(R.string.nowplaying_008, titles.size))
-            .setSingleChoiceItems(titles.toTypedArray(), p.currentMediaItemIndex) { d, which ->
-                p.seekToDefaultPosition(which)
-                p.play()
+            .setSingleChoiceItems(titles.toTypedArray(), MusicController.queueIndex) { d, which ->
+                MusicController.playAt(which)
                 d.dismiss()
             }
             .setNegativeButton(Tx.s(R.string.nowplaying_009), null)
