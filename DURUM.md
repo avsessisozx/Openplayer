@@ -8,7 +8,8 @@ Son güncelleme: 2026-11-07 · Son sürüm: **v1.0.0-beta22** (2026-11-07, ön s
 ## Devam noktası (mpv geçişi)
 > Kota dolup devam edilirse: önce `git fetch --all`, bu bölümü ve `claude/mpv-*` dallarını oku; bitenleri yeniden yapma.
 Güncelleme: 2026-11-07 · Plan: yerel `OpenPlayer-mpv-TEK-PROMPT.md` (hedef sürüm 1.0.0-beta23; ara sürüm yok)
-- **Biten faz:** Faz 0 bitti (G). F'nin başlangıç görevi bitti. Faz 1 sürüyor (G).
+- **Biten faz:** Faz 0 bitti (G). F'nin başlangıç görevi bitti. Faz 1 sürüyor (G). 2026-11-08 00:48: kota + oturum kesintisinden sonra tüm işçiler kaldıkları yerden sürdürüldü.
+- **Ara uçlar (00:48):** ana 396572c (Faz 1 ara), a f96c043 (push yok, wt-a'da yarım), b a438c29, c 42c75c3 (ara), d e88e0d9, e 3d145b3, f bfd17ff. Hiçbiri henüz yönetici tarafından doğrulanmadı.
 - **Karar:** AAR `io.github.abdallahmehiz:mpv-android-lib:0.1.12` + `kotlinx-coroutines-android:1.10.2`. 360° SurfaceTexture yolu çalışıyor, alternatif gerekmiyor. Lisans uyumlu: ikili GPLv3, AGPLv3 ile birleşebilir (hukuki görüş değil).
 - **Yayın öncesi zorunlu:** mpv/FFmpeg vb. karşılık gelen kaynak sunulmalı; uygulama içinde lisans bildirimi + GPLv3 metni olmalı (`docs/mpv-licenses.md`).
 - **Dallar/işçiler:** `claude/mpv-ana` (G, Faz 1), `claude/mpv-f` (F bitti, bfd17ff; birleştirilecek; sonda yeniden çağrılacak). `claude/mpv-a/b/c/d/e` f96c043'ten başlıyor (A altyazı, B ses, C ağ, D müzik/sistem, E 360°).
