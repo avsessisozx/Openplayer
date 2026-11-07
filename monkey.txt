@@ -1,0 +1,437 @@
+  bash arg: -p
+  bash arg: org.openplayer.app
+  bash arg: -s
+  bash arg: 4242
+  bash arg: --throttle
+  bash arg: 120
+  bash arg: --pct-syskeys
+  bash arg: 0
+  bash arg: --pct-appswitch
+  bash arg: 5
+  bash arg: --ignore-security-exceptions
+  bash arg: -v
+  bash arg: 1500
+:Monkey: seed=4242 count=1500
+:AllowPackage: org.openplayer.app
+:IncludeCategory: android.intent.category.LAUNCHER
+:IncludeCategory: android.intent.category.MONKEY
+// Event percentages:
+//   0: 14.84375%
+//   1: 9.895833%
+//   2: 1.9791666%
+//   3: 14.84375%
+//   4: -0.0%
+//   5: -0.0%
+//   6: 24.739582%
+//   7: 14.84375%
+//   8: -0.0%
+//   9: 5.0%
+//   10: 0.9895833%
+//   11: 12.864583%
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,0.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(732.0,2170.0)
+:Sending Touch (ACTION_UP): 0:(734.5586,2160.4512)
+:Sending Touch (ACTION_DOWN): 0:(664.0,2185.0)
+:Sending Touch (ACTION_UP): 0:(656.80566,2187.5977)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(550.0,1303.0)
+:Sending Touch (ACTION_UP): 0:(583.62695,1328.8486)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,3.0)
+:Sending Touch (ACTION_DOWN): 0:(377.0,1826.0)
+:Sending Touch (ACTION_UP): 0:(372.63574,1822.1807)
+:Sending Touch (ACTION_DOWN): 0:(229.0,1443.0)
+:Sending Touch (ACTION_UP): 0:(226.42578,1440.4434)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,3.0)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(124.0,1066.0)
+:Sending Touch (ACTION_UP): 0:(125.80078,1067.7793)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(234.0,1647.0)
+    //[calendar_time:2026-11-07 21:04:59.910  system_uptime:5358788]
+    // Sending event #100
+:Sending Touch (ACTION_UP): 0:(230.42871,1644.0)
+:Sending Touch (ACTION_DOWN): 0:(750.0,717.0)
+:Sending Touch (ACTION_UP): 0:(755.64355,731.9785)
+:Sending Touch (ACTION_DOWN): 0:(258.0,820.0)
+:Sending Touch (ACTION_UP): 0:(259.83203,826.1094)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,4.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(94.0,738.0)
+:Sending Touch (ACTION_UP): 0:(97.33008,726.1885)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,-1.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(455.0,232.0)
+:Sending Touch (ACTION_UP): 0:(457.33203,238.73926)
+:Sending Touch (ACTION_DOWN): 0:(183.0,1787.0)
+:Sending Touch (ACTION_UP): 0:(183.54102,1832.6367)
+:Sending Touch (ACTION_DOWN): 0:(267.0,302.0)
+:Sending Touch (ACTION_UP): 0:(267.21973,309.05078)
+:Sending Touch (ACTION_DOWN): 0:(1020.0,550.0)
+:Sending Touch (ACTION_UP): 0:(922.2451,490.59668)
+:Sending Touch (ACTION_DOWN): 0:(257.0,1180.0)
+:Sending Touch (ACTION_UP): 0:(262.53223,1179.9199)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-2.0)
+:Sending Touch (ACTION_DOWN): 0:(365.0,1809.0)
+:Sending Touch (ACTION_UP): 0:(442.20996,1815.2734)
+:Sending Touch (ACTION_DOWN): 0:(664.0,1884.0)
+:Sending Touch (ACTION_UP): 0:(651.0635,1873.2246)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,4.0)
+    //[calendar_time:2026-11-07 21:05:03.231  system_uptime:5362023]
+    // Sending event #200
+:Sending Touch (ACTION_DOWN): 0:(217.0,684.0)
+:Sending Touch (ACTION_UP): 0:(229.09473,685.0762)
+:Sending Touch (ACTION_DOWN): 0:(985.0,1982.0)
+:Sending Touch (ACTION_UP): 0:(934.16504,1920.6025)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(673.0,1714.0)
+:Sending Touch (ACTION_UP): 0:(673.6504,1716.2217)
+:Sending Touch (ACTION_DOWN): 0:(855.0,2048.0)
+:Sending Touch (ACTION_UP): 0:(766.1836,2158.5)
+:Sending Touch (ACTION_DOWN): 0:(198.0,1416.0)
+:Sending Touch (ACTION_UP): 0:(152.41406,1424.581)
+:Sending Touch (ACTION_DOWN): 0:(723.0,664.0)
+:Sending Touch (ACTION_UP): 0:(758.1221,671.8877)
+:Sending Touch (ACTION_DOWN): 0:(154.0,360.0)
+:Sending Touch (ACTION_UP): 0:(167.30957,359.19434)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,3.0)
+:Sending Touch (ACTION_DOWN): 0:(62.0,1700.0)
+:Sending Touch (ACTION_UP): 0:(59.871094,1698.4092)
+:Sending Touch (ACTION_DOWN): 0:(883.0,322.0)
+:Sending Touch (ACTION_UP): 0:(875.459,329.88477)
+:Sending Touch (ACTION_DOWN): 0:(555.0,520.0)
+    //[calendar_time:2026-11-07 21:05:07.056  system_uptime:5365848]
+    // Sending event #300
+:Sending Touch (ACTION_UP): 0:(508.55273,476.3584)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,2.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(601.0,1533.0)
+:Sending Touch (ACTION_UP): 0:(541.81445,1538.8223)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(522.0,1654.0)
+:Sending Touch (ACTION_UP): 0:(532.54785,1654.0254)
+:Sending Touch (ACTION_DOWN): 0:(122.0,652.0)
+:Sending Touch (ACTION_UP): 0:(163.45898,618.5127)
+:Sending Touch (ACTION_DOWN): 0:(142.0,245.0)
+:Sending Touch (ACTION_UP): 0:(150.89355,236.03809)
+:Sending Touch (ACTION_DOWN): 0:(711.0,195.0)
+:Sending Touch (ACTION_UP): 0:(724.4131,177.78711)
+:Sending Touch (ACTION_DOWN): 0:(683.0,895.0)
+:Sending Touch (ACTION_UP): 0:(691.1582,894.9531)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-1.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(525.0,1835.0)
+:Sending Touch (ACTION_UP): 0:(528.125,1849.2998)
+:Sending Touch (ACTION_DOWN): 0:(417.0,397.0)
+:Sending Touch (ACTION_UP): 0:(408.67578,399.68457)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
+    //[calendar_time:2026-11-07 21:05:10.644  system_uptime:5369437]
+    // Sending event #400
+:Sending Trackball (ACTION_MOVE): 0:(4.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,-1.0)
+:Sending Touch (ACTION_DOWN): 0:(825.0,925.0)
+:Sending Touch (ACTION_UP): 0:(826.42773,930.48047)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-2.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(1.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(472.0,1482.0)
+:Sending Touch (ACTION_UP): 0:(552.6133,1587.7979)
+:Sending Touch (ACTION_DOWN): 0:(555.0,1574.0)
+:Sending Touch (ACTION_UP): 0:(553.4365,1544.0713)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,2.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(194.0,951.0)
+:Sending Touch (ACTION_UP): 0:(189.62305,952.97656)
+:Sending Touch (ACTION_DOWN): 0:(767.0,58.0)
+    //[calendar_time:2026-11-07 21:05:13.611  system_uptime:5372404]
+    // Sending event #500
+:Sending Touch (ACTION_UP): 0:(797.76855,99.75879)
+:Sending Touch (ACTION_DOWN): 0:(341.0,2057.0)
+:Sending Touch (ACTION_UP): 0:(360.78125,2057.3643)
+:Sending Touch (ACTION_DOWN): 0:(223.0,439.0)
+:Sending Touch (ACTION_UP): 0:(238.62598,444.71777)
+:Sending Touch (ACTION_DOWN): 0:(156.0,2018.0)
+:Sending Touch (ACTION_UP): 0:(158.31055,2024.3389)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,1.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,3.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(184.0,2171.0)
+:Sending Touch (ACTION_UP): 0:(193.38086,2195.2646)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,2.0)
+    //[calendar_time:2026-11-07 21:05:16.129  system_uptime:5374922]
+    // Sending event #600
+:Sending Touch (ACTION_DOWN): 0:(968.0,1753.0)
+:Sending Touch (ACTION_UP): 0:(980.77344,1751.7803)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-2.0)
+:Sending Touch (ACTION_DOWN): 0:(82.0,1389.0)
+:Sending Touch (ACTION_UP): 0:(75.70996,1387.7432)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-2.0)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(277.0,1657.0)
+:Sending Touch (ACTION_UP): 0:(279.34863,1652.3438)
+:Sending Touch (ACTION_DOWN): 0:(856.0,825.0)
+:Sending Touch (ACTION_UP): 0:(856.2256,823.0508)
+:Sending Touch (ACTION_DOWN): 0:(726.0,826.0)
+:Sending Touch (ACTION_UP): 0:(838.0869,777.99414)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-5.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(591.0,1550.0)
+:Sending Touch (ACTION_UP): 0:(552.8789,1588.375)
+:Sending Touch (ACTION_DOWN): 0:(709.0,1939.0)
+:Sending Touch (ACTION_UP): 0:(716.46094,1938.5293)
+:Sending Touch (ACTION_DOWN): 0:(695.0,1250.0)
+:Sending Touch (ACTION_UP): 0:(700.99316,1252.1602)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,1.0)
+    //[calendar_time:2026-11-07 21:05:20.077  system_uptime:5378870]
+    // Sending event #700
+:Sending Touch (ACTION_DOWN): 0:(885.0,1846.0)
+:Sending Touch (ACTION_UP): 0:(889.0762,1856.5996)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(457.0,1478.0)
+:Sending Touch (ACTION_UP): 0:(532.3076,1427.4414)
+:Sending Touch (ACTION_DOWN): 0:(764.0,2080.0)
+:Sending Touch (ACTION_UP): 0:(699.63477,2066.0273)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(890.0,176.0)
+:Sending Touch (ACTION_UP): 0:(902.1113,179.13184)
+:Sending Touch (ACTION_DOWN): 0:(684.0,145.0)
+:Sending Touch (ACTION_UP): 0:(672.2969,150.2207)
+:Sending Flip keyboardOpen=false
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,0.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(687.0,715.0)
+:Sending Touch (ACTION_UP): 0:(718.33984,660.4746)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-5.0)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,2.0)
+    //[calendar_time:2026-11-07 21:05:25.043  system_uptime:5383836]
+    // Sending event #800
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(779.0,1827.0)
+:Sending Touch (ACTION_UP): 0:(787.99023,1876.5586)
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(445.0,533.0)
+:Sending Touch (ACTION_UP): 0:(429.78906,515.95996)
+    // Rejecting start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=com.google.android.calendar/com.android.calendar.AllInOneActivity } in package com.google.android.calendar
+:Sending Touch (ACTION_DOWN): 0:(108.0,192.0)
+:Sending Touch (ACTION_UP): 0:(107.413086,191.79102)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(287.0,1377.0)
+:Sending Touch (ACTION_UP): 0:(363.48145,1399.0674)
+:Sending Touch (ACTION_DOWN): 0:(935.0,985.0)
+:Sending Touch (ACTION_UP): 0:(919.52344,989.25684)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,-3.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,-2.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(129.0,558.0)
+:Sending Touch (ACTION_UP): 0:(127.19531,555.03516)
+:Sending Touch (ACTION_DOWN): 0:(833.0,1818.0)
+:Sending Touch (ACTION_UP): 0:(835.0176,1818.833)
+    //[calendar_time:2026-11-07 21:05:28.578  system_uptime:5387371]
+    // Sending event #900
+    //[calendar_time:2026-11-07 21:05:28.698  system_uptime:5387491]
+    // Sending event #900
+:Sending Trackball (ACTION_MOVE): 0:(0.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(233.0,655.0)
+:Sending Touch (ACTION_UP): 0:(229.12695,647.4121)
+    // Allowing start of Intent { cmp=org.openplayer.app/.PlayerActivity } in package org.openplayer.app
+:Sending Flip keyboardOpen=false
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(234.0,454.0)
+:Sending Touch (ACTION_UP): 0:(220.92383,456.91797)
+:Sending Touch (ACTION_DOWN): 0:(208.0,184.0)
+    // Injection Failed
+:Sending Touch (ACTION_UP): 0:(209.44043,178.7998)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(1556.0,283.0)
+:Sending Touch (ACTION_UP): 0:(1612.8555,290.5332)
+    // activityResuming(org.openplayer.app)
+:Sending Touch (ACTION_DOWN): 0:(434.0,574.0)
+:Sending Touch (ACTION_UP): 0:(410.33984,500.65625)
+:Sending Touch (ACTION_DOWN): 0:(65.0,2016.0)
+:Sending Touch (ACTION_UP): 0:(61.83008,2012.8271)
+:Sending Touch (ACTION_DOWN): 0:(777.0,1650.0)
+:Sending Touch (ACTION_UP): 0:(767.1406,1650.9609)
+:Sending Touch (ACTION_DOWN): 0:(949.0,1084.0)
+:Sending Touch (ACTION_UP): 0:(932.32715,1081.0586)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(657.0,103.0)
+:Sending Touch (ACTION_UP): 0:(669.20215,107.05957)
+:Sending Touch (ACTION_DOWN): 0:(1033.0,29.0)
+:Sending Touch (ACTION_UP): 0:(1067.5176,10.0625)
+:Sending Touch (ACTION_DOWN): 0:(445.0,625.0)
+    //[calendar_time:2026-11-07 21:05:38.483  system_uptime:5397276]
+    // Sending event #1000
+:Sending Touch (ACTION_UP): 0:(354.30762,663.6045)
+:Sending Touch (ACTION_DOWN): 0:(78.0,487.0)
+:Sending Touch (ACTION_UP): 0:(82.740234,485.50488)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(835.0,927.0)
+:Sending Touch (ACTION_UP): 0:(837.3545,929.14844)
+    // Allowing start of Intent { cmp=org.openplayer.app/.PlayerActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(528.0,204.0)
+:Sending Touch (ACTION_UP): 0:(546.1914,219.84863)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,3.0)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-4.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+    // activityResuming(org.openplayer.app)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,3.0)
+:Sending Touch (ACTION_DOWN): 0:(648.0,789.0)
+:Sending Touch (ACTION_UP): 0:(650.1328,791.374)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-5.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-3.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(755.0,115.0)
+:Sending Touch (ACTION_UP): 0:(758.5293,114.85547)
+:Sending Touch (ACTION_DOWN): 0:(308.0,1073.0)
+:Sending Touch (ACTION_UP): 0:(309.26172,1070.9395)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,3.0)
+    //[calendar_time:2026-11-07 21:05:43.822  system_uptime:5402615]
+    // Sending event #1100
+    //[calendar_time:2026-11-07 21:05:43.942  system_uptime:5402735]
+    // Sending event #1100
+:Sending Touch (ACTION_DOWN): 0:(871.0,922.0)
+:Sending Touch (ACTION_UP): 0:(846.9844,913.38086)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(648.0,889.0)
+:Sending Touch (ACTION_UP): 0:(654.71875,895.0703)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(328.0,643.0)
+:Sending Touch (ACTION_UP): 0:(304.24512,634.02734)
+:Sending Touch (ACTION_DOWN): 0:(948.0,2001.0)
+:Sending Touch (ACTION_UP): 0:(956.5801,2002.4512)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(379.0,2138.0)
+:Sending Touch (ACTION_UP): 0:(342.85156,2150.629)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(640.0,1780.0)
+:Sending Touch (ACTION_UP): 0:(645.6787,1784.2158)
+:Sending Touch (ACTION_DOWN): 0:(205.0,33.0)
+:Sending Touch (ACTION_UP): 0:(230.91602,80.515625)
+:Sending Touch (ACTION_DOWN): 0:(506.0,666.0)
+:Sending Touch (ACTION_UP): 0:(502.77246,628.61816)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-1.0)
+:Sending Touch (ACTION_DOWN): 0:(35.0,1646.0)
+:Sending Touch (ACTION_UP): 0:(23.489258,1642.8994)
+:Sending Touch (ACTION_DOWN): 0:(91.0,596.0)
+:Sending Touch (ACTION_UP): 0:(74.34082,597.7295)
+    //[calendar_time:2026-11-07 21:05:47.319  system_uptime:5406112]
+    // Sending event #1200
+:Sending Touch (ACTION_DOWN): 0:(773.0,1428.0)
+:Sending Touch (ACTION_UP): 0:(807.93164,1374.9961)
+:Sending Touch (ACTION_DOWN): 0:(193.0,1820.0)
+:Sending Touch (ACTION_UP): 0:(197.70312,1822.1094)
+:Sending Touch (ACTION_DOWN): 0:(566.0,2047.0)
+:Sending Touch (ACTION_UP): 0:(586.5869,2051.8818)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-3.0)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,-3.0)
+:Sending Touch (ACTION_DOWN): 0:(639.0,2200.0)
+:Sending Touch (ACTION_UP): 0:(719.3262,2116.8223)
+:Sending Touch (ACTION_DOWN): 0:(189.0,1110.0)
+:Sending Touch (ACTION_UP): 0:(212.83203,1092.5293)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,1.0)
+:Sending Touch (ACTION_DOWN): 0:(749.0,736.0)
+:Sending Touch (ACTION_UP): 0:(752.2578,735.0537)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,4.0)
+    // Allowing start of Intent { cmp=org.openplayer.app/.MusicActivity } in package org.openplayer.app
+    // activityResuming(org.openplayer.app)
+:Sending Touch (ACTION_DOWN): 0:(72.0,253.0)
+:Sending Touch (ACTION_UP): 0:(64.01465,239.03027)
+:Sending Touch (ACTION_DOWN): 0:(212.0,712.0)
+:Sending Touch (ACTION_UP): 0:(215.69629,730.85156)
+    //[calendar_time:2026-11-07 21:05:50.406  system_uptime:5409199]
+    // Sending event #1300
+:Sending Touch (ACTION_DOWN): 0:(902.0,1818.0)
+:Sending Touch (ACTION_UP): 0:(903.1201,1817.419)
+:Sending Touch (ACTION_DOWN): 0:(586.0,2125.0)
+:Sending Touch (ACTION_UP): 0:(572.4531,2126.079)
+:Sending Touch (ACTION_DOWN): 0:(570.0,1201.0)
+:Sending Touch (ACTION_UP): 0:(567.57324,1212.2725)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-5.0)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,4.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(402.0,849.0)
+:Sending Touch (ACTION_UP): 0:(370.0205,873.0918)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(1042.0,1048.0)
+:Sending Touch (ACTION_UP): 0:(1034.4814,1027.502)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,0.0)
+    //[calendar_time:2026-11-07 21:05:54.952  system_uptime:5413745]
+    // Sending event #1400
+:Switch: #Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10200000;component=org.openplayer.app/.MainActivity;end
+    // Allowing start of Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=org.openplayer.app/.MainActivity } in package org.openplayer.app
+:Sending Touch (ACTION_DOWN): 0:(799.0,1504.0)
+:Sending Touch (ACTION_UP): 0:(817.53516,1503.5566)
+:Sending Touch (ACTION_DOWN): 0:(371.0,894.0)
+:Sending Touch (ACTION_UP): 0:(370.6455,971.2178)
+:Sending Touch (ACTION_DOWN): 0:(143.0,1544.0)
+:Sending Touch (ACTION_UP): 0:(143.45215,1546.9502)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-4.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(62.0,324.0)
+:Sending Touch (ACTION_UP): 0:(54.90039,311.74316)
+:Sending Touch (ACTION_DOWN): 0:(830.0,1744.0)
+:Sending Touch (ACTION_UP): 0:(829.33203,1742.6797)
+:Sending Touch (ACTION_DOWN): 0:(135.0,744.0)
+:Sending Touch (ACTION_UP): 0:(135.04102,745.209)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,1.0)
+:Sending Touch (ACTION_DOWN): 0:(558.0,1675.0)
+:Sending Touch (ACTION_UP): 0:(597.5,1610.5654)
+:Sending Touch (ACTION_DOWN): 0:(872.0,994.0)
+:Sending Touch (ACTION_UP): 0:(909.81934,1041.6123)
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(983.0,211.0)
+:Sending Touch (ACTION_UP): 0:(983.56934,197.37695)
+:Sending Touch (ACTION_DOWN): 0:(181.0,1915.0)
+Events injected: 1500
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=2 trackballs=0 flips=4 rotations=0
+## Network stats: elapsed time=63358ms (0ms mobile, 0ms wifi, 63358ms not connected)
+// Monkey finished
