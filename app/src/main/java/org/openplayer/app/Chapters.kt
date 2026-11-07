@@ -21,8 +21,8 @@ object Chapters {
     /** [index]. bölümün başına gider (mpv `chapter` özelliği). */
     fun seekTo(engine: MpvEngine, index: Int) = engine.setProperty("chapter", index.toString())
 
-    /** Geçici uyumluluk: video ekranı dosyayı kendisi ayrıştırmayı bekliyor; artık [read] kullanılır. */
-    @Suppress("UNUSED_PARAMETER")
+    /** Geçici uyumluluk: video ekranı dosyayı kendisi ayrıştırmayı bekliyor; artık [read] kullanılır. */ // MPV-REMOVE
+    @Suppress("UNUSED_PARAMETER") // MPV-REMOVE
     fun load(context: Context, uri: android.net.Uri): List<Chapter> = emptyList() // MPV-REMOVE
 
     /**
