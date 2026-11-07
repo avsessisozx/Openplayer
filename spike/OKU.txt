@@ -1,0 +1,1 @@
+Faz 0 spike: mpv-android-lib 0.1.12. Calistirma: runspike.sh "<asamalar>" <sn>. Medya ffmpeg testsrc2 ile uretildi.
