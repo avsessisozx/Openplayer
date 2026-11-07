@@ -32,15 +32,16 @@ object Chapters {
     fun parse(json: String?, fallbackTitle: (Int) -> String = { Tx.s(R.string.chapters_001, it) }): List<Chapter> {
         if (json.isNullOrBlank()) return emptyList()
         val arr = runCatching { JSONArray(json) }.getOrNull() ?: return emptyList()
-        val out = ArrayList<Chapter>()
+        val raw = ArrayList<Pair<Long, String>>()
         for (i in 0 until arr.length()) {
             val o = arr.optJSONObject(i) ?: continue
             val sec = o.optDouble("time", Double.NaN)
             if (sec.isNaN() || sec.isInfinite()) continue
             val title = if (o.isNull("title")) "" else o.optString("title", "").trim()
-            out += Chapter((sec * 1000).roundToLong().coerceAtLeast(0L), title.ifEmpty { fallbackTitle(out.size + 1) })
+            raw += (sec * 1000).roundToLong().coerceAtLeast(0L) to title
         }
-        return out.sortedBy { it.startMs }
+        // Ad verilmemiş bölümler, zamana göre sıralandıktan sonra numaralanır.
+        return raw.sortedBy { it.first }.mapIndexed { i, (ms, title) -> Chapter(ms, title.ifEmpty { fallbackTitle(i + 1) }) }
     }
 
     /** [positionMs] konumundaki bölümün sırası; ilk bölümden önceyse -1. */
