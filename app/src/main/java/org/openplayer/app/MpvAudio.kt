@@ -99,6 +99,7 @@ object MpvAudio {
     /** %200 artırma: eski LoudnessEnhancer ile aynı +15 dB. */
     private const val BOOST_MAX_DB = 15.0
     private const val AF_MIN_INTERVAL_MS = 120L
+    private const val REVERB_IN_GAIN = 0.9
     private const val NIGHT_FILTER = "acompressor=threshold=0.1:ratio=4:attack=5:release=200:knee=2.8:makeup=2"
     private const val EQ_RATES = "aformat=sample_rates=44100|48000|88200|96000|176400|192000"
 
@@ -210,7 +211,9 @@ object MpvAudio {
     private fun reverbEntry(preset: Int): String? {
         val (delays, decays) = REVERB.getOrNull(preset) ?: return null
         if (delays.isEmpty()) return null
-        return entry("opreverb", "aecho=0.9:0.9:${delays.joinToString("|")}:${decays.joinToString("|") { num(it, 2) }}")
+        // Çıkış kazancı toplamı 1'e indirir: aecho aksi halde taşma uyarısı verir ve ses kırpılır.
+        val outGain = 1.0 / (REVERB_IN_GAIN + decays.sum())
+        return entry("opreverb", "aecho=$REVERB_IN_GAIN:${num(outGain, 3)}:${delays.joinToString("|")}:${decays.joinToString("|") { num(it, 2) }}")
     }
 
     /** Yerel ayardan bağımsız sayı metni: Türkçe `0,5` filtreyi bozar. */

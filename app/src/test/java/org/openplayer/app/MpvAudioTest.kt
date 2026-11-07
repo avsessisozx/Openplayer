@@ -211,7 +211,10 @@ class MpvAudioTest {
         for (i in 1..6) {
             val (delays, decays) = MpvAudio.REVERB[i]
             assertEquals(delays.size, decays.size)
-            assertTrue(MpvAudio.buildChain(MpvAudioSpec(reverbPreset = i)).startsWith("@opreverb:lavfi=[aecho=0.9:0.9:"))
+            val chain = MpvAudio.buildChain(MpvAudioSpec(reverbPreset = i))
+            assertTrue(chain, chain.startsWith("@opreverb:lavfi=[aecho=0.9:"))
+            val outGain = chain.substringAfter("aecho=").split(':')[1].toDouble()
+            assertTrue("taşma olmamalı: $chain", outGain * (0.9 + decays.sum()) <= 1.001)
         }
         assertEquals("", MpvAudio.buildChain(MpvAudioSpec(reverbPreset = 99)))
         assertEquals("", MpvAudio.buildChain(MpvAudioSpec(reverbPreset = -1)))
