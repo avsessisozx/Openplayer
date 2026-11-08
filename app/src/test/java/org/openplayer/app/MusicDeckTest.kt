@@ -201,13 +201,7 @@ class MusicDeckTest {
         assertEquals(60_000L, deck.positionMs)
     }
 
-    @Test
-    fun volumeFormulaIsClamped() {
-        assertEquals(100, musicVolumePercent(100, 1f, 1f, 1f))
-        assertEquals(200, musicVolumePercent(200, 1f, 1f, 1f))
-        assertEquals(20, musicVolumePercent(100, 1f, 1f, 0.2f))
-        assertEquals(0, musicVolumePercent(150, 0.5f, 0f, 1f))
-        assertEquals(200, musicVolumePercent(400, 1f, 1f, 1f))
+
     }
 
     @Test

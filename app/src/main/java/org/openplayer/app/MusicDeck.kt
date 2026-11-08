@@ -235,6 +235,3 @@ class MusicDeck<T>(
     }
 }
 
-/** Müzik ses düzeyi (yüzde): artırma, ReplayGain, geçiş yumuşatması ve kısma çarpımı. */
-fun musicVolumePercent(boostPercent: Int, replay: Float, fade: Float, duck: Float): Int =
-    (boostPercent * replay * fade * duck).roundToInt().coerceIn(0, 200)

@@ -55,12 +55,24 @@ class VideoPlayer(val engine: MpvEngine) {
     val isIdle: Boolean get() = queue.isEmpty()
     val speed: Float get() = engine.speed
 
-    /** 0..1 */
+    /** mpv'ye verilecek adres; ağ kaynakları için yerel vekili kurar. Etkinlik atar. */
+    var resolve: (Uri) -> String = { it.toString() }
+
+    /** Çıkış kazancı 0..1 (kısma, yumuşak başlangıç); ses artırmayı [MpvAudio] korur. */
     var volume = 1f
         set(value) {
             field = value
-            engine.setVolume((value * 100).toInt())
+            applyGain()
         }
+
+    /** Ses odağı kısması (1 = normal). */
+    var duck = 1f
+        set(value) {
+            field = value
+            applyGain()
+        }
+
+    private fun applyGain() = MpvAudio.setGainFactor((volume * duck).coerceIn(0f, 1f))
 
     private val listener: (MpvEvent) -> Unit = { e ->
         when (e) {
@@ -89,13 +101,13 @@ class VideoPlayer(val engine: MpvEngine) {
         isEnded = false
         videoWidth = 0
         videoHeight = 0
-        currentItem?.let { engine.open(it.uri.toString(), startMs, paused) }
+        currentItem?.let { engine.open(resolve(it.uri), startMs, paused) }
     }
 
     /** Aynı öğeyi aynı konumdan yeniden açar (çözücü değişimi sonrası gibi). */
     fun reopen(paused: Boolean = !engine.playWhenReady) {
         val pos = currentPosition
-        currentItem?.let { engine.open(it.uri.toString(), pos, paused) }
+        currentItem?.let { engine.open(resolve(it.uri), pos, paused) }
     }
 
     fun play() {
@@ -144,7 +156,7 @@ class VideoPlayer(val engine: MpvEngine) {
         videoWidth = 0
         videoHeight = 0
         val item = queue[i]
-        engine.open(item.uri.toString(), positionMs, paused = false)
+        engine.open(resolve(item.uri), positionMs, paused = false)
         onItemChanged?.invoke(item, repeat)
     }
 

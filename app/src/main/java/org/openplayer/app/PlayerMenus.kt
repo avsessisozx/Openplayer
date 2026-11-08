@@ -124,6 +124,12 @@ class PlayerMenus(private val a: PlayerActivity) {
         root.addView(rowButton(Tx.s(R.string.playermenu_006, a.settings.stereoMode.label)) { showStereoMode() })
         root.addView(rowButton(Tx.s(R.string.playermenu_007, AudioFx.reverbLabels[a.settings.reverbPreset])) { showReverb() })
         root.addView(rowButton(Tx.s(R.string.playermenu_008)) { showGraphicEq() })
+        root.addView(SwitchCompat(a).apply {
+            text = Tx.s(R.string.audiofx_night)
+            setTextColor(Color.WHITE)
+            isChecked = MpvAudio.nightMode(a.settings)
+            setOnCheckedChangeListener { _, on -> MpvAudio.setNightMode(a.settings, on) }
+        })
         val boostLabel = a.label(Tx.s(R.string.musiccontr_001, a.settings.volumeBoostPercent))
         root.addView(boostLabel)
         root.addView(a.seekBar(100, 200, a.settings.volumeBoostPercent) { v ->
@@ -193,7 +199,7 @@ class PlayerMenus(private val a: PlayerActivity) {
             text = Tx.s(R.string.playermenu_010)
             setTextColor(Color.WHITE)
             isChecked = s.graphicEqEnabled
-            setOnCheckedChangeListener { _, on -> s.graphicEqEnabled = on; AudioEq.current?.enabled = on }
+            setOnCheckedChangeListener { _, on -> s.graphicEqEnabled = on; AudioEq.update(s) }
         })
         val extraRows = ArrayList<View>()
         root.addView(SwitchCompat(a).apply {
@@ -214,7 +220,7 @@ class PlayerMenus(private val a: PlayerActivity) {
                 gains[i] = v
                 gLab.text = "${freqLabel(freqs[i])}:  ${fmtDb(v)}"
                 s.graphicEqBands = gains
-                AudioEq.current?.setGain(i, v)
+                AudioEq.update(s)
             })
             val fLab = a.label("   Frekans: ${freqLabel(freqs[i])}", 11f)
             val fBar = a.seekBar(0, 1000, freqToBar(freqs[i])) { bar ->
@@ -223,14 +229,14 @@ class PlayerMenus(private val a: PlayerActivity) {
                 fLab.text = "   Frekans: ${freqLabel(hz)}"
                 gLab.text = "${freqLabel(hz)}:  ${fmtDb(gains[i])}"
                 s.graphicEqFreqs = freqs
-                AudioEq.current?.setBand(i, hz.toFloat(), qs[i] / 100f)
+                AudioEq.update(s)
             }
             val qLab = a.label("   Q: ${"%.2f".format(qs[i] / 100f)}", 11f)
             val qBar = a.seekBar(qMin, qMax, qs[i]) { v ->
                 qs[i] = v
                 qLab.text = "   Q: ${"%.2f".format(v / 100f)}"
                 s.graphicEqQs = qs
-                AudioEq.current?.setBand(i, freqs[i].toFloat(), v / 100f)
+                AudioEq.update(s)
             }
             for (v in listOf(fLab, fBar, qLab, qBar)) {
                 v.visibility = if (s.graphicEqParametric) View.VISIBLE else View.GONE
@@ -252,7 +258,6 @@ class PlayerMenus(private val a: PlayerActivity) {
                 s.graphicEqBands = gains
                 s.graphicEqFreqs = freqs
                 s.graphicEqQs = qs
-                AudioEq.current?.setGains(gains)
                 AudioEq.update(s)
             }
             .show()
@@ -268,7 +273,7 @@ class PlayerMenus(private val a: PlayerActivity) {
         val subTracks = a.player.engine.tracks().filter { it.type == MpvTrackType.SUB && !it.isExternal }
         subTracks.forEachIndexed { i, t ->
             val selected = sub.mode == SubtitleController.Mode.EMBEDDED && t.selected
-            entries += ((if (selected) "● " else "○ ") + Tx.s(R.string.playermenu_014) + trackLabel(t, i)) to { sub.useEmbedded(t) }
+            entries += ((if (selected) "● " else "○ ") + Tx.s(R.string.playermenu_014) + trackLabel(t, i)) to { sub.useEmbedded(t.id) }
         }
         for (f in a.sidecars) {
             val selected = sub.mode == SubtitleController.Mode.EXTERNAL && sub.externalName == f.name
@@ -530,9 +535,14 @@ class PlayerMenus(private val a: PlayerActivity) {
 
     // ------------------------------------------------------------ altyazı çevirisi
 
+    /**
+     * Çevrilecek kaynağı seçtirir: yüklü harici altyazı ya da videonun gömülü metin parçaları.
+     * Görüntü tabanlı parçalar (VobSub/PGS) listede görünür ama çevrilemez.
+     */
     fun showTranslate() {
-        val cues = a.subtitles.externalCues
-        if (cues.isEmpty()) {
+        val external = a.subtitles.externalCues
+        val embedded = EmbeddedSubtitles.list(a.player.engine)
+        if (external.isEmpty() && embedded.isEmpty()) {
             a.showMessage(
                 Tx.s(R.string.playermenu_044),
                 Tx.s(R.string.playermenu_045) +
@@ -540,6 +550,64 @@ class PlayerMenus(private val a: PlayerActivity) {
             )
             return
         }
+        if (embedded.isEmpty()) {
+            translateCues(external)
+            return
+        }
+        val labels = ArrayList<String>()
+        val actions = ArrayList<() -> Unit>()
+        if (external.isNotEmpty()) {
+            labels += Tx.s(R.string.subtitle_embedded_external, a.subtitles.externalName ?: "")
+            actions += { translateCues(external) }
+        }
+        embedded.forEachIndexed { i, t ->
+            val lang = t.language?.let { Locale.forLanguageTag(it).getDisplayLanguage(Locale("tr")) }?.takeIf { it.isNotBlank() }
+            val name = listOfNotNull(t.title, lang).distinct().joinToString(" · ").ifBlank { Tx.s(R.string.cuesheet_001, i + 1) }
+            val codec = t.codec?.uppercase().orEmpty()
+            labels += if (t.isImage) Tx.s(R.string.subtitle_embedded_image_label, name, codec) else "$name ($codec)"
+            actions += { if (t.isImage) a.toast(Tx.s(R.string.subtitle_embedded_image)) else extractEmbedded(t) }
+        }
+        a.showChoice(Tx.s(R.string.subtitle_embedded_pick), labels, -1) { actions[it]() }
+    }
+
+    /** Gömülü parçayı arka planda çıkarır; bitince çeviri akışına verir. */
+    private fun extractEmbedded(track: EmbeddedTrack) {
+        val uri = a.currentUri ?: return
+        val source = NetworkPlayback.resolve(a, uri)
+        val cancel = java.util.concurrent.atomic.AtomicBoolean(false)
+        val label = a.label(Tx.s(R.string.subtitle_embedded_reading), 15f)
+        val dialog = PanelBuilder(a)
+            .setTitle(Tx.s(R.string.playermenu_016))
+            .setView(a.vertical { addView(label) })
+            .setNegativeButton(Tx.s(R.string.fileops_004)) { _, _ -> cancel.set(true) }
+            .show()
+        Thread {
+            val result = EmbeddedSubtitles.extract(
+                a.applicationContext, source, track, a.settings.subtitleFallbackCharset,
+                cancelled = { cancel.get() },
+                progress = { p ->
+                    if (p >= 0f) a.runOnUiThread { label.text = Tx.s(R.string.subtitle_embedded_progress, (p * 100).toInt()) }
+                },
+            )
+            a.runOnUiThread {
+                if (a.isDestroyed || cancel.get()) return@runOnUiThread
+                runCatching { dialog.dismiss() }
+                when (result) {
+                    is EmbeddedResult.Ok -> if (result.cues.isEmpty()) a.toast(Tx.s(R.string.subtitle_embedded_empty)) else translateCues(result.cues)
+                    is EmbeddedResult.Failed -> a.showMessage(
+                        Tx.s(R.string.playermenu_016),
+                        when (result.reason) {
+                            EmbeddedResult.Reason.IMAGE -> Tx.s(R.string.subtitle_embedded_image)
+                            EmbeddedResult.Reason.EMPTY -> Tx.s(R.string.subtitle_embedded_empty)
+                            else -> Tx.s(R.string.subtitle_embedded_failed, result.detail ?: result.reason.name)
+                        }
+                    )
+                }
+            }
+        }.start()
+    }
+
+    private fun translateCues(cues: List<SubCue>) {
         val s = a.settings
         val cfg = s.translateConfig()
         if (cfg.provider != TrProvider.MYMEMORY && cfg.apiUrl.isBlank() ||
@@ -803,8 +871,6 @@ class PlayerMenus(private val a: PlayerActivity) {
     fun showReverb() {
         a.showChoice(Tx.s(R.string.playermenu_086), AudioFx.reverbLabels, a.settings.reverbPreset) { i ->
             a.audioFx.setReverb(i)
-            a.applyAuxEffect()
-            if (i > 0 && a.audioFx.reverbId == 0) a.toast(Tx.s(R.string.playermenu_087))
         }
     }
 

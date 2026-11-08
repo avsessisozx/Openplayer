@@ -417,11 +417,11 @@ class MpvAudioTest {
 
     @Test
     fun externalAudioTargets() {
-        assertEquals("fdclose://42", MpvAudio.audioAddTarget("content://a/b") { 42 })
-        assertNull(MpvAudio.audioAddTarget("content://a/b") { null })
-        assertEquals("/sdcard/a b.mka", MpvAudio.audioAddTarget("file:///sdcard/a%20b.mka") { null })
-        assertEquals("/sdcard/plain.mka", MpvAudio.audioAddTarget("/sdcard/plain.mka") { null })
-        assertEquals("https://x/y.m4a", MpvAudio.audioAddTarget("https://x/y.m4a") { null })
+        assertEquals("fdclose://42", MpvUris.target("content://a/b") { 42 })
+        assertNull(MpvUris.target("content://a/b") { null })
+        assertEquals("/sdcard/a b.mka", MpvUris.target("file:///sdcard/a%20b.mka") { null })
+        assertEquals("/sdcard/plain.mka", MpvUris.target("/sdcard/plain.mka") { null })
+        assertEquals("https://x/y.m4a", MpvUris.target("https://x/y.m4a") { null })
     }
 
     @Test

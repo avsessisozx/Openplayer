@@ -308,7 +308,6 @@
     <string name="networkbro_004">WebDAV hatası %1$s</string>
     <string name="networkdat_001">SMB adresinde paylaşım adı yok</string>
     <string name="networkdat_002">SMB bağlantı hatası: %1$s</string>
-    <string name="networkdat_003">SMB: istenen konum dosya boyutunu aşıyor</string>
     <string name="networkdat_004">SMB okuma hatası: %1$s</string>
     <string name="networkdat_005">FTP dosyası açılamadı: %1$s</string>
     <string name="networkdat_006">FTP hatası: %1$s</string>
@@ -350,7 +349,6 @@
     <string name="playeracti_017">Geçerli bir adres girin (http://, https:// veya rtsp://)</string>
     <string name="playeracti_018">Altyazı okunamadı veya boş: %1$s</string>
     <string name="playeracti_019">Altyazı yüklendi: %1$s</string>
-    <string name="playeracti_020">ExoPlayer açamadı; VLC motoruyla açılıyor</string>
     <string name="playeracti_021">%1$s çözücüyle yeniden deneniyor</string>
     <string name="playeracti_022">Açılamadı, sonraki videoya geçiliyor</string>
     <string name="playeracti_023">Bu video oynatılamadı (%1$s). Tüm çözücüler denendi.</string>
@@ -476,10 +474,9 @@
     <string name="playermenu_084">1 ile 600 arasında bir sayı girin</string>
     <string name="playermenu_085">Stereo modu</string>
     <string name="playermenu_086">Yankı (reverb)</string>
-    <string name="playermenu_087">Bu cihaz yankı efektini desteklemiyor</string>
-    <string name="playermenu_088">Donanım (HW): sistemin MediaCodec çözücüsü</string>
-    <string name="playermenu_089">Donanım+ (HW+): HW, desteklenmeyen biçimde FFmpeg</string>
-    <string name="playermenu_090">Yazılım (SW): önce FFmpeg ile işlemci çözmesi</string>
+    <string name="playermenu_088">Donanım (HW): yalnız doğrudan MediaCodec çıkışı</string>
+    <string name="playermenu_089">Donanım+ (HW+): doğrudan donanım çıkışı, olmazsa kopyalı donanım ya da yazılım (önerilen)</string>
+    <string name="playermenu_090">Yazılım (SW): işlemciyle çözme (mpv/FFmpeg)</string>
     <string name="playermenu_091">Çözücü</string>
     <string name="playermenu_092">En boy oranı</string>
     <string name="playermenu_093">Kısayolları seçin</string>
@@ -557,9 +554,6 @@
     <string name="settings_005">Boyut (küçükten büyüğe)</string>
     <string name="settings_006">Süre (kısadan uzuna)</string>
     <string name="settings_007">Dosya türü</string>
-    <string name="settings_008">Otomatik: ExoPlayer, açamazsa VLC motoru</string>
-    <string name="settings_009">Yalnız ExoPlayer</string>
-    <string name="settings_010">Yalnız VLC motoru</string>
     <string name="settings_011">Videoya göre otomatik</string>
     <string name="settings_012">Sensör (serbest)</string>
     <string name="settings_013">Evet, kaldığı yerden devam et</string>
@@ -709,11 +703,9 @@
     <string name="settingsac_128">Alt şeritte: yatay = önceki/sonraki satır, dikey = konum, çimdik = boyut</string>
     <string name="settingsac_129">Altyazı hareketleri</string>
     <string name="settingsac_130">Varsayılan çözücü</string>
-    <string name="settingsac_131">Oynatma motoru</string>
     <string name="settingsac_132">Video açılmazsa çözücüler sırayla (HW → HW+ → SW) sormadan denenir; ayarınız değişmez</string>
     <string name="settingsac_133">Açılamazsa otomatik dene</string>
-    <string name="settingsac_134">VLC motoru, ExoPlayer\'ın açamadığı eski/nadir biçimler için yedektir (WMV, RealMedia, bozuk AVI vb.). Daha sade bir arayüzü vardır: oynat/duraklat, sarma, ses ve altyazı seçimi, hız, dış altyazı.</string>
-    <string name="settingsac_135">HW: sistemin donanım çözücüsü, en az pil harcar. HW+: donanımın desteklemediği biçimlerde FFmpeg kullanır. SW: önce FFmpeg ile işlemci çözmesi. Oynatma sırasında üstteki etiketten de değiştirilebilir.</string>
+    <string name="settingsac_135">HW: yalnız donanım çözücüsü, en az pil harcar. HW+ (varsayılan): donanım çıkışı; olmazsa kendiliğinden kopyalı donanıma ya da yazılıma geçer. SW: işlemciyle çözme, donanımın oynatamadığı dosyalar için.</string>
     <string name="settingsac_136">Ses seviyesi</string>
     <string name="settingsac_137">Ses artırma</string>
     <string name="settingsac_138">Yazılımsal artırmadır; yüksek değerlerde bozulma olabilir. Oynatıcıdaki ses menüsünden de ayarlanır.</string>
@@ -925,14 +917,6 @@
     <string name="vault_016">Kalıcı silinsin mi?</string>
     <string name="vault_017">%1$s\n\nBu işlem geri alınamaz.</string>
     <string name="videorepos_001">Diğer</string>
-    <string name="vlcplayera_001">Altyazı yüklenemedi</string>
-    <string name="vlcplayera_002">Altyazı eklendi</string>
-    <string name="vlcplayera_003">VLC motoru başlatılamadı.</string>
-    <string name="vlcplayera_004">Bu dosya açılamadı; bozuk veya desteklenmeyen bir biçimde olabilir.</string>
-    <string name="vlcplayera_005">Bu dosya VLC motoruyla da açılamadı.</string>
-    <string name="vlcplayera_006">Dosya açılamadı.</string>
-    <string name="vlcplayera_007">Ses parçası bilgisi yok</string>
-    <string name="vlcplayera_008">Dosyadan altyazı yükle…</string>
     <string name="vr360_001">Balık gözü lens</string>
     <string name="vr360_002">360° tam küre</string>
     <string name="vr360_003">180° yarım küre</string>
@@ -1094,9 +1078,14 @@
     <string name="playermenu_pitch">Perde: %1$s yarım ton</string>
     <string name="perfmode_title">Performans modu</string>
     <string name="perfmode_desc">Video oynarken cihazdan işlemciyi hızlı tutmasını ister. Ağır 4K/360° videolarda takılmayı azaltır. Pili daha çok harcar, cihaz ısınabilir. Donanımın sınırını aşamaz.</string>
-    <string name="playeracti_hwlimit">Bu video (%1$s) bu cihazın akıcı oynatabileceği sınırın üstünde (%2$s). Ayarlardan VLC motorunu veya yazılım çözücüyü deneyin, Performans modunu açın ya da düşük çözünürlüklü bir kopya kullanın.</string>
     <string name="playeracti_unknown">bilinmeyen biçim</string>
-    <string name="smooth_title">Akıcı değilse VLC\'ye geç</string>
-    <string name="smooth_desc">Ağır bir yerel video (ör. 4K 10-bit) yazılım çözücüyle sürekli kare atlıyorsa, aynı konumdan VLC motorunda devam eder. Oynatma motoru yalnız yerleşik oynatıcıya sabitlenmişse etkisizdir.</string>
-    <string name="playeracti_smooth_switch">Yazılım çözücüyle oynatma akıcı değil, VLC motoruna geçiliyor</string>
+    <string name="audiofx_night">Gece modu (yüksek ve alçak sesleri dengeler)</string>
+    <string name="subtitle_embedded_pick">Çevrilecek altyazı</string>
+    <string name="subtitle_embedded_external">Yüklü dosya: %1$s</string>
+    <string name="subtitle_embedded_image_label">%1$s (%2$s, görüntü)</string>
+    <string name="subtitle_embedded_image">Bu parça görüntü altyazı, çevrilemez.</string>
+    <string name="subtitle_embedded_reading">Altyazı okunuyor…</string>
+    <string name="subtitle_embedded_progress">Altyazı okunuyor… %%%1$d</string>
+    <string name="subtitle_embedded_empty">Bu parçada altyazı satırı bulunamadı.</string>
+    <string name="subtitle_embedded_failed">Bu altyazı parçası okunamadı (%1$s).</string>
 </resources>

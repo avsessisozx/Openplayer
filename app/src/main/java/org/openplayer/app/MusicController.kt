@@ -235,7 +235,7 @@ object MusicController {
         replayFactor = 1f
         fadeFactor = 1f
         duckFactor = 1f
-        lastVolume = -1
+        lastVolume = null
         MpvEngines.current?.takeIf { !it.isReleased }?.let { e ->
             e.setProperty("audio-display", "embedded-first")
             e.setVolume(100)
@@ -312,7 +312,7 @@ object MusicController {
     private var replayFactor = 1f
     private var fadeFactor = 1f
     private var duckFactor = 1f
-    private var lastVolume = -1
+    private var lastVolume: String? = null
 
     /**
      * Müzik çalarken motorun `volume` özelliği burada yönetilir: ses artırma × ReplayGain ×
@@ -321,10 +321,11 @@ object MusicController {
     private fun applyVolume(force: Boolean = false) {
         val c = appCtx ?: return
         if (!isActive) return
-        val percent = musicVolumePercent(AppSettings.get(c).volumeBoostPercent, replayFactor, fadeFactor, duckFactor)
-        if (!force && percent == lastVolume) return
-        lastVolume = percent
-        MpvEngines.current?.setVolume(percent)
+        // Video ile aynı kübik eğri: %200 = +15 dB (MpvAudio).
+        val value = MpvAudio.volumeFor(AppSettings.get(c).volumeBoostPercent, (replayFactor * fadeFactor * duckFactor).coerceIn(0f, 1f))
+        if (!force && value == lastVolume) return
+        lastVolume = value
+        MpvEngines.current?.setProperty("volume", value)
     }
 
     private fun updateReplayGain() {
@@ -374,7 +375,9 @@ object MusicController {
     private fun syncFx(app: Context) {
         if (isActive) {
             if (fx == null) fx = AudioFx(app)
-            // B ajanı bağlama noktası: mpv ses zinciri burada kurulur, örn. MpvAudio.apply(AppSettings.get(app)).
+            MpvAudio.volumeManagedElsewhere = true
+            MpvAudio.apply(app)
+            applyVolume(force = true)
         } else {
             fx?.release()
             fx = null

@@ -100,6 +100,12 @@ interface MpvEngine {
      */
     fun detachSurface()
 
+    /**
+     * Yalnız [surface] bağlıysa ayırır. Yüzey sahibi kendi iş parçacığında geç kalırsa (360° GL
+     * iş parçacığı) yerine bağlanmış başka bir yüzeyi koparmasın diye.
+     */
+    fun detachSurface(surface: Surface) = detachSurface()
+
     /** [value]: `mediacodec,mediacodec-copy,no`, `mediacodec-copy,no` ya da `no`. */
     fun setHardwareDecoding(value: String)
 

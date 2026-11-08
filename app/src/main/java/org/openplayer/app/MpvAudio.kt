@@ -223,7 +223,7 @@ object MpvAudio {
     }
 
     /** `volume` değeri. mpv kazancı (değer/100)³ olduğundan istenen doğrusal kazanç dönüştürülür. */
-    internal fun volumeFor(boostPercent: Int, gainFactor: Float): String {
+    fun volumeFor(boostPercent: Int, gainFactor: Float): String {
         val db = (boostPercent.coerceIn(100, 200) - 100) / 100.0 * BOOST_MAX_DB
         val value = 100.0 * 10.0.pow(db / 60.0) * cbrt(gainFactor.coerceIn(0f, 1f).toDouble())
         return num(value, 2)
@@ -395,23 +395,9 @@ object MpvAudio {
         engine.setProperty("aid", trackId?.toString() ?: "no")
     }
 
-    /**
-     * mpv'nin açabileceği adrese çevirir. `content://` için [openFd] mpv'nin devralacağı dosya
-     * tanıtıcısını açar. Açılamıyorsa null.
-     */
-    internal fun audioAddTarget(uri: String, openFd: (String) -> Int?): String? = when {
-        uri.startsWith("content://") -> openFd(uri)?.let { "fdclose://$it" }
-        uri.startsWith("file://") -> runCatching { java.net.URI(uri).path }.getOrNull() ?: uri.removePrefix("file://")
-        else -> uri
-    }
-
     /** Harici ses dosyasını ekler ve seçer. Dosya kapanınca mpv parçayı kendisi bırakır. */
     fun addExternalAudio(context: Context, engine: MpvEngine, uri: String, title: String? = null): Boolean {
-        val path = audioAddTarget(uri) { u ->
-            runCatching {
-                context.contentResolver.openFileDescriptor(android.net.Uri.parse(u), "r")?.detachFd()
-            }.getOrNull()
-        } ?: return false
+        val path = MpvUris.resolve(context, uri) ?: return false
         if (title.isNullOrBlank()) engine.command("audio-add", path, "select")
         else engine.command("audio-add", path, "select", title)
         return true

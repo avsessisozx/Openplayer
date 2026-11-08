@@ -45,7 +45,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.media3.ui.SubtitleView
 import java.io.File
 import java.util.Locale
 import kotlin.math.abs
@@ -102,12 +101,10 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun attachExternalAudio(audioUri: Uri) {
-        val target = if (player.isIdle) null else MpvUris.resolve(this, audioUri.toString())
-        if (target == null) {
+        if (player.isIdle || !MpvAudio.addExternalAudio(this, player.engine, audioUri.toString(), SubtitleFiles.displayName(this, audioUri))) {
             toast(Tx.s(R.string.playeracti_004))
             return
         }
-        player.engine.command("audio-add", target, "select")
         toast(Tx.s(R.string.playeracti_005, SubtitleFiles.displayName(this, audioUri)))
     }
 
@@ -135,8 +132,8 @@ class PlayerActivity : AppCompatActivity() {
 
     // Görünümler
     private lateinit var playerView: SurfaceView
-    private lateinit var subtitleView: SubtitleView
-    private lateinit var ghostSubtitleView: SubtitleView
+    private lateinit var subtitleView: SubtitleOverlayView
+    private lateinit var ghostSubtitleView: SubtitleOverlayView
     private lateinit var nightOverlay: View
     private lateinit var controls: FrameLayout
     private lateinit var controlsInner: FrameLayout
@@ -232,7 +229,7 @@ class PlayerActivity : AppCompatActivity() {
             }
             is MpvEvent.VideoSizeChanged -> {
                 logState("video-size")
-                vrUpdateAspect(e.width, e.height)
+                vrView?.setVideoSize(e.width, e.height)
                 applyOrientation()
                 applyTransform()
                 updatePipParams()
@@ -240,15 +237,55 @@ class PlayerActivity : AppCompatActivity() {
             MpvEvent.TracksChanged -> player.engine.tracks().takeIf { it.isNotEmpty() }?.let { tracks ->
                 autoSelectSubtitle(tracks)
                 applyPendingAudio(tracks)
+            }
+            is MpvEvent.FileLoaded -> {
+                updatePlayButton()
+                loadChapters()
                 detectVr()
             }
-            is MpvEvent.FileLoaded -> updatePlayButton()
             is MpvEvent.Error -> {
-                android.util.Log.w("OPFEAT", "mpv error: ${e.message}")
-                onPlaybackError(e.message)
+                // Ağ kaynağında asıl neden vekilde: mpv yalnız "açılamadı" der.
+                val reason = NetworkPlayback.lastError ?: e.message
+                android.util.Log.w("OPFEAT", "mpv error: $reason")
+                onPlaybackError(reason)
             }
             else -> Unit
         }
+    }
+
+    /** Bildirim, medya tuşları ve ses odağı için video hedefi (müzik başlayınca motoru devralır). */
+    private val videoTarget = object : PlaybackTarget {
+        override val title: String get() = player.currentItem?.title ?: ""
+        override val positionMs: Long get() = player.currentPosition
+        override val durationMs: Long get() = player.duration
+        override val isPlaying: Boolean get() = player.isPlaying
+        override val playWhenReady: Boolean get() = player.playWhenReady
+        override val speed: Float get() = player.speed
+        override val canSkipNext: Boolean get() = player.hasNext()
+        override val canSkipPrevious: Boolean get() = player.hasPrevious()
+        override fun play() = player.play()
+        override fun pause() = player.pause()
+        override fun next() = player.seekToNext()
+        override fun previous() = this@PlayerActivity.previous()
+        override fun seekTo(ms: Long) = player.seekTo(ms)
+        override fun setDuck(factor: Float) {
+            player.duck = factor
+        }
+        override fun onDetached() {
+            // Müzik motoru devraldı: video kaldığı yer saklanır, ekrana dönünce yeniden açılır.
+            detachedAtMs = player.currentPosition
+            saveResume()
+        }
+    }
+
+    private var detachedAtMs = -1L
+
+    /** Motoru video için alır; müzik çalıyorsa durur. */
+    private fun claimEngine() {
+        MpvAudio.volumeManagedElsewhere = false
+        PlaybackHub.setTarget(this, videoTarget)
+        MpvAudio.apply(this)
+        player.volume = player.volume
     }
 
     private fun bindPlayerCallbacks() {
@@ -365,6 +402,12 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Ses ayarları başka ekranda değişmiş ya da kulaklık takılmış olabilir.
+        if (PlaybackHub.target === videoTarget) MpvAudio.apply(this)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -373,6 +416,13 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        if (PlaybackHub.target !== videoTarget && !player.isIdle) {
+            // Arada müzik çaldı: video kaldığı yerden duraklı açılır.
+            claimEngine()
+            val at = detachedAtMs.coerceAtLeast(0L)
+            detachedAtMs = -1L
+            player.currentItem?.let { player.setItems(List(player.mediaItemCount) { i -> player.itemAt(i)!! }, player.currentIndex, at, paused = true) }
+        }
         bindVideo(true)
         handler.post(ticker)
         applyOrientation()
@@ -385,12 +435,8 @@ class PlayerActivity : AppCompatActivity() {
         if (isFinishing) return
         val inPip = Build.VERSION.SDK_INT >= 24 && isInPictureInPictureMode
         if (settings.backgroundPlay && player.isPlaying) {
-            try {
-                startService(Intent(this, PlaybackService::class.java))
-            } catch (_: Exception) {
-                // Arka plan servisi başlatılamazsa oynatma duraklatılır.
-                player.pause()
-            }
+            // Arka plan servisi başlatılamazsa oynatma duraklatılır.
+            if (!PlaybackService.start(this)) player.pause()
         } else if (!inPip) {
             player.pause()
         }
@@ -409,11 +455,14 @@ class PlayerActivity : AppCompatActivity() {
             if (PlaybackStats.lastReport.isNotEmpty()) BugReport.notePlayback(this, PlaybackStats.lastReport)
             saveResume()
             audioFx.release()
+            subtitles.release()
             if (liveInstance === this) {
                 liveInstance = null
+                PlaybackHub.clearTarget(videoTarget)
                 VideoPlayer.releaseShared()
+                NetworkPlayback.stop()
             }
-            stopService(Intent(this, PlaybackService::class.java))
+            PlaybackService.stop(this)
         }
         super.onDestroy()
     }
@@ -493,6 +542,7 @@ class PlayerActivity : AppCompatActivity() {
         val engine = player.engine
         engine.addListener(engineListener)
         bindPlayerCallbacks()
+        player.resolve = { NetworkPlayback.prepare(this, engine, it) }
         engine.setHardwareDecoding(MpvPlayer.hwdecFor(effectiveDecoder()))
         engine.setProperty("user-agent", settings.httpUserAgent.ifBlank { "OpenPlayer/1.0" })
         val audioLangs = settings.audioLanguages.split(',').map { it.trim() }.filter { it.isNotEmpty() }
@@ -521,12 +571,10 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun detachVideo() {
+        val s = attachedSurface ?: return
         attachedSurface = null
-        if (::player.isInitialized) player.engine.detachSurface()
+        if (::player.isInitialized) player.engine.detachSurface(s)
     }
-
-    // MPV-REMOVE: Faz 3'te ses efektleri mpv filtrelerine geçince (MpvAudio) kalkacak.
-    fun applyAuxEffect() = Unit
 
     private fun loadFromIntent(intent: Intent): Boolean {
         @Suppress("DEPRECATION")
@@ -581,7 +629,8 @@ class PlayerActivity : AppCompatActivity() {
         val stored = if (settings.resumeMode != ResumeMode.NO && !settings.incognito) ResumeStore.position(this, uris[index]) else 0L
         val ask = settings.resumeMode == ResumeMode.ASK && stored > 5_000
         val saved = if (ask) 0L else stored
-        PlayerHolder.player?.pause() // MPV-REMOVE: müzik mpv'ye geçince tek motor zaten keser.
+        detachedAtMs = -1L
+        claimEngine()
         player.volume = if (muted) 0f else 1f
         player.setItems(items, index, if (saved > 5_000) saved else 0L, paused = ask)
         errorDialogShown = false
@@ -704,15 +753,6 @@ class PlayerActivity : AppCompatActivity() {
         applyVaultSecurity(uri)
         chapters = emptyList()
         seekBar.startsSec = emptyList()
-        Thread {
-            val list = Chapters.load(applicationContext, uri)
-            runOnUiThread {
-                if (!isDestroyed && currentUri == uri && list.isNotEmpty()) {
-                    chapters = list
-                    seekBar.startsSec = list.map { (it.startMs / 1000).toInt() }
-                }
-            }
-        }.start()
         titleView.text = item.title
         abA = -1L
         abB = -1L
@@ -750,7 +790,7 @@ class PlayerActivity : AppCompatActivity() {
             ?: subs.firstOrNull { it.isDefault }
             // Dil etiketi olmayan tek/ilk parça: otomatik altyazı açıkken onu göster (MX gibi).
             ?: subs.firstOrNull { it.language.isNullOrBlank() || it.language == "und" }
-        if (pick != null) subtitles.useEmbedded(pick)
+        if (pick != null) subtitles.useEmbedded(pick.id)
     }
 
     fun loadExternalSubtitle(file: File, remember: Boolean = true, quiet: Boolean = false) {
@@ -758,14 +798,14 @@ class PlayerActivity : AppCompatActivity() {
             val result = runCatching {
                 require(file.length() <= SubtitleFiles.MAX_BYTES) { "too large" }
                 val text = SubtitleParser.decode(file.readBytes(), settings.subtitleCharset, settings.subtitleFallbackCharset)
-                SubtitleParser.parse(file.name, text)
+                SubtitleParser.parse(file.name, text) to text
             }
             runOnUiThread {
-                val cues = result.getOrNull()
+                val (cues, text) = result.getOrNull() ?: (null to null)
                 if (cues.isNullOrEmpty()) {
                     if (!quiet) toast(Tx.s(R.string.playeracti_018, file.name))
                 } else {
-                    subtitles.useExternal(cues, file.name)
+                    subtitles.useExternal(cues, file.name, text)
                     if (remember) currentUri?.let { SubtitleFiles.remember(this, it, file) }
                     if (!quiet) toast(Tx.s(R.string.playeracti_019, file.name))
                 }
@@ -774,6 +814,13 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private val triedDecoders = HashSet<DecoderMode>()
+
+    /** Bölümler mpv'den (`chapter-list`): dosya açılınca okunur. */
+    private fun loadChapters() {
+        val list = Chapters.read(player.engine)
+        chapters = list
+        seekBar.startsSec = list.map { (it.startMs / 1000).toInt() }
+    }
 
     /** O an açık video için geçici çözücü modu (ayarı değiştirmez). */
     private var decoderOverride: DecoderMode? = null
@@ -821,8 +868,8 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun buildUi(): View {
         playerView = SurfaceView(this).apply { holder.addCallback(surfaceCallback) }
-        subtitleView = SubtitleView(this)
-        ghostSubtitleView = SubtitleView(this).apply { visibility = View.GONE }
+        subtitleView = SubtitleOverlayView(this)
+        ghostSubtitleView = SubtitleOverlayView(this).apply { visibility = View.GONE }
         nightOverlay = View(this).apply {
             setBackgroundColor(0x66301800)
             visibility = View.GONE
@@ -1299,7 +1346,6 @@ class PlayerActivity : AppCompatActivity() {
     private fun tick() {
         val tickStart = System.nanoTime()
         val pos = player.currentPosition
-        subtitles.tick(pos)
         if (abA >= 0 && abB > abA && pos >= abB) player.seekTo(abA)
         if (controlsVisible) updateProgress(pos)
         if (ticks % 5 == 0) updateClock()
@@ -1448,10 +1494,20 @@ class PlayerActivity : AppCompatActivity() {
     private fun detectVr() {
         if (vrManual != null) return
         val name = titleView.text?.toString().orEmpty()
-        // MPV-REMOVE: Vr360.detect Media3 Format istiyor; küresel üst veri okuması Faz 6'da (E).
-        var detected = Vr360.detect(null, name)
-        if (detected == VrMode.NONE) detected = currentUri?.let { Vr360.saved(this, it.toString()) } ?: VrMode.NONE
-        if (detected != vr) setVr(detected, remember = true)
+        val uri = currentUri ?: return
+        val saved = Vr360.saved(this, uri.toString())
+        if (saved != null) {
+            if (saved != vr) setVr(saved, remember = false)
+            return
+        }
+        // Küresel üst veri dosyadan okunur (mpv vermez): disk/ağ işi, arka planda.
+        val source = NetworkPlayback.resolve(this, uri)
+        Thread {
+            val detected = Vr360.probe(applicationContext, source, name)
+            runOnUiThread {
+                if (!isDestroyed && currentUri == uri && vrManual == null && detected != vr) setVr(detected, remember = true)
+            }
+        }.start()
     }
 
     /** Elle veya otomatik 360° biçimini ayarlar. NONE normal oynatmaya döner. */
@@ -1465,39 +1521,43 @@ class PlayerActivity : AppCompatActivity() {
                 vrOrientationLocked = false
                 applyOrientation()
             }
+            // Sıra: 360 görünümü kendi yüzeyini ayırır, sonra normal yüzey görünür olup bağlanır.
             vrView?.let { v ->
                 v.onPause()
                 (v.parent as? ViewGroup)?.removeView(v)
             }
             vrView = null
-            if (old != VrMode.NONE && ::player.isInitialized) {
-                detachVideo()
-                playerView.visibility = View.VISIBLE
-            }
+            subtitles.overlayOnly = false
+            if (old != VrMode.NONE && ::player.isInitialized) playerView.visibility = View.VISIBLE
             zoom = 1f
             panX = 0f
             panY = 0f
+            if (old != VrMode.NONE) {
+                applyTransform()
+                applyFlip()
+            }
         } else {
             var v = vrView
             if (v == null) {
-                v = Vr360View(this) { sf ->
-                    handler.post {
-                        if (sf != null && vr != VrMode.NONE) attachVideo(sf, vrView?.width ?: 0, vrView?.height ?: 0)
-                        else if (sf == null) detachVideo()
-                    }
-                }
+                // Sıra: normal yüzey önce ayrılır, sonra 360 görünümü kendi yüzeyini bağlar.
+                detachVideo()
+                v = Vr360View(this, MpvVrOutput(player.engine))
                 v.setOnTouchListener(GestureController(this))
                 v.horizonLevel = settings.vrHorizonLevel
                 v.setSensorAlt(settings.vrSensorAlt)
                 v.setAutoRotate(settings.vrAutoRotate)
                 vrView = v
-                vrUpdateAspect(player.videoWidth, player.videoHeight)
+                v.setVideoSize(player.videoWidth, player.videoHeight)
                 playerView.visibility = View.GONE
                 val parent = playerView.parent as ViewGroup
                 parent.addView(v, parent.indexOfChild(playerView) + 1, FrameLayout.LayoutParams(-1, -1))
                 v.onResume()
             }
             v.mode = mode
+            // Küre dokusu bozulmasın: en-boy/yakınlaştırma/ayna nötr, altyazı katmanda.
+            subtitles.overlayOnly = true
+            applyTransform()
+            applyFlip()
             if (old == VrMode.NONE) {
                 v.resetLook()
                 showHud(Tx.s(R.string.playeracti_031))
@@ -1518,11 +1578,6 @@ class PlayerActivity : AppCompatActivity() {
     fun vrSensorEnabled(): Boolean = vrView?.sensorEnabled == true
 
     private var vrOrientationLocked = false
-
-    fun vrUpdateAspect(width: Int, height: Int) {
-        val v = vrView ?: return
-        if (width > 0 && height > 0) v.videoAspect = width.toFloat() / height
-    }
 
     fun vrSetSensor(on: Boolean) {
         vrView?.setSensor(on)
@@ -1653,7 +1708,7 @@ class PlayerActivity : AppCompatActivity() {
 
     /** Ayna ve dikey çevirme: SurfaceView içeriği görünümle çevrilemez, mpv filtresi kullanılır. */
     private fun applyFlip() {
-        val filters = listOfNotNull("hflip".takeIf { mirror }, "vflip".takeIf { vflip })
+        val filters = if (vr != VrMode.NONE) emptyList() else listOfNotNull("hflip".takeIf { mirror }, "vflip".takeIf { vflip })
         player.engine.setVideoFilter(if (filters.isEmpty()) "" else "lavfi=[${filters.joinToString(",")}]")
         logState("flip")
     }
@@ -1663,6 +1718,17 @@ class PlayerActivity : AppCompatActivity() {
         if (!::player.isInitialized) return
         val e = player.engine
         fun num(v: Double) = String.format(Locale.ROOT, "%.4f", v)
+        if (vr != VrMode.NONE) {
+            // 360'ta görüntü küre dokusudur: mpv tarafı nötr kalır.
+            e.setProperty("video-aspect-override", "no")
+            e.setProperty("keepaspect", "no")
+            e.setProperty("panscan", "0.0")
+            e.setProperty("video-unscaled", "no")
+            e.setProperty("video-zoom", "0")
+            e.setProperty("video-pan-x", "0")
+            e.setProperty("video-pan-y", "0")
+            return
+        }
         e.setProperty("video-aspect-override", aspect.ratio?.let { num(it.toDouble()) } ?: "no")
         e.setProperty("keepaspect", if (aspect == AspectMode.FILL) "no" else "yes")
         e.setProperty("panscan", if (aspect == AspectMode.CROP) "1.0" else "0.0")
@@ -1720,26 +1786,13 @@ class PlayerActivity : AppCompatActivity() {
     /** Kare kare ilerleme/geri: mpv tam bir kare atlar ve duraklı kalır. */
     fun stepFrame(forward: Boolean) {
         if (player.isIdle) return
-        player.pause()
-        player.engine.command(if (forward) "frame-step" else "frame-back-step")
+        MpvAudio.stepFrame(player.engine, forward)
     }
 
-    /** Ses perdesini yarım ton cinsinden ayarlar (hız değişmez). AAR'da rubberband yok. */
-    fun setPitchSemitones(st: Int) {
-        val e = player.engine
-        if (st == 0) {
-            e.setProperty("af", "")
-        } else {
-            val rate = e.getProperty("audio-params/samplerate")?.toIntOrNull() ?: 48000
-            val ratio = Math.pow(2.0, st / 12.0)
-            val f = { v: Double -> String.format(Locale.ROOT, "%.6f", v) }
-            e.setProperty("af", "lavfi=[asetrate=${(rate * ratio).toInt()},aresample=$rate,atempo=${f(1.0 / ratio)}]")
-        }
-        pitchSemitones = st
-    }
+    /** Ses perdesini yarım ton cinsinden ayarlar (hız değişmez). */
+    fun setPitchSemitones(st: Int) = MpvAudio.setPitchSemitones(st)
 
-    var pitchSemitones = 0
-        private set
+    val pitchSemitones: Int get() = MpvAudio.pitchSemitones
 
     // --- Altyazı üstünde parmak: vurgu kutusu + yatay kaydırmada metin parmakla gelir, komşu satır yandan girer (MX gibi).
     private var ghostDir = 0
@@ -1777,6 +1830,11 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     fun jumpSubtitle(next: Boolean) {
+        // Gömülü altyazıda satırları mpv bilir (`sub-seek`).
+        if (subtitles.mode == SubtitleController.Mode.EMBEDDED) {
+            if (!subtitles.stepEmbedded(next)) toast(Tx.s(R.string.playeracti_035))
+            return
+        }
         val pos = player.currentPosition
         val target = if (next) subtitles.nextCueMs(pos) else subtitles.previousCueMs(pos)
         if (target == null) toast(Tx.s(R.string.playeracti_035)) else player.seekTo(target.coerceAtLeast(0))

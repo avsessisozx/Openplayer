@@ -308,7 +308,6 @@
     <string name="networkbro_004">خطأ WebDAV %1$s</string>
     <string name="networkdat_001">عنوان SMB لا يحتوي على اسم مشاركة</string>
     <string name="networkdat_002">خطأ في اتصال SMB: %1$s</string>
-    <string name="networkdat_003">SMB: الموضع المطلوب يتجاوز حجم الملف</string>
     <string name="networkdat_004">خطأ في قراءة SMB: %1$s</string>
     <string name="networkdat_005">تعذّر فتح ملف FTP: %1$s</string>
     <string name="networkdat_006">خطأ FTP: %1$s</string>
@@ -350,7 +349,6 @@
     <string name="playeracti_017">أدخل عنوانًا صالحًا (http:// أو https:// أو rtsp://)</string>
     <string name="playeracti_018">تعذّرت قراءة الترجمة أو أنها فارغة: %1$s</string>
     <string name="playeracti_019">تم تحميل الترجمة: %1$s</string>
-    <string name="playeracti_020">تعذّر الفتح بـ ExoPlayer، جارٍ الفتح بمحرك VLC</string>
     <string name="playeracti_021">إعادة المحاولة بمفكك الترميز %1$s</string>
     <string name="playeracti_022">تعذّر الفتح، سيتم تخطي هذا الفيديو إلى التالي</string>
     <string name="playeracti_023">تعذّر تشغيل هذا الفيديو (%1$s). جُرّبت جميع مفككات الترميز.</string>
@@ -476,10 +474,9 @@
     <string name="playermenu_084">أدخل رقمًا بين 1 و600</string>
     <string name="playermenu_085">وضع الستيريو</string>
     <string name="playermenu_086">الصدى</string>
-    <string name="playermenu_087">هذا الجهاز لا يدعم مؤثر الصدى</string>
-    <string name="playermenu_088">عتاد (HW): مفكك MediaCodec الخاص بالنظام</string>
-    <string name="playermenu_089">عتاد+ (HW+): HW، مع FFmpeg للصيغ غير المدعومة</string>
-    <string name="playermenu_090">برمجي (SW): فك الترميز بالمعالج، FFmpeg أولًا</string>
+    <string name="playermenu_088">العتاد (HW): إخراج MediaCodec المباشر فقط</string>
+    <string name="playermenu_089">العتاد+ (HW+): إخراج عتادي مباشر، وإلا عتاد بالنسخ أو برمجي (موصى به)</string>
+    <string name="playermenu_090">برمجي (SW): فك الترميز بالمعالج (mpv/FFmpeg)</string>
     <string name="playermenu_091">مفكك الترميز</string>
     <string name="playermenu_092">نسبة العرض</string>
     <string name="playermenu_093">اختر الاختصارات</string>
@@ -557,9 +554,6 @@
     <string name="settings_005">الحجم (الأصغر)</string>
     <string name="settings_006">المدة (الأقصر)</string>
     <string name="settings_007">نوع الملف</string>
-    <string name="settings_008">تلقائي: ExoPlayer، ثم محرك VLC إن تعذّر الفتح</string>
-    <string name="settings_009">ExoPlayer فقط</string>
-    <string name="settings_010">محرك VLC فقط</string>
     <string name="settings_011">تلقائي حسب الفيديو</string>
     <string name="settings_012">المستشعر (حر)</string>
     <string name="settings_013">نعم، تابع من حيث توقفت</string>
@@ -709,11 +703,9 @@
     <string name="settingsac_128">في المنطقة السفلية: أفقيًا = السطر السابق/التالي، رأسيًا = الموضع، قرص = الحجم</string>
     <string name="settingsac_129">إيماءات الترجمة</string>
     <string name="settingsac_130">مفكك الترميز الافتراضي</string>
-    <string name="settingsac_131">محرك التشغيل</string>
     <string name="settingsac_132">إذا لم يُفتح الفيديو، تُجرَّب مفككات الترميز بالترتيب دون سؤال (HW ← HW+ ← SW). لا تتغير إعداداتك</string>
     <string name="settingsac_133">تجربة تلقائية عند تعذّر الفتح</string>
-    <string name="settingsac_134">محرك VLC بديل للصيغ القديمة أو النادرة التي لا يفتحها ExoPlayer (WMV وRealMedia وAVI التالف...). واجهته أبسط وتدعم التشغيل/الإيقاف المؤقت والتقديم واختيار الصوت والترجمة والسرعة والترجمات الخارجية.</string>
-    <string name="settingsac_135">HW: مفكك العتاد في النظام، أقل استهلاكًا للبطارية. HW+: يستخدم FFmpeg للصيغ التي لا يدعمها العتاد. SW: فك الترميز بالمعالج، FFmpeg أولًا. يمكنك تغييره أثناء التشغيل من التسمية العلوية.</string>
+    <string name="settingsac_135">HW: مفكك العتاد فقط، الأقل استهلاكًا للبطارية. HW+ (الافتراضي): إخراج عتادي ينتقل تلقائيًا إلى الإطارات المنسوخة أو فك الترميز البرمجي. SW: فك الترميز بالمعالج، للملفات التي لا يشغّلها العتاد.</string>
     <string name="settingsac_136">مستوى الصوت</string>
     <string name="settingsac_137">تعزيز الصوت</string>
     <string name="settingsac_138">تضخيم برمجي. القيم العالية قد تشوّه الصوت. متاح أيضًا من قائمة الصوت في المشغّل.</string>
@@ -925,14 +917,6 @@
     <string name="vault_016">الحذف نهائيًا؟</string>
     <string name="vault_017">%1$s\n\nلا يمكن التراجع عن هذا الإجراء.</string>
     <string name="videorepos_001">أخرى</string>
-    <string name="vlcplayera_001">تعذّر تحميل الترجمة</string>
-    <string name="vlcplayera_002">تمت إضافة الترجمة</string>
-    <string name="vlcplayera_003">تعذّر تشغيل محرك VLC.</string>
-    <string name="vlcplayera_004">تعذّر فتح هذا الملف. قد يكون تالفًا أو بصيغة غير مدعومة.</string>
-    <string name="vlcplayera_005">تعذّر فتح هذا الملف حتى بمحرك VLC.</string>
-    <string name="vlcplayera_006">تعذّر فتح الملف.</string>
-    <string name="vlcplayera_007">لا توجد معلومات عن المسار الصوتي</string>
-    <string name="vlcplayera_008">تحميل ترجمة من ملف…</string>
     <string name="vr360_001">عين السمكة</string>
     <string name="vr360_002">كرة كاملة 360°</string>
     <string name="vr360_003">نصف كرة 180°</string>
@@ -1094,9 +1078,14 @@
     <string name="playermenu_pitch">درجة الصوت: %1$s نصف نغمة</string>
     <string name="perfmode_title">وضع الأداء</string>
     <string name="perfmode_desc">يطلب من الجهاز إبقاء المعالج سريعًا أثناء تشغيل الفيديو. يساعد في تقليل التقطيع في فيديوهات 4K/360° الثقيلة. يستهلك بطارية أكثر وقد يسخن الجهاز. لا يمكنه تجاوز حدود العتاد.</string>
-    <string name="playeracti_hwlimit">هذا الفيديو (%1$s) يتجاوز ما يستطيع هذا الجهاز تشغيله بسلاسة (%2$s). جرّب محرك VLC أو مفكك الترميز البرمجي من الإعدادات، أو فعّل وضع الأداء، أو استخدم نسخة بدقة أقل.</string>
     <string name="playeracti_unknown">تنسيق غير معروف</string>
-    <string name="smooth_title">التبديل إلى VLC عند التقطّع</string>
-    <string name="smooth_desc">إذا كان فيديو محلي ثقيل (مثل 4K بعمق 10 بت) يفقد الإطارات باستمرار مع فك الترميز البرمجي، يُكمل التشغيل في محرك VLC من الموضع نفسه. لا تأثير إذا كان المحرك مثبتًا على المشغّل المدمج.</string>
-    <string name="playeracti_smooth_switch">التشغيل متقطع مع فك الترميز البرمجي، جارٍ التبديل إلى محرك VLC</string>
+    <string name="audiofx_night">الوضع الليلي (يوازن بين الأجزاء العالية والهادئة)</string>
+    <string name="subtitle_embedded_pick">الترجمة النصية المراد ترجمتها</string>
+    <string name="subtitle_embedded_external">الملف المحمَّل: %1$s</string>
+    <string name="subtitle_embedded_image_label">%1$s (%2$s، صورة)</string>
+    <string name="subtitle_embedded_image">هذا المسار ترجمة نصية مصوَّرة ولا يمكن ترجمته.</string>
+    <string name="subtitle_embedded_reading">جارٍ قراءة الترجمة النصية…</string>
+    <string name="subtitle_embedded_progress">جارٍ قراءة الترجمة النصية… %1$d%%</string>
+    <string name="subtitle_embedded_empty">لم يُعثر على أسطر ترجمة في هذا المسار.</string>
+    <string name="subtitle_embedded_failed">تعذّرت قراءة مسار الترجمة هذا (%1$s).</string>
 </resources>

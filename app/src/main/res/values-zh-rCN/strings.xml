@@ -308,7 +308,6 @@
     <string name="networkbro_004">WebDAV 错误 %1$s</string>
     <string name="networkdat_001">SMB 地址没有共享名称</string>
     <string name="networkdat_002">SMB 连接错误：%1$s</string>
-    <string name="networkdat_003">SMB：请求的位置超出文件大小</string>
     <string name="networkdat_004">SMB 读取错误：%1$s</string>
     <string name="networkdat_005">无法打开 FTP 文件：%1$s</string>
     <string name="networkdat_006">FTP 错误：%1$s</string>
@@ -350,7 +349,6 @@
     <string name="playeracti_017">请输入有效的地址（http://、https:// 或 rtsp://）</string>
     <string name="playeracti_018">无法读取字幕或字幕为空：%1$s</string>
     <string name="playeracti_019">字幕已加载：%1$s</string>
-    <string name="playeracti_020">ExoPlayer 无法打开；正在使用 VLC 引擎打开</string>
     <string name="playeracti_021">正在使用 %1$s 解码器重试</string>
     <string name="playeracti_022">无法打开，正在跳到下一个视频</string>
     <string name="playeracti_023">无法播放此视频（%1$s）。已尝试所有解码器。</string>
@@ -476,10 +474,9 @@
     <string name="playermenu_084">请输入 1 到 600 之间的数字</string>
     <string name="playermenu_085">立体声模式</string>
     <string name="playermenu_086">混响</string>
-    <string name="playermenu_087">此设备不支持混响效果</string>
-    <string name="playermenu_088">硬件（HW）：系统的 MediaCodec 解码器</string>
-    <string name="playermenu_089">硬件+（HW+）：HW，对不支持的格式使用 FFmpeg</string>
-    <string name="playermenu_090">软件（SW）：CPU 解码，优先使用 FFmpeg</string>
+    <string name="playermenu_088">硬件（HW）：仅 MediaCodec 直接输出</string>
+    <string name="playermenu_089">硬件+（HW+）：硬件直接输出，失败时改用复制硬件帧或软件（推荐）</string>
+    <string name="playermenu_090">软件（SW）：CPU 解码（mpv/FFmpeg）</string>
     <string name="playermenu_091">解码器</string>
     <string name="playermenu_092">宽高比</string>
     <string name="playermenu_093">选择快捷方式</string>
@@ -557,9 +554,6 @@
     <string name="settings_005">大小（从小到大）</string>
     <string name="settings_006">时长（从短到长）</string>
     <string name="settings_007">文件类型</string>
-    <string name="settings_008">自动：ExoPlayer，无法打开时使用 VLC 引擎</string>
-    <string name="settings_009">仅 ExoPlayer</string>
-    <string name="settings_010">仅 VLC 引擎</string>
     <string name="settings_011">按视频自动选择</string>
     <string name="settings_012">传感器（自由）</string>
     <string name="settings_013">是，从上次停止的位置继续</string>
@@ -709,11 +703,9 @@
     <string name="settingsac_128">在底部区域：水平 = 上一行/下一行，垂直 = 位置，捏合 = 大小</string>
     <string name="settingsac_129">字幕手势</string>
     <string name="settingsac_130">默认解码器</string>
-    <string name="settingsac_131">播放引擎</string>
     <string name="settingsac_132">如果视频无法打开，会按顺序（HW → HW+ → SW）自动尝试解码器而不询问；您的设置不会改变</string>
     <string name="settingsac_133">无法打开时自动尝试</string>
-    <string name="settingsac_134">VLC 引擎是 ExoPlayer 无法打开的旧格式/罕见格式（WMV、RealMedia、损坏的 AVI 等）的备用方案。界面更简单：播放/暂停、快进、音频和字幕选择、速度、外部字幕。</string>
-    <string name="settingsac_135">HW：系统的硬件解码器，最省电。HW+：对硬件不支持的格式使用 FFmpeg。SW：CPU 解码，优先使用 FFmpeg。播放期间也可通过顶部标签更改。</string>
+    <string name="settingsac_135">HW：仅硬件解码器，最省电。HW+（默认）：硬件输出，必要时自动改用复制硬件帧或软件解码。SW：CPU 解码，用于硬件无法播放的文件。</string>
     <string name="settingsac_136">音量级别</string>
     <string name="settingsac_137">音量增强</string>
     <string name="settingsac_138">这是软件增强；较高的值可能导致失真。也可在播放器的音频菜单中设置。</string>
@@ -925,14 +917,6 @@
     <string name="vault_016">永久删除？</string>
     <string name="vault_017">%1$s\n\n此操作无法撤销。</string>
     <string name="videorepos_001">其他</string>
-    <string name="vlcplayera_001">无法加载字幕</string>
-    <string name="vlcplayera_002">字幕已添加</string>
-    <string name="vlcplayera_003">无法启动 VLC 引擎。</string>
-    <string name="vlcplayera_004">无法打开此文件；它可能已损坏或格式不受支持。</string>
-    <string name="vlcplayera_005">使用 VLC 引擎也无法打开此文件。</string>
-    <string name="vlcplayera_006">无法打开文件。</string>
-    <string name="vlcplayera_007">没有音轨信息</string>
-    <string name="vlcplayera_008">从文件加载字幕…</string>
     <string name="vr360_001">鱼眼镜头</string>
     <string name="vr360_002">360° 全球面</string>
     <string name="vr360_003">180° 半球面</string>
@@ -1094,9 +1078,14 @@
     <string name="playermenu_pitch">音调：%1$s 个半音</string>
     <string name="perfmode_title">性能模式</string>
     <string name="perfmode_desc">播放视频时请求设备保持处理器高速运行,可减少 4K/360° 高负载视频的卡顿。会更耗电,设备可能发热。无法突破硬件的上限。</string>
-    <string name="playeracti_hwlimit">此视频(%1$s)超出了本设备能流畅播放的范围(%2$s)。请在设置中尝试 VLC 引擎或软件解码器,开启性能模式,或使用分辨率较低的副本。</string>
     <string name="playeracti_unknown">未知格式</string>
-    <string name="smooth_title">卡顿时切换到 VLC</string>
-    <string name="smooth_desc">当较重的本地视频(如 4K 10 位)使用软件解码器持续丢帧时,会在同一位置改用 VLC 引擎继续播放。若播放引擎被固定为内置播放器则无效。</string>
-    <string name="playeracti_smooth_switch">软件解码播放卡顿,正在切换到 VLC 引擎</string>
+    <string name="audiofx_night">夜间模式（平衡响亮与轻柔部分）</string>
+    <string name="subtitle_embedded_pick">要翻译的字幕</string>
+    <string name="subtitle_embedded_external">已加载文件：%1$s</string>
+    <string name="subtitle_embedded_image_label">%1$s（%2$s，图像）</string>
+    <string name="subtitle_embedded_image">此轨道为图像字幕，无法翻译。</string>
+    <string name="subtitle_embedded_reading">正在读取字幕…</string>
+    <string name="subtitle_embedded_progress">正在读取字幕… %1$d%%</string>
+    <string name="subtitle_embedded_empty">此轨道中未找到字幕行。</string>
+    <string name="subtitle_embedded_failed">无法读取此字幕轨道（%1$s）。</string>
 </resources>

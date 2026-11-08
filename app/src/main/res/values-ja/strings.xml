@@ -308,7 +308,6 @@
     <string name="networkbro_004">WebDAV エラー %1$s</string>
     <string name="networkdat_001">SMB アドレスに共有名がありません</string>
     <string name="networkdat_002">SMB 接続エラー：%1$s</string>
-    <string name="networkdat_003">SMB：要求された位置がファイルサイズを超えています</string>
     <string name="networkdat_004">SMB 読み取りエラー：%1$s</string>
     <string name="networkdat_005">FTP ファイルを開けませんでした：%1$s</string>
     <string name="networkdat_006">FTP エラー：%1$s</string>
@@ -350,7 +349,6 @@
     <string name="playeracti_017">有効なアドレスを入力してください（http://、https:// または rtsp://）</string>
     <string name="playeracti_018">字幕を読み取れないか、空です：%1$s</string>
     <string name="playeracti_019">字幕を読み込みました：%1$s</string>
-    <string name="playeracti_020">ExoPlayer で開けなかったため、VLC エンジンで開いています</string>
     <string name="playeracti_021">%1$s デコーダーで再試行しています</string>
     <string name="playeracti_022">開けないため、次の動画へスキップします</string>
     <string name="playeracti_023">この動画は再生できませんでした（%1$s）。すべてのデコーダーを試しました。</string>
@@ -476,10 +474,9 @@
     <string name="playermenu_084">1 から 600 の数値を入力してください</string>
     <string name="playermenu_085">ステレオモード</string>
     <string name="playermenu_086">リバーブ</string>
-    <string name="playermenu_087">この端末はリバーブエフェクトに対応していません</string>
-    <string name="playermenu_088">ハードウェア（HW）：システムの MediaCodec デコーダー</string>
-    <string name="playermenu_089">ハードウェア+（HW+）：HW。非対応形式は FFmpeg を使用</string>
-    <string name="playermenu_090">ソフトウェア（SW）：CPU デコード、FFmpeg を優先</string>
+    <string name="playermenu_088">ハードウェア（HW）：MediaCodec の直接出力のみ</string>
+    <string name="playermenu_089">ハードウェア+（HW+）：ハードウェア直接出力。失敗時はコピー方式かソフトウェア（推奨）</string>
+    <string name="playermenu_090">ソフトウェア（SW）：CPU でデコード（mpv/FFmpeg）</string>
     <string name="playermenu_091">デコーダー</string>
     <string name="playermenu_092">アスペクト比</string>
     <string name="playermenu_093">ショートカットを選択</string>
@@ -557,9 +554,6 @@
     <string name="settings_005">サイズ（小さい順）</string>
     <string name="settings_006">長さ（短い順）</string>
     <string name="settings_007">ファイルの種類</string>
-    <string name="settings_008">自動：ExoPlayer。開けない場合は VLC エンジン</string>
-    <string name="settings_009">ExoPlayer のみ</string>
-    <string name="settings_010">VLC エンジンのみ</string>
     <string name="settings_011">動画ごとに自動</string>
     <string name="settings_012">センサー（自由）</string>
     <string name="settings_013">はい、続きから再生</string>
@@ -709,11 +703,9 @@
     <string name="settingsac_128">下部ゾーンで：横 = 前/次の行、縦 = 位置、ピンチ = サイズ</string>
     <string name="settingsac_129">字幕ジェスチャー</string>
     <string name="settingsac_130">既定のデコーダー</string>
-    <string name="settingsac_131">再生エンジン</string>
     <string name="settingsac_132">動画が開けない場合、確認なしでデコーダーを順に試します（HW → HW+ → SW）。設定は変わりません</string>
     <string name="settingsac_133">開けない場合は自動で試す</string>
-    <string name="settingsac_134">VLC エンジンは、ExoPlayer で開けない古い/珍しい形式（WMV、RealMedia、壊れた AVI など）向けの代替手段です。インターフェースはよりシンプルで、再生/一時停止、シーク、音声と字幕の選択、速度、外部字幕に対応します。</string>
-    <string name="settingsac_135">HW：システムのハードウェアデコーダーで、最も電池を消費しません。HW+：ハードウェア非対応の形式に FFmpeg を使用します。SW：CPU デコードで FFmpeg を優先します。再生中も上部のラベルから変更できます。</string>
+    <string name="settingsac_135">HW：ハードウェアデコーダーのみ。電池消費が最も少ない。HW+（既定）：ハードウェア出力。必要に応じて自動でコピー方式またはソフトウェアに切り替え。SW：CPU でデコード。ハードウェアで再生できないファイル向け。</string>
     <string name="settingsac_136">音量レベル</string>
     <string name="settingsac_137">音量ブースト</string>
     <string name="settingsac_138">ソフトウェアによる増幅です。値が大きいと音が歪むことがあります。プレーヤーの音声メニューからも設定できます。</string>
@@ -925,14 +917,6 @@
     <string name="vault_016">完全に削除しますか？</string>
     <string name="vault_017">%1$s\n\nこの操作は元に戻せません。</string>
     <string name="videorepos_001">その他</string>
-    <string name="vlcplayera_001">字幕を読み込めませんでした</string>
-    <string name="vlcplayera_002">字幕を追加しました</string>
-    <string name="vlcplayera_003">VLC エンジンを起動できませんでした。</string>
-    <string name="vlcplayera_004">このファイルを開けませんでした。破損しているか、非対応の形式の可能性があります。</string>
-    <string name="vlcplayera_005">このファイルは VLC エンジンでも開けませんでした。</string>
-    <string name="vlcplayera_006">ファイルを開けませんでした。</string>
-    <string name="vlcplayera_007">音声トラック情報がありません</string>
-    <string name="vlcplayera_008">ファイルから字幕を読み込む…</string>
     <string name="vr360_001">魚眼レンズ</string>
     <string name="vr360_002">360° 全球</string>
     <string name="vr360_003">180° 半球</string>
@@ -1094,9 +1078,14 @@
     <string name="playermenu_pitch">ピッチ：%1$s 半音</string>
     <string name="perfmode_title">パフォーマンスモード</string>
     <string name="perfmode_desc">動画の再生中、プロセッサを高速に保つよう端末に要求します。重い4K/360°動画のカクつきを減らします。バッテリー消費が増え、端末が熱くなることがあります。ハードウェアの限界は超えられません。</string>
-    <string name="playeracti_hwlimit">この動画(%1$s)は、この端末が滑らかに再生できる範囲を超えています(%2$s)。設定でVLCエンジンまたはソフトウェアデコーダーを試すか、パフォーマンスモードをオンにするか、低解像度のコピーを使ってください。</string>
     <string name="playeracti_unknown">不明な形式</string>
-    <string name="smooth_title">カクつく場合は VLC に切り替え</string>
-    <string name="smooth_desc">重いローカル動画(例: 4K 10bit)がソフトウェアデコーダーで継続的にコマ落ちする場合、同じ位置から VLC エンジンで再生を続けます。再生エンジンが内蔵プレーヤーに固定されている場合は無効です。</string>
-    <string name="playeracti_smooth_switch">ソフトウェアデコードでカクつくため、VLC エンジンに切り替えます</string>
+    <string name="audiofx_night">ナイトモード（大きい音と小さい音を均一化）</string>
+    <string name="subtitle_embedded_pick">翻訳する字幕</string>
+    <string name="subtitle_embedded_external">読み込んだファイル：%1$s</string>
+    <string name="subtitle_embedded_image_label">%1$s（%2$s、画像）</string>
+    <string name="subtitle_embedded_image">このトラックは画像字幕のため翻訳できません。</string>
+    <string name="subtitle_embedded_reading">字幕を読み込み中…</string>
+    <string name="subtitle_embedded_progress">字幕を読み込み中… %1$d%%</string>
+    <string name="subtitle_embedded_empty">このトラックに字幕の行が見つかりませんでした。</string>
+    <string name="subtitle_embedded_failed">この字幕トラックを読み込めませんでした（%1$s）。</string>
 </resources>

@@ -355,7 +355,6 @@ class SettingsActivity : AppCompatActivity() {
         }
         toggle(Tx.s(R.string.settingsac_133), Tx.s(R.string.settingsac_132), s.autoDecoderFallback) { s.autoDecoderFallback = it }
         toggle(Tx.s(R.string.perfmode_title), Tx.s(R.string.perfmode_desc), s.performanceMode) { s.performanceMode = it }
-        note(Tx.s(R.string.settingsac_134))
         note(Tx.s(R.string.settingsac_135))
     }
 

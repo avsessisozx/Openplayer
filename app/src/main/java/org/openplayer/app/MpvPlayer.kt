@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.view.Surface
 import `is`.xyz.mpv.MPV
@@ -20,26 +19,19 @@ import java.util.Locale
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.roundToLong
 
-/** Adres dönüşümü: mpv'nin kendisi açamadığı şemaları (SMB/FTP/WebDAV) yerel vekile çevirir. */
+/** mpv'ye verilecek yerel adres. SMB/FTP/WebDAV önce [NetworkPlayback] ile vekile çevrilir. */
 object MpvUris {
-    /** Yerel HTTP vekili kurulunca bağlanır; null dönerse adres olduğu gibi denenir. */
-    @Volatile var proxyResolver: ((Uri) -> String?)? = null
-
     /** `content://` için mpv'nin kapatacağı bir dosya tanıtıcısı açar; açılamazsa null. */
-    fun resolve(context: Context, uri: String): String? {
-        val u = Uri.parse(uri)
-        return when (u.scheme?.lowercase()) {
-            null -> uri
-            "file" -> u.path
-            "content" -> runCatching {
-                context.contentResolver.openFileDescriptor(u, "r")?.let(::fdUrl)
-            }.getOrNull()
-            "http", "https", "rtsp", "rtmp", "fd", "fdclose" -> uri
-            else -> proxyResolver?.invoke(u) ?: uri
-        }
+    fun resolve(context: Context, uri: String): String? = target(uri) { u ->
+        runCatching { context.contentResolver.openFileDescriptor(Uri.parse(u), "r")?.detachFd() }.getOrNull()
     }
 
-    private fun fdUrl(pfd: ParcelFileDescriptor) = "fdclose://${pfd.detachFd()}"
+    /** mpv'nin açabileceği adres; [openFd] `content://` için tanıtıcı açar. Saf işlev (birim testli). */
+    internal fun target(uri: String, openFd: (String) -> Int?): String? = when {
+        uri.startsWith("content://") -> openFd(uri)?.let { "fdclose://$it" }
+        uri.startsWith("file://") -> runCatching { java.net.URI(uri).path }.getOrNull() ?: uri.removePrefix("file://")
+        else -> uri
+    }
 }
 
 /** mpv JSON çıktılarının ayrıştırılması (saf işlevler, birim testli). */
@@ -320,6 +312,11 @@ class MpvPlayer(context: Context) : MpvEngine, MPV.EventObserver, MPV.LogObserve
         if (surface == null) return@guarded
         mpv.setPropertyString("vid", "no")
         dropSurface()
+    }
+
+    @Synchronized
+    override fun detachSurface(surface: Surface) {
+        if (this.surface === surface) detachSurface()
     }
 
     @Synchronized

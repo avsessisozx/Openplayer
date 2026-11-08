@@ -406,8 +406,16 @@ interface VrVideoOutput {
 
 /** 360° görüntüsünü mpv motoruna bağlar. */
 class MpvVrOutput(private val engine: MpvEngine) : VrVideoOutput {
-    override fun attach(surface: Surface, width: Int, height: Int) = engine.attachSurface(surface, width, height)
-    override fun detach() = engine.detachSurface()
+    private var attached: Surface? = null
+    override fun attach(surface: Surface, width: Int, height: Int) {
+        attached = surface
+        engine.attachSurface(surface, width, height)
+    }
+    // Yalnız kendi yüzeyini ayırır: normal görünüme dönerken yeni bağlanan yüzeyi koparmaz.
+    override fun detach() {
+        attached?.let { engine.detachSurface(it) }
+        attached = null
+    }
 }
 
 /**
