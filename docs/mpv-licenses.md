@@ -58,16 +58,35 @@ means `af=rubberband` is not available.
 Each release that ships this AAR must:
 
 1. Keep OpenPlayer's own source public (already true) and state its AGPLv3 license.
-2. Provide the Corresponding Source of the GPL parts (GPLv3 section 6). At minimum: mpv, FFmpeg,
-   and the build scripts (`abdallahmehiz/mpv-android` at `v0.1.12`, plus the LGPL libraries
-   libplacebo and fribidi). A link to someone else's repository is allowed only if we make sure it
-   stays available, so **attach a source archive to each GitHub Release**, or mirror the exact
-   commits under this project.
+2. Provide the Corresponding Source of the GPL parts (GPLv3 section 6). **Done automatically:**
+   every release gets `OpenPlayer-native-sources.tar` attached next to the APK (see below).
 3. Show legal notices: list the components above with their licenses and include the GPLv3 text.
    An in-app screen or an asset file is enough; GPLv3 section 5(d) asks for appropriate legal
    notices in interactive programs. The Apache-2.0 components (mbedtls, font, libc++) need their
    license text; FreeType's FTL needs its credit line.
-4. If the AAR version changes, repeat this check and update the table.
+4. If the AAR version changes, repeat this check, update the table and `docs/native-sources.txt`.
+
+## How the source is shipped
+
+- `docs/native-sources.txt` lists every source archive with its exact commit or release:
+  mpv, FFmpeg, libplacebo (with its git submodules), fribidi, libass, dav1d, freetype (with `dlg`),
+  harfbuzz, libunibreak, mbedtls, libxml2, Lua and the wrapper's build scripts (`v0.1.12`).
+- `.github/workflows/native-sources.yml` downloads them and packs them unchanged into
+  `OpenPlayer-native-sources.tar` with `SHA256SUMS`, the list and this file.
+- `build.yml` runs it before publishing. The release job needs it, so **if any download fails, no
+  release is published** (no GPL binary without its source). It also fails when the AAR version in
+  `app/build.gradle.kts` differs from the `aar` line in the list.
+- Why not just link upstream: GPLv3 section 6(d) allows a third-party server only while we make sure
+  the source stays available. A force-push, a deleted fork (the wrapper repository is a personal
+  fork), or a moved tarball would leave our published APKs without source and us out of compliance.
+  A copy attached to each release lives as long as the release does.
+- Why not build the AAR ourselves: heavier (NDK, about an hour per ABI) and would change the binary
+  we tested. Packing the exact sources is enough for the obligation.
+
+Limits: tarball versions (mbedtls, freetype, harfbuzz, fribidi, libunibreak, libxml2, Lua) come
+from the wrapper's build script and are not proven by strings in the binary. The wrapper's build
+script would fetch the FFmpeg/mpv/libass/dav1d/libplacebo heads; we pin the commits reported by
+the binaries instead.
 
 ## Sources
 
