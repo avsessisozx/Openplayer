@@ -15,8 +15,6 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
 import android.view.SurfaceHolder
-import androidx.media3.common.C // MPV-REMOVE
-import androidx.media3.common.Format // MPV-REMOVE
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -74,17 +72,6 @@ enum class VrMode(val label: String, val lens: VrLens, val stereo: Int) {
 /** 360° algılama ve bilinen videoların kaydı (listede "360°" etiketi için). */
 object Vr360 {
     private const val PREFS = "vr360"
-
-    // MPV-REMOVE: yalnız PlayerActivity geçişi için; yerine probe().
-    fun detect(format: Format?, name: String): VrMode { // MPV-REMOVE
-        if (format == null) return VrMode.NONE // MPV-REMOVE
-        val stereo = when (format.stereoMode) { // MPV-REMOVE
-            C.STEREO_MODE_TOP_BOTTOM -> 1 // MPV-REMOVE
-            C.STEREO_MODE_LEFT_RIGHT -> 2 // MPV-REMOVE
-            else -> 0 // MPV-REMOVE
-        } // MPV-REMOVE
-        return modeFor(format.projectionData != null, stereo, name) // MPV-REMOVE
-    } // MPV-REMOVE
 
     /** Üstveriden kip: küresel değilse NONE; 180° ayrımı üstveride olmadığından dosya adından gelir. */
     fun modeFor(spherical: Boolean, stereo: Int, name: String): VrMode {
@@ -571,12 +558,6 @@ private class VideoTexture(val texture: SurfaceTexture) {
  * - Süre aşılırsa doku bırakılır: üretici hata alır ve mpv takılmaktan kurtulur.
  */
 class Vr360View(context: Context, private val output: VrVideoOutput? = null) : GLSurfaceView(context), SensorEventListener {
-
-    // MPV-REMOVE: PlayerActivity geçişi için eski geri çağrı; yerine MpvVrOutput.
-    constructor(context: Context, onSurface: (Surface?) -> Unit) : this(context, object : VrVideoOutput { // MPV-REMOVE
-        override fun attach(surface: Surface, width: Int, height: Int) = onSurface(surface) // MPV-REMOVE
-        override fun detach() = onSurface(null) // MPV-REMOVE
-    }) // MPV-REMOVE
 
     private val link = VrSurfaceLink<VideoTexture>(
         runner = { outputWorker.execute(it) },

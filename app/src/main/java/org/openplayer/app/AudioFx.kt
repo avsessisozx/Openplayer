@@ -21,8 +21,6 @@ class AudioFx(context: Context) {
     private fun levels(): List<Int> =
         settings.eqLevels.takeIf { it.size == bandCount } ?: List(bandCount) { 0 }
 
-    val reverbId: Int get() = settings.reverbPreset // MPV-REMOVE
-
     fun setReverb(preset: Int) {
         settings.reverbPreset = preset
         refresh()
@@ -38,8 +36,6 @@ class AudioFx(context: Context) {
     fun centerFreqHz(band: Int): Int = MpvAudio.DEVICE_EQ_FREQS.getOrElse(band) { 0 }
 
     fun level(band: Int): Int = levels().getOrElse(band) { 0 }
-
-    fun attach(sessionId: Int) = Unit // MPV-REMOVE
 
     val bassAvailable: Boolean get() = true
     val virtualizerAvailable: Boolean get() = true

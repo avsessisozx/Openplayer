@@ -3,10 +3,6 @@ package org.openplayer.app
 import android.content.Context
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
-import androidx.media3.common.audio.AudioProcessor // MPV-REMOVE
-import androidx.media3.common.audio.BaseAudioProcessor // MPV-REMOVE
-import androidx.media3.common.util.UnstableApi // MPV-REMOVE
-import java.nio.ByteBuffer // MPV-REMOVE
 
 /** Ses/görüntü eşitleme: pozitif gecikme sesi geciktirir, negatif öne alır (mpv `audio-delay`). */
 object AudioDelay {
@@ -26,13 +22,5 @@ object AudioDelay {
 
     /** Ayar değiştiğinde çağrılır; sarma gerektirmez, oynarken etkili olur. */
     fun apply(context: Context) = MpvAudio.apply(context)
-
-    @Volatile var current: AudioDelayProcessor? = null // MPV-REMOVE
 }
 
-@UnstableApi // MPV-REMOVE
-class AudioDelayProcessor : BaseAudioProcessor() { // MPV-REMOVE
-    var delayMs = 0L // MPV-REMOVE
-    override fun onConfigure(inputAudioFormat: AudioProcessor.AudioFormat) = AudioProcessor.AudioFormat.NOT_SET // MPV-REMOVE
-    override fun queueInput(inputBuffer: ByteBuffer) = Unit // MPV-REMOVE
-} // MPV-REMOVE

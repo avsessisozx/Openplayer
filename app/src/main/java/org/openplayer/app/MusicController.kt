@@ -43,10 +43,6 @@ object MusicController {
         onPausedAtEnd = { sleepAtEnd = false }
     }
 
-    /** Geçici uyumluluk: video ekranı henüz eski oynatıcı öğesi soruyor. */ // MPV-REMOVE
-    @Suppress("UNUSED_PARAMETER") // MPV-REMOVE
-    fun isMusic(item: androidx.media3.common.MediaItem?): Boolean = false // MPV-REMOVE
-
     // ------------------------------------------------------------ durum
 
     /** Müzik şu an motoru kullanıyor mu. */

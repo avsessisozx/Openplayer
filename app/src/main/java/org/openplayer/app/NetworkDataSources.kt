@@ -2,8 +2,6 @@ package org.openplayer.app
 
 import android.content.Context
 import android.net.Uri
-import androidx.media3.datasource.DataSource // MPV-REMOVE
-import androidx.media3.datasource.ResolvingDataSource // MPV-REMOVE
 import com.hierynomus.msdtyp.AccessMask
 import com.hierynomus.mssmb2.SMB2CreateDisposition
 import com.hierynomus.mssmb2.SMB2ShareAccess
@@ -24,17 +22,6 @@ import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import com.hierynomus.smbj.share.File as SmbFile
-
-// MPV-REMOVE: PlayerHolder silinince aşağıdaki sınıfı ve yukarıdaki iki Media3 satırını silin.
-class NetworkDataSourceFactory(private val context: Context, private val base: DataSource.Factory) : DataSource.Factory { // MPV-REMOVE
-    override fun createDataSource(): DataSource = ResolvingDataSource.Factory(base) { spec -> // MPV-REMOVE
-        spec.withUri(Uri.parse(NetworkPlayback.resolve(context, spec.uri))) // MPV-REMOVE
-    }.createDataSource() // MPV-REMOVE
-
-    companion object { // MPV-REMOVE
-        fun withWebDavAuth(context: Context, upstream: DataSource.Factory): DataSource.Factory = upstream.also { context.hashCode() } // MPV-REMOVE
-    } // MPV-REMOVE
-} // MPV-REMOVE
 
 /**
  * Oynatılacak adresi mpv'nin açabileceği adrese çevirir. SMB, FTP ve kimlik bilgili WebDAV yerel

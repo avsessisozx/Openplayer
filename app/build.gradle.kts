@@ -11,8 +11,8 @@ android {
         applicationId = "org.openplayer.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 21
-        versionName = "1.0.0-beta22"
+        versionCode = 22
+        versionName = "1.0.0-beta23"
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
             // Yalnız emülatör testi için (-PemulatorAbi=true): x86_64 kütüphanelerini de pakete koy.
@@ -70,15 +70,6 @@ kotlin {
 }
 
 dependencies {
-    // MPV-REMOVE: Media3 yalnız taşınmamış dosyalar derlensin diye duruyor, Faz 7 siler.
-    val media3 = "1.10.1"
-    implementation("androidx.media3:media3-exoplayer:$media3")
-    implementation("androidx.media3:media3-exoplayer-hls:$media3")
-    implementation("androidx.media3:media3-exoplayer-dash:$media3")
-    implementation("androidx.media3:media3-exoplayer-rtsp:$media3")
-    implementation("androidx.media3:media3-ui:$media3")
-    implementation("androidx.media3:media3-session:$media3")
-    implementation("androidx.media3:media3-datasource-okhttp:$media3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.hierynomus:smbj:0.13.0")
     implementation("commons-net:commons-net:3.11.1")
