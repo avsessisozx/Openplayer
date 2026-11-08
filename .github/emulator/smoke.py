@@ -697,7 +697,7 @@ if os.environ.get("SMOKE_ONLY") == "ray":
 
 
 if os.environ.get("SMOKE_ONLY") == "ayar":
-    for page in ("Altyazı", "Liste ve dosyalar", "Tema ve görünüm", "Video ve çözücü"):
+    for page in ("Video ve çözücü", "Ses", "Tema ve görünüm"):
         crawl(f"Ayarlar › {page}", settings_page(page), limit=14, skip=("içe aktar", "Tüm dosyalara erişim"))
         crawl(f"Ayarlar › {page} (alt)", settings_page(page, 2), limit=10, skip=("dosyadan", "Dosyadan", "içe aktar", "Tüm dosyalara erişim"))
         crawl(f"Ayarlar › {page} (en alt)", settings_page(page, 4), limit=10, skip=("dosyadan", "Dosyadan", "içe aktar", "Tüm dosyalara erişim"))
