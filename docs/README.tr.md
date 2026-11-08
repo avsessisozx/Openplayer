@@ -47,7 +47,8 @@ Uygulama 12 dilde kullanılabilir. Çeviriler makine çevirisidir ve ana dili ko
 
 ## Özellikler
 
-- **Çözücüler:** HW, HW+ (FFmpeg uzantısı: AC3, E-AC3, DTS, TrueHD, FLAC, Opus…), SW; çalışırken değiştirilebilir. ExoPlayer'ın açamadığı biçimler için libVLC yedek motoru.
+- **Oynatma motoru:** libmpv (mpv + FFmpeg). Çözücüler: **HW** (yalnız donanım, MediaCodec), **HW+** (donanım; olmazsa kopyalı donanım, o da olmazsa yazılım), **SW** (yalnız yazılım, FFmpeg); oynatırken değiştirilebilir.
+- **Yeni (beta23):** ASS/SSA altyazılar tam stiliyle (libass); gömülü altyazı çevirisi (MKV/WebM/MP4); ses için gece modu.
 - **Oynatma:** 0.25x–4x hız, uzun basınca 2x, A-B tekrar, uyku zamanlayıcısı, ekolayzır, %200'e kadar ses artırma, ses gecikmesi, kaldığı yerden devam, PiP, arka planda oynatma, ekran ve çocuk kilidi, ekran görüntüsü.
 - **360° / VR:** 360° video ve fotoğraf, hareket sensörü, VR gözlük kipi.
 - **Ekran hareketleri:** sol/orta/sağ şeritler (parlaklık, ses, hız, sarma, altyazı, yakınlaştırma), yatay kaydırarak sarma, çift dokunma, çimdikle yakınlaştırma.
@@ -58,7 +59,7 @@ Uygulama 12 dilde kullanılabilir. Çeviriler makine çevirisidir ve ana dili ko
 
 ## Bilinen eksikler
 
-Tam ASS/SSA (libass) yok; resim tabanlı altyazılar (VobSub, PGS) çizilmez; Chromecast ve deinterlace yok; ağdaki videolar için yan dosya altyazısı otomatik bulunmaz.
+Resim tabanlı altyazılar (VobSub, PGS) mpv ile gösterilir ama çevrilemez ve 360° kipinde görünmez; Chromecast ve deinterlace yok; ağdaki videolar için yan dosya altyazısı otomatik bulunmaz.
 
 ## Derleme
 
@@ -70,4 +71,4 @@ Reklam, izleme veya analitik yoktur. Ağ sunucusu ve OpenSubtitles parolaları u
 
 ## Lisans
 
-GNU AGPLv3 ([LICENSE](../LICENSE)). Kullanılan bileşenler: [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg, GPLv3), [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0), [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1).
+GNU AGPLv3 ([LICENSE](../LICENSE)). Oynatma motoru: [mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — paket: [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). Bileşen listesi, lisanslar ve kaynak arşivleri: [mpv-licenses.md](mpv-licenses.md).

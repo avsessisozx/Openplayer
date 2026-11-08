@@ -47,7 +47,8 @@ OpenPlayer は、広告もトラッキングもないオープンソースの An
 
 ## 機能
 
-- **デコーダー：** HW、HW+（FFmpeg 拡張：AC3、E-AC3、DTS、TrueHD、FLAC、Opus など）、SW。再生中に切り替え可能。ExoPlayer で開けない形式は libVLC の予備エンジンで再生します。
+- **再生エンジン：** libmpv（mpv + FFmpeg）。デコーダー：**HW**（ハードウェアのみ、MediaCodec）、**HW+**（ハードウェア。失敗時はコピー方式のハードウェア、次にソフトウェア）、**SW**（ソフトウェアのみ、FFmpeg）。再生中に切り替え可能。
+- **新機能（beta23）：** ASS/SSA 字幕のフルスタイル表示（libass）、埋め込み字幕の翻訳（MKV/WebM/MP4）、音声のナイトモード。
 - **再生：** 0.25x〜4x の速度、長押しで 2x、A-B リピート、スリープタイマー、イコライザー、最大 200% の音量ブースト、音声遅延、続きから再生、PiP、バックグラウンド再生、画面ロックとお子様ロック、スクリーンショット。
 - **360° / VR：** 360° 動画・写真、モーションセンサー、VR ヘッドセットモード。
 - **ジェスチャー：** 左／中央／右のゾーン（明るさ、音量、速度、シーク、字幕、ズーム）、水平スワイプでシーク、ダブルタップ、ピンチでズーム。
@@ -58,7 +59,7 @@ OpenPlayer は、広告もトラッキングもないオープンソースの An
 
 ## 既知の制限
 
-完全な ASS/SSA（libass）には非対応。画像字幕（VobSub、PGS）は表示されません。Chromecast とインターレース解除はありません。ネットワーク動画の外部字幕は自動検出されません。
+画像字幕（VobSub、PGS）は mpv で表示されますが、翻訳はできず、360° モードでは表示されません。Chromecast とインターレース解除はありません。ネットワーク動画の外部字幕は自動検出されません。
 
 ## ビルド
 
@@ -70,4 +71,4 @@ OpenPlayer は、広告もトラッキングもないオープンソースの An
 
 ## ライセンス
 
-GNU AGPLv3（[LICENSE](../LICENSE)）。使用コンポーネント：[Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg, GPLv3), [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0), [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1)。
+GNU AGPLv3（[LICENSE](../LICENSE)）。再生エンジン：[mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — 同梱ライブラリ: [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). 全一覧・ライセンス・ソースアーカイブ：[mpv-licenses.md](mpv-licenses.md)。
