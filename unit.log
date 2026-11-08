@@ -1,0 +1,46 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:mergeDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:javaPreCompileDebug
+> Task :app:processDebugResources
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/EmbeddedSubtitles.kt:239:29 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/EmbeddedSubtitles.kt:264:20 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/MpvPlayer.kt:419:38 The corresponding parameter in the supertype 'EventObserver' is named 'data'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/PlayerActivity.kt:591:17 Condition is always 'true'.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/PlayerMenus.kt:36:83 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/PlayerMenus.kt:564:87 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/ThemeManager.kt:95:25 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/ThemeManager.kt:96:25 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/main/java/org/openplayer/app/Vr360.kt:762:75 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///home/runner/work/Openplayer/Openplayer/app/src/test/java/org/openplayer/app/MpvAudioTest.kt:231:27 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1794157292225.json
+
+BUILD SUCCESSFUL in 1m 16s
+22 actionable tasks: 22 executed
