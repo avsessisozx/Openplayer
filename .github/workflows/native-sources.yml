@@ -55,7 +55,7 @@ jobs:
           sha256sum OpenPlayer-native-sources.tar > OpenPlayer-native-sources.tar.sha256
           ls -la "$d"; du -h OpenPlayer-native-sources.tar
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: OpenPlayer-native-sources
           path: |
