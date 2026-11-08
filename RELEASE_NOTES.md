@@ -1,6 +1,6 @@
 # 1.0.0-beta23
 
-Oynatma motoru baştan değişti: video ve müzik artık **mpv** (libmpv + FFmpeg) ile çalıyor. ExoPlayer ve VLC tamamen kaldırıldı. Derleme, birim testleri ve emülatör kısa testleri geçti; gerçek cihazda 4K akıcılığı henüz denenmedi.
+Oynatma motoru baştan değişti: video ve müzik artık **mpv** (libmpv + FFmpeg) ile çalıyor. ExoPlayer ve VLC tamamen kaldırıldı. Derleme ve birim testleri geçti; gerçek cihazda 4K akıcılığı henüz denenmedi.
 
 - **Yeni:** ASS/SSA altyazılar tam stiliyle gösterilir (libass). Gömülü altyazı çevirisi eklendi (yalnız MKV/WebM/MP4; resim altyazılar çevrilemez). Ses ayarlarına gece modu eklendi.
 - **Kaldırıldı:** "Akıcı değilse VLC'ye geç" ayarı ve VLC motoru.

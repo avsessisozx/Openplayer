@@ -49,7 +49,8 @@ OpenPlayer مشغّل فيديو مفتوح المصدر لأندرويد، بل
 
 ## الميزات
 
-- **مفككات الترميز:** HW وHW+ (امتداد FFmpeg: AC3 وE-AC3 وDTS وTrueHD وFLAC وOpus…) وSW، ويمكن التبديل أثناء التشغيل. محرك libVLC احتياطي للصيغ التي لا يفتحها ExoPlayer.
+- **محرك التشغيل:** libmpv (mpv + FFmpeg). مفككات الترميز: **HW** (عتاد فقط، MediaCodec)، **HW+** (عتاد؛ وإن فشل فعتاد بالنسخ ثم برمجي)، **SW** (برمجي فقط، FFmpeg)؛ يمكن تبديلها أثناء التشغيل.
+- **جديد (beta23):** ترجمات ASS/SSA بنمطها الكامل (libass)؛ ترجمة الترجمات المضمّنة (MKV/WebM/MP4)؛ الوضع الليلي للصوت.
 - **التشغيل:** سرعة 0.25x–4x، و2x بالضغط المطوّل، وتكرار A-B، ومؤقت النوم، ومعادل صوتي، وتعزيز الصوت حتى 200%، وتأخير الصوت، ومتابعة التشغيل من حيث توقفت، وPiP، والتشغيل في الخلفية، وقفل الشاشة وقفل الأطفال، ولقطات الشاشة.
 - **360° / VR:** فيديو وصور 360°، ومستشعر الحركة، ووضع نظارة VR.
 - **الإيماءات:** مناطق يسار/وسط/يمين (السطوع، الصوت، السرعة، التقديم، الترجمة، التكبير)، والسحب الأفقي للتقديم، والنقر المزدوج، والتكبير بالقرص.
@@ -60,7 +61,7 @@ OpenPlayer مشغّل فيديو مفتوح المصدر لأندرويد، بل
 
 ## القيود المعروفة
 
-لا يدعم ASS/SSA الكامل (libass)؛ لا تُعرض الترجمات الصورية (VobSub وPGS)؛ لا يوجد Chromecast ولا إزالة التداخل؛ ولا تُكتشف ترجمات الفيديوهات عبر الشبكة تلقائيًا.
+يعرض mpv الترجمات الصورية (VobSub وPGS) لكن لا يمكن ترجمتها ولا تظهر في وضع 360°؛ لا يوجد Chromecast ولا إزالة التداخل؛ ولا تُكتشف ترجمات الفيديوهات عبر الشبكة تلقائيًا.
 
 ## البناء
 
@@ -72,6 +73,6 @@ OpenPlayer مشغّل فيديو مفتوح المصدر لأندرويد، بل
 
 ## الرخصة
 
-GNU AGPLv3 ([LICENSE](../LICENSE)). المكونات المستخدمة: [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg, GPLv3), [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0), [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1).
+GNU AGPLv3 ([LICENSE](../LICENSE)). محرك التشغيل: [mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — عبر [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). القائمة الكاملة والتراخيص وأرشيفات المصدر: [mpv-licenses.md](mpv-licenses.md).
 
 </div>

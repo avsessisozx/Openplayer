@@ -47,7 +47,8 @@ Scarica `OpenPlayer.apk` dalla [pagina delle versioni](https://github.com/avsess
 
 ## Funzioni
 
-- **Decoder:** HW, HW+ (estensione FFmpeg: AC3, E-AC3, DTS, TrueHD, FLAC, Opus…) e SW, modificabili durante la riproduzione. Motore libVLC di riserva per i formati che ExoPlayer non apre.
+- **Motore di riproduzione:** libmpv (mpv + FFmpeg). Decoder: **HW** (solo hardware, MediaCodec), **HW+** (hardware; altrimenti hardware con copia, poi software), **SW** (solo software, FFmpeg); modificabili durante la riproduzione.
+- **Novità (beta23):** sottotitoli ASS/SSA con stile completo (libass); traduzione dei sottotitoli incorporati (MKV/WebM/MP4); modalità notte per l’audio.
 - **Riproduzione:** velocità 0,25x–4x, 2x con pressione prolungata, ripetizione A-B, timer di spegnimento, equalizzatore, aumento del volume fino al 200%, ritardo audio, ripresa da dove eri rimasto, PiP, riproduzione in background, blocco schermo e controllo genitori, schermate.
 - **360° / VR:** video e foto 360°, sensore di movimento, modalità visore VR.
 - **Gesti:** fasce sinistra/centro/destra (luminosità, volume, velocità, ricerca, sottotitoli, zoom), scorrimento orizzontale per cercare, doppio tocco, zoom a pizzico.
@@ -58,7 +59,7 @@ Scarica `OpenPlayer.apk` dalla [pagina delle versioni](https://github.com/avsess
 
 ## Limiti noti
 
-Nessun rendering ASS/SSA completo (libass); i sottotitoli a immagine (VobSub, PGS) non vengono mostrati; niente Chromecast né deinterlacciamento; i sottotitoli esterni dei video in rete non vengono trovati automaticamente.
+I sottotitoli a immagine (VobSub, PGS) sono mostrati da mpv ma non si possono tradurre e non compaiono in modalità 360°; niente Chromecast né deinterlacciamento; i sottotitoli esterni dei video di rete non vengono trovati automaticamente.
 
 ## Compilazione
 
@@ -70,4 +71,4 @@ Nessuna pubblicità, tracciamento o analisi. Le password dei server di rete e di
 
 ## Licenza
 
-GNU AGPLv3 ([LICENSE](../LICENSE)). Componenti utilizzati: [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg, GPLv3), [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0), [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1).
+GNU AGPLv3 ([LICENSE](../LICENSE)). Motore di riproduzione: [mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — tramite [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). Elenco completo, licenze e archivi dei sorgenti: [mpv-licenses.md](mpv-licenses.md).

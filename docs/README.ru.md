@@ -47,7 +47,8 @@ OpenPlayer — видеоплеер для Android с открытым исхо�
 
 ## Возможности
 
-- **Декодеры:** HW, HW+ (расширение FFmpeg: AC3, E-AC3, DTS, TrueHD, FLAC, Opus…) и SW, переключаются во время воспроизведения. Запасной движок libVLC для форматов, которые не открывает ExoPlayer.
+- **Движок воспроизведения:** libmpv (mpv + FFmpeg). Декодеры: **HW** (только аппаратный, MediaCodec), **HW+** (аппаратный; при сбое — аппаратный с копированием, затем программный), **SW** (только программный, FFmpeg); переключаются во время воспроизведения.
+- **Новое (beta23):** субтитры ASS/SSA с полным оформлением (libass); перевод встроенных субтитров (MKV/WebM/MP4); ночной режим звука.
 - **Воспроизведение:** скорость 0,25x–4x, 2x по долгому нажатию, повтор A-B, таймер сна, эквалайзер, усиление громкости до 200 %, задержка звука, продолжение с места остановки, PiP, фоновое воспроизведение, блокировка экрана и детская блокировка, скриншоты.
 - **360° / VR:** видео и фото 360°, датчик движения, режим VR-гарнитуры.
 - **Жесты:** зоны слева/в центре/справа (яркость, громкость, скорость, перемотка, субтитры, масштаб), горизонтальный свайп для перемотки, двойное касание, масштабирование щипком.
@@ -58,7 +59,7 @@ OpenPlayer — видеоплеер для Android с открытым исхо�
 
 ## Известные ограничения
 
-Нет полной поддержки ASS/SSA (libass); графические субтитры (VobSub, PGS) не отображаются; нет Chromecast и деинтерлейсинга; внешние субтитры для сетевых видео автоматически не ищутся.
+Графические субтитры (VobSub, PGS) показывает mpv, но их нельзя перевести и они не видны в режиме 360°; нет Chromecast и деинтерлейсинга; внешние субтитры для сетевых видео не находятся автоматически.
 
 ## Сборка
 
@@ -70,4 +71,4 @@ OpenPlayer — видеоплеер для Android с открытым исхо�
 
 ## Лицензия
 
-GNU AGPLv3 ([LICENSE](../LICENSE)). Используемые компоненты: [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg, GPLv3), [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0), [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1).
+GNU AGPLv3 ([LICENSE](../LICENSE)). Движок воспроизведения: [mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — через [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). Полный список, лицензии и архивы исходного кода: [mpv-licenses.md](mpv-licenses.md).
