@@ -308,7 +308,6 @@
     <string name="networkbro_004">WebDAV error %1$s</string>
     <string name="networkdat_001">The SMB address has no share name</string>
     <string name="networkdat_002">SMB connection error: %1$s</string>
-    <string name="networkdat_003">SMB: the requested position exceeds the file size</string>
     <string name="networkdat_004">SMB read error: %1$s</string>
     <string name="networkdat_005">Could not open the FTP file: %1$s</string>
     <string name="networkdat_006">FTP error: %1$s</string>
@@ -350,7 +349,6 @@
     <string name="playeracti_017">Enter a valid address (http://, https:// or rtsp://)</string>
     <string name="playeracti_018">Could not read the subtitle or it is empty: %1$s</string>
     <string name="playeracti_019">Subtitle loaded: %1$s</string>
-    <string name="playeracti_020">ExoPlayer could not open it; opening with the VLC engine</string>
     <string name="playeracti_021">Retrying with the %1$s decoder</string>
     <string name="playeracti_022">Could not open, skipping to the next video</string>
     <string name="playeracti_023">This video could not be played (%1$s). All decoders were tried.</string>
@@ -476,10 +474,9 @@
     <string name="playermenu_084">Enter a number between 1 and 600</string>
     <string name="playermenu_085">Stereo mode</string>
     <string name="playermenu_086">Reverb</string>
-    <string name="playermenu_087">This device does not support the reverb effect</string>
-    <string name="playermenu_088">Hardware (HW): the system\'s MediaCodec decoder</string>
-    <string name="playermenu_089">Hardware+ (HW+): HW, with FFmpeg for unsupported formats</string>
-    <string name="playermenu_090">Software (SW): CPU decoding with FFmpeg first</string>
+    <string name="playermenu_088">Hardware (HW): direct MediaCodec output only</string>
+    <string name="playermenu_089">Hardware+ (HW+): direct hardware output, falls back to copy or software (recommended)</string>
+    <string name="playermenu_090">Software (SW): CPU decoding (mpv/FFmpeg)</string>
     <string name="playermenu_091">Decoder</string>
     <string name="playermenu_092">Aspect ratio</string>
     <string name="playermenu_093">Choose shortcuts</string>
@@ -557,9 +554,6 @@
     <string name="settings_005">Size (small to large)</string>
     <string name="settings_006">Duration (short to long)</string>
     <string name="settings_007">File type</string>
-    <string name="settings_008">Automatic: ExoPlayer, VLC engine if it cannot open</string>
-    <string name="settings_009">ExoPlayer only</string>
-    <string name="settings_010">VLC engine only</string>
     <string name="settings_011">Automatic by video</string>
     <string name="settings_012">Sensor (free)</string>
     <string name="settings_013">Yes, resume where you left off</string>
@@ -709,11 +703,9 @@
     <string name="settingsac_128">In the bottom zone: horizontal = previous/next line, vertical = position, pinch = size</string>
     <string name="settingsac_129">Subtitle gestures</string>
     <string name="settingsac_130">Default decoder</string>
-    <string name="settingsac_131">Playback engine</string>
     <string name="settingsac_132">If a video does not open, decoders are tried in order (HW → HW+ → SW) without asking; your setting does not change</string>
     <string name="settingsac_133">Try automatically if it cannot open</string>
-    <string name="settingsac_134">The VLC engine is a fallback for old/rare formats ExoPlayer cannot open (WMV, RealMedia, broken AVI, etc.). It has a simpler interface: play/pause, seeking, audio and subtitle selection, speed, external subtitles.</string>
-    <string name="settingsac_135">HW: the system\'s hardware decoder, uses the least battery. HW+: uses FFmpeg for formats the hardware does not support. SW: CPU decoding with FFmpeg first. It can also be changed during playback from the label at the top.</string>
+    <string name="settingsac_135">HW: hardware decoder only, uses the least battery. HW+ (default): hardware output that falls back to copied hardware frames or software decoding by itself. SW: CPU decoding, for files the hardware cannot play.</string>
     <string name="settingsac_136">Volume level</string>
     <string name="settingsac_137">Volume boost</string>
     <string name="settingsac_138">This is software boosting; high values may distort. It can also be set from the audio menu in the player.</string>
@@ -925,14 +917,6 @@
     <string name="vault_016">Delete permanently?</string>
     <string name="vault_017">%1$s\n\nThis cannot be undone.</string>
     <string name="videorepos_001">Other</string>
-    <string name="vlcplayera_001">Could not load the subtitle</string>
-    <string name="vlcplayera_002">Subtitle added</string>
-    <string name="vlcplayera_003">Could not start the VLC engine.</string>
-    <string name="vlcplayera_004">This file could not be opened; it may be broken or in an unsupported format.</string>
-    <string name="vlcplayera_005">This file could not be opened with the VLC engine either.</string>
-    <string name="vlcplayera_006">Could not open the file.</string>
-    <string name="vlcplayera_007">No audio track information</string>
-    <string name="vlcplayera_008">Load subtitle from file…</string>
     <string name="vr360_001">Fisheye lens</string>
     <string name="vr360_002">360° full sphere</string>
     <string name="vr360_003">180° hemisphere</string>
@@ -1094,9 +1078,14 @@
     <string name="playermenu_pitch">Pitch: %1$s semitones</string>
     <string name="perfmode_title">Performance mode</string>
     <string name="perfmode_desc">Asks the device to keep the processor fast while a video plays. Helps heavy 4K/360° videos stutter less. Uses more battery and can warm the device. It cannot go beyond the hardware\'s limit.</string>
-    <string name="playeracti_hwlimit">This video (%1$s) is beyond what this device can play smoothly (%2$s). Try the VLC engine or the software decoder in the settings, turn on Performance mode, or use a lower-resolution copy.</string>
     <string name="playeracti_unknown">unknown format</string>
-    <string name="smooth_title">Switch to VLC if playback is choppy</string>
-    <string name="smooth_desc">When a heavy local video (e.g. 4K 10-bit) keeps dropping frames with the software decoder, playback continues in the VLC engine from the same position. Has no effect if the playback engine is fixed to the built-in player.</string>
-    <string name="playeracti_smooth_switch">Playback is choppy with the software decoder, switching to the VLC engine</string>
+    <string name="audiofx_night">Night mode (evens out loud and quiet parts)</string>
+    <string name="subtitle_embedded_pick">Subtitle to translate</string>
+    <string name="subtitle_embedded_external">Loaded file: %1$s</string>
+    <string name="subtitle_embedded_image_label">%1$s (%2$s, image)</string>
+    <string name="subtitle_embedded_image">This track is an image subtitle and cannot be translated.</string>
+    <string name="subtitle_embedded_reading">Reading subtitle…</string>
+    <string name="subtitle_embedded_progress">Reading subtitle… %1$d%%</string>
+    <string name="subtitle_embedded_empty">No subtitle lines were found in this track.</string>
+    <string name="subtitle_embedded_failed">This subtitle track could not be read (%1$s).</string>
 </resources>

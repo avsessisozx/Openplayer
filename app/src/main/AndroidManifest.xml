@@ -35,12 +35,6 @@
         </activity>
 
         <activity
-            android:name=".VlcPlayerActivity"
-            android:exported="false"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|keyboard|navigation|uiMode"
-            android:theme="@style/Theme.OpenPlayer" />
-
-        <activity
             android:name=".PlayerActivity"
             android:exported="true"
             android:launchMode="singleTop"
@@ -90,12 +84,8 @@
 
         <service
             android:name=".PlaybackService"
-            android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
-            </intent-filter>
-        </service>
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
         <receiver
             android:name=".MusicWidget"
             android:exported="false">

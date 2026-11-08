@@ -1,0 +1,64 @@
+name: Native sources
+
+# Builds the GPL "Corresponding Source" bundle for the mpv/FFmpeg libraries inside the APK.
+# build.yml calls this before every release and attaches the result; a release is not published
+# if this fails. A push that changes the list (claude/** only) or a manual run tests it alone.
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths:
+      - 'docs/native-sources.txt'
+      - '.github/workflows/native-sources.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # The list must describe the AAR the APK actually uses.
+      - name: Check the list matches the app
+        run: |
+          want=$(sed -n 's/^aar //p' docs/native-sources.txt)
+          have=$(sed -n 's/.*mpv-android-lib:\([0-9.]*\).*/\1/p' app/build.gradle.kts | head -1)
+          echo "list: $want  app: $have"
+          if [ -z "$have" ] || [ "$want" != "$have" ]; then
+            echo "::error::docs/native-sources.txt is for mpv-android-lib $want but the app uses '$have'. Update the list (see docs/mpv-licenses.md)."
+            exit 1
+          fi
+
+      - name: Download sources
+        run: |
+          set -euo pipefail
+          d=OpenPlayer-native-sources
+          mkdir -p "$d"
+          grep -vE '^\s*(#|$)|^aar ' docs/native-sources.txt | while read -r name url; do
+            echo "-> $name"
+            curl -fsSL --retry 4 --retry-delay 5 -o "$d/$name" "$url"
+            # Reject HTML error pages and empty files.
+            if [ "$(stat -c %s "$d/$name")" -lt 1000 ] || file "$d/$name" | grep -qi 'html'; then
+              echo "::error::$name from $url is not an archive"; exit 1
+            fi
+          done
+          cp docs/native-sources.txt "$d/SOURCES.txt"
+          cp docs/mpv-licenses.md "$d/LICENSES.md"
+          (cd "$d" && sha256sum -- * > SHA256SUMS)
+          tar -cf OpenPlayer-native-sources.tar "$d"
+          sha256sum OpenPlayer-native-sources.tar > OpenPlayer-native-sources.tar.sha256
+          ls -la "$d"; du -h OpenPlayer-native-sources.tar
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OpenPlayer-native-sources
+          path: |
+            OpenPlayer-native-sources.tar
+            OpenPlayer-native-sources.tar.sha256
+          compression-level: 0

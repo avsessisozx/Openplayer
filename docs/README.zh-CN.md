@@ -47,7 +47,8 @@ OpenPlayer 是一款开源的 Android 视频播放器，没有广告，也不追
 
 ## 功能
 
-- **解码器：** HW、HW+（FFmpeg 扩展：AC3、E-AC3、DTS、TrueHD、FLAC、Opus 等）和 SW，播放时可切换。ExoPlayer 无法打开的格式由 libVLC 备用引擎处理。
+- **播放引擎：** libmpv（mpv + FFmpeg）。解码器：**HW**（仅硬件，MediaCodec）、**HW+**（硬件；失败时改用复制模式硬件，再失败用软件）、**SW**（仅软件，FFmpeg）；播放中可切换。
+- **新功能（beta23）：** ASS/SSA 字幕完整样式（libass）；内嵌字幕翻译（MKV/WebM/MP4）；音频夜间模式。
 - **播放：** 0.25x–4x 倍速、长按 2x、A-B 循环、睡眠定时器、均衡器、最高 200% 音量增强、音频延迟、断点续播、画中画、后台播放、屏幕锁定与儿童锁、截图。
 - **360° / VR：** 360° 视频与照片、运动传感器、VR 头显模式。
 - **手势：** 左/中/右分区（亮度、音量、速度、快进快退、字幕、缩放），水平滑动快进，双击，双指缩放。
@@ -58,7 +59,7 @@ OpenPlayer 是一款开源的 Android 视频播放器，没有广告，也不追
 
 ## 已知限制
 
-不支持完整的 ASS/SSA（libass）；不显示图像字幕（VobSub、PGS）；没有 Chromecast 和去隔行；网络视频的外挂字幕不会自动查找。
+图像字幕（VobSub、PGS）由 mpv 显示，但无法翻译，且在 360° 模式下不显示；不支持 Chromecast 和去隔行；网络视频的外挂字幕不会自动查找。
 
 ## 构建
 
@@ -70,4 +71,4 @@ OpenPlayer 是一款开源的 Android 视频播放器，没有广告，也不追
 
 ## 许可证
 
-GNU AGPLv3（[LICENSE](../LICENSE)）。使用的组件：[Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg, GPLv3), [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0), [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1)。
+GNU AGPLv3（[LICENSE](../LICENSE)）。播放引擎：[mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — 通过 [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). 完整列表、许可证与源代码归档：[mpv-licenses.md](mpv-licenses.md)。

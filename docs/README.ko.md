@@ -47,7 +47,8 @@ OpenPlayer는 광고와 추적이 없는 오픈 소스 안드로이드 동영상
 
 ## 기능
 
-- **디코더:** HW, HW+(FFmpeg 확장: AC3, E-AC3, DTS, TrueHD, FLAC, Opus 등), SW. 재생 중 전환 가능. ExoPlayer가 열지 못하는 형식은 libVLC 대체 엔진으로 재생합니다.
+- **재생 엔진:** libmpv(mpv + FFmpeg). 디코더: **HW**(하드웨어 전용, MediaCodec), **HW+**(하드웨어, 실패하면 복사 방식 하드웨어, 그다음 소프트웨어), **SW**(소프트웨어 전용, FFmpeg). 재생 중 변경 가능.
+- **새 기능(beta23):** ASS/SSA 자막 전체 스타일(libass), 내장 자막 번역(MKV/WebM/MP4), 오디오 야간 모드.
 - **재생:** 0.25x–4x 속도, 길게 눌러 2x, A-B 반복, 취침 타이머, 이퀄라이저, 최대 200% 볼륨 부스트, 오디오 지연, 이어서 재생, PiP, 백그라운드 재생, 화면 잠금 및 자녀 보호 잠금, 스크린샷.
 - **360° / VR:** 360° 동영상 및 사진, 모션 센서, VR 헤드셋 모드.
 - **제스처:** 왼쪽/가운데/오른쪽 영역(밝기, 볼륨, 속도, 탐색, 자막, 확대/축소), 가로 스와이프로 탐색, 두 번 탭, 핀치 확대/축소.
@@ -58,7 +59,7 @@ OpenPlayer는 광고와 추적이 없는 오픈 소스 안드로이드 동영상
 
 ## 알려진 제한 사항
 
-완전한 ASS/SSA(libass)는 지원하지 않습니다. 이미지 자막(VobSub, PGS)은 표시되지 않습니다. Chromecast와 인터레이스 해제가 없습니다. 네트워크 동영상의 외부 자막은 자동으로 찾지 않습니다.
+이미지 자막(VobSub, PGS)은 mpv가 표시하지만 번역할 수 없고 360° 모드에서는 보이지 않습니다. Chromecast와 디인터레이스는 지원하지 않습니다. 네트워크 동영상의 외부 자막은 자동으로 찾지 않습니다.
 
 ## 빌드
 
@@ -70,4 +71,4 @@ OpenPlayer는 광고와 추적이 없는 오픈 소스 안드로이드 동영상
 
 ## 라이선스
 
-GNU AGPLv3([LICENSE](../LICENSE)). 사용된 구성 요소: [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg, GPLv3), [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0), [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1).
+GNU AGPLv3([LICENSE](../LICENSE)). 재생 엔진: [mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — 포함 라이브러리: [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). 전체 목록, 라이선스, 소스 아카이브: [mpv-licenses.md](mpv-licenses.md).

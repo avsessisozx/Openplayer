@@ -2,8 +2,8 @@ package org.openplayer.app
 
 /**
  * .cue sayfası ayrıştırıcı: tek bir ses dosyasını birden çok parçaya bölen CUE dosyalarını
- * okur. Oynatma, ses dosyasının Media3 "clipping" ile kırpılmış kopyalarıyla yapılır
- * (bkz. [MusicController.toItem]); bu dosya yalnızca metni çözümler ve sanal parçalar üretir.
+ * okur. Oynatmada aynı dosyanın ilgili aralığına konumlanılır
+ * (bkz. [MusicDeck]); bu dosya yalnızca metni çözümler ve sanal parçalar üretir.
  */
 object CueSheet {
 

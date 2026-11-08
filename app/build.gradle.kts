@@ -11,8 +11,8 @@ android {
         applicationId = "org.openplayer.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 21
-        versionName = "1.0.0-beta22"
+        versionCode = 22
+        versionName = "1.0.0-beta23"
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
             // Yalnız emülatör testi için (-PemulatorAbi=true): x86_64 kütüphanelerini de pakete koy.
@@ -70,20 +70,12 @@ kotlin {
 }
 
 dependencies {
-    val media3 = "1.10.1"
-    implementation("androidx.media3:media3-exoplayer:$media3")
-    implementation("androidx.media3:media3-exoplayer-hls:$media3")
-    implementation("androidx.media3:media3-exoplayer-dash:$media3")
-    implementation("androidx.media3:media3-exoplayer-rtsp:$media3")
-    implementation("androidx.media3:media3-ui:$media3")
-    implementation("androidx.media3:media3-session:$media3")
-    implementation("androidx.media3:media3-datasource-okhttp:$media3")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.hierynomus:smbj:0.13.0")
     implementation("commons-net:commons-net:3.11.1")
-    implementation("io.github.anilbeesetti:nextlib-media3ext:1.10.1-0.13.0")
-    // Yedek oynatma motoru: ExoPlayer açamayan biçimler için (LGPL-2.1).
-    implementation("org.videolan.android:libvlc-all:3.6.0")
+    // Oynatma motoru. POM coroutines vermiyor ama sınıfları kullanıyor: coroutines satırı zorunlu.
+    implementation("io.github.abdallahmehiz:mpv-android-lib:0.1.12")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")

@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Free, open-source, ad-free video and music player for Android.</b><br>
-  Gesture controls, HW / HW+ / SW decoders, subtitle search and translation, 360° video, SMB / FTP / WebDAV network playback.
+  Gesture controls, mpv engine with HW / HW+ / SW decoding, full ASS/SSA subtitles, subtitle search and translation, 360° video, SMB / FTP / WebDAV network playback.
 </p>
 
 <p align="center">
@@ -50,7 +50,8 @@ Get `OpenPlayer.apk` from the [Releases page](../../releases) and install it (An
 ## Features
 
 **Playback**
-- Three decoder modes: **HW** (MediaCodec), **HW+** (MediaCodec + FFmpeg extension: AC3, E-AC3, DTS, TrueHD, FLAC, Opus…), **SW** (software decoding, FFmpeg first). Switchable during playback. A libVLC engine is the fallback for formats ExoPlayer cannot open.
+- Engine: **libmpv** (mpv + FFmpeg). Decoder modes: **HW** (hardware only, MediaCodec), **HW+** (hardware; if that fails, hardware with copy-back, then software), **SW** (software only, FFmpeg). Switchable during playback; if a file fails to play, the next mode is tried automatically (optional).
+- **New in beta23:** full-style ASS/SSA subtitles (libass), translation of embedded subtitle tracks (MKV/WebM/MP4), audio night mode (compressor)
 - Speed (0.25x–4x, custom), **long-press for 2x**, A-B repeat, repeat / shuffle, sleep timer, night mode
 - Equalizer, volume boost up to 200%, bass / stereo widening, reverse stereo / mono, reverb, audio delay, add an external audio file
 - Resume where you left off, clock / battery / time in the corner, ±N s seek buttons
@@ -64,7 +65,7 @@ Get `OpenPlayer.apk` from the [Releases page](../../releases) and install it (An
 - Horizontal swipe to seek; double tap to play / pause or skip forward / back
 
 **Subtitles**
-- Formats: SRT, WebVTT, SSA/ASS (colors, bold / italic / underline, position), SAMI, MicroDVD, MPL2, TMPlayer; embedded subtitle tracks
+- Formats: SRT, WebVTT, SSA/ASS (full styling via libass), SAMI, MicroDVD, MPL2, TMPlayer; embedded subtitle tracks
 - Manual delay / speed adjustment, automatic character encoding detection, size / color / background / edge / position / alignment, your own font (.ttf/.otf)
 - Subtitle gestures: horizontal swipe for previous / next line, vertical swipe for position, pinch for size
 - Online subtitle search (OpenSubtitles.com). You need to enter [your own API key](https://www.opensubtitles.com/consumers) under Settings → Subtitles
@@ -79,8 +80,8 @@ Get `OpenPlayer.apk` from the [Releases page](../../releases) and install it (An
 
 ## Known limitations
 
-- No full ASS/SSA rendering (libass): styles, colors and position work, but animations, advanced effects, drawing commands and embedded fonts do not.
-- Image-based subtitles (VobSub, PGS) and Teletext are not drawn.
+- Image-based subtitles (VobSub, PGS) are drawn by mpv but cannot be translated and are not shown in 360° mode. Teletext is not drawn.
+- Embedded subtitles can only be translated from MKV, WebM and MP4 files.
 - Sidecar subtitles are not found automatically for network videos; add them manually from the player.
 - No Chromecast, no deinterlacing, no decoder plugins.
 - SMB share lists cannot be enumerated; type the share name.
@@ -100,4 +101,4 @@ No Android Studio needed: every push is built by **GitHub Actions** and the APK 
 
 GNU AGPLv3. Anyone may use and modify it; modified versions (even offered as a network service) must be distributed under the same license with source code. See `LICENSE`.
 
-OpenPlayer uses [Media3/ExoPlayer](https://github.com/androidx/media) (Apache-2.0), [NextLib](https://github.com/anilbeesetti/nextlib) (FFmpeg extension, GPLv3), [smbj](https://github.com/hierynomus/smbj) (Apache-2.0), [Apache Commons Net](https://commons.apache.org/proper/commons-net/) (Apache-2.0), [OkHttp](https://square.github.io/okhttp/) (Apache-2.0), [Coil](https://coil-kt.github.io/coil/) (Apache-2.0) and, as the fallback engine, [libVLC](https://code.videolan.org/videolan/vlc-android) (LGPL-2.1).
+OpenPlayer plays media with [mpv](https://mpv.io) (GPL-2.0+), [FFmpeg](https://ffmpeg.org) (GPL-3.0+), [libass](https://github.com/libass/libass) (ISC), [libplacebo](https://code.videolan.org/videolan/libplacebo) (LGPL-2.1+), [dav1d](https://code.videolan.org/videolan/dav1d) (BSD-2-Clause), FreeType, HarfBuzz, FriBidi, mbedTLS, libxml2, Lua — bundled through [mpv-android-lib](https://github.com/abdallahmehiz/mpv-android) (MIT); [smbj](https://github.com/hierynomus/smbj), [Apache Commons Net](https://commons.apache.org/proper/commons-net/), [OkHttp](https://square.github.io/okhttp/), [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) (Apache-2.0). Full component list, licenses and the source archive attached to every release: [docs/mpv-licenses.md](docs/mpv-licenses.md).

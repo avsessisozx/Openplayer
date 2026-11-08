@@ -189,7 +189,7 @@ class GestureController(private val a: PlayerActivity) : View.OnTouchListener {
             startVolume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
             val b = a.window.attributes.screenBrightness
             startBrightness = if (b < 0f) 0.5f else b
-            startSpeed = a.player.playbackParameters.speed
+            startSpeed = a.player.speed
             startSubBottom = a.settings.subtitleBottomFraction
             return true
         }

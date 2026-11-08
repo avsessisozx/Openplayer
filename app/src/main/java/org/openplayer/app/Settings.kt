@@ -43,12 +43,6 @@ enum class DoubleTapAction(val label: String) {
     NONE(Tx.s(R.string.gesturecon_001)),
 }
 
-enum class PlaybackEngine(val label: String) {
-    AUTO(Tx.s(R.string.settings_008)),
-    EXO(Tx.s(R.string.settings_009)),
-    VLC(Tx.s(R.string.settings_010)),
-}
-
 enum class OrientationMode(val label: String) {
     AUTO(Tx.s(R.string.settings_011)),
     SENSOR(Tx.s(R.string.settings_012)),
@@ -448,10 +442,6 @@ class AppSettings private constructor(context: Context) {
         set(v) = prefs.edit().putBoolean("horizontal_seek", v).apply()
 
     /** Açılamayan videoda çözücüler sırayla otomatik denenir (HW → HW+ → SW). */
-    var playbackEngine: PlaybackEngine
-        get() = enumOf("playback_engine", PlaybackEngine.AUTO)
-        set(v) = putEnum("playback_engine", v)
-
     var autoDecoderFallback: Boolean
         get() = prefs.getBoolean("auto_decoder_fallback", true)
         set(v) = prefs.edit().putBoolean("auto_decoder_fallback", v).apply()
@@ -465,11 +455,6 @@ class AppSettings private constructor(context: Context) {
     var performanceMode: Boolean
         get() = prefs.getBoolean("performance_mode", false)
         set(v) = prefs.edit().putBoolean("performance_mode", v).apply()
-
-    /** Yazılım çözücüyle oynarken kareler sürekli atlanıyorsa (yerel video) VLC motoruna otomatik geçer. */
-    var smoothSwitch: Boolean
-        get() = prefs.getBoolean("smooth_switch", true)
-        set(v) = prefs.edit().putBoolean("smooth_switch", v).apply()
 
     /** Sararken görüntü canlı akar (ileri-geri sararken önizleme). */
     var liveScrub: Boolean

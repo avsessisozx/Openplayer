@@ -336,3 +336,46 @@ fun android.app.Activity.showSummaryInfo(title: String, lines: List<Pair<String,
         .setNeutralButton(Tx.s(R.string.mainactivi_005)) { _, _ -> copyText(lines.joinToString("\n") { "${it.first}: ${it.second}" }) }
         .show()
 }
+
+/**
+ * mpv'nin okuduğu etiketler (MediaMetadataRetriever'ın vermediği alanlar için): `metadata` ve
+ * `track-list` JSON'u. Android'den bağımsızdır.
+ */
+object MediaTags {
+
+    /** "-6.20 dB" gibi metinden sayı. */
+    fun parseGain(value: String?): Float? =
+        value?.let { Regex("-?[0-9]+([.][0-9]+)?").find(it)?.value?.toFloatOrNull() }
+
+    /** `metadata` düğümü; anahtarlar büyük harfe çevrilir (biçimlere göre büyük/küçük harf değişir). */
+    fun metadata(json: String?): Map<String, String> {
+        val o = json?.let { runCatching { org.json.JSONObject(it) }.getOrNull() } ?: return emptyMap()
+        val out = HashMap<String, String>()
+        for (k in o.keys()) out[k.uppercase()] = o.opt(k)?.toString().orEmpty()
+        return out
+    }
+
+    /**
+     * ReplayGain (dB). [mode] 1 = parça önce, 2 = albüm önce. Önce seçili ses parçasının mpv
+     * alanlarına (`replaygain-track-gain`...), yoksa dosya etiketlerine bakılır.
+     */
+    fun replayGainDb(trackListJson: String?, metadataJson: String?, mode: Int): Float? {
+        var track: Float? = null
+        var album: Float? = null
+        val arr = trackListJson?.let { runCatching { org.json.JSONArray(it) }.getOrNull() }
+        if (arr != null) {
+            for (i in 0 until arr.length()) {
+                val t = arr.optJSONObject(i) ?: continue
+                if (t.optString("type") != "audio" || !t.optBoolean("selected")) continue
+                if (t.has("replaygain-track-gain")) track = t.optDouble("replaygain-track-gain").toFloat().takeIf { !it.isNaN() }
+                if (t.has("replaygain-album-gain")) album = t.optDouble("replaygain-album-gain").toFloat().takeIf { !it.isNaN() }
+            }
+        }
+        if (track == null && album == null) {
+            val m = metadata(metadataJson)
+            track = parseGain(m["REPLAYGAIN_TRACK_GAIN"])
+            album = parseGain(m["REPLAYGAIN_ALBUM_GAIN"])
+        }
+        return if (mode == 2) album ?: track else track ?: album
+    }
+}

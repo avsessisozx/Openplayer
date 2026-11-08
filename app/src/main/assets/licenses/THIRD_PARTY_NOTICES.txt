@@ -1,0 +1,47 @@
+OpenPlayer - third-party notices
+================================
+
+OpenPlayer is free software licensed under the GNU Affero General Public
+License version 3 (AGPL-3.0). Its source code is public:
+https://github.com/avsessisozx/Openplayer
+
+OpenPlayer plays media with libmpv, bundled through the Android library
+io.github.abdallahmehiz:mpv-android-lib 0.1.12. The native code in that
+library is built with GPL-only options, so it is distributed under the
+GNU General Public License version 3 or later (full text: GPL-3.0.txt in
+this folder). GPLv3 section 13 and AGPLv3 section 13 allow the two to be
+combined. The MIT license of the Android wrapper covers only the wrapper.
+
+The Corresponding Source of the GPL components (mpv, FFmpeg and the build
+scripts, plus the LGPL libraries) is published with each OpenPlayer release
+on GitHub, and is available from the wrapper project:
+https://github.com/abdallahmehiz/mpv-android/tree/v0.1.12
+
+Components bundled in the media engine
+--------------------------------------
+
+Component                   Version                    License
+mpv                         v0.41.0-174-g76a5eba99     GPL-2.0-or-later (as built)
+FFmpeg                      N-122742-ga7522f3fef       GPL-3.0-or-later (as configured)
+libplacebo                  v7.360.0                   LGPL-2.1-or-later
+libass                      0.17.4-21-gfadc39058       ISC
+dav1d                       1.5.3-18-gdaef3962         BSD-2-Clause
+mbedtls                     3.6.5                      Apache-2.0 (text: Apache-2.0.txt)
+libxml2                     2.13.5                     MIT
+FreeType                    2.14.1                     FreeType License (FTL)
+FriBidi                     1.0.16                     LGPL-2.1-or-later
+HarfBuzz                    12.2.0                     MIT (Old MIT)
+libunibreak                 6.1                        Zlib
+Lua                         5.2.4                      MIT
+libc++ (Android NDK r29)    NDK r29                    Apache-2.0 WITH LLVM-exception
+mpv-android wrapper         v0.1.12                    MIT
+Droid Sans Fallback font    2.56                       Apache-2.0 (text: Apache-2.0.txt)
+Mozilla CA certificate list 2025-12-02                 MPL-2.0
+
+FreeType credit (required by the FreeType License):
+Portions of this software are copyright (C) The FreeType Project
+(www.freetype.org). All rights reserved.
+
+Versions were read from the shipped binaries where possible; the rest come
+from the wrapper's build scripts (buildscripts/include/depinfo.sh at v0.1.12).
+Review details: docs/mpv-licenses.md in the OpenPlayer repository.

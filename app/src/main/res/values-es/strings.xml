@@ -308,7 +308,6 @@
     <string name="networkbro_004">Error de WebDAV %1$s</string>
     <string name="networkdat_001">La dirección SMB no tiene nombre de recurso compartido</string>
     <string name="networkdat_002">Error de conexión SMB: %1$s</string>
-    <string name="networkdat_003">SMB: la posición solicitada supera el tamaño del archivo</string>
     <string name="networkdat_004">Error de lectura SMB: %1$s</string>
     <string name="networkdat_005">No se pudo abrir el archivo FTP: %1$s</string>
     <string name="networkdat_006">Error de FTP: %1$s</string>
@@ -350,7 +349,6 @@
     <string name="playeracti_017">Introduce una dirección válida (http://, https:// o rtsp://)</string>
     <string name="playeracti_018">No se pudo leer el subtítulo o está vacío: %1$s</string>
     <string name="playeracti_019">Subtítulo cargado: %1$s</string>
-    <string name="playeracti_020">ExoPlayer no pudo abrirlo; se abre con el motor VLC</string>
     <string name="playeracti_021">Reintentando con el decodificador %1$s</string>
     <string name="playeracti_022">No se pudo abrir, pasando al siguiente vídeo</string>
     <string name="playeracti_023">No se pudo reproducir este vídeo (%1$s). Se probaron todos los decodificadores.</string>
@@ -476,10 +474,9 @@
     <string name="playermenu_084">Introduce un número entre 1 y 600</string>
     <string name="playermenu_085">Modo estéreo</string>
     <string name="playermenu_086">Reverberación</string>
-    <string name="playermenu_087">Este dispositivo no admite el efecto de reverberación</string>
-    <string name="playermenu_088">Hardware (HW): el decodificador MediaCodec del sistema</string>
-    <string name="playermenu_089">Hardware+ (HW+): HW, con FFmpeg para formatos no compatibles</string>
-    <string name="playermenu_090">Software (SW): decodificación por CPU con FFmpeg primero</string>
+    <string name="playermenu_088">Hardware (HW): solo salida directa de MediaCodec</string>
+    <string name="playermenu_089">Hardware+ (HW+): salida directa por hardware; si falla, hardware con copia o software (recomendado)</string>
+    <string name="playermenu_090">Software (SW): decodificación por CPU (mpv/FFmpeg)</string>
     <string name="playermenu_091">Decodificador</string>
     <string name="playermenu_092">Relación de aspecto</string>
     <string name="playermenu_093">Elegir accesos directos</string>
@@ -557,9 +554,6 @@
     <string name="settings_005">Tamaño (de pequeño a grande)</string>
     <string name="settings_006">Duración (de corta a larga)</string>
     <string name="settings_007">Tipo de archivo</string>
-    <string name="settings_008">Automático: ExoPlayer, motor VLC si no puede abrirlo</string>
-    <string name="settings_009">Solo ExoPlayer</string>
-    <string name="settings_010">Solo motor VLC</string>
     <string name="settings_011">Automático según el vídeo</string>
     <string name="settings_012">Sensor (libre)</string>
     <string name="settings_013">Sí, reanudar donde lo dejaste</string>
@@ -709,11 +703,9 @@
     <string name="settingsac_128">En la zona inferior: horizontal = línea anterior/siguiente, vertical = posición, pellizco = tamaño</string>
     <string name="settingsac_129">Gestos de subtítulos</string>
     <string name="settingsac_130">Decodificador predeterminado</string>
-    <string name="settingsac_131">Motor de reproducción</string>
     <string name="settingsac_132">Si un vídeo no se abre, se prueban los decodificadores en orden (HW → HW+ → SW) sin preguntar; tu ajuste no cambia</string>
     <string name="settingsac_133">Probar automáticamente si no se puede abrir</string>
-    <string name="settingsac_134">El motor VLC es una alternativa para formatos antiguos o poco comunes que ExoPlayer no puede abrir (WMV, RealMedia, AVI dañados, etc.). Tiene una interfaz más sencilla: reproducir/pausar, avance, selección de audio y subtítulos, velocidad, subtítulos externos.</string>
-    <string name="settingsac_135">HW: el decodificador por hardware del sistema, el que menos batería gasta. HW+: usa FFmpeg para los formatos que el hardware no admite. SW: decodificación por CPU con FFmpeg primero. También se puede cambiar durante la reproducción desde la etiqueta de arriba.</string>
+    <string name="settingsac_135">HW: solo decodificador por hardware, gasta menos batería. HW+ (predeterminado): salida por hardware que pasa sola a fotogramas copiados o a software. SW: decodificación por CPU, para archivos que el hardware no puede reproducir.</string>
     <string name="settingsac_136">Nivel de volumen</string>
     <string name="settingsac_137">Amplificación de volumen</string>
     <string name="settingsac_138">Es una amplificación por software; con valores altos puede haber distorsión. También se ajusta desde el menú de audio del reproductor.</string>
@@ -925,14 +917,6 @@
     <string name="vault_016">¿Eliminar permanentemente?</string>
     <string name="vault_017">%1$s\n\nEsta acción no se puede deshacer.</string>
     <string name="videorepos_001">Otros</string>
-    <string name="vlcplayera_001">No se pudo cargar el subtítulo</string>
-    <string name="vlcplayera_002">Subtítulo añadido</string>
-    <string name="vlcplayera_003">No se pudo iniciar el motor VLC.</string>
-    <string name="vlcplayera_004">No se pudo abrir este archivo; puede estar dañado o tener un formato no admitido.</string>
-    <string name="vlcplayera_005">Tampoco se pudo abrir este archivo con el motor VLC.</string>
-    <string name="vlcplayera_006">No se pudo abrir el archivo.</string>
-    <string name="vlcplayera_007">Sin información de la pista de audio</string>
-    <string name="vlcplayera_008">Cargar subtítulo desde archivo…</string>
     <string name="vr360_001">Lente ojo de pez</string>
     <string name="vr360_002">Esfera completa de 360°</string>
     <string name="vr360_003">Hemisferio de 180°</string>
@@ -1094,9 +1078,14 @@
     <string name="playermenu_pitch">Tono: %1$s semitonos</string>
     <string name="perfmode_title">Modo de rendimiento</string>
     <string name="perfmode_desc">Pide al dispositivo que mantenga el procesador rápido mientras se reproduce un vídeo. Ayuda a que los vídeos pesados en 4K/360° se entrecorten menos. Gasta más batería y puede calentar el dispositivo. No puede superar el límite del hardware.</string>
-    <string name="playeracti_hwlimit">Este vídeo (%1$s) supera lo que este dispositivo puede reproducir con fluidez (%2$s). Prueba el motor VLC o el decodificador por software en los ajustes, activa el Modo de rendimiento o usa una copia de menor resolución.</string>
     <string name="playeracti_unknown">formato desconocido</string>
-    <string name="smooth_title">Cambiar a VLC si se entrecorta</string>
-    <string name="smooth_desc">Si un vídeo local pesado (p. ej. 4K de 10 bits) pierde fotogramas continuamente con el decodificador por software, la reproducción continúa en el motor VLC desde la misma posición. No tiene efecto si el motor está fijado al reproductor integrado.</string>
-    <string name="playeracti_smooth_switch">La reproducción con el decodificador por software se entrecorta; cambiando al motor VLC</string>
+    <string name="audiofx_night">Modo nocturno (iguala partes fuertes y suaves)</string>
+    <string name="subtitle_embedded_pick">Subtítulo a traducir</string>
+    <string name="subtitle_embedded_external">Archivo cargado: %1$s</string>
+    <string name="subtitle_embedded_image_label">%1$s (%2$s, imagen)</string>
+    <string name="subtitle_embedded_image">Esta pista es un subtítulo de imagen y no se puede traducir.</string>
+    <string name="subtitle_embedded_reading">Leyendo subtítulo…</string>
+    <string name="subtitle_embedded_progress">Leyendo subtítulo… %1$d%%</string>
+    <string name="subtitle_embedded_empty">No se encontraron líneas de subtítulo en esta pista.</string>
+    <string name="subtitle_embedded_failed">No se pudo leer esta pista de subtítulos (%1$s).</string>
 </resources>
