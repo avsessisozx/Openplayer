@@ -201,9 +201,6 @@ class MusicDeckTest {
         assertEquals(60_000L, deck.positionMs)
     }
 
-
-    }
-
     @Test
     fun emptyDeckIsSafe() {
         deck.play()
