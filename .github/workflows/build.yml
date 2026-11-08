@@ -58,8 +58,14 @@ jobs:
             OpenPlayer.apk
             OpenPlayer.apk.sha256
 
+  # GPL "Corresponding Source" for the mpv/FFmpeg libraries in the APK (docs/mpv-licenses.md).
+  # The release needs it: no source bundle, no release.
+  native-sources:
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    uses: ./.github/workflows/native-sources.yml
+
   release:
-    needs: build
+    needs: [build, native-sources]
     # Etiketle, elle ya da ana dala gönderimde (sürüm numarası yeni ise) yayınlanır.
     if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
@@ -72,6 +78,9 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: OpenPlayer-apk
+      - uses: actions/download-artifact@v4
+        with:
+          name: OpenPlayer-native-sources
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -89,5 +98,6 @@ jobs:
           # Sürüm notu: yalnızca en üstteki (yeni) sürümün bölümü
           awk '/^# /{n++} n==1' RELEASE_NOTES.md > latest_notes.md
           gh release create "$TAG" OpenPlayer.apk OpenPlayer.apk.sha256 \
+            OpenPlayer-native-sources.tar OpenPlayer-native-sources.tar.sha256 \
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
             --title "OpenPlayer $TAG" --notes-file latest_notes.md $flag

@@ -1,0 +1,33 @@
+name: Release dry run (temporary)
+
+# Temporary: checks the build.yml wiring (reusable call + artifact download) without publishing.
+on:
+  push:
+    branches: ['claude/mpv-f2']
+    paths: ['.github/workflows/release-dryrun.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  native-sources:
+    uses: ./.github/workflows/native-sources.yml
+
+  release:
+    needs: [native-sources]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: OpenPlayer-native-sources
+      - name: Would publish
+        run: |
+          set -e
+          sha256sum -c OpenPlayer-native-sources.tar.sha256
+          tar -tf OpenPlayer-native-sources.tar | head -30
+          awk '/^# /{n++} n==1' RELEASE_NOTES.md > latest_notes.md
+          cat latest_notes.md
+          echo "gh release create TAG OpenPlayer.apk OpenPlayer.apk.sha256 OpenPlayer-native-sources.tar OpenPlayer-native-sources.tar.sha256 (not run)"
