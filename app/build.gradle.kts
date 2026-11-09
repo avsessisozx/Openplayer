@@ -70,7 +70,7 @@ kotlin {
 }
 
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.1")
     implementation("com.hierynomus:smbj:0.13.0")
     implementation("commons-net:commons-net:3.11.1")
     // Oynatma motoru. POM coroutines vermiyor ama sınıfları kullanıyor: coroutines satırı zorunlu.
